@@ -1,0 +1,196 @@
+ERROR - 2024-11-18 06:55:19 --> Access denied for role ID: 3
+ERROR - 2024-11-18 06:55:19 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 06:55:19 --> AsizeD: 1
+ERROR - 2024-11-18 06:55:19 --> Access Check: 2 to module ID: 17 for action: read
+ERROR - 2024-11-18 06:55:19 --> permission: 7
+ERROR - 2024-11-18 06:55:19 --> Access Not denied for role ID: 2 to module ID: 17 for action: read
+ERROR - 2024-11-18 06:56:12 --> Access denied for role ID: 3
+ERROR - 2024-11-18 06:56:12 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 06:56:12 --> AsizeD: 1
+ERROR - 2024-11-18 06:56:12 --> Access Check: 2 to module ID: 15 for action: read
+ERROR - 2024-11-18 06:56:12 --> permission: 7
+ERROR - 2024-11-18 06:56:12 --> Access Not denied for role ID: 2 to module ID: 15 for action: read
+ERROR - 2024-11-18 06:57:21 --> Access denied for role ID: 3
+ERROR - 2024-11-18 06:57:21 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 06:57:21 --> AsizeD: 1
+ERROR - 2024-11-18 06:57:21 --> Access Check: 2 to module ID: 15 for action: read
+ERROR - 2024-11-18 06:57:21 --> permission: 7
+ERROR - 2024-11-18 06:57:21 --> Access Not denied for role ID: 2 to module ID: 15 for action: read
+ERROR - 2024-11-18 06:57:23 --> Access denied for role ID: 3
+ERROR - 2024-11-18 06:57:23 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 06:57:23 --> AsizeD: 1
+ERROR - 2024-11-18 06:57:23 --> Access Check: 2 to module ID: 17 for action: read
+ERROR - 2024-11-18 06:57:23 --> permission: 7
+ERROR - 2024-11-18 06:57:23 --> Access Not denied for role ID: 2 to module ID: 17 for action: read
+ERROR - 2024-11-18 07:13:12 --> Access denied for role ID: 3
+ERROR - 2024-11-18 07:13:12 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:13:12 --> AsizeD: 1
+ERROR - 2024-11-18 07:13:12 --> Access Check: 2 to module ID: 17 for action: read
+ERROR - 2024-11-18 07:13:12 --> permission: 7
+ERROR - 2024-11-18 07:13:12 --> Access Not denied for role ID: 2 to module ID: 17 for action: read
+ERROR - 2024-11-18 07:13:22 --> Access denied for role ID: 3
+ERROR - 2024-11-18 07:13:22 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:13:22 --> AsizeD: 1
+ERROR - 2024-11-18 07:13:22 --> Access Check: 2 to module ID: 18 for action: read
+ERROR - 2024-11-18 07:13:22 --> permission: 7
+ERROR - 2024-11-18 07:13:22 --> Access Not denied for role ID: 2 to module ID: 18 for action: read
+ERROR - 2024-11-18 07:13:26 --> Access denied for role ID: 3
+ERROR - 2024-11-18 07:13:26 --> Access:  to module ID:  for action: update
+ERROR - 2024-11-18 07:13:26 --> AsizeD: 1
+ERROR - 2024-11-18 07:13:26 --> Access Check: 2 to module ID: 18 for action: update
+ERROR - 2024-11-18 07:13:26 --> permission: 7
+ERROR - 2024-11-18 07:13:26 --> Access denied for role ID: 2 to module ID: 18 for action: update
+ERROR - 2024-11-18 07:13:35 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:13:35 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:13:35 --> AsizeD: 1
+ERROR - 2024-11-18 07:13:35 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2024-11-18 07:13:35 --> permission: 7
+ERROR - 2024-11-18 07:13:35 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2024-11-18 07:13:43 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:13:43 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:13:43 --> AsizeD: 1
+ERROR - 2024-11-18 07:13:43 --> Access Check: 1 to module ID: 18 for action: read
+ERROR - 2024-11-18 07:13:43 --> permission: 7
+ERROR - 2024-11-18 07:13:43 --> Access Not denied for role ID: 1 to module ID: 18 for action: read
+ERROR - 2024-11-18 07:13:48 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:13:48 --> Access:  to module ID:  for action: update
+ERROR - 2024-11-18 07:13:48 --> AsizeD: 1
+ERROR - 2024-11-18 07:13:48 --> Access Check: 1 to module ID: 18 for action: update
+ERROR - 2024-11-18 07:13:48 --> permission: 7
+ERROR - 2024-11-18 07:13:48 --> Access Not denied for role ID: 1 to module ID: 18 for action: update
+ERROR - 2024-11-18 07:13:52 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:13:52 --> Access:  to module ID:  for action: update
+ERROR - 2024-11-18 07:13:52 --> AsizeD: 1
+ERROR - 2024-11-18 07:13:52 --> Access Check: 1 to module ID: 18 for action: update
+ERROR - 2024-11-18 07:13:52 --> permission: 7
+ERROR - 2024-11-18 07:13:52 --> Access Not denied for role ID: 1 to module ID: 18 for action: update
+ERROR - 2024-11-18 07:13:52 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:13:52 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:13:52 --> AsizeD: 1
+ERROR - 2024-11-18 07:13:52 --> Access Check: 1 to module ID: 18 for action: read
+ERROR - 2024-11-18 07:13:52 --> permission: 7
+ERROR - 2024-11-18 07:13:52 --> Access Not denied for role ID: 1 to module ID: 18 for action: read
+ERROR - 2024-11-18 07:13:59 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:13:59 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:13:59 --> AsizeD: 1
+ERROR - 2024-11-18 07:13:59 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2024-11-18 07:13:59 --> permission: 7
+ERROR - 2024-11-18 07:13:59 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2024-11-18 07:15:14 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:15:14 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:15:14 --> AsizeD: 1
+ERROR - 2024-11-18 07:15:14 --> Access Check: 1 to module ID: 20 for action: read
+ERROR - 2024-11-18 07:15:14 --> permission: 7
+ERROR - 2024-11-18 07:15:14 --> Access Not denied for role ID: 1 to module ID: 20 for action: read
+ERROR - 2024-11-18 07:15:16 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:15:16 --> Access:  to module ID:  for action: create
+ERROR - 2024-11-18 07:15:16 --> AsizeD: 1
+ERROR - 2024-11-18 07:15:16 --> Access Check: 1 to module ID: 20 for action: create
+ERROR - 2024-11-18 07:15:16 --> permission: 7
+ERROR - 2024-11-18 07:15:16 --> Access Not denied for role ID: 1 to module ID: 20 for action: create
+ERROR - 2024-11-18 07:15:44 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:15:44 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:15:44 --> AsizeD: 1
+ERROR - 2024-11-18 07:15:44 --> Access Check: 1 to module ID: 20 for action: read
+ERROR - 2024-11-18 07:15:44 --> permission: 7
+ERROR - 2024-11-18 07:15:44 --> Access Not denied for role ID: 1 to module ID: 20 for action: read
+ERROR - 2024-11-18 07:16:26 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:16:26 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:16:26 --> AsizeD: 1
+ERROR - 2024-11-18 07:16:26 --> Access Check: 1 to module ID: 20 for action: read
+ERROR - 2024-11-18 07:16:26 --> permission: 7
+ERROR - 2024-11-18 07:16:26 --> Access Not denied for role ID: 1 to module ID: 20 for action: read
+ERROR - 2024-11-18 07:21:02 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:21:02 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:21:02 --> AsizeD: 1
+ERROR - 2024-11-18 07:21:02 --> Access Check: 1 to module ID: 20 for action: read
+ERROR - 2024-11-18 07:21:02 --> permission: 7
+ERROR - 2024-11-18 07:21:02 --> Access Not denied for role ID: 1 to module ID: 20 for action: read
+ERROR - 2024-11-18 07:21:12 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:21:12 --> Access:  to module ID:  for action: create
+ERROR - 2024-11-18 07:21:12 --> AsizeD: 1
+ERROR - 2024-11-18 07:21:12 --> Access Check: 1 to module ID: 20 for action: create
+ERROR - 2024-11-18 07:21:12 --> permission: 7
+ERROR - 2024-11-18 07:21:12 --> Access Not denied for role ID: 1 to module ID: 20 for action: create
+ERROR - 2024-11-18 07:21:20 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:21:20 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:21:20 --> AsizeD: 1
+ERROR - 2024-11-18 07:21:20 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2024-11-18 07:21:20 --> permission: 7
+ERROR - 2024-11-18 07:21:20 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2024-11-18 07:21:27 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:21:27 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:21:27 --> AsizeD: 1
+ERROR - 2024-11-18 07:21:27 --> Access Check: 1 to module ID: 20 for action: read
+ERROR - 2024-11-18 07:21:27 --> permission: 7
+ERROR - 2024-11-18 07:21:27 --> Access Not denied for role ID: 1 to module ID: 20 for action: read
+ERROR - 2024-11-18 07:21:46 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:21:46 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:21:46 --> AsizeD: 1
+ERROR - 2024-11-18 07:21:46 --> Access Check: 1 to module ID: 23 for action: read
+ERROR - 2024-11-18 07:21:46 --> permission: 7
+ERROR - 2024-11-18 07:21:46 --> Access Not denied for role ID: 1 to module ID: 23 for action: read
+ERROR - 2024-11-18 07:26:32 --> Access denied for role ID: 1
+ERROR - 2024-11-18 07:26:32 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-18 07:26:32 --> AsizeD: 1
+ERROR - 2024-11-18 07:26:32 --> Access Check: 1 to module ID: 23 for action: read
+ERROR - 2024-11-18 07:26:32 --> permission: 7
+ERROR - 2024-11-18 07:26:32 --> Access Not denied for role ID: 1 to module ID: 23 for action: read
+ERROR - 2024-11-18 07:26:37 --> mysqli_sql_exception: Table 'rhtexin_testrht.suppliers' doesn't exist in /home/rhtexin/domains/rhtex.in/public_html/dev/system/Database/MySQLi/Connection.php:310
+Stack trace:
+#0 /home/rhtexin/domains/rhtex.in/public_html/dev/system/Database/MySQLi/Connection.php(310): mysqli->query()
+#1 /home/rhtexin/domains/rhtex.in/public_html/dev/system/Database/BaseConnection.php(732): CodeIgniter\Database\MySQLi\Connection->execute()
+#2 /home/rhtexin/domains/rhtex.in/public_html/dev/system/Database/BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery()
+#3 /home/rhtexin/domains/rhtex.in/public_html/dev/system/Database/BaseBuilder.php(1637): CodeIgniter\Database\BaseConnection->query()
+#4 /home/rhtexin/domains/rhtex.in/public_html/dev/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 /home/rhtexin/domains/rhtex.in/public_html/dev/system/BaseModel.php(676): CodeIgniter\Model->doFindAll()
+#6 /home/rhtexin/domains/rhtex.in/public_html/dev/app/Controllers/SupplierController.php(24): CodeIgniter\BaseModel->findAll()
+#7 /home/rhtexin/domains/rhtex.in/public_html/dev/system/CodeIgniter.php(933): App\Controllers\SupplierController->index()
+#8 /home/rhtexin/domains/rhtex.in/public_html/dev/system/CodeIgniter.php(509): CodeIgniter\CodeIgniter->runController()
+#9 /home/rhtexin/domains/rhtex.in/public_html/dev/system/CodeIgniter.php(355): CodeIgniter\CodeIgniter->handleRequest()
+#10 /home/rhtexin/domains/rhtex.in/public_html/dev/system/Boot.php(325): CodeIgniter\CodeIgniter->run()
+#11 /home/rhtexin/domains/rhtex.in/public_html/dev/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#12 /home/rhtexin/domains/rhtex.in/public_html/dev/index.php(56): CodeIgniter\Boot::bootWeb()
+#13 {main}
+CRITICAL - 2024-11-18 07:26:37 --> CodeIgniter\Database\Exceptions\DatabaseException: Table 'rhtexin_testrht.suppliers' doesn't exist
+[Method: GET, Route: suppliers]
+in SYSTEMPATH/Database/BaseConnection.php on line 686.
+ 1 SYSTEMPATH/Database/BaseBuilder.php(1637): CodeIgniter\Database\BaseConnection->query()
+ 2 SYSTEMPATH/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH/BaseModel.php(676): CodeIgniter\Model->doFindAll()
+ 4 APPPATH/Controllers/SupplierController.php(24): CodeIgniter\BaseModel->findAll()
+ 5 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\SupplierController->index()
+ 6 SYSTEMPATH/CodeIgniter.php(509): CodeIgniter\CodeIgniter->runController()
+ 7 SYSTEMPATH/CodeIgniter.php(355): CodeIgniter\CodeIgniter->handleRequest()
+ 8 SYSTEMPATH/Boot.php(325): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+10 FCPATH/index.php(56): CodeIgniter\Boot::bootWeb()
+CRITICAL - 2024-11-18 07:26:37 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Table 'rhtexin_testrht.suppliers' doesn't exist
+in SYSTEMPATH/Database/MySQLi/Connection.php on line 315.
+ 1 SYSTEMPATH/Database/BaseConnection.php(732): CodeIgniter\Database\MySQLi\Connection->execute()
+ 2 SYSTEMPATH/Database/BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery()
+ 3 SYSTEMPATH/Database/BaseBuilder.php(1637): CodeIgniter\Database\BaseConnection->query()
+ 4 SYSTEMPATH/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH/BaseModel.php(676): CodeIgniter\Model->doFindAll()
+ 6 APPPATH/Controllers/SupplierController.php(24): CodeIgniter\BaseModel->findAll()
+ 7 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\SupplierController->index()
+ 8 SYSTEMPATH/CodeIgniter.php(509): CodeIgniter\CodeIgniter->runController()
+ 9 SYSTEMPATH/CodeIgniter.php(355): CodeIgniter\CodeIgniter->handleRequest()
+10 SYSTEMPATH/Boot.php(325): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+12 FCPATH/index.php(56): CodeIgniter\Boot::bootWeb()
+CRITICAL - 2024-11-18 07:26:37 --> [Caused by] mysqli_sql_exception: Table 'rhtexin_testrht.suppliers' doesn't exist
+in SYSTEMPATH/Database/MySQLi/Connection.php on line 310.
+ 1 SYSTEMPATH/Database/MySQLi/Connection.php(310): mysqli->query()
+ 2 SYSTEMPATH/Database/BaseConnection.php(732): CodeIgniter\Database\MySQLi\Connection->execute()
+ 3 SYSTEMPATH/Database/BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery()
+ 4 SYSTEMPATH/Database/BaseBuilder.php(1637): CodeIgniter\Database\BaseConnection->query()
+ 5 SYSTEMPATH/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH/BaseModel.php(676): CodeIgniter\Model->doFindAll()
+ 7 APPPATH/Controllers/SupplierController.php(24): CodeIgniter\BaseModel->findAll()
+ 8 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\SupplierController->index()
+ 9 SYSTEMPATH/CodeIgniter.php(509): CodeIgniter\CodeIgniter->runController()
+10 SYSTEMPATH/CodeIgniter.php(355): CodeIgniter\CodeIgniter->handleRequest()
+11 SYSTEMPATH/Boot.php(325): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+13 FCPATH/index.php(56): CodeIgniter\Boot::bootWeb()

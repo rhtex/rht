@@ -1,0 +1,29 @@
+CRITICAL - 2024-07-02 15:39:17 --> ErrorException: Trying to access array offset on value of type bool
+[Method: GET, Route: permissions]
+in APPPATH\Views\permissions\index.php on line 45.
+ 1 APPPATH\Views\permissions\index.php(45): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Trying to access array offset on value of type bool', 'C:\\sgr\\xampp\\htdocs\\RHT\\app\\Views\\permissions\\index.php', 45)
+ 2 SYSTEMPATH\View\View.php(234): include('C:\\sgr\\xampp\\htdocs\\RHT\\app\\Views\\permissions\\index.php')
+ 3 SYSTEMPATH\View\View.php(237): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1171): CodeIgniter\View\View->render('permissions/index', [], true)
+ 5 APPPATH\Controllers\PermissionsController.php(36): view('permissions/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PermissionsController->index()
+ 7 SYSTEMPATH\CodeIgniter.php(509): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PermissionsController))
+ 8 SYSTEMPATH\CodeIgniter.php(355): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(325): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2024-07-02 15:42:08 --> ErrorException: Undefined variable $pageTitle
+[Method: GET, Route: modules/edit/1]
+in APPPATH\Views\layouts\head.php on line 4.
+ 1 APPPATH\Views\layouts\head.php(4): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $pageTitle', 'C:\\sgr\\xampp\\htdocs\\RHT\\app\\Views\\layouts\\head.php', 4)
+ 2 APPPATH\Views\modules\edit.php(2): include('C:\\sgr\\xampp\\htdocs\\RHT\\app\\Views\\layouts\\head.php')
+ 3 SYSTEMPATH\View\View.php(234): include('C:\\sgr\\xampp\\htdocs\\RHT\\app\\Views\\modules\\edit.php')
+ 4 SYSTEMPATH\View\View.php(237): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 5 SYSTEMPATH\Common.php(1171): CodeIgniter\View\View->render('modules/edit', [], true)
+ 6 APPPATH\Controllers\ModulesController.php(48): view('modules/edit', [...])
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\ModulesController->edit('1')
+ 8 SYSTEMPATH\CodeIgniter.php(509): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\ModulesController))
+ 9 SYSTEMPATH\CodeIgniter.php(355): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(325): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

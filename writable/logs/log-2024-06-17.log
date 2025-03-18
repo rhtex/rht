@@ -1,0 +1,46 @@
+CRITICAL - 2024-06-17 19:44:47 --> ErrorException: Undefined variable $pageTitle
+[Method: GET, Route: dashboard]
+in APPPATH\Views\layouts\head.php on line 4.
+ 1 APPPATH\Views\layouts\head.php(4): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $pageTitle', 'C:\\sgr\\xampp\\htdocs\\RHT\\app\\Views\\layouts\\head.php', 4)
+ 2 APPPATH\Views\signin.php(3): include('C:\\sgr\\xampp\\htdocs\\RHT\\app\\Views\\layouts\\head.php')
+ 3 SYSTEMPATH\View\View.php(234): include('C:\\sgr\\xampp\\htdocs\\RHT\\app\\Views\\signin.php')
+ 4 SYSTEMPATH\View\View.php(237): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 5 SYSTEMPATH\Common.php(1171): CodeIgniter\View\View->render('signin', [], true)
+ 6 APPPATH\Controllers\DashboardController.php(18): view('signin')
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\DashboardController->index()
+ 8 SYSTEMPATH\CodeIgniter.php(509): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\DashboardController))
+ 9 SYSTEMPATH\CodeIgniter.php(355): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(325): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2024-06-17 20:13:24 --> ErrorException: Undefined variable $pageTitle
+[Method: GET, Route: profile]
+in APPPATH\Views\layouts\head.php on line 4.
+ 1 APPPATH\Views\layouts\head.php(4): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $pageTitle', 'C:\\sgr\\xampp\\htdocs\\RHT\\app\\Views\\layouts\\head.php', 4)
+ 2 APPPATH\Views\profile.php(1): include('C:\\sgr\\xampp\\htdocs\\RHT\\app\\Views\\layouts\\head.php')
+ 3 SYSTEMPATH\View\View.php(234): include('C:\\sgr\\xampp\\htdocs\\RHT\\app\\Views\\profile.php')
+ 4 SYSTEMPATH\View\View.php(237): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 5 SYSTEMPATH\Common.php(1171): CodeIgniter\View\View->render('profile', [], true)
+ 6 APPPATH\Controllers\ProfileController.php(17): view('profile')
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\ProfileController->index()
+ 8 SYSTEMPATH\CodeIgniter.php(509): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\ProfileController))
+ 9 SYSTEMPATH\CodeIgniter.php(355): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(325): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2024-06-17 22:14:36 --> ErrorException: date_default_timezone_set(): Timezone ID 'UTC+05:30' is invalid
+[Method: GET, Route: list_employees]
+in SYSTEMPATH\CodeIgniter.php on line 193.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(8, 'date_default_timezone_set(): Timezone ID \'UTC+05:30\' is invalid', 'C:\\sgr\\xampp\\htdocs\\RHT\\system\\CodeIgniter.php', 193)
+ 2 SYSTEMPATH\CodeIgniter.php(193): date_default_timezone_set('UTC+05:30')
+ 3 SYSTEMPATH\Boot.php(312): CodeIgniter\CodeIgniter->initialize()
+ 4 SYSTEMPATH\Boot.php(66): CodeIgniter\Boot::initializeCodeIgniter()
+ 5 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2024-06-17 22:15:07 --> ErrorException: date_default_timezone_set(): Timezone ID '+05:30' is invalid
+[Method: GET, Route: list_employees]
+in SYSTEMPATH\CodeIgniter.php on line 193.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(8, 'date_default_timezone_set(): Timezone ID \'+05:30\' is invalid', 'C:\\sgr\\xampp\\htdocs\\RHT\\system\\CodeIgniter.php', 193)
+ 2 SYSTEMPATH\CodeIgniter.php(193): date_default_timezone_set('+05:30')
+ 3 SYSTEMPATH\Boot.php(312): CodeIgniter\CodeIgniter->initialize()
+ 4 SYSTEMPATH\Boot.php(66): CodeIgniter\Boot::initializeCodeIgniter()
+ 5 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

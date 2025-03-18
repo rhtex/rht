@@ -1,0 +1,27 @@
+{
+    "remotePath": "./",
+    "host": "rhtex.in",
+    "username": "dev@rhtex.in",
+    "password": "Sgrajaj7",
+    "port": 21,
+    "secure": false,
+    "protocol": "ftp",
+    "uploadOnSave": true,
+    "passive": false,
+    "debug": false,
+    "privateKeyPath": null,
+    "passphrase": null,
+    "agent": null,
+    "allow": [],
+    "ignore": [
+        "\\.git",
+        "\\.DS_Store",
+         "**/Config/**"
+    ],
+    "generatedFiles": {
+        "extensionsToInclude": [
+            ""
+        ],
+        "path": ""
+    }
+}

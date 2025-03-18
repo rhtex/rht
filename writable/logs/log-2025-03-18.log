@@ -106,3 +106,21 @@ ERROR - 2025-03-18 17:44:57 --> AsizeD: 1
 ERROR - 2025-03-18 17:44:57 --> Access Check: 1 to module ID: 17 for action: read
 ERROR - 2025-03-18 17:44:57 --> permission: 7
 ERROR - 2025-03-18 17:44:57 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:58:04 --> Access denied for role ID: 1
+ERROR - 2025-03-18 17:58:04 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-18 17:58:04 --> AsizeD: 1
+ERROR - 2025-03-18 17:58:04 --> Access Check: 1 to module ID: 15 for action: read
+ERROR - 2025-03-18 17:58:04 --> permission: 7
+ERROR - 2025-03-18 17:58:04 --> Access Not denied for role ID: 1 to module ID: 15 for action: read
+ERROR - 2025-03-18 17:58:06 --> Access denied for role ID: 1
+ERROR - 2025-03-18 17:58:06 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-18 17:58:06 --> AsizeD: 1
+ERROR - 2025-03-18 17:58:06 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:58:06 --> permission: 7
+ERROR - 2025-03-18 17:58:06 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:58:07 --> Access denied for role ID: 1
+ERROR - 2025-03-18 17:58:07 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-18 17:58:07 --> AsizeD: 1
+ERROR - 2025-03-18 17:58:07 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:58:07 --> permission: 7
+ERROR - 2025-03-18 17:58:07 --> Access Not denied for role ID: 1 to module ID: 17 for action: read

@@ -76,3 +76,33 @@ ERROR - 2025-03-18 17:24:58 --> AsizeD: 1
 ERROR - 2025-03-18 17:24:58 --> Access Check: 1 to module ID: 17 for action: read
 ERROR - 2025-03-18 17:24:58 --> permission: 7
 ERROR - 2025-03-18 17:24:58 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:25:55 --> Access denied for role ID: 1
+ERROR - 2025-03-18 17:25:55 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-18 17:25:55 --> AsizeD: 1
+ERROR - 2025-03-18 17:25:55 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:25:55 --> permission: 7
+ERROR - 2025-03-18 17:25:55 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:31:24 --> Access denied for role ID: 1
+ERROR - 2025-03-18 17:31:24 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-18 17:31:24 --> AsizeD: 1
+ERROR - 2025-03-18 17:31:24 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:31:24 --> permission: 7
+ERROR - 2025-03-18 17:31:24 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:31:26 --> Access denied for role ID: 1
+ERROR - 2025-03-18 17:31:26 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-18 17:31:26 --> AsizeD: 1
+ERROR - 2025-03-18 17:31:26 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:31:26 --> permission: 7
+ERROR - 2025-03-18 17:31:26 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:44:41 --> Access denied for role ID: 1
+ERROR - 2025-03-18 17:44:41 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-18 17:44:41 --> AsizeD: 1
+ERROR - 2025-03-18 17:44:41 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:44:41 --> permission: 7
+ERROR - 2025-03-18 17:44:41 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:44:57 --> Access denied for role ID: 1
+ERROR - 2025-03-18 17:44:57 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-18 17:44:57 --> AsizeD: 1
+ERROR - 2025-03-18 17:44:57 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-18 17:44:57 --> permission: 7
+ERROR - 2025-03-18 17:44:57 --> Access Not denied for role ID: 1 to module ID: 17 for action: read

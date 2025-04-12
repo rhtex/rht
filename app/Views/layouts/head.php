@@ -13,7 +13,7 @@
 
 
 	<!-- Favicon icon -->
-	<link rel="icon" href="/public/assets/images/favicon.svg" type="image/x-icon">
+	<link rel="icon" href="/public/assets/images/favicon.ico" type="image/x-icon">
 	<!-- font css -->
 	<link rel="stylesheet" href="/public/assets/fonts/feather.css">
 	<link rel="stylesheet" href="/public/assets/fonts/fontawesome.css">

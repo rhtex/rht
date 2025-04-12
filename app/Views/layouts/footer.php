@@ -1,6 +1,8 @@
 <div style="text-align:center">
     <p class="footer-copyright">© Copyright <span id="year"></span> - Gowthamraj Somanathan</p>
 </div>
+</div>
+</div>
 <!-- Required Js -->
 <script src="/public/assets/js/vendor-all.min.js"></script>
 <script src="/public/assets/js/plugins/bootstrap.min.js"></script>

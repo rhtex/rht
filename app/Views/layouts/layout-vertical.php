@@ -10,7 +10,7 @@
 	<!-- [ Mobile header ] start -->
 	<div class="pc-mob-header pc-header">
 		<div class="pcm-logo">
-			<img src="/public/assets/images/logo.svg" alt="" class="logo logo-lg">
+			<img src="/public/assets/images/logo.png" width="100%" alt="" class="logo logo-lg">
 		</div>
 		<div class="pcm-toolbar">
 			<a href="#!" class="pc-head-link" id="mobile-collapse">
@@ -36,8 +36,8 @@
 			<div class="m-header">
 				<a href="/dashboard" class="b-brand">
 					<!-- ========   change your logo hear   ============ -->
-					<img src="/public/assets/images/logo.svg" alt="" class="logo logo-lg">
-					<img src="/public/assets/images/logo-sm.svg" alt="" class="logo logo-sm">
+					<img src="/public/assets/images/logo.png" width="100%" alt="" class="logo logo-lg">
+					<img src="/public/assets/images/logo.png" width="100%" alt="" class="logo logo-sm">
 				</a>
 			</div>
 			<div class="navbar-content">

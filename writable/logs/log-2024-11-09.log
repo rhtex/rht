@@ -1,0 +1,53 @@
+ERROR - 2024-11-09 22:55:38 --> Access denied for role ID: 1
+ERROR - 2024-11-09 22:55:38 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-09 22:55:38 --> AsizeD: 1
+ERROR - 2024-11-09 22:55:38 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2024-11-09 22:55:38 --> permission: 7
+ERROR - 2024-11-09 22:55:38 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2024-11-09 22:55:46 --> Access denied for role ID: 1
+ERROR - 2024-11-09 22:55:46 --> Access:  to module ID:  for action: create
+ERROR - 2024-11-09 22:55:46 --> AsizeD: 1
+ERROR - 2024-11-09 22:55:46 --> Access Check: 1 to module ID: 15 for action: create
+ERROR - 2024-11-09 22:55:46 --> permission: 7
+ERROR - 2024-11-09 22:55:46 --> Access Not denied for role ID: 1 to module ID: 15 for action: create
+ERROR - 2024-11-09 22:55:49 --> Access denied for role ID: 1
+ERROR - 2024-11-09 22:55:49 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-09 22:55:49 --> AsizeD: 1
+ERROR - 2024-11-09 22:55:49 --> Access Check: 1 to module ID: 15 for action: read
+ERROR - 2024-11-09 22:55:49 --> permission: 7
+ERROR - 2024-11-09 22:55:49 --> Access Not denied for role ID: 1 to module ID: 15 for action: read
+ERROR - 2024-11-09 22:55:51 --> Access denied for role ID: 1
+ERROR - 2024-11-09 22:55:51 --> Access:  to module ID:  for action: create
+ERROR - 2024-11-09 22:55:51 --> AsizeD: 1
+ERROR - 2024-11-09 22:55:51 --> Access Check: 1 to module ID: 16 for action: create
+ERROR - 2024-11-09 22:55:51 --> permission: 7
+ERROR - 2024-11-09 22:55:51 --> Access Not denied for role ID: 1 to module ID: 16 for action: create
+ERROR - 2024-11-09 22:55:59 --> Access denied for role ID: 1
+ERROR - 2024-11-09 22:55:59 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-09 22:55:59 --> AsizeD: 1
+ERROR - 2024-11-09 22:55:59 --> Access Check: 1 to module ID: 16 for action: read
+ERROR - 2024-11-09 22:55:59 --> permission: 7
+ERROR - 2024-11-09 22:55:59 --> Access Not denied for role ID: 1 to module ID: 16 for action: read
+ERROR - 2024-11-09 22:59:53 --> Access denied for role ID: 1
+ERROR - 2024-11-09 22:59:53 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-09 22:59:53 --> AsizeD: 1
+ERROR - 2024-11-09 22:59:53 --> Access Check: 1 to module ID: 15 for action: read
+ERROR - 2024-11-09 22:59:53 --> permission: 7
+ERROR - 2024-11-09 22:59:53 --> Access Not denied for role ID: 1 to module ID: 15 for action: read
+ERROR - 2024-11-09 23:00:50 --> Access denied for role ID: 1
+ERROR - 2024-11-09 23:00:50 --> Access:  to module ID:  for action: read
+ERROR - 2024-11-09 23:00:50 --> AsizeD: 1
+ERROR - 2024-11-09 23:00:50 --> Access Check: 1 to module ID: 16 for action: read
+ERROR - 2024-11-09 23:00:50 --> permission: 7
+ERROR - 2024-11-09 23:00:50 --> Access Not denied for role ID: 1 to module ID: 16 for action: read
+CRITICAL - 2024-11-09 23:02:15 --> TypeError: CodeIgniter\Database\BaseBuilder::like(): Argument #2 ($match) must be of type string, null given, called in /home/rhtexin/domains/rhtex.in/public_html/dev/app/Models/AttendanceModel.php on line 89
+[Method: GET, Route: search_by_date_employee_ajax]
+in SYSTEMPATH/Database/BaseBuilder.php on line 995.
+ 1 APPPATH/Models/AttendanceModel.php(89): CodeIgniter\Database\BaseBuilder->like()
+ 2 APPPATH/Controllers/AttendanceController.php(231): App\Models\AttendanceModel->searchByDateEmployee()
+ 3 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\AttendanceController->search_by_date_employee_ajax()
+ 4 SYSTEMPATH/CodeIgniter.php(509): CodeIgniter\CodeIgniter->runController()
+ 5 SYSTEMPATH/CodeIgniter.php(355): CodeIgniter\CodeIgniter->handleRequest()
+ 6 SYSTEMPATH/Boot.php(325): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+ 8 FCPATH/index.php(56): CodeIgniter\Boot::bootWeb()

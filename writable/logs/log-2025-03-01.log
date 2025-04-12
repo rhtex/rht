@@ -1,0 +1,176 @@
+ERROR - 2025-03-01 11:41:15 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:41:15 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:41:15 --> AsizeD: 1
+ERROR - 2025-03-01 11:41:15 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 11:41:15 --> permission: 7
+ERROR - 2025-03-01 11:41:15 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 11:43:31 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:43:31 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:43:31 --> AsizeD: 1
+ERROR - 2025-03-01 11:43:31 --> Access Check: 1 to module ID: 15 for action: read
+ERROR - 2025-03-01 11:43:31 --> permission: 7
+ERROR - 2025-03-01 11:43:31 --> Access Not denied for role ID: 1 to module ID: 15 for action: read
+ERROR - 2025-03-01 11:43:33 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:43:33 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:43:33 --> AsizeD: 1
+ERROR - 2025-03-01 11:43:33 --> Access Check: 1 to module ID: 15 for action: read
+ERROR - 2025-03-01 11:43:33 --> permission: 7
+ERROR - 2025-03-01 11:43:33 --> Access Not denied for role ID: 1 to module ID: 15 for action: read
+ERROR - 2025-03-01 11:43:38 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:43:38 --> Access:  to module ID:  for action: create
+ERROR - 2025-03-01 11:43:38 --> AsizeD: 1
+ERROR - 2025-03-01 11:43:38 --> Access Check: 1 to module ID: 15 for action: create
+ERROR - 2025-03-01 11:43:38 --> permission: 7
+ERROR - 2025-03-01 11:43:38 --> Access Not denied for role ID: 1 to module ID: 15 for action: create
+ERROR - 2025-03-01 11:43:40 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:43:40 --> Access:  to module ID:  for action: create
+ERROR - 2025-03-01 11:43:40 --> AsizeD: 1
+ERROR - 2025-03-01 11:43:40 --> Access Check: 1 to module ID: 16 for action: create
+ERROR - 2025-03-01 11:43:40 --> permission: 7
+ERROR - 2025-03-01 11:43:40 --> Access Not denied for role ID: 1 to module ID: 16 for action: create
+ERROR - 2025-03-01 11:43:49 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:43:49 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:43:49 --> AsizeD: 1
+ERROR - 2025-03-01 11:43:49 --> Access Check: 1 to module ID: 16 for action: read
+ERROR - 2025-03-01 11:43:49 --> permission: 7
+ERROR - 2025-03-01 11:43:49 --> Access Not denied for role ID: 1 to module ID: 16 for action: read
+ERROR - 2025-03-01 11:43:57 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:43:57 --> Access:  to module ID:  for action: create
+ERROR - 2025-03-01 11:43:57 --> AsizeD: 1
+ERROR - 2025-03-01 11:43:57 --> Access Check: 1 to module ID: 16 for action: create
+ERROR - 2025-03-01 11:43:57 --> permission: 7
+ERROR - 2025-03-01 11:43:57 --> Access Not denied for role ID: 1 to module ID: 16 for action: create
+ERROR - 2025-03-01 11:44:12 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:44:12 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:44:12 --> AsizeD: 1
+ERROR - 2025-03-01 11:44:12 --> Access Check: 1 to module ID: 16 for action: read
+ERROR - 2025-03-01 11:44:12 --> permission: 7
+ERROR - 2025-03-01 11:44:12 --> Access Not denied for role ID: 1 to module ID: 16 for action: read
+ERROR - 2025-03-01 11:44:12 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:44:13 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:44:13 --> AsizeD: 1
+ERROR - 2025-03-01 11:44:13 --> Access Check: 1 to module ID: 16 for action: read
+ERROR - 2025-03-01 11:44:13 --> permission: 7
+ERROR - 2025-03-01 11:44:13 --> Access Not denied for role ID: 1 to module ID: 16 for action: read
+ERROR - 2025-03-01 11:44:18 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:44:18 --> Access:  to module ID:  for action: create
+ERROR - 2025-03-01 11:44:18 --> AsizeD: 1
+ERROR - 2025-03-01 11:44:18 --> Access Check: 1 to module ID: 15 for action: create
+ERROR - 2025-03-01 11:44:18 --> permission: 7
+ERROR - 2025-03-01 11:44:18 --> Access Not denied for role ID: 1 to module ID: 15 for action: create
+ERROR - 2025-03-01 11:44:25 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:44:25 --> Access:  to module ID:  for action: create
+ERROR - 2025-03-01 11:44:25 --> AsizeD: 1
+ERROR - 2025-03-01 11:44:25 --> Access Check: 1 to module ID: 16 for action: create
+ERROR - 2025-03-01 11:44:25 --> permission: 7
+ERROR - 2025-03-01 11:44:25 --> Access Not denied for role ID: 1 to module ID: 16 for action: create
+ERROR - 2025-03-01 11:44:33 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:44:33 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:44:33 --> AsizeD: 1
+ERROR - 2025-03-01 11:44:33 --> Access Check: 1 to module ID: 16 for action: read
+ERROR - 2025-03-01 11:44:33 --> permission: 7
+ERROR - 2025-03-01 11:44:33 --> Access Not denied for role ID: 1 to module ID: 16 for action: read
+ERROR - 2025-03-01 11:44:34 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:44:34 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:44:34 --> AsizeD: 1
+ERROR - 2025-03-01 11:44:34 --> Access Check: 1 to module ID: 16 for action: read
+ERROR - 2025-03-01 11:44:34 --> permission: 7
+ERROR - 2025-03-01 11:44:34 --> Access Not denied for role ID: 1 to module ID: 16 for action: read
+ERROR - 2025-03-01 11:44:36 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:44:36 --> Access:  to module ID:  for action: create
+ERROR - 2025-03-01 11:44:36 --> AsizeD: 1
+ERROR - 2025-03-01 11:44:36 --> Access Check: 1 to module ID: 15 for action: create
+ERROR - 2025-03-01 11:44:36 --> permission: 7
+ERROR - 2025-03-01 11:44:36 --> Access Not denied for role ID: 1 to module ID: 15 for action: create
+ERROR - 2025-03-01 11:44:57 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:44:57 --> Access:  to module ID:  for action: create
+ERROR - 2025-03-01 11:44:57 --> AsizeD: 1
+ERROR - 2025-03-01 11:44:57 --> Access Check: 1 to module ID: 15 for action: create
+ERROR - 2025-03-01 11:44:57 --> permission: 7
+ERROR - 2025-03-01 11:44:57 --> Access Not denied for role ID: 1 to module ID: 15 for action: create
+ERROR - 2025-03-01 11:45:22 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:45:23 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:45:29 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:45:29 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:45:29 --> AsizeD: 1
+ERROR - 2025-03-01 11:45:29 --> Access Check: 1 to module ID: 15 for action: read
+ERROR - 2025-03-01 11:45:29 --> permission: 7
+ERROR - 2025-03-01 11:45:29 --> Access Not denied for role ID: 1 to module ID: 15 for action: read
+ERROR - 2025-03-01 11:45:38 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:45:38 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:45:38 --> AsizeD: 1
+ERROR - 2025-03-01 11:45:38 --> Access Check: 1 to module ID: 15 for action: read
+ERROR - 2025-03-01 11:45:38 --> permission: 7
+ERROR - 2025-03-01 11:45:38 --> Access Not denied for role ID: 1 to module ID: 15 for action: read
+ERROR - 2025-03-01 11:45:48 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:45:48 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:45:48 --> AsizeD: 1
+ERROR - 2025-03-01 11:45:48 --> Access Check: 1 to module ID: 15 for action: read
+ERROR - 2025-03-01 11:45:48 --> permission: 7
+ERROR - 2025-03-01 11:45:48 --> Access Not denied for role ID: 1 to module ID: 15 for action: read
+ERROR - 2025-03-01 11:45:52 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:45:52 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:45:52 --> AsizeD: 1
+ERROR - 2025-03-01 11:45:52 --> Access Check: 1 to module ID: 18 for action: read
+ERROR - 2025-03-01 11:45:52 --> permission: 7
+ERROR - 2025-03-01 11:45:52 --> Access Not denied for role ID: 1 to module ID: 18 for action: read
+ERROR - 2025-03-01 11:45:59 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:45:59 --> Access:  to module ID:  for action: update
+ERROR - 2025-03-01 11:45:59 --> AsizeD: 1
+ERROR - 2025-03-01 11:45:59 --> Access Check: 1 to module ID: 18 for action: update
+ERROR - 2025-03-01 11:45:59 --> permission: 7
+ERROR - 2025-03-01 11:45:59 --> Access Not denied for role ID: 1 to module ID: 18 for action: update
+ERROR - 2025-03-01 11:46:04 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:46:04 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:46:04 --> AsizeD: 1
+ERROR - 2025-03-01 11:46:04 --> Access Check: 1 to module ID: 19 for action: read
+ERROR - 2025-03-01 11:46:04 --> permission: 7
+ERROR - 2025-03-01 11:46:04 --> Access Not denied for role ID: 1 to module ID: 19 for action: read
+ERROR - 2025-03-01 11:46:08 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:46:08 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:46:08 --> AsizeD: 1
+ERROR - 2025-03-01 11:46:08 --> Access Check: 1 to module ID: 19 for action: read
+ERROR - 2025-03-01 11:46:08 --> permission: 7
+ERROR - 2025-03-01 11:46:08 --> Access Not denied for role ID: 1 to module ID: 19 for action: read
+ERROR - 2025-03-01 11:47:47 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:47:47 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:47:47 --> AsizeD: 1
+ERROR - 2025-03-01 11:47:47 --> Access Check: 1 to module ID: 19 for action: read
+ERROR - 2025-03-01 11:47:47 --> permission: 7
+ERROR - 2025-03-01 11:47:47 --> Access Not denied for role ID: 1 to module ID: 19 for action: read
+ERROR - 2025-03-01 11:47:53 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:47:53 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:47:53 --> AsizeD: 1
+ERROR - 2025-03-01 11:47:53 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 11:47:53 --> permission: 7
+ERROR - 2025-03-01 11:47:53 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 11:49:24 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:49:24 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:49:24 --> AsizeD: 1
+ERROR - 2025-03-01 11:49:24 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 11:49:24 --> permission: 7
+ERROR - 2025-03-01 11:49:24 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 11:50:20 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:50:20 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:50:20 --> AsizeD: 1
+ERROR - 2025-03-01 11:50:20 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 11:50:20 --> permission: 7
+ERROR - 2025-03-01 11:50:20 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 11:53:08 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:53:08 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:53:08 --> AsizeD: 1
+ERROR - 2025-03-01 11:53:08 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 11:53:08 --> permission: 7
+ERROR - 2025-03-01 11:53:08 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 11:53:34 --> Access denied for role ID: 1
+ERROR - 2025-03-01 11:53:34 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 11:53:34 --> AsizeD: 1
+ERROR - 2025-03-01 11:53:34 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 11:53:34 --> permission: 7
+ERROR - 2025-03-01 11:53:34 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 12:12:32 --> Access denied for role ID: 1
+ERROR - 2025-03-01 12:12:32 --> Access:  to module ID:  for action: read
+ERROR - 2025-03-01 12:12:32 --> AsizeD: 1
+ERROR - 2025-03-01 12:12:32 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-03-01 12:12:32 --> permission: 7
+ERROR - 2025-03-01 12:12:32 --> Access Not denied for role ID: 1 to module ID: 17 for action: read

@@ -1,0 +1,24 @@
+ERROR - 2025-04-12 16:02:58 --> Access denied for role ID: 1
+ERROR - 2025-04-12 16:02:58 --> Access:  to module ID:  for action: read
+ERROR - 2025-04-12 16:02:58 --> AsizeD: 1
+ERROR - 2025-04-12 16:02:58 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-04-12 16:02:58 --> permission: 7
+ERROR - 2025-04-12 16:02:58 --> Access Not denied for role ID: 1 to module ID: 17 for action: read
+ERROR - 2025-04-12 16:03:05 --> Access denied for role ID: 1
+ERROR - 2025-04-12 16:03:05 --> Access:  to module ID:  for action: read
+ERROR - 2025-04-12 16:03:05 --> AsizeD: 1
+ERROR - 2025-04-12 16:03:05 --> Access Check: 1 to module ID: 15 for action: read
+ERROR - 2025-04-12 16:03:05 --> permission: 7
+ERROR - 2025-04-12 16:03:05 --> Access Not denied for role ID: 1 to module ID: 15 for action: read
+ERROR - 2025-04-12 16:13:28 --> Access denied for role ID: 1
+ERROR - 2025-04-12 16:13:29 --> Access:  to module ID:  for action: read
+ERROR - 2025-04-12 16:13:29 --> AsizeD: 1
+ERROR - 2025-04-12 16:13:29 --> Access Check: 1 to module ID: 15 for action: read
+ERROR - 2025-04-12 16:13:29 --> permission: 7
+ERROR - 2025-04-12 16:13:29 --> Access Not denied for role ID: 1 to module ID: 15 for action: read
+ERROR - 2025-04-12 16:13:37 --> Access denied for role ID: 1
+ERROR - 2025-04-12 16:13:37 --> Access:  to module ID:  for action: read
+ERROR - 2025-04-12 16:13:37 --> AsizeD: 1
+ERROR - 2025-04-12 16:13:37 --> Access Check: 1 to module ID: 17 for action: read
+ERROR - 2025-04-12 16:13:37 --> permission: 7
+ERROR - 2025-04-12 16:13:37 --> Access Not denied for role ID: 1 to module ID: 17 for action: read

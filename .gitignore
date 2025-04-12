@@ -4,4 +4,5 @@
 # Ignore other sensitive or local files
 /writable/
 /public/uploads/
+/app/Config/
 /vendors/

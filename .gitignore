@@ -6,3 +6,6 @@
 /public/uploads/
 /app/Config/
 /vendors/
+
+
+#find writable/logs -type f -exec git update-index --assume-unchanged {} \;

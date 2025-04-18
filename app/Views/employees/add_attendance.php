@@ -7,7 +7,7 @@
 <h4>Add Attendance</h4>
 
 <form action="/store_attendance" method="post" id="attendanceForm">
-    <div class="mb-3">
+    <div class="mb-3 col-md-4">
         <label for="attendance_date" class="form-label">Date</label>
         <input type="text" class="form-control" id="attendance_date" name="attendance_date"
             value="<?= date('d/m/Y') ?>" required placeholder="dd/mm/yyyy">

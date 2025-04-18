@@ -10,6 +10,7 @@
 <script src="/public/assets/js/pcoded.min.js"></script>
 <script src="/public/assets/js/jquery-3.5.1.js"></script>
 <script src="/public/assets/js/jquery.dataTables.min.js"></script>
+<script src="/public/assets/js/flatpickr.js"></script>
 <script>
     $('#year').text(new Date().getFullYear());
 </script>

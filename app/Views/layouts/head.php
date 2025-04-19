@@ -19,6 +19,7 @@
 	<link rel="stylesheet" href="/public/assets/fonts/fontawesome.css">
 	<link rel="stylesheet" href="/public/assets/fonts/material.css">
 	<link rel="stylesheet" href="/public/assets/css/bootstrapIcons.css">
+	<link rel="stylesheet" href="/public/assets/css/flatpickr.css">
 
 	<!-- vendor css -->
 	<link rel="stylesheet" href="/public/assets/css/style.css" id="main-style-link">

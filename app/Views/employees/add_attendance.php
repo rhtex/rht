@@ -7,10 +7,11 @@
 <h4>Add Attendance</h4>
 
 <form action="/store_attendance" method="post" id="attendanceForm">
-    <div class="mb-3">
+    <div class="mb-3 col-md-4">
         <label for="attendance_date" class="form-label">Date</label>
-        <input type="date" class="form-control" id="attendance_date" name="attendance_date"
-            value="<?= date('Y-m-d') ?>" required>
+        <input type="text" class="form-control" id="attendance_date" name="attendance_date"
+            value="<?= date('d/m/Y') ?>" required placeholder="dd/mm/yyyy">
+
         <button type="button" id="fetchAttendance" class="btn btn-secondary mt-2">Fetch</button>
     </div>
     <div id="attendance-entries" style="display: none;">
@@ -59,6 +60,15 @@
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
 <script>
     $(document).ready(function() {
+        flatpickr("#attendance_date", {
+            dateFormat: "d/m/Y",
+            defaultDate: "today",
+            allowInput: true,
+            disableMobile: true, // Ensures consistent desktop-style popup on mobile too
+            maxDate: "today", // Disable future dates
+            minDate: new Date().fp_incr(-60) // Disable anything before 60 days ago
+        });
+
         // Handle the Fetch button click event
         $('#fetchAttendance').click(function() {
             const selectedDate = $('#attendance_date').val();
@@ -74,18 +84,45 @@
                 // Update salary based on status selection
                 switch (status) {
                     case '1': // Present
+                        $('#entry_time_' + index).prop('readonly', false);
+                        $('#exit_time_' + index).prop('readonly', false);
+                        $('#salary_' + index).prop('readonly', false);
+                        $('#entry_time_' + index).val('09:00');
+                        $('#exit_time_' + index).val('19:00');
+                        $('#entry_time_' + index).show();
+                        $('#entry_time_' + index).show();
                         salaryInput.val('1.00');
                         break;
                     case '2': // Absent
+                        $('#entry_time_' + index).prop('readonly', true);
+                        $('#exit_time_' + index).prop('readonly', true);
+                        $('#salary_' + index).prop('readonly', true);
+                        $('#entry_time_' + index).val('00:00');
+                        $('#exit_time_' + index).val('00:00');
                         salaryInput.val('0.00');
                         break;
                     case '3': // Holiday
+                        $('#entry_time_' + index).prop('readonly', true);
+                        $('#exit_time_' + index).prop('readonly', true);
+                        $('#salary_' + index).prop('readonly', true);
+                        $('#entry_time_' + index).val('00:00');
+                        $('#exit_time_' + index).val('00:00');
                         salaryInput.val('1.00');
                         break;
                     case '4': // Half Day
+                        $('#entry_time_' + index).prop('readonly', false);
+                        $('#exit_time_' + index).prop('readonly', false);
+                        $('#salary_' + index).prop('readonly', false);
+                        $('#entry_time_' + index).val('09:00');
+                        $('#exit_time_' + index).val('19:00');
                         salaryInput.val('0.50');
                         break;
                     default:
+                        $('#entry_time_' + index).prop('readonly', false);
+                        $('#exit_time_' + index).prop('readonly', false);
+                        $('#salary_' + index).prop('readonly', false);
+                        $('#entry_time_' + index).val('09:00');
+                        $('#exit_time_' + index).val('19:00');
                         salaryInput.val('1.00'); // Default to 1.00 if no valid status is selected
                 }
             }
@@ -126,8 +163,8 @@
                             $("#attendance-entries").show();
                         } else {
                             // Reset values if no attendance data is found
-                            $('#entry_time_' + index).val('00:00');
-                            $('#exit_time_' + index).val('00:00');
+                            $('#entry_time_' + index).val('09:00');
+                            $('#exit_time_' + index).val('18:00');
                             $('#status_' + index).val('1'); // Default to Present
                             $('#salary_' + index).val('1.00'); // Default salary
                             $("#attendance-entries").show();
@@ -140,5 +177,14 @@
                 }
             });
         });
+        $('#attendanceForm').on('submit', function() {
+            let dateInput = $('#attendance_date');
+            let parts = dateInput.val().split('/');
+            if (parts.length === 3) {
+                let formatted = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                dateInput.val(formatted);
+            }
+        });
+
     });
 </script>

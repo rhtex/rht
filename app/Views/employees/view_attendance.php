@@ -14,18 +14,20 @@
 <?php endif; ?>
 
 <div id="flashMessage"></div>
-
+<a href="/add_attendance" class="btn btn-success mb-3">Add Attendance</a>
+<a href="/salary-history" class="btn btn-primary mb-3">View Salary History</a>
+<a href="/calculate_salary" class="btn btn-danger mb-3">Calculate Salary</a>
 <!-- Tabs -->
 <ul class="tabs" id="attendanceTab">
     <li data-tab="monthYear" class="active">Search by Month & Year</li>
 </ul>
 
 <div class="tab-content active" id="monthYear">
-    <div class="mb-3">
+    <div class="mb-3 col-md-4">
         <label for="searchMonth" class="form-label">Month</label>
         <input type="month" class="form-control" id="searchMonth" name="searchMonth">
     </div>
-    <div class="mb-3">
+    <div class="mb-3 col-md-4">
         <label for="searchEmployee2" class="form-label">Employee Name</label>
         <select class="form-control" id="searchEmployee2" name="searchEmployee2">
             <?php foreach ($employees as $employee): ?>

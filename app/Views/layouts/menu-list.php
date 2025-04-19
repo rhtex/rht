@@ -16,6 +16,7 @@
 		<li class="pc-item"><a class="pc-link" href="/view_attendance">View Attendance</a></li>
 		<li class="pc-item"><a class="pc-link" href="/calculate_salary">Calculate Salary</a></li>
 		<li class="pc-item"><a class="pc-link" href="/salary-history">View Salary Details</a></li>
+		<li class="pc-item"><a class="pc-link" href="/salary-history">Employee Loans</a></li>
 	</ul>
 </li>
 <li class="pc-item pc-caption">

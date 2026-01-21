@@ -1,0 +1,108 @@
+--- Data: modules ---
+id: 1 | module_name: User Management | module_slug: users | status: active | created_at:  | updated_at:  | 
+id: 2 | module_name: Employee Management | module_slug: employees | status: active | created_at:  | updated_at:  | 
+id: 3 | module_name: Attendance Management | module_slug: attendance | status: active | created_at:  | updated_at:  | 
+id: 4 | module_name: Payroll Management | module_slug: payroll | status: active | created_at:  | updated_at:  | 
+id: 5 | module_name: Settings | module_slug:  | status: active | created_at: 2026-01-21 07:02:52 | updated_at: 2026-01-21 07:02:52 | 
+id: 12 | module_name: Settings | module_slug: settings | status: active | created_at: 2026-01-21 07:48:25 | updated_at: 2026-01-21 07:48:25 | 
+id: 14 | module_name: Countries | module_slug: country | status: active | created_at: 2026-01-21 11:06:19 | updated_at: 2026-01-21 11:06:19 | 
+id: 15 | module_name: States | module_slug: state | status: active | created_at: 2026-01-21 11:06:19 | updated_at: 2026-01-21 11:06:19 | 
+id: 16 | module_name: Agents | module_slug: agent | status: active | created_at: 2026-01-21 11:06:19 | updated_at: 2026-01-21 11:06:19 | 
+id: 17 | module_name: Transports | module_slug: transport | status: active | created_at: 2026-01-21 11:06:19 | updated_at: 2026-01-21 11:06:19 | 
+id: 18 | module_name: Expenses | module_slug: expense | status: active | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 19 | module_name: Bank Accounts | module_slug: bank_account | status: active | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 20 | module_name: Roles | module_slug: roles | status: active | created_at:  | updated_at:  | 
+id: 21 | module_name: Employee | module_slug: employee | status: active | created_at:  | updated_at:  | 
+id: 22 | module_name: Loan | module_slug: loan | status: active | created_at:  | updated_at:  | 
+id: 23 | module_name: Salary | module_slug: salary | status: active | created_at:  | updated_at:  | 
+id: 24 | module_name: Expense Categories | module_slug: expense_category | status: active | created_at: 2026-01-21 11:23:34 | updated_at: 2026-01-21 11:23:34 | 
+id: 25 | module_name: Customers | module_slug: customer | status: active | created_at: 2026-01-21 11:33:53 | updated_at: 2026-01-21 11:33:53 | 
+id: 26 | module_name: Vendors | module_slug: vendor | status: active | created_at: 2026-01-21 11:33:53 | updated_at: 2026-01-21 11:33:53 | 
+--- Data: permissions ---
+id: 1 | permission_key: user.view | permission_name: View Users | module_id: 1 | created_at:  | updated_at:  | 
+id: 2 | permission_key: user.create | permission_name: Create User | module_id: 1 | created_at:  | updated_at:  | 
+id: 3 | permission_key: user.edit | permission_name: Edit User | module_id: 1 | created_at:  | updated_at:  | 
+id: 4 | permission_key: user.delete | permission_name: Delete User | module_id: 1 | created_at:  | updated_at:  | 
+id: 5 | permission_key: employee.view | permission_name: View Employees | module_id: 2 | created_at:  | updated_at:  | 
+id: 6 | permission_key: employee.create | permission_name: Create Employee | module_id: 2 | created_at:  | updated_at:  | 
+id: 7 | permission_key: employee.edit | permission_name: Edit Employee | module_id: 2 | created_at:  | updated_at:  | 
+id: 8 | permission_key: employee.delete | permission_name: Delete Employee | module_id: 2 | created_at:  | updated_at:  | 
+id: 9 | permission_key: attendance.view | permission_name: View Attendance | module_id: 3 | created_at:  | updated_at:  | 
+id: 10 | permission_key: attendance.manage | permission_name: Manage Attendance | module_id: 3 | created_at:  | updated_at:  | 
+id: 11 | permission_key: salary.view | permission_name: View Salary | module_id: 4 | created_at:  | updated_at:  | 
+id: 12 | permission_key: salary.calculate | permission_name: Calculate Salary | module_id: 4 | created_at:  | updated_at:  | 
+id: 13 | permission_key: setting.view | permission_name: View Settings | module_id: 5 | created_at: 2026-01-21 07:02:52 | updated_at: 2026-01-21 07:02:52 | 
+id: 14 | permission_key: role.view | permission_name: View Roles | module_id: 1 | created_at: 2026-01-21 12:41:54 | updated_at: 2026-01-21 12:41:54 | 
+id: 15 | permission_key: role.create | permission_name: Create Role | module_id: 1 | created_at: 2026-01-21 12:41:54 | updated_at: 2026-01-21 12:41:54 | 
+id: 16 | permission_key: role.edit | permission_name: Edit Role | module_id: 1 | created_at: 2026-01-21 12:41:54 | updated_at: 2026-01-21 12:41:54 | 
+id: 17 | permission_key: role.delete | permission_name: Delete Role | module_id: 1 | created_at: 2026-01-21 12:41:55 | updated_at: 2026-01-21 12:41:55 | 
+id: 18 | permission_key: attendance.create | permission_name: Create Attendance | module_id: 3 | created_at: 2026-01-21 12:41:55 | updated_at: 2026-01-21 12:41:55 | 
+id: 19 | permission_key: loan.view | permission_name: View Loans | module_id: 4 | created_at: 2026-01-21 12:41:55 | updated_at: 2026-01-21 12:41:55 | 
+id: 20 | permission_key: loan.create | permission_name: Create Loan | module_id: 4 | created_at: 2026-01-21 12:41:55 | updated_at: 2026-01-21 12:41:55 | 
+id: 21 | permission_key: loan.edit | permission_name: Edit Loan | module_id: 4 | created_at: 2026-01-21 12:41:55 | updated_at: 2026-01-21 12:41:55 | 
+id: 22 | permission_key: loan.delete | permission_name: Delete Loan | module_id: 4 | created_at: 2026-01-21 12:41:55 | updated_at: 2026-01-21 12:41:55 | 
+id: 23 | permission_key: salary.create | permission_name: Calculate Salary | module_id: 4 | created_at: 2026-01-21 12:41:55 | updated_at: 2026-01-21 12:41:55 | 
+id: 24 | permission_key: salary.edit | permission_name: Edit Salary Status | module_id: 4 | created_at: 2026-01-21 12:41:55 | updated_at: 2026-01-21 12:41:55 | 
+id: 25 | permission_key: salary.delete | permission_name: Delete Salary | module_id: 4 | created_at: 2026-01-21 12:41:55 | updated_at: 2026-01-21 12:41:55 | 
+id: 26 | permission_key: setting.edit | permission_name: Edit Settings | module_id: 5 | created_at: 2026-01-21 12:41:55 | updated_at: 2026-01-21 12:41:55 | 
+id: 27 | permission_key: setting.view | permission_name: View Settings | module_id: 12 | created_at: 2026-01-21 07:48:25 | updated_at: 2026-01-21 07:48:25 | 
+id: 28 | permission_key: setting.view | permission_name: View Settings | module_id: 12 | created_at: 2026-01-21 07:49:03 | updated_at: 2026-01-21 07:49:03 | 
+id: 29 | permission_key: setting.edit | permission_name: Edit Settings | module_id: 12 | created_at: 2026-01-21 07:49:03 | updated_at: 2026-01-21 07:49:03 | 
+id: 30 | permission_key: users.view | permission_name: View User Management | module_id: 1 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 31 | permission_key: users.create | permission_name: Create User Management | module_id: 1 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 32 | permission_key: users.edit | permission_name: Edit User Management | module_id: 1 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 33 | permission_key: users.delete | permission_name: Delete User Management | module_id: 1 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 34 | permission_key: employees.view | permission_name: View Employee Management | module_id: 2 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 35 | permission_key: employees.create | permission_name: Create Employee Management | module_id: 2 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 36 | permission_key: employees.edit | permission_name: Edit Employee Management | module_id: 2 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 37 | permission_key: employees.delete | permission_name: Delete Employee Management | module_id: 2 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 38 | permission_key: attendance.edit | permission_name: Edit Attendance Management | module_id: 3 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 39 | permission_key: attendance.delete | permission_name: Delete Attendance Management | module_id: 3 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 40 | permission_key: payroll.view | permission_name: View Payroll Management | module_id: 4 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 41 | permission_key: payroll.create | permission_name: Create Payroll Management | module_id: 4 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 42 | permission_key: payroll.edit | permission_name: Edit Payroll Management | module_id: 4 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 43 | permission_key: payroll.delete | permission_name: Delete Payroll Management | module_id: 4 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 44 | permission_key: settings.view | permission_name: View Settings | module_id: 12 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 45 | permission_key: settings.create | permission_name: Create Settings | module_id: 12 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 46 | permission_key: settings.edit | permission_name: Edit Settings | module_id: 12 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 47 | permission_key: settings.delete | permission_name: Delete Settings | module_id: 12 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 48 | permission_key: country.view | permission_name: View Countries | module_id: 14 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 49 | permission_key: country.create | permission_name: Create Countries | module_id: 14 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 50 | permission_key: country.edit | permission_name: Edit Countries | module_id: 14 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 51 | permission_key: country.delete | permission_name: Delete Countries | module_id: 14 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 52 | permission_key: state.view | permission_name: View States | module_id: 15 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 53 | permission_key: state.create | permission_name: Create States | module_id: 15 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 54 | permission_key: state.edit | permission_name: Edit States | module_id: 15 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 55 | permission_key: state.delete | permission_name: Delete States | module_id: 15 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 56 | permission_key: agent.view | permission_name: View Agents | module_id: 16 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 57 | permission_key: agent.create | permission_name: Create Agents | module_id: 16 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 58 | permission_key: agent.edit | permission_name: Edit Agents | module_id: 16 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 59 | permission_key: agent.delete | permission_name: Delete Agents | module_id: 16 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 60 | permission_key: transport.view | permission_name: View Transports | module_id: 17 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 61 | permission_key: transport.create | permission_name: Create Transports | module_id: 17 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 62 | permission_key: transport.edit | permission_name: Edit Transports | module_id: 17 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 63 | permission_key: transport.delete | permission_name: Delete Transports | module_id: 17 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 64 | permission_key: expense.view | permission_name: View Expenses | module_id: 18 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 65 | permission_key: expense.create | permission_name: Create Expenses | module_id: 18 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 66 | permission_key: expense.edit | permission_name: Edit Expenses | module_id: 18 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 67 | permission_key: expense.delete | permission_name: Delete Expenses | module_id: 18 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 68 | permission_key: bank_account.view | permission_name: View Bank Accounts | module_id: 19 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 69 | permission_key: bank_account.create | permission_name: Create Bank Accounts | module_id: 19 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 70 | permission_key: bank_account.edit | permission_name: Edit Bank Accounts | module_id: 19 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 71 | permission_key: bank_account.delete | permission_name: Delete Bank Accounts | module_id: 19 | created_at: 2026-01-21 11:06:20 | updated_at: 2026-01-21 11:06:20 | 
+id: 72 | permission_key: module.view | permission_name: View Modules | module_id: 1 | created_at: 2026-01-21 11:11:23 | updated_at: 2026-01-21 11:11:23 | 
+id: 73 | permission_key: module.create | permission_name: Create Module | module_id: 1 | created_at: 2026-01-21 11:11:23 | updated_at: 2026-01-21 11:11:23 | 
+id: 74 | permission_key: module.edit | permission_name: Edit Module | module_id: 1 | created_at: 2026-01-21 11:11:23 | updated_at: 2026-01-21 11:11:23 | 
+id: 75 | permission_key: module.delete | permission_name: Delete Module | module_id: 1 | created_at: 2026-01-21 11:11:23 | updated_at: 2026-01-21 11:11:23 | 
+id: 76 | permission_key: permission.view | permission_name: View Permission Keys | module_id: 1 | created_at: 2026-01-21 11:11:23 | updated_at: 2026-01-21 11:11:23 | 
+id: 77 | permission_key: permission.create | permission_name: Create Permission Key | module_id: 1 | created_at: 2026-01-21 11:11:23 | updated_at: 2026-01-21 11:11:23 | 
+id: 78 | permission_key: permission.edit | permission_name: Edit Permission Key | module_id: 1 | created_at: 2026-01-21 11:11:23 | updated_at: 2026-01-21 11:11:23 | 
+id: 79 | permission_key: permission.delete | permission_name: Delete Permission Key | module_id: 1 | created_at: 2026-01-21 11:11:23 | updated_at: 2026-01-21 11:11:23 | 
+id: 80 | permission_key: customer.view | permission_name: View Customers | module_id: 25 | created_at: 2026-01-21 11:33:53 | updated_at: 2026-01-21 11:33:53 | 
+id: 81 | permission_key: customer.create | permission_name: Create Customers | module_id: 25 | created_at: 2026-01-21 11:33:53 | updated_at: 2026-01-21 11:33:53 | 
+id: 82 | permission_key: customer.edit | permission_name: Edit Customers | module_id: 25 | created_at: 2026-01-21 11:33:53 | updated_at: 2026-01-21 11:33:53 | 
+id: 83 | permission_key: customer.delete | permission_name: Delete Customers | module_id: 25 | created_at: 2026-01-21 11:33:53 | updated_at: 2026-01-21 11:33:53 | 
+id: 84 | permission_key: vendor.view | permission_name: View Vendors | module_id: 26 | created_at: 2026-01-21 11:33:53 | updated_at: 2026-01-21 11:33:53 | 
+id: 85 | permission_key: vendor.create | permission_name: Create Vendors | module_id: 26 | created_at: 2026-01-21 11:33:53 | updated_at: 2026-01-21 11:33:53 | 
+id: 86 | permission_key: vendor.edit | permission_name: Edit Vendors | module_id: 26 | created_at: 2026-01-21 11:33:53 | updated_at: 2026-01-21 11:33:53 | 
+id: 87 | permission_key: vendor.delete | permission_name: Delete Vendors | module_id: 26 | created_at: 2026-01-21 11:33:53 | updated_at: 2026-01-21 11:33:53 | 

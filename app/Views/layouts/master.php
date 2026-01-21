@@ -16,6 +16,8 @@
     <!-- AdminLTE 4 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta2/dist/css/adminlte.min.css" crossorigin="anonymous">
     
+    <!-- Custom Sidebar Styles -->
+    <link rel="stylesheet" href="<?= base_url('assets/css/sidebar_colors.css') ?>">
 
     <style>
         .app-header {

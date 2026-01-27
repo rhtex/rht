@@ -1,71 +1,107 @@
-/* Custom Font Size Overrides */
+/* =============================
+     Custom CSS Variables
+     ============================= */
+:root {
+    --font-size-base: 0.825rem;
+    --font-size-h1: 1.1rem;
+    --font-size-h2: 1.05rem;
+    --font-size-h3: 1.0rem;
+    --font-size-h4: 0.95rem;
+    --font-size-card-title: 1.0rem;
+    --font-size-table: 0.8rem;
+    --font-size-sidebar: 0.775rem;
+    --font-size-nav-header: 0.7rem;
+    --font-size-sidebar-icon: 0.8rem;
+    --sidebar-indent: 1.5rem;
+    --nav-header-padding-top: 0.5rem;
+    --nav-header-padding-bottom: 0.2rem;
+    --nav-link-padding-top: 0.25rem;
+    --nav-link-padding-bottom: 0.25rem;
+    --nav-header-letter-spacing: 0.05rem;
+    --nav-header-opacity: 0.8;
+}
+
+/* =============================
+     Typography
+     ============================= */
 body {
-    font-size: 0.825rem !important;
+    font-size: var(--font-size-base);
     /* Slightly smaller than text-sm (0.875rem) */
 }
 
-h1,
-.h1 {
-    font-size: 1.1rem !important;
+h1, .h1 {
+    font-size: var(--font-size-h1);
+}
+h2, .h2 {
+    font-size: var(--font-size-h2);
+}
+h3, .h3 {
+    font-size: var(--font-size-h3);
+}
+h4, .h4 {
+    font-size: var(--font-size-h4);
 }
 
-h2,
-.h2 {
-    font-size: 1.05rem !important;
-}
-
-h3,
-.h3 {
-    font-size: 1.0rem !important;
-}
-
-h4,
-.h4 {
-    font-size: 0.95rem !important;
-}
-
-/* Specifically target AdminLTE Card Titles */
+/* Card Titles */
 .card-title {
-    font-size: 1.0rem !important;
+    font-size: var(--font-size-card-title);
     font-weight: 600;
 }
 
-/* Adjust table font size */
+/* =============================
+     Tables
+     ============================= */
 .table {
-    font-size: 0.8rem;
+    font-size: var(--font-size-table);
 }
 
-/* Sidebar adjustments */
+/* =============================
+     Sidebar & Navigation
+     ============================= */
 .nav-link p {
-    font-size: 0.775rem !important;
+    font-size: var(--font-size-sidebar);
     /* Reduced sidebar font size */
 }
 
 .nav-link {
-    padding-top: 0.25rem !important;
-    /* Tighten vertical spacing */
-    padding-bottom: 0.25rem !important;
+    padding-top: var(--nav-link-padding-top);
+    padding-bottom: var(--nav-link-padding-bottom);
 }
 
 .nav-item {
-    margin-bottom: 0 !important;
+    margin-bottom: 0;
 }
 
 .nav-header {
-    font-size: 0.7rem !important;
-    padding-top: 0.5rem !important;
-    padding-bottom: 0.2rem !important;
+    font-size: var(--font-size-nav-header);
+    padding-top: var(--nav-header-padding-top);
+    padding-bottom: var(--nav-header-padding-bottom);
     text-transform: uppercase;
-    letter-spacing: 0.05rem;
-    opacity: 0.8;
+    letter-spacing: var(--nav-header-letter-spacing);
+    opacity: var(--nav-header-opacity);
 }
 
 .sidebar-menu .nav-icon {
-    font-size: 0.8rem !important;
+    font-size: var(--font-size-sidebar-icon);
     /* Scale down icons slightly */
 }
 
-.nav-treeview>.nav-item>.nav-link {
-    padding-left: 1.5rem !important;
+.nav-treeview > .nav-item > .nav-link {
+    padding-left: var(--sidebar-indent);
     /* Ensure good nesting indent */
+}
+
+/* =============================
+     Responsive Tweaks
+     ============================= */
+@media (max-width: 600px) {
+    body {
+        font-size: 0.75rem;
+    }
+    .table {
+        font-size: 0.7rem;
+    }
+    .nav-header {
+        font-size: 0.6rem;
+    }
 }

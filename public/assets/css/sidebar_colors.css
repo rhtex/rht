@@ -1,55 +1,77 @@
-/* Sidebar Icon Colors */
+/* =============================
+     Sidebar Color Variables
+     ============================= */
+:root {
+    --sidebar-primary: #0d6efd;
+    --sidebar-secondary: #6c757d;
+    --sidebar-success: #198754;
+    --sidebar-info: #0dcaf0;
+    --sidebar-warning: #ffc107;
+    --sidebar-danger: #dc3545;
+    --sidebar-light: #f8f9fa;
+    --sidebar-dark: #212529;
+    --sidebar-primary-dark: #3d8bfd;
+    --sidebar-success-dark: #2fb380;
+    --sidebar-info-dark: #3bc9db;
+    --sidebar-warning-dark: #fcc419;
+    --sidebar-danger-dark: #ff6b6b;
+    --sidebar-font-size: 0.85rem;
+    --sidebar-header-font-size: 0.75rem;
+    --sidebar-header-padding: 0.5rem 0.8rem 0.2rem;
+    --sidebar-header-letter-spacing: 0.5px;
+    --sidebar-header-opacity: 0.8;
+    --sidebar-link-padding: 0.4rem 0.8rem;
+    --sidebar-link-margin-bottom: 0.1rem;
+    --sidebar-icon-size: 0.9rem;
+    --sidebar-icon-margin-right: 0.5rem;
+    --sidebar-icon-width: 1.2rem;
+    --sidebar-treeview-indent: 2rem;
+    --sidebar-brand-padding: 0.5rem 1rem;
+}
+
+/* =============================
+     Sidebar Icon Colors
+     ============================= */
 .nav-sidebar .nav-icon.text-primary {
-    color: #0d6efd !important;
+    color: var(--sidebar-primary) !important;
 }
-
 .nav-sidebar .nav-icon.text-secondary {
-    color: #6c757d !important;
+    color: var(--sidebar-secondary) !important;
 }
-
 .nav-sidebar .nav-icon.text-success {
-    color: #198754 !important;
+    color: var(--sidebar-success) !important;
 }
-
 .nav-sidebar .nav-icon.text-info {
-    color: #0dcaf0 !important;
+    color: var(--sidebar-info) !important;
 }
-
 .nav-sidebar .nav-icon.text-warning {
-    color: #ffc107 !important;
+    color: var(--sidebar-warning) !important;
 }
-
 .nav-sidebar .nav-icon.text-danger {
-    color: #dc3545 !important;
+    color: var(--sidebar-danger) !important;
 }
-
 .nav-sidebar .nav-icon.text-light {
-    color: #f8f9fa !important;
+    color: var(--sidebar-light) !important;
 }
-
 .nav-sidebar .nav-icon.text-dark {
-    color: #212529 !important;
+    color: var(--sidebar-dark) !important;
 }
 
 /* Brighten colors for dark themes */
 [data-bs-theme="dark"] .nav-sidebar .nav-icon.text-primary {
-    color: #3d8bfd !important;
+    color: var(--sidebar-primary-dark) !important;
 }
-
 [data-bs-theme="dark"] .nav-sidebar .nav-icon.text-success {
-    color: #2fb380 !important;
+    color: var(--sidebar-success-dark) !important;
 }
-
 [data-bs-theme="dark"] .nav-sidebar .nav-icon.text-info {
-    color: #3bc9db !important;
+    color: var(--sidebar-info-dark) !important;
 }
-
 [data-bs-theme="dark"] .nav-sidebar .nav-icon.text-warning {
-    color: #fcc419 !important;
+    color: var(--sidebar-warning-dark) !important;
 }
-
 [data-bs-theme="dark"] .nav-sidebar .nav-icon.text-danger {
-    color: #ff6b6b !important;
+    color: var(--sidebar-danger-dark) !important;
 }
 
 /* Keep icons readable on hover */
@@ -57,44 +79,40 @@
     filter: brightness(1.2);
 }
 
-/* Sidebar Styling Refinements */
+/* =============================
+     Sidebar Styling Refinements
+     ============================= */
 .sidebar-menu {
-    font-size: 0.85rem !important;
-    /* Reduced font size */
+    font-size: var(--sidebar-font-size) !important;
 }
 
 .nav-sidebar .nav-link {
-    padding: 0.4rem 0.8rem !important;
-    /* Reduced padding */
-    margin-bottom: 0.1rem !important;
-    /* Reduced margin between items */
+    padding: var(--sidebar-link-padding) !important;
+    margin-bottom: var(--sidebar-link-margin-bottom) !important;
 }
 
 .nav-sidebar .nav-header {
-    padding: 0.5rem 0.8rem 0.2rem !important;
-    /* Reduced header padding */
-    font-size: 0.75rem !important;
+    padding: var(--sidebar-header-padding) !important;
+    font-size: var(--sidebar-header-font-size) !important;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    opacity: 0.8;
+    letter-spacing: var(--sidebar-header-letter-spacing);
+    opacity: var(--sidebar-header-opacity);
 }
 
 .nav-sidebar .nav-icon {
-    font-size: 0.9rem !important;
-    /* Slightly smaller icons */
-    margin-right: 0.5rem !important;
-    width: 1.2rem !important;
+    font-size: var(--sidebar-icon-size) !important;
+    margin-right: var(--sidebar-icon-margin-right) !important;
+    width: var(--sidebar-icon-width) !important;
     text-align: center;
 }
 
 /* Adjust treeview indentation */
-.nav-treeview>.nav-item>.nav-link {
-    padding-left: 2rem !important;
+.nav-treeview > .nav-item > .nav-link {
+    padding-left: var(--sidebar-treeview-indent) !important;
 }
 
 .sidebar-brand {
-    padding: 0.5rem 1rem !important;
-    /* Reduced brand padding */
+    padding: var(--sidebar-brand-padding) !important;
     height: auto !important;
 }
 

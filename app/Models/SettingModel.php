@@ -32,4 +32,13 @@ class SettingModel extends Model
             ]);
         }
     }
+    public function getAllSettings()
+    {
+        $settings = $this->findAll();
+        $data = [];
+        foreach ($settings as $setting) {
+            $data[$setting['setting_key']] = $setting['setting_value'];
+        }
+        return $data;
+    }
 }

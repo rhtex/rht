@@ -67,6 +67,45 @@ class CustomerController extends BaseController
         return redirect()->to('customers')->with('success', 'Customer added successfully.');
     }
 
+    public function view($id)
+    {
+        $data['customer'] = $this->customerModel->find($id);
+        if (!$data['customer']) {
+            return redirect()->to('customers')->with('error', 'Customer not found.');
+        }
+
+        $data['billing_address'] = $this->addressModel->getActiveAddress('customer', $id, 'billing');
+        $data['shipping_address'] = $this->addressModel->getActiveAddress('customer', $id, 'shipping');
+        if ($data['billing_address']) {
+            $data['billing_state'] = $this->stateModel->find($data['billing_address']['state_id']);
+        }
+         if ($data['shipping_address']) {
+            $data['shipping_state'] = $this->stateModel->find($data['shipping_address']['state_id']);
+        }
+
+        // Fetch Transactions
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $data['invoices'] = $invoiceModel->where('customer_id', $id)->orderBy('invoice_date', 'DESC')->findAll();
+
+        $quotationModel = new \App\Models\QuotationModel();
+        $data['quotations'] = $quotationModel->where('customer_id', $id)->orderBy('quotation_date', 'DESC')->findAll();
+        
+        $salesOrderModel = new \App\Models\SalesOrderModel();
+        $data['sales_orders'] = $salesOrderModel->where('customer_id', $id)->orderBy('order_date', 'DESC')->findAll();
+
+        $paymentModel = new \App\Models\InvoicePaymentModel();
+        // Payments are linked to invoices, so we need to join or fetch via invoice IDs.
+        // Or better, fetch payments where invoice.customer_id = $id
+        $data['payments'] = $paymentModel->select('invoice_payments.*, invoices.invoice_number')
+                                         ->join('invoices', 'invoices.id = invoice_payments.invoice_id')
+                                         ->where('invoices.customer_id', $id)
+                                         ->orderBy('payment_date', 'DESC')
+                                         ->findAll();
+
+        $data['title'] = $data['customer']['name'];
+        return view('customers/view', $data);
+    }
+
     public function edit($id)
     {
         $data['customer'] = $this->customerModel->find($id);
@@ -129,14 +168,14 @@ class CustomerController extends BaseController
 
         $data = [
             'contact_name' => $customer['name'],
-            'company_name' => $customer['company_name'],
+            'company_name' => $customer['name'], // Use customer name as company name
             'contact_type' => 'customer',
             'email'        => $customer['email'],
             'phone'        => $customer['phone'],
             'mobile'       => $customer['whatsapp_number'] ?? $customer['phone'],
             'website'      => $customer['website'],
             'gst_no'       => $customer['gstin'],
-            'pan'          => $customer['pan'],
+            'pan'          => $customer['pan_number'],
             'billing_address' => [
                 'address' => $billing['address_line1'] ?? '',
                 'street2' => $billing['address_line2'] ?? '',
@@ -191,8 +230,7 @@ class CustomerController extends BaseController
                 
                 $customerData = [
                     'zoho_contact_id' => $contact['contact_id'],
-                    'name'            => $contact['contact_name'],
-                    'company_name'    => $contact['company_name'],
+                    'name'            => $contact['company_name'] ?: $contact['contact_name'],
                     'email'           => $contact['email'],
                     'phone'           => $contact['phone'],
                     'website'         => $contact['website'],
@@ -271,6 +309,80 @@ class CustomerController extends BaseController
             }
         } else {
             $this->addressModel->insert($newData);
+        }
+    }
+
+    /**
+     * Save addresses from form data
+     */
+    private function saveAddresses($ownerType, $ownerId)
+    {
+        // Save Billing Address
+        $billingData = [
+            'owner_type'    => $ownerType,
+            'owner_id'      => $ownerId,
+            'address_type'  => 'billing',
+            'address_line1' => $this->request->getPost('billing_address_line1'),
+            'address_line2' => $this->request->getPost('billing_address_line2'),
+            'city'          => $this->request->getPost('billing_city'),
+            'state_id'      => $this->request->getPost('billing_state_id'),
+            'pincode'       => $this->request->getPost('billing_pincode'),
+            'country_id'    => 1, // India
+            'is_active'     => 1
+        ];
+
+        $existingBilling = $this->addressModel->getActiveAddress($ownerType, $ownerId, 'billing');
+        
+        if ($existingBilling) {
+            $isChanged = false;
+            foreach (['address_line1', 'address_line2', 'city', 'state_id', 'pincode'] as $field) {
+                if (($existingBilling[$field] ?? '') != ($billingData[$field] ?? '')) {
+                    $isChanged = true;
+                    break;
+                }
+            }
+
+            if ($isChanged) {
+                $this->addressModel->deactivateOthers($ownerType, $ownerId, 'billing');
+                $this->addressModel->insert($billingData);
+            }
+        } else {
+            $this->addressModel->insert($billingData);
+        }
+
+        // Save Shipping Address (if different from billing)
+        if ($this->request->getPost('shipping_address_line1')) {
+            $shippingData = [
+                'owner_type'    => $ownerType,
+                'owner_id'      => $ownerId,
+                'address_type'  => 'shipping',
+                'address_line1' => $this->request->getPost('shipping_address_line1'),
+                'address_line2' => $this->request->getPost('shipping_address_line2'),
+                'city'          => $this->request->getPost('shipping_city'),
+                'state_id'      => $this->request->getPost('shipping_state_id'),
+                'pincode'       => $this->request->getPost('shipping_pincode'),
+                'country_id'    => 1,
+                'is_active'     => 1
+            ];
+
+            $existingShipping = $this->addressModel->getActiveAddress($ownerType, $ownerId, 'shipping');
+            
+            if ($existingShipping) {
+                $isChanged = false;
+                foreach (['address_line1', 'address_line2', 'city', 'state_id', 'pincode'] as $field) {
+                    if (($existingShipping[$field] ?? '') != ($shippingData[$field] ?? '')) {
+                        $isChanged = true;
+                        break;
+                    }
+                }
+
+                if ($isChanged) {
+                    $this->addressModel->deactivateOthers($ownerType, $ownerId, 'shipping');
+                    $this->addressModel->insert($shippingData);
+                }
+            } else {
+                $this->addressModel->insert($shippingData);
+            }
         }
     }
 }

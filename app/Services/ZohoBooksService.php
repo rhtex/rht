@@ -84,4 +84,231 @@ class ZohoBooksService
 
         return ['success' => false, 'message' => $result['message'] ?? 'Unknown Zoho API error', 'raw' => $result];
     }
+
+    // ==================== BILLS API ====================
+
+    /**
+     * Get bills from Zoho Books
+     */
+    public function getBills($page = 1, $filters = [])
+    {
+        $url = $this->settings['api_base_url'] . '/bills?page=' . $page;
+        
+        if (!empty($filters['vendor_id'])) {
+            $url .= '&vendor_id=' . $filters['vendor_id'];
+        }
+        
+        if (!empty($filters['status'])) {
+            $url .= '&status=' . $filters['status'];
+        }
+        
+        return $this->makeRequest($url);
+    }
+
+    /**
+     * Get single bill by Zoho bill ID
+     */
+    public function getBillById($zohoBillId)
+    {
+        $url = $this->settings['api_base_url'] . '/bills/' . $zohoBillId;
+        return $this->makeRequest($url);
+    }
+
+    /**
+     * Create bill in Zoho Books
+     */
+    public function createBill($billData)
+    {
+        $url = $this->settings['api_base_url'] . '/bills';
+        return $this->makeRequest($url, 'POST', $billData);
+    }
+
+    /**
+     * Update bill in Zoho Books
+     */
+    public function updateBill($zohoBillId, $billData)
+    {
+        $url = $this->settings['api_base_url'] . '/bills/' . $zohoBillId;
+        return $this->makeRequest($url, 'PUT', $billData);
+    }
+
+    /**
+     * Void a bill in Zoho Books
+     */
+    public function voidBill($zohoBillId)
+    {
+        $url = $this->settings['api_base_url'] . '/bills/' . $zohoBillId . '/status/void';
+        return $this->makeRequest($url, 'POST');
+    }
+
+    // ==================== VENDOR PAYMENTS API ====================
+
+    /**
+     * Get vendor payments from Zoho Books
+     */
+    public function getVendorPayments($page = 1)
+    {
+        $url = $this->settings['api_base_url'] . '/vendorpayments?page=' . $page;
+        return $this->makeRequest($url);
+    }
+
+    /**
+     * Get single vendor payment by Zoho payment ID
+     */
+    public function getPaymentById($zohoPaymentId)
+    {
+        $url = $this->settings['api_base_url'] . '/vendorpayments/' . $zohoPaymentId;
+        return $this->makeRequest($url);
+    }
+
+    /**
+     * Create vendor payment in Zoho Books
+     */
+    public function createVendorPayment($paymentData)
+    {
+        $url = $this->settings['api_base_url'] . '/vendorpayments';
+        return $this->makeRequest($url, 'POST', $paymentData);
+    }
+    // ==================== INVOICES API ====================
+
+    /**
+     * Get invoices from Zoho Books
+     */
+    public function getInvoices($page = 1, $filters = [])
+    {
+        $url = $this->settings['api_base_url'] . '/invoices?page=' . $page;
+        
+        if (!empty($filters['customer_id'])) {
+            $url .= '&customer_id=' . $filters['customer_id'];
+        }
+        
+        if (!empty($filters['status'])) {
+            $url .= '&status=' . $filters['status'];
+        }
+        
+        return $this->makeRequest($url);
+    }
+
+    /**
+     * Get single invoice by Zoho ID
+     */
+    public function getInvoiceById($zohoInvoiceId)
+    {
+        $url = $this->settings['api_base_url'] . '/invoices/' . $zohoInvoiceId;
+        return $this->makeRequest($url);
+    }
+
+    /**
+     * Create invoice in Zoho Books
+     */
+    public function createInvoice($invoiceData)
+    {
+        $url = $this->settings['api_base_url'] . '/invoices';
+        return $this->makeRequest($url, 'POST', $invoiceData);
+    }
+
+    /**
+     * Update invoice in Zoho Books
+     */
+    public function updateInvoice($zohoInvoiceId, $invoiceData)
+    {
+        $url = $this->settings['api_base_url'] . '/invoices/' . $zohoInvoiceId;
+        return $this->makeRequest($url, 'PUT', $invoiceData);
+    }
+
+    /**
+     * Void an invoice in Zoho Books
+     */
+    public function voidInvoice($zohoInvoiceId)
+    {
+        $url = $this->settings['api_base_url'] . '/invoices/' . $zohoInvoiceId . '/status/void';
+        return $this->makeRequest($url, 'POST');
+    }
+
+    // ==================== CUSTOMER PAYMENTS API ====================
+
+    /**
+     * Get customer payments from Zoho Books
+     */
+    public function getCustomerPayments($page = 1)
+    {
+        $url = $this->settings['api_base_url'] . '/customerpayments?page=' . $page;
+        return $this->makeRequest($url);
+    }
+
+    /**
+     * Get single customer payment by Zoho ID
+     */
+    public function getCustomerPaymentById($zohoPaymentId)
+    {
+        $url = $this->settings['api_base_url'] . '/customerpayments/' . $zohoPaymentId;
+        return $this->makeRequest($url);
+    }
+
+    /**
+     * Create customer payment in Zoho Books
+     */
+    public function createCustomerPayment($paymentData)
+    {
+        $url = $this->settings['api_base_url'] . '/customerpayments';
+        return $this->makeRequest($url, 'POST', $paymentData);
+    }
+
+    // ==================== ESTIMATES (QUOTATIONS) API ====================
+
+    /**
+     * Create estimate in Zoho Books
+     */
+    public function createEstimate($data)
+    {
+        $url = $this->settings['api_base_url'] . '/estimates';
+        return $this->makeRequest($url, 'POST', $data);
+    }
+
+    /**
+     * Update estimate in Zoho Books
+     */
+    public function updateEstimate($zohoEstimateId, $data)
+    {
+        $url = $this->settings['api_base_url'] . '/estimates/' . $zohoEstimateId;
+        return $this->makeRequest($url, 'PUT', $data);
+    }
+
+    /**
+     * Void an estimate in Zoho Books
+     */
+    public function voidEstimate($zohoEstimateId)
+    {
+        $url = $this->settings['api_base_url'] . '/estimates/' . $zohoEstimateId . '/status/void';
+        return $this->makeRequest($url, 'POST');
+    }
+
+    // ==================== SALES ORDERS API ====================
+
+    /**
+     * Create sales order in Zoho Books
+     */
+    public function createSalesOrder($data)
+    {
+        $url = $this->settings['api_base_url'] . '/salesorders';
+        return $this->makeRequest($url, 'POST', $data);
+    }
+
+    /**
+     * Update sales order in Zoho Books
+     */
+    public function updateSalesOrder($zohoSalesOrderId, $data)
+    {
+        $url = $this->settings['api_base_url'] . '/salesorders/' . $zohoSalesOrderId;
+        return $this->makeRequest($url, 'PUT', $data);
+    }
+
+    /**
+     * Void a sales order in Zoho Books
+     */
+    public function voidSalesOrder($zohoSalesOrderId)
+    {
+        $url = $this->settings['api_base_url'] . '/salesorders/' . $zohoSalesOrderId . '/status/void';
+        return $this->makeRequest($url, 'POST');
+    }
 }

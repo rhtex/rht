@@ -22,8 +22,13 @@ class SettingController extends BaseController
             $settingMap[$s['setting_key']] = $s['setting_value'];
         }
 
+        // Fetch Countries for the dropdown
+        $countryModel = new \App\Models\CountryModel();
+        $countries = $countryModel->orderBy('name', 'ASC')->findAll();
+
         return view('settings/index', [
-            'settings' => $settingMap
+            'settings'  => $settingMap,
+            'countries' => $countries
         ]);
     }
 

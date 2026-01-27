@@ -19,6 +19,7 @@
             <div class="card-body">
                 <?php $isEdit = isset($transport); ?>
                 <form action="<?= $isEdit ? site_url('transports/update/'.$transport['id']) : site_url('transports/store') ?>" method="post">
+                    <?= csrf_field() ?>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Transport Name</label>

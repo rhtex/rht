@@ -30,6 +30,46 @@ class TransportController extends BaseController
         return view('transports/index', $data);
     }
 
+    public function view($id)
+    {
+        $data['transport'] = $this->transportModel->find($id);
+
+        if (!$data['transport']) {
+            return redirect()->to('transports')->with('error', 'Transport not found.');
+        }
+
+        if ($data['transport']['state_id']) {
+            $data['state'] = $this->stateModel->find($data['transport']['state_id']);
+        }
+
+        if ($data['transport']['country_id']) {
+            $data['country'] = $this->countryModel->find($data['transport']['country_id']);
+        }
+
+        // Get invoices using this transport
+        $invoiceModel = new \App\Models\InvoiceModel();
+        // Since invoice model stores transport_name as string
+        $transportName = $data['transport']['transport_name'];
+        
+        $data['invoices'] = $invoiceModel->select('invoices.*, customers.name as customer_name')
+            ->join('customers', 'customers.id = invoices.customer_id', 'left')
+            ->where('transport_name', $transportName)
+            ->orderBy('invoice_date', 'DESC')
+            ->findAll();
+
+        // Get return shipments using this transport
+        $returnShipmentModel = new \App\Models\ReturnShipmentModel();
+        
+        $data['return_shipments'] = $returnShipmentModel->select('return_shipments.*, vendors.name as vendor_name')
+            ->join('vendors', 'vendors.id = return_shipments.vendor_id', 'left')
+            ->where('transport_name', $transportName)
+            ->orderBy('return_date', 'DESC')
+            ->findAll();
+
+        $data['title'] = $data['transport']['transport_name'];
+        return view('transports/view', $data);
+    }
+
     public function create()
     {
         $countries = $this->countryModel->findAll();

@@ -1,0 +1,71 @@
+/* Custom Font Size Overrides */
+body {
+    font-size: 0.825rem !important;
+    /* Slightly smaller than text-sm (0.875rem) */
+}
+
+h1,
+.h1 {
+    font-size: 1.1rem !important;
+}
+
+h2,
+.h2 {
+    font-size: 1.05rem !important;
+}
+
+h3,
+.h3 {
+    font-size: 1.0rem !important;
+}
+
+h4,
+.h4 {
+    font-size: 0.95rem !important;
+}
+
+/* Specifically target AdminLTE Card Titles */
+.card-title {
+    font-size: 1.0rem !important;
+    font-weight: 600;
+}
+
+/* Adjust table font size */
+.table {
+    font-size: 0.8rem;
+}
+
+/* Sidebar adjustments */
+.nav-link p {
+    font-size: 0.775rem !important;
+    /* Reduced sidebar font size */
+}
+
+.nav-link {
+    padding-top: 0.25rem !important;
+    /* Tighten vertical spacing */
+    padding-bottom: 0.25rem !important;
+}
+
+.nav-item {
+    margin-bottom: 0 !important;
+}
+
+.nav-header {
+    font-size: 0.7rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.2rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+    opacity: 0.8;
+}
+
+.sidebar-menu .nav-icon {
+    font-size: 0.8rem !important;
+    /* Scale down icons slightly */
+}
+
+.nav-treeview>.nav-item>.nav-link {
+    padding-left: 1.5rem !important;
+    /* Ensure good nesting indent */
+}

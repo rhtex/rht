@@ -27,7 +27,7 @@
                             <th>Agent Name</th>
                             <th>Phone</th>
                             <th>City</th>
-                            <th>State</th>
+                            <th>Commission (%)</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -37,11 +37,20 @@
                             <td><?= $agent['id'] ?></td>
                             <td><?= $agent['agent_name'] ?></td>
                             <td><?= $agent['phone_number'] ?></td>
-                            <td><?= $agent['city'] ?></td>
-                            <td><?= $agent['state_name'] ?></td>
+                            <td><?= $agent['city'] ?> (<?= $agent['state_name'] ?>)</td>
+                            <td><?= number_format($agent['commission_percentage'], 2) ?>%</td>
                             <td>
-                                <a href="<?= site_url('agents/edit/'.$agent['id']) ?>" class="btn btn-sm btn-warning">Edit</a>
-                                <a href="<?= site_url('agents/delete/'.$agent['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="<?= site_url('agents/view/'.$agent['id']) ?>" class="btn btn-info" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="<?= site_url('agents/edit/'.$agent['id']) ?>" class="btn btn-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="<?= site_url('agents/delete/'.$agent['id']) ?>" class="btn btn-danger" onclick="return confirm('Are you sure?')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>

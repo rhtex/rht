@@ -11,12 +11,27 @@ class MasterDataController extends BaseController
 
     public function getStatesByCountry($countryId)
     {
-        $stateModel = new StateModel();
-        $states = $stateModel->where('country_id', $countryId)
-                            ->where('status', 'active')
-                            ->orderBy('name', 'ASC')
-                            ->findAll();
+        try {
+            $stateModel = new StateModel();
+            
+            // Fetch states for the country. Removed status check to debug visibility issues.
+            // Also ordered by name.
+            $states = $stateModel->where('country_id', $countryId)
+                                ->orderBy('name', 'ASC')
+                                ->findAll();
+            
+            // If no states found, return empty array (which is valid for JS)
+            if (empty($states)) {
+                 return $this->respond([]);
+            }
 
-        return $this->respond($states);
+            return $this->respond($states);
+            
+        } catch (\Exception $e) {
+            // Log the error
+            log_message('error', 'Error fetching states: ' . $e->getMessage());
+            // Return validation error or internal error
+            return $this->fail('Failed to load states', 500);
+        }
     }
 }

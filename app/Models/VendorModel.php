@@ -12,7 +12,8 @@ class VendorModel extends Model
     protected $returnType       = 'array';
     protected $allowedFields    = [
         'name', 'contact_person', 'email', 'website', 'phone', 'whatsapp_number', 'gst_type', 
-        'gstin', 'pan_number', 'opening_balance', 'balance_type', 'notes', 'status'
+        'gstin', 'pan_number', 'opening_balance', 'balance_type', 'notes', 'status',
+        'bank_name', 'bank_account_no', 'bank_ifsc', 'bank_branch', 'zoho_contact_id', 'zoho_sync_at'
     ];
 
     protected $useTimestamps = true;

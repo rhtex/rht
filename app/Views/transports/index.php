@@ -36,14 +36,15 @@
                         <?php foreach($transports as $transport): ?>
                         <tr>
                             <td><?= $transport['id'] ?></td>
-                            <td><?= $transport['transport_name'] ?></td>
+                            <td><a href="<?= site_url('transports/view/'.$transport['id']) ?>" class="fw-bold text-dark"><?= $transport['transport_name'] ?></a></td>
                             <td><?= $transport['transport_code'] ?></td>
                             <td><?= $transport['branch'] ?></td>
                             <td><?= $transport['branch_phone_number'] ?></td>
                             <td><?= $transport['branch_gst_number'] ?></td>
                             <td>
-                                <a href="<?= site_url('transports/edit/'.$transport['id']) ?>" class="btn btn-sm btn-warning">Edit</a>
-                                <a href="<?= site_url('transports/delete/'.$transport['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                                <a href="<?= site_url('transports/view/'.$transport['id']) ?>" class="btn btn-sm btn-info text-white"><i class="fas fa-eye"></i></a>
+                                <a href="<?= site_url('transports/edit/'.$transport['id']) ?>" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                                <a href="<?= site_url('transports/delete/'.$transport['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')"><i class="fas fa-trash"></i></a>
                             </td>
                         </tr>
                         <?php endforeach; ?>

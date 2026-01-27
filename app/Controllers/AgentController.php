@@ -125,6 +125,22 @@ class AgentController extends BaseController
         return redirect()->to('agents')->with('success', 'Agent updated successfully.');
     }
 
+    public function view($id)
+    {
+        $data['agent'] = $this->agentModel
+            ->select('agents.*, states.name as state_name, countries.name as country_name')
+            ->join('states', 'states.id = agents.state_id', 'left')
+            ->join('countries', 'countries.id = agents.country_id', 'left')
+            ->find($id);
+            
+        if (!$data['agent']) {
+            return redirect()->to('agents')->with('error', 'Agent not found.');
+        }
+
+        $data['title'] = 'Agent Details - ' . $data['agent']['agent_name'];
+        return view('agents/view', $data);
+    }
+
     public function delete($id)
     {
         $existing = $this->agentModel->find($id);

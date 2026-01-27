@@ -45,7 +45,7 @@
                         <tr>
                             <td><?= $customer['id'] ?></td>
                             <td>
-                                <strong><?= esc($customer['name']) ?></strong><br>
+                                <strong><a href="<?= site_url('customers/view/'.$customer['id']) ?>" class="text-dark"><?= esc($customer['name']) ?></a></strong><br>
                                 <small class="text-muted"><?= esc($customer['contact_person']) ?></small>
                             </td>
                             <td>
@@ -66,6 +66,9 @@
                             <td>
                                 <a href="<?= site_url('customers/edit/'.$customer['id']) ?>" class="btn btn-sm btn-warning">
                                     <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="<?= site_url('customers/view/'.$customer['id']) ?>" class="btn btn-sm btn-info text-white">
+                                    <i class="fas fa-eye"></i>
                                 </a>
                                 <a href="<?= site_url('customers/delete/'.$customer['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
                                     <i class="fas fa-trash"></i>

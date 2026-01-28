@@ -5,12 +5,14 @@
 <?= $this->section('header') ?>
 <div class="row align-items-center mb-0">
     <div class="col-sm-6">
-        <h3 class="fw-bolder text-uppercase ls-1 mb-0" style="color: #1e293b; letter-spacing: -0.5px;">Analytics <span class="text-primary">Studio</span></h3>
+        <h3 class="fw-bolder text-uppercase ls-1 mb-0" style="color: #1e293b; letter-spacing: -0.5px;">Analytics <span
+                class="text-primary">Studio</span></h3>
         <p class="text-muted small fw-bold mb-0">Dynamic Pulse of Your Business</p>
     </div>
     <div class="col-sm-6 text-end">
         <div class="btn-group shadow-sm rounded-3">
-            <button class="btn btn-white btn-sm fw-bold border-0 px-3"><i class="fas fa-sync-alt me-1 text-primary"></i> Live</button>
+            <button class="btn btn-white btn-sm fw-bold border-0 px-3"><i class="fas fa-sync-alt me-1 text-primary"></i>
+                Live</button>
             <button class="btn btn-primary btn-sm fw-bold border-0 px-3"><?= date('M d, Y') ?></button>
         </div>
     </div>
@@ -25,10 +27,19 @@
         --accent-4: #06b6d4;
     }
 
-    .dashboard-container { padding: 10px; }
-    
-    .compact-row { margin-left: -5px; margin-right: -5px; }
-    .compact-row > [class*="col-"] { padding-left: 5px; padding-right: 5px; }
+    .dashboard-container {
+        padding: 10px;
+    }
+
+    .compact-row {
+        margin-left: -5px;
+        margin-right: -5px;
+    }
+
+    .compact-row>[class*="col-"] {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
 
     .stat-card-v2 {
         border: none;
@@ -40,30 +51,73 @@
         cursor: pointer;
     }
 
-    .stat-card-v2:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-    .stat-card-v2 .card-body { padding: 18px; z-index: 2; position: relative; }
-    .stat-card-v2 .label { font-size: 0.75rem; font-weight: 700; text-uppercase: uppercase; opacity: 0.85; letter-spacing: 0.5px; }
-    .stat-card-v2 .value { font-size: 1.6rem; font-weight: 900; margin: 4px 0; }
-    .stat-card-v2 .meta { font-size: 0.7rem; font-weight: 600; background: rgba(0,0,0,0.1); display: inline-block; padding: 2px 8px; border-radius: 20px; }
-    
-    .bg-gradient-vibrant-1 { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-    .bg-gradient-vibrant-2 { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-    .bg-gradient-vibrant-3 { background: linear-gradient(135deg, #06b6d4 0%, #2563eb 100%); }
-    .bg-gradient-vibrant-4 { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .text-zoho {
+        color: white;
+    }
+
+    .stat-card-v2:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card-v2 .card-body {
+        padding: 18px;
+        z-index: 2;
+        position: relative;
+    }
+
+    .stat-card-v2 .label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-uppercase: uppercase;
+        opacity: 0.85;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-card-v2 .value {
+        font-size: 1.6rem;
+        font-weight: 900;
+        margin: 4px 0;
+    }
+
+    .stat-card-v2 .meta {
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: rgba(0, 0, 0, 0.1);
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 20px;
+    }
+
+    .bg-gradient-vibrant-1 {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    }
+
+    .bg-gradient-vibrant-2 {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .bg-gradient-vibrant-3 {
+        background: linear-gradient(135deg, #06b6d4 0%, #2563eb 100%);
+    }
+
+    .bg-gradient-vibrant-4 {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
 
     .chart-card {
         background: white;
         border-radius: 15px;
         border: 1px solid #f1f5f9;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         margin-bottom: 10px;
     }
-    
-    .chart-card .card-header { 
-        background: transparent; 
-        border-bottom: none; 
-        padding: 15px 20px 0; 
-        font-weight: 700; 
+
+    .chart-card .card-header {
+        background: transparent;
+        border-bottom: none;
+        padding: 15px 20px 0;
+        font-weight: 700;
         color: #334155;
         font-size: 0.95rem;
     }
@@ -75,39 +129,70 @@
         height: 100%;
     }
 
-    .custom-table { font-size: 0.82rem; }
-    .custom-table th { color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; border-bottom: 2px solid #f1f5f9 !important; }
-    .custom-table td { font-weight: 600; color: #334155; padding: 10px 8px; }
+    .custom-table {
+        font-size: 0.82rem;
+    }
 
-    .progress-thin { height: 6px; border-radius: 10px; background: #f1f5f9; }
-    .badge-soft { font-weight: 700; font-size: 0.7rem; padding: 4px 10px; border-radius: 6px; }
-    
-    .text-success-vibrant { color: #10b981; }
+    .custom-table th {
+        color: #64748b;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        border-bottom: 2px solid #f1f5f9 !important;
+    }
+
+    .custom-table td {
+        font-weight: 600;
+        color: #334155;
+        padding: 10px 8px;
+    }
+
+    .progress-thin {
+        height: 6px;
+        border-radius: 10px;
+        background: #f1f5f9;
+    }
+
+    .badge-soft {
+        font-weight: 700;
+        font-size: 0.7rem;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    .text-success-vibrant {
+        color: #10b981;
+    }
 </style>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <div class="dashboard-container">
-    
-    <?php 
-        $notifModel = new \App\Models\NotificationModel();
-        $unreadNotifs = $notifModel->getUnread();
-        if(!empty($unreadNotifs)): 
-    ?>
-    <div class="alert border-0 shadow-sm d-flex align-items-center mb-3 animate__animated animate__shakeX" style="background: #fff5f5; border-left: 5px solid #ff4d4d !important; border-radius: 12px;">
-        <div class="flex-shrink-0 me-3">
-            <div class="bg-danger bg-opacity-10 p-2 rounded-circle">
-                <i class="fas fa-bolt text-danger"></i>
+
+    <?php
+    $notifModel = new \App\Models\NotificationModel();
+    $unreadNotifs = $notifModel->getUnread();
+    if (!empty($unreadNotifs)):
+        ?>
+        <div class="alert border-0 shadow-sm d-flex align-items-center mb-3 animate__animated animate__shakeX"
+            style="background: #fff5f5; border-left: 5px solid #ff4d4d !important; border-radius: 12px;">
+            <div class="flex-shrink-0 me-3">
+                <div class="bg-danger bg-opacity-10 p-2 rounded-circle">
+                    <i class="fas fa-bolt text-danger"></i>
+                </div>
             </div>
+            <div class="flex-grow-1">
+                <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.9rem;">Attention Required:
+                    <?= count($unreadNotifs) ?> Active Alerts
+                </h6>
+                <p class="mb-0 smaller text-muted"><?= esc($unreadNotifs[0]['message']) ?> ... <a
+                        href="<?= site_url('notifications') ?>" class="fw-bold text-danger text-decoration-none ms-1">View
+                        All Center</a></p>
+            </div>
+            <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <div class="flex-grow-1">
-            <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.9rem;">Attention Required: <?= count($unreadNotifs) ?> Active Alerts</h6>
-            <p class="mb-0 smaller text-muted"><?= esc($unreadNotifs[0]['message']) ?> ... <a href="<?= site_url('notifications') ?>" class="fw-bold text-danger text-decoration-none ms-1">View All Center</a></p>
-        </div>
-        <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
     <?php endif; ?>
-    
+
     <!-- Pulse Row -->
     <div class="row compact-row mb-2">
         <div class="col-xl-3 col-sm-6 mb-2">
@@ -132,7 +217,8 @@
             <div class="card stat-card-v2 bg-gradient-vibrant-3">
                 <div class="card-body">
                     <div class="label">Asset Valuation</div>
-                    <div class="value"><?= number_format($itemsInStock) ?> <span style="font-size: 0.8rem">Units</span></div>
+                    <div class="value"><?= number_format($itemsInStock) ?> <span style="font-size: 0.8rem">Units</span>
+                    </div>
                     <div class="meta">Inventory in Hand</div>
                 </div>
             </div>
@@ -155,9 +241,12 @@
                 <div class="card-header d-flex justify-content-between">
                     <span>OPERATIONAL VELOCITY</span>
                     <div class="d-flex gap-2">
-                        <span class="small opacity-75 d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #4f46e5; font-size: 8px;"></i> Revenue</span>
-                        <span class="small opacity-75 d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #f59e0b; font-size: 8px;"></i> Expense</span>
-                        <span class="small opacity-75 d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #10b981; font-size: 8px;"></i> Profit</span>
+                        <span class="small opacity-75 d-flex align-items-center"><i class="fas fa-circle me-1"
+                                style="color: #4f46e5; font-size: 8px;"></i> Revenue</span>
+                        <span class="small opacity-75 d-flex align-items-center"><i class="fas fa-circle me-1"
+                                style="color: #f59e0b; font-size: 8px;"></i> Expense</span>
+                        <span class="small opacity-75 d-flex align-items-center"><i class="fas fa-circle me-1"
+                                style="color: #10b981; font-size: 8px;"></i> Profit</span>
                     </div>
                 </div>
                 <div class="card-body" style="height: 300px;">
@@ -179,23 +268,29 @@
     <div class="row compact-row">
         <!-- Top Products List -->
         <div class="col-xl-4 col-md-6 mb-2">
-            <div class="card activity-feed-card border-0 shadow-lg" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+            <div class="card activity-feed-card border-0 shadow-lg"
+                style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
                 <div class="card-body">
                     <h6 class="fw-bold mb-3 text-white-50 small text-uppercase ls-1">Elite Product Leaderboard</h6>
                     <div class="list-group list-group-flush bg-transparent">
-                        <?php foreach($topProducts as $index => $prod): ?>
-                        <div class="list-group-item bg-transparent border-white border-opacity-10 px-0 d-flex align-items-center animate__animated animate__fadeInUp" style="animation-delay: <?= $index * 0.1 ?>s">
-                            <div class="stats-icon bg-info bg-opacity-10 rounded-3 p-2 me-3 text-info">
-                                <i class="fas fa-<?= ['crown', 'medal', 'award', 'star', 'rocket'][$index] ?? 'bolt' ?> fa-sm"></i>
+                        <?php foreach ($topProducts as $index => $prod): ?>
+                            <div class="list-group-item bg-transparent border-white border-opacity-10 px-0 d-flex align-items-center animate__animated animate__fadeInUp"
+                                style="animation-delay: <?= $index * 0.1 ?>s">
+                                <div class="stats-icon bg-info bg-opacity-10 rounded-3 p-2 me-3 text-info">
+                                    <i
+                                        class="fas fa-<?= ['crown', 'medal', 'award', 'star', 'rocket'][$index] ?? 'bolt' ?> fa-sm"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-white small text-truncate" style="max-width: 140px;">
+                                        <?= esc($prod['product_name']) ?>
+                                    </div>
+                                    <div class="text-white-50 smaller">Vol: <?= $prod['total_qty'] ?> Units</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-info small">
+                                        ₹<?= number_format($prod['total_revenue'] / 1000, 1) ?>K</div>
+                                </div>
                             </div>
-                            <div class="flex-grow-1">
-                                <div class="fw-bold text-white small text-truncate" style="max-width: 140px;"><?= esc($prod['product_name']) ?></div>
-                                <div class="text-white-50 smaller">Vol: <?= $prod['total_qty'] ?> Units</div>
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold text-info small">₹<?= number_format($prod['total_revenue'] / 1000, 1) ?>K</div>
-                            </div>
-                        </div>
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -217,19 +312,23 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach($topCustomers as $cust): ?>
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sx bg-soft-primary me-2 rounded-circle text-center fw-bold" style="width: 24px; height: 24px; line-height: 24px; font-size: 10px;">
-                                                <?= substr($cust['name'], 0, 1) ?>
+                                <?php foreach ($topCustomers as $cust): ?>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sx bg-soft-primary me-2 rounded-circle text-center fw-bold"
+                                                    style="width: 24px; height: 24px; line-height: 24px; font-size: 10px;">
+                                                    <?= substr($cust['name'], 0, 1) ?>
+                                                </div>
+                                                <span class="text-truncate"
+                                                    style="max-width: 120px;"><?= esc($cust['name']) ?></span>
                                             </div>
-                                            <span class="text-truncate" style="max-width: 120px;"><?= esc($cust['name']) ?></span>
-                                        </div>
-                                    </td>
-                                    <td><span class="badge-soft bg-light text-muted"><?= $cust['total_orders'] ?></span></td>
-                                    <td class="text-end fw-bold text-primary">₹<?= number_format($cust['total_spent'] / 1000, 1) ?>K</td>
-                                </tr>
+                                        </td>
+                                        <td><span class="badge-soft bg-light text-muted"><?= $cust['total_orders'] ?></span>
+                                        </td>
+                                        <td class="text-end fw-bold text-primary">
+                                            ₹<?= number_format($cust['total_spent'] / 1000, 1) ?>K</td>
+                                    </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
@@ -254,16 +353,18 @@
                         </div>
                         <p class="smaller text-muted mt-2 mb-0">Portfolio diversity looks strong.</p>
                     </div>
-                    
+
                     <div class="row g-2">
                         <div class="col-6">
-                            <div class="p-3 bg-white rounded-4 text-center shadow-sm border-bottom border-3 border-info">
+                            <div
+                                class="p-3 bg-white rounded-4 text-center shadow-sm border-bottom border-3 border-info">
                                 <div class="fw-black h5 mb-0" style="font-weight: 900;"><?= $employeeCount ?></div>
                                 <div class="smaller fw-bold text-muted text-uppercase">Force</div>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-3 bg-white rounded-4 text-center shadow-sm border-bottom border-3 border-primary">
+                            <div
+                                class="p-3 bg-white rounded-4 text-center shadow-sm border-bottom border-3 border-primary">
                                 <div class="fw-black h5 mb-0" style="font-weight: 900;"><?= $userCount ?></div>
                                 <div class="smaller fw-bold text-muted text-uppercase">Users</div>
                             </div>
@@ -271,7 +372,7 @@
                     </div>
 
                     <div class="mt-4 text-center">
-                        <div class="badge-soft bg-success text-success d-inline-block">
+                        <div class="badge-soft bg-success text-zoho d-inline-block">
                             <i class="fas fa-shield-alt me-1"></i> Zoho Synchronized
                         </div>
                     </div>
@@ -283,7 +384,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Shared Configuration
         Chart.defaults.font.family = "'Inter', sans-serif";
         Chart.defaults.font.weight = '600';
@@ -338,7 +439,7 @@
                         beginAtZero: true,
                         grid: { borderDash: [2, 2], color: '#f1f5f9' },
                         ticks: {
-                            callback: function(v) { return '₹' + (v >= 1000 ? (v/1000) + 'k' : v); },
+                            callback: function (v) { return '₹' + (v >= 1000 ? (v / 1000) + 'k' : v); },
                             font: { size: 10 }
                         }
                     },
@@ -382,5 +483,3 @@
     });
 </script>
 <?= $this->endSection() ?>
-
-

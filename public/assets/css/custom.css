@@ -29,16 +29,23 @@ body {
     /* Slightly smaller than text-sm (0.875rem) */
 }
 
-h1, .h1 {
+h1,
+.h1 {
     font-size: var(--font-size-h1);
 }
-h2, .h2 {
+
+h2,
+.h2 {
     font-size: var(--font-size-h2);
 }
-h3, .h3 {
+
+h3,
+.h3 {
     font-size: var(--font-size-h3);
 }
-h4, .h4 {
+
+h4,
+.h4 {
     font-size: var(--font-size-h4);
 }
 
@@ -86,7 +93,7 @@ h4, .h4 {
     /* Scale down icons slightly */
 }
 
-.nav-treeview > .nav-item > .nav-link {
+.nav-treeview>.nav-item>.nav-link {
     padding-left: var(--sidebar-indent);
     /* Ensure good nesting indent */
 }
@@ -98,10 +105,24 @@ h4, .h4 {
     body {
         font-size: 0.75rem;
     }
+
     .table {
         font-size: 0.7rem;
     }
+
     .nav-header {
         font-size: 0.6rem;
     }
+}
+
+.card-header .nav-item .nav-link {
+    color: white;
+}
+
+.card-header .nav-item .nav-link:hover {
+    color: antiquewhite;
+}
+
+.card-header .nav-item .nav-link.active {
+    color: black;
 }

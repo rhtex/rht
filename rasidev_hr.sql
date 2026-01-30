@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 27, 2026 at 01:44 PM
+-- Generation Time: Jan 30, 2026 at 01:41 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,45 @@ SET time_zone = "+00:00";
 --
 -- Database: `rasidev_hr`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `accounts`
+--
+
+CREATE TABLE `accounts` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `type` enum('Asset','Liability','Equity','Income','Expense','COGS') NOT NULL,
+  `description` text DEFAULT NULL,
+  `balance` decimal(15,2) DEFAULT 0.00,
+  `status` enum('Active','Inactive') DEFAULT 'Active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `accounts`
+--
+
+INSERT INTO `accounts` (`id`, `name`, `type`, `description`, `balance`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Accounts Receivable', 'Asset', NULL, -18112500.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:34:58'),
+(2, 'Accounts Payable', 'Liability', NULL, 0.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:19:08'),
+(3, 'Cash', 'Asset', NULL, 0.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:19:08'),
+(4, 'Bank Account', 'Asset', NULL, 18112135.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:34:58'),
+(5, 'Sales Income', 'Income', NULL, 0.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:19:08'),
+(6, 'Cost of Goods Sold', 'COGS', NULL, 0.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:19:08'),
+(7, 'Cost of Purchase', 'COGS', NULL, 0.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:19:08'),
+(8, 'Customer Discount', 'Expense', NULL, 25.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:34:58'),
+(9, 'Vendor Payment Discount', 'Income', NULL, 0.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:19:08'),
+(10, 'Sales Return', 'Expense', NULL, 0.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:19:08'),
+(11, 'Purchase Return', 'Income', NULL, 0.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:19:08'),
+(12, 'GST Payable', 'Liability', NULL, 0.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:19:08'),
+(13, 'GST Receivable', 'Asset', NULL, 0.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:19:08'),
+(14, 'Mahimai Income', 'Income', NULL, 20.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:34:58'),
+(15, 'Postal Charges', 'Income', NULL, 320.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:34:58'),
+(16, 'Agent Commission Expense', 'Expense', NULL, 0.00, 'Active', '2026-01-28 07:19:08', '2026-01-28 07:19:08');
 
 -- --------------------------------------------------------
 
@@ -50,8 +89,11 @@ CREATE TABLE `addresses` (
 INSERT INTO `addresses` (`id`, `owner_type`, `owner_id`, `address_type`, `address_line1`, `address_line2`, `city`, `pincode`, `state_id`, `country_id`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 'vendor', 2, 'billing', 'OLD NO-36F NEW NO-1/156 R.PUDUPALAYAM PO RASIPURAM TK', 'OLD NO-36F NEW NO-1/156 R.PUDUPALAYAM PO RASIPURAM TK', 'NAMAKKAL', '637408', 1, 1, 1, '2026-01-22 13:06:53', '2026-01-22 13:06:53'),
 (2, 'vendor', 3, 'billing', 'OLD NO-36F NEW NO-1/156 R.PUDUPALAYAM PO RASIPURAM TK', 'OLD NO-36F NEW NO-1/156 R.PUDUPALAYAM PO RASIPURAM TK', 'NAMAKKAL', '637408', 1, 1, 1, '2026-01-22 13:09:06', '2026-01-22 13:09:06'),
-(3, 'customer', 1, 'billing', '18/3A, Krishnan Kovil Street, C.P Kannaiah Road', 'Opp: Gopinath Engineering Works', 'RASIPURAM', '637408', 1, 1, 1, '2026-01-27 03:05:47', '2026-01-27 03:05:47'),
-(4, 'customer', 2, 'billing', '18/3A, Krishnan Kovil Street, C.P Kannaiah Road', 'Opp: Gopinath Engineering Works', 'RASIPURAM', '637408', 1, 1, 1, '2026-01-27 03:08:04', '2026-01-27 03:08:04');
+(3, 'customer', 1, 'billing', '18/3A, Krishnan Kovil Street, C.P Kannaiah Road', 'Opp: Gopinath Engineering Works', 'RASIPURAM', '637408', 1, 1, 0, '2026-01-27 03:05:47', '2026-01-30 11:07:34'),
+(4, 'customer', 2, 'billing', '18/3A, Krishnan Kovil Street, C.P Kannaiah Road', 'Opp: Gopinath Engineering Works', 'RASIPURAM', '637408', 1, 1, 1, '2026-01-27 03:08:04', '2026-01-27 03:08:04'),
+(5, 'customer', 2, 'shipping', '18/3A, Krishnan Kovil Street, C.P Kannaiah Road', 'Opp: Gopinath Engineering Works', 'RASIPURAM', '637408', 1, 1, 1, '2026-01-30 11:07:12', '2026-01-30 11:07:12'),
+(6, 'customer', 1, 'billing', '18/3A, Krishnan Kovil Street, C.P Kannaiah Road', 'Opp: Gopinath Engineering Works', 'RASIPURAM', '637408', 14, 1, 1, '2026-01-30 11:07:34', '2026-01-30 11:07:34'),
+(7, 'customer', 1, 'shipping', '18/3A, Krishnan Kovil Street, C.P Kannaiah Road', 'Opp: Gopinath Engineering Works', 'RASIPURAM', '637408', 14, 1, 1, '2026-01-30 11:07:34', '2026-01-30 11:07:34');
 
 -- --------------------------------------------------------
 
@@ -99,6 +141,7 @@ CREATE TABLE `agent_payments` (
   `payment_date` date NOT NULL,
   `payment_mode` enum('Cash','Bank Transfer','Cheque','UPI','Other') NOT NULL DEFAULT 'Cash',
   `bank_account_id` int(11) UNSIGNED DEFAULT NULL,
+  `bank_transaction_id` int(11) UNSIGNED DEFAULT NULL,
   `amount` decimal(15,2) NOT NULL DEFAULT 0.00,
   `reference_number` varchar(100) DEFAULT NULL,
   `notes` text DEFAULT NULL,
@@ -112,9 +155,9 @@ CREATE TABLE `agent_payments` (
 -- Dumping data for table `agent_payments`
 --
 
-INSERT INTO `agent_payments` (`id`, `payment_number`, `agent_id`, `payment_date`, `payment_mode`, `bank_account_id`, `amount`, `reference_number`, `notes`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
-(2, 'AGPAY-202601-0001', 1, '2026-01-27', 'Cash', NULL, 362250.00, '', '', 1, NULL, '2026-01-27 07:17:58', '2026-01-27 07:17:58'),
-(3, 'AGPAY-202601-0002', 1, '2026-01-27', 'Cash', NULL, 24.00, '', '', 1, NULL, '2026-01-27 08:39:13', '2026-01-27 08:39:13');
+INSERT INTO `agent_payments` (`id`, `payment_number`, `agent_id`, `payment_date`, `payment_mode`, `bank_account_id`, `bank_transaction_id`, `amount`, `reference_number`, `notes`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(2, 'AGPAY-202601-0001', 1, '2026-01-27', 'Cash', NULL, NULL, 362250.00, '', '', 1, NULL, '2026-01-27 07:17:58', '2026-01-27 07:17:58'),
+(3, 'AGPAY-202601-0002', 1, '2026-01-27', 'Cash', NULL, NULL, 24.00, '', '', 1, NULL, '2026-01-27 08:39:13', '2026-01-27 08:39:13');
 
 -- --------------------------------------------------------
 
@@ -184,6 +227,7 @@ CREATE TABLE `bank_accounts` (
   `account_number` varchar(50) NOT NULL,
   `ifsc_code` varchar(20) NOT NULL,
   `branch_name` varchar(100) NOT NULL,
+  `account_type` enum('Bank','Cash') DEFAULT 'Bank',
   `current_balance` decimal(15,2) NOT NULL DEFAULT 0.00,
   `status` enum('active','inactive') NOT NULL DEFAULT 'active',
   `created_at` datetime DEFAULT NULL,
@@ -194,8 +238,9 @@ CREATE TABLE `bank_accounts` (
 -- Dumping data for table `bank_accounts`
 --
 
-INSERT INTO `bank_accounts` (`id`, `bank_name`, `account_number`, `ifsc_code`, `branch_name`, `current_balance`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'CITY UNION BANK', '510909010007385', 'CUBI0000509', 'Rasipuram', 15000.00, 'active', '2026-01-21 11:19:21', '2026-01-21 11:19:45');
+INSERT INTO `bank_accounts` (`id`, `bank_name`, `account_number`, `ifsc_code`, `branch_name`, `account_type`, `current_balance`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'CITY UNION BANK', '510909010007385', 'CUBI0000509', 'Rasipuram', 'Bank', 15000.00, 'active', '2026-01-21 11:19:21', '2026-01-21 11:19:45'),
+(2, 'Cash in Hand', 'CASH-001', 'N/A', 'Cash Account', 'Cash', 0.00, 'active', '2026-01-28 16:05:28', '2026-01-28 16:05:28');
 
 -- --------------------------------------------------------
 
@@ -212,6 +257,9 @@ CREATE TABLE `bank_transactions` (
   `amount` decimal(15,2) NOT NULL DEFAULT 0.00,
   `reference_number` varchar(100) DEFAULT NULL,
   `balance_after` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `is_reconciled` tinyint(1) DEFAULT 0,
+  `reference_type` varchar(50) DEFAULT NULL,
+  `reference_id` int(11) UNSIGNED DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -220,8 +268,8 @@ CREATE TABLE `bank_transactions` (
 -- Dumping data for table `bank_transactions`
 --
 
-INSERT INTO `bank_transactions` (`id`, `bank_account_id`, `transaction_date`, `description`, `type`, `amount`, `reference_number`, `balance_after`, `created_at`, `updated_at`) VALUES
-(1, 1, '2026-01-21', 'INVIOEC', 'credit', 15000.00, '123546879', 15000.00, '2026-01-21 11:19:45', '2026-01-21 11:19:45');
+INSERT INTO `bank_transactions` (`id`, `bank_account_id`, `transaction_date`, `description`, `type`, `amount`, `reference_number`, `balance_after`, `is_reconciled`, `reference_type`, `reference_id`, `created_at`, `updated_at`) VALUES
+(1, 1, '2026-01-21', 'INVIOEC', 'credit', 15000.00, '123546879', 15000.00, 1, 'invoice_payment', 5, '2026-01-21 11:19:45', '2026-01-21 11:19:45');
 
 -- --------------------------------------------------------
 
@@ -302,6 +350,32 @@ INSERT INTO `bill_items` (`id`, `bill_id`, `product_id`, `description`, `hsn_cod
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `calendar_reminders`
+--
+
+CREATE TABLE `calendar_reminders` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `title` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `reminder_date` date NOT NULL,
+  `reminder_time` time DEFAULT NULL,
+  `priority` enum('low','medium','high') DEFAULT 'medium',
+  `status` enum('pending','completed') DEFAULT 'pending',
+  `is_notified` tinyint(1) DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `calendar_reminders`
+--
+
+INSERT INTO `calendar_reminders` (`id`, `title`, `description`, `reminder_date`, `reminder_time`, `priority`, `status`, `is_notified`, `created_at`, `updated_at`) VALUES
+(1, 'dfazdf', 'zdfAVSd', '2026-01-30', '00:00:00', 'medium', 'completed', 1, '2026-01-30 10:16:29', '2026-01-30 10:43:47');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `countries`
 --
 
@@ -347,6 +421,7 @@ CREATE TABLE `customers` (
   `credit_limit` decimal(15,2) DEFAULT 0.00,
   `credit_period_days` int(5) DEFAULT 0,
   `status` enum('active','inactive') NOT NULL DEFAULT 'active',
+  `agent_id` int(11) UNSIGNED DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `notes` text DEFAULT NULL,
@@ -357,9 +432,9 @@ CREATE TABLE `customers` (
 -- Dumping data for table `customers`
 --
 
-INSERT INTO `customers` (`id`, `zoho_contact_id`, `name`, `contact_person`, `email`, `website`, `phone`, `whatsapp_number`, `gst_type`, `gstin`, `pan_number`, `opening_balance`, `balance_type`, `credit_limit`, `credit_period_days`, `status`, `created_at`, `updated_at`, `notes`, `zoho_sync_at`) VALUES
-(1, NULL, 'EmployeeLoans', 'Rasi Handloom Textiles', '', '', '09626077333', '', 'Regular', '33asdas8793D12K', '', 0.00, 'Dr', 0.00, 0, 'active', '2026-01-27 03:05:47', '2026-01-27 03:05:47', '', NULL),
-(2, NULL, 'EmployeeLoans', 'Rasi Handloom Textiles', '', '', '09626077333', '', 'Regular', '33asdas8793D12K', '', 0.00, 'Dr', 0.00, 0, 'active', '2026-01-27 03:08:04', '2026-01-27 03:08:04', '', NULL);
+INSERT INTO `customers` (`id`, `zoho_contact_id`, `name`, `contact_person`, `email`, `website`, `phone`, `whatsapp_number`, `gst_type`, `gstin`, `pan_number`, `opening_balance`, `balance_type`, `credit_limit`, `credit_period_days`, `status`, `agent_id`, `created_at`, `updated_at`, `notes`, `zoho_sync_at`) VALUES
+(1, NULL, 'OS Customer', 'Rasi Handloom Textiles', '', '', '09626077333', '', 'Regular', '33asdas8793D12K', '', 0.00, 'Dr', 0.00, 0, 'active', 1, '2026-01-27 03:05:47', '2026-01-30 11:07:34', '', NULL),
+(2, NULL, 'TN Customer', 'Rasi Handloom Textiles', '', '', '09626077333', '', 'Regular', '33asdas8793D12K', '', 0.00, 'Dr', 0.00, 0, 'active', 1, '2026-01-27 03:08:04', '2026-01-30 11:07:12', '', NULL);
 
 -- --------------------------------------------------------
 
@@ -424,6 +499,7 @@ CREATE TABLE `expenses` (
   `description` text DEFAULT NULL,
   `payment_mode` varchar(50) NOT NULL DEFAULT 'Cash',
   `bank_account_id` int(11) UNSIGNED DEFAULT NULL,
+  `bank_transaction_id` int(11) UNSIGNED DEFAULT NULL,
   `reference_number` varchar(100) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
@@ -484,6 +560,17 @@ CREATE TABLE `invoices` (
   `packages_count` int(11) DEFAULT NULL,
   `waybill_date` date DEFAULT NULL,
   `ewaybill_number` varchar(50) DEFAULT NULL,
+  `waybill_image` varchar(255) DEFAULT NULL,
+  `transport_amount` decimal(10,2) DEFAULT 0.00,
+  `transport_pay_type` enum('Paid','To Pay') DEFAULT 'To Pay',
+  `waybill_shipping_charge` decimal(10,2) DEFAULT 0.00,
+  `doc_courier_name` varchar(255) DEFAULT NULL,
+  `doc_tracking_number` varchar(100) DEFAULT NULL,
+  `doc_dispatched_date` date DEFAULT NULL,
+  `doc_status` enum('Pending','Dispatched','Delivered','Returned') DEFAULT 'Pending',
+  `doc_received_date` date DEFAULT NULL,
+  `delivery_status` enum('Pending','In Transit','Delivered','Cancelled') DEFAULT 'Pending',
+  `delivered_date` date DEFAULT NULL,
   `status` enum('Draft','Open','Paid','Partially Paid','Overdue','Void') NOT NULL DEFAULT 'Draft',
   `subtotal` decimal(12,2) NOT NULL DEFAULT 0.00,
   `discount_amount` decimal(12,2) NOT NULL DEFAULT 0.00,
@@ -510,10 +597,11 @@ CREATE TABLE `invoices` (
 -- Dumping data for table `invoices`
 --
 
-INSERT INTO `invoices` (`id`, `customer_id`, `agent_id`, `agent_commission_percent`, `agent_commission_amount`, `agent_commission_status`, `agent_commission_paid_at`, `invoice_number`, `zoho_invoice_id`, `zoho_sync_status`, `invoice_date`, `due_date`, `reference_number`, `transport_name`, `waybill_number`, `packages_count`, `waybill_date`, `ewaybill_number`, `status`, `subtotal`, `discount_amount`, `discount_type`, `shipping_charge`, `cgst_amount`, `sgst_amount`, `igst_amount`, `tax_amount`, `roundoff_amount`, `total_amount`, `paid_amount`, `balance`, `notes`, `terms`, `created_by`, `updated_by`, `zoho_sync_at`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 2.00, 24.00, 'Paid', '2026-01-27 00:00:00', 'INV-202601-0001', NULL, 'Pending', '2026-01-27', '2026-02-26', '', '', '', 2, NULL, '', 'Open', 1200.00, 0.00, 'Fixed', 0.00, 0.00, 0.00, 138.00, 138.00, 0.00, 1338.00, 0.00, 1338.00, '', '1. Goods once sold cannot be taken back or exchanged.\r\n2. Please verify the items at the time of delivery.', 1, 1, NULL, '2026-01-27 03:08:27', '2026-01-27 08:39:13'),
-(2, 2, 1, 2.00, 13.00, 'Unpaid', NULL, 'INV-202601-0002', NULL, 'Pending', '2026-01-27', '2026-02-26', '23', '', '', NULL, NULL, '', 'Open', 650.00, 0.00, 'Fixed', 0.00, 0.00, 0.00, 32.50, 32.50, 0.00, 682.50, 0.00, 682.50, '', '1. Goods once sold cannot be taken back or exchanged.\r\n2. Please verify the items at the time of delivery.', 1, 1, NULL, '2026-01-27 06:49:13', '2026-01-27 08:40:00'),
-(3, 1, 1, 2.00, 362250.00, 'Paid', '2026-01-27 00:00:00', 'INV-202601-0003', NULL, 'Pending', '2026-01-27', '2026-02-26', '', '', '', NULL, NULL, NULL, 'Open', 17250000.00, 0.00, 'Fixed', 0.00, 0.00, 0.00, 862500.00, 862500.00, 0.00, 18112500.00, 0.00, 18112500.00, '', '1. Goods once sold cannot be taken back or exchanged.\r\n2. Please verify the items at the time of delivery.', 1, NULL, NULL, '2026-01-27 07:06:22', '2026-01-27 07:17:58');
+INSERT INTO `invoices` (`id`, `customer_id`, `agent_id`, `agent_commission_percent`, `agent_commission_amount`, `agent_commission_status`, `agent_commission_paid_at`, `invoice_number`, `zoho_invoice_id`, `zoho_sync_status`, `invoice_date`, `due_date`, `reference_number`, `transport_name`, `waybill_number`, `packages_count`, `waybill_date`, `ewaybill_number`, `waybill_image`, `transport_amount`, `transport_pay_type`, `waybill_shipping_charge`, `doc_courier_name`, `doc_tracking_number`, `doc_dispatched_date`, `doc_status`, `doc_received_date`, `delivery_status`, `delivered_date`, `status`, `subtotal`, `discount_amount`, `discount_type`, `shipping_charge`, `cgst_amount`, `sgst_amount`, `igst_amount`, `tax_amount`, `roundoff_amount`, `total_amount`, `paid_amount`, `balance`, `notes`, `terms`, `created_by`, `updated_by`, `zoho_sync_at`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 2.00, 24.00, 'Paid', '2026-01-27 00:00:00', 'INV-202601-0001', NULL, 'Pending', '2026-01-27', '2026-02-26', '', '', '', 2, NULL, '', NULL, 0.00, 'To Pay', 0.00, NULL, NULL, NULL, 'Pending', NULL, 'Pending', NULL, 'Open', 1200.00, 0.00, 'Fixed', 0.00, 0.00, 0.00, 138.00, 138.00, 0.00, 1338.00, 0.00, 1338.00, '', '1. Goods once sold cannot be taken back or exchanged.\r\n2. Please verify the items at the time of delivery.', 1, 1, NULL, '2026-01-27 03:08:27', '2026-01-27 08:39:13'),
+(2, 2, 1, 2.00, 13.00, 'Unpaid', NULL, 'INV-202601-0002', NULL, 'Pending', '2026-01-27', '2026-02-26', '23', '', '', NULL, NULL, '', NULL, 0.00, 'To Pay', 0.00, NULL, NULL, NULL, 'Pending', NULL, 'Pending', NULL, 'Open', 650.00, 0.00, 'Fixed', 0.00, 0.00, 0.00, 32.50, 32.50, 0.00, 682.50, 0.00, 682.50, '', '1. Goods once sold cannot be taken back or exchanged.\r\n2. Please verify the items at the time of delivery.', 1, 1, NULL, '2026-01-27 06:49:13', '2026-01-27 08:40:00'),
+(3, 1, 1, 2.00, 362250.00, 'Paid', '2026-01-27 00:00:00', 'INV-202601-0003', NULL, 'Pending', '2026-01-27', '2026-02-26', '', '', '', NULL, NULL, NULL, NULL, 0.00, 'To Pay', 0.00, NULL, NULL, NULL, 'Pending', NULL, 'Pending', NULL, 'Paid', 17250000.00, 0.00, 'Fixed', 0.00, 0.00, 0.00, 862500.00, 862500.00, 0.00, 18112500.00, 18112500.00, 0.00, '', '1. Goods once sold cannot be taken back or exchanged.\r\n2. Please verify the items at the time of delivery.', 1, NULL, NULL, '2026-01-27 07:06:22', '2026-01-28 07:36:55'),
+(4, 1, 1, 2.00, 3.00, 'Unpaid', NULL, 'INV-202601-0004', NULL, 'Pending', '2026-01-28', '2026-02-27', '23sv', 'AKR', '', NULL, NULL, '', NULL, 0.00, 'To Pay', 0.00, NULL, NULL, NULL, 'Pending', NULL, 'Delivered', NULL, 'Open', 150.00, 0.00, 'Fixed', 0.00, 0.00, 0.00, 7.50, 7.50, 0.00, 157.50, 0.00, 157.50, '', '1. Goods once sold cannot be taken back or exchanged.\r\n2. Please verify the items at the time of delivery.', 1, NULL, NULL, '2026-01-28 04:44:35', '2026-01-28 11:02:11');
 
 -- --------------------------------------------------------
 
@@ -546,7 +634,8 @@ INSERT INTO `invoice_items` (`id`, `invoice_id`, `product_id`, `description`, `h
 (5, 3, 1, '', '5208', 115000.00, 150.00, 5.00, 0.00, 0.00, 5.00, 17250000.00, '2026-01-27 07:06:22', '2026-01-27 07:06:22'),
 (6, 1, 1, 'KASAVU KERALA SAREE GOLD', '5208', 1.00, 600.00, 5.00, 0.00, 0.00, 5.00, 600.00, '2026-01-27 08:38:35', '2026-01-27 08:38:35'),
 (7, 1, 1, '', '5208', 1.00, 600.00, 18.00, 0.00, 0.00, 18.00, 600.00, '2026-01-27 08:38:35', '2026-01-27 08:38:35'),
-(8, 2, 1, '', '5208', 1.00, 650.00, 5.00, 0.00, 0.00, 5.00, 650.00, '2026-01-27 08:40:00', '2026-01-27 08:40:00');
+(8, 2, 1, '', '5208', 1.00, 650.00, 5.00, 0.00, 0.00, 5.00, 650.00, '2026-01-27 08:40:00', '2026-01-27 08:40:00'),
+(9, 4, 1, '', 'ds32', 1.00, 150.00, 5.00, 0.00, 0.00, 5.00, 150.00, '2026-01-28 04:44:35', '2026-01-28 04:44:35');
 
 -- --------------------------------------------------------
 
@@ -559,6 +648,7 @@ CREATE TABLE `invoice_payments` (
   `invoice_id` int(11) UNSIGNED NOT NULL,
   `customer_id` int(11) UNSIGNED NOT NULL,
   `bank_account_id` int(11) UNSIGNED DEFAULT NULL,
+  `bank_transaction_id` int(11) UNSIGNED DEFAULT NULL,
   `payment_number` varchar(50) NOT NULL,
   `payment_date` date NOT NULL,
   `payment_mode` varchar(50) NOT NULL,
@@ -576,6 +666,57 @@ CREATE TABLE `invoice_payments` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `invoice_payments`
+--
+
+INSERT INTO `invoice_payments` (`id`, `invoice_id`, `customer_id`, `bank_account_id`, `bank_transaction_id`, `payment_number`, `payment_date`, `payment_mode`, `amount`, `discount_amount`, `mahimai_amount`, `postal_charges`, `reference_number`, `zoho_payment_id`, `zoho_sync_status`, `notes`, `created_by`, `updated_by`, `zoho_sync_at`, `created_at`, `updated_at`) VALUES
+(5, 3, 1, 1, 1, 'RECP-202601-0001', '2026-01-28', 'Bank Transfer', 18112145.00, 25.00, 20.00, 310.00, '23sv', NULL, 'Pending', '', 1, 1, NULL, '2026-01-28 07:34:58', '2026-01-28 07:36:55');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `invoice_status_history`
+--
+
+CREATE TABLE `invoice_status_history` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `invoice_id` int(11) UNSIGNED NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `created_by` int(11) UNSIGNED DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ledger_entries`
+--
+
+CREATE TABLE `ledger_entries` (
+  `id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `entry_date` date NOT NULL,
+  `debit` decimal(15,2) DEFAULT 0.00,
+  `credit` decimal(15,2) DEFAULT 0.00,
+  `description` text DEFAULT NULL,
+  `reference_type` varchar(50) DEFAULT NULL,
+  `reference_id` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `ledger_entries`
+--
+
+INSERT INTO `ledger_entries` (`id`, `account_id`, `entry_date`, `debit`, `credit`, `description`, `reference_type`, `reference_id`, `created_at`) VALUES
+(1, 4, '2026-01-28', 18112135.00, 0.00, 'Payment: RECP-202601-0001 (Ref: INV-202601-0003)', 'invoice_payment', 5, '2026-01-28 07:34:58'),
+(2, 8, '2026-01-28', 25.00, 0.00, 'Discount allowed on RECP-202601-0001', 'invoice_payment', 5, '2026-01-28 07:34:58'),
+(3, 1, '2026-01-28', 0.00, 18112500.00, 'Gross settlement for RECP-202601-0001', 'invoice_payment', 5, '2026-01-28 07:34:58'),
+(4, 14, '2026-01-28', 0.00, 20.00, 'Mahimai collected in RECP-202601-0001', 'invoice_payment', 5, '2026-01-28 07:34:58'),
+(5, 15, '2026-01-28', 0.00, 320.00, 'Postal charges collected in RECP-202601-0001', 'invoice_payment', 5, '2026-01-28 07:34:58');
 
 -- --------------------------------------------------------
 
@@ -808,8 +949,21 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`id`, `type`, `title`, `message`, `link`, `reference_id`, `is_read`, `created_at`, `updated_at`) VALUES
-(1, 'low_stock', 'Low Stock Alert', 'Product \'KASAVU KERALA SAREE GOLD\' is low in stock (0 units left).', 'products/view/1', 1, 0, '2026-01-27 07:52:38', '2026-01-27 07:52:38'),
-(2, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0002 is waiting for Transport LR (Waybill) update.', 'invoices/edit/2', 2, 0, '2026-01-27 07:52:38', '2026-01-27 07:52:38');
+(1, 'low_stock', 'Low Stock Alert', 'Product \'KASAVU KERALA SAREE GOLD\' is low in stock (0 units left).', 'products/view/1', 1, 1, '2026-01-27 07:52:38', '2026-01-28 06:35:59'),
+(2, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0002 is waiting for Transport LR (Waybill) update.', 'invoices/edit/2', 2, 1, '2026-01-27 07:52:38', '2026-01-28 06:35:59'),
+(3, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-28 05:12:11', '2026-01-28 05:12:32'),
+(4, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-28 05:12:33', '2026-01-28 06:35:59'),
+(5, 'low_stock', 'Low Stock Alert', 'Product \'KASAVU KERALA SAREE GOLD\' is low in stock (0 units left).', 'products/view/1', 1, 1, '2026-01-28 06:35:59', '2026-01-28 06:36:02'),
+(6, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-28 06:35:59', '2026-01-28 06:36:02'),
+(7, 'low_stock', 'Low Stock Alert', 'Product \'KASAVU KERALA SAREE GOLD\' is low in stock (0 units left).', 'products/view/1', 1, 1, '2026-01-28 06:36:02', '2026-01-30 10:26:36'),
+(8, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-28 06:36:02', '2026-01-30 10:22:40'),
+(9, 'reminder', 'Reminder: dfazdf', 'zdfAVSd', 'calendar', 1, 1, '2026-01-30 10:16:30', '2026-01-30 10:26:28'),
+(10, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-30 10:22:40', '2026-01-30 10:26:36'),
+(11, 'low_stock', 'Low Stock Alert', 'Product \'KASAVU KERALA SAREE GOLD\' is low in stock (0 units left).', 'products/view/1', 1, 0, '2026-01-30 10:26:36', '2026-01-30 10:26:36'),
+(12, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-30 10:26:36', '2026-01-30 12:38:23'),
+(13, 'low_stock', 'Low Stock Alert', 'Product \'Plain Neli Border\' is low in stock (0 units left).', 'products/view/2', 2, 0, '2026-01-30 11:26:49', '2026-01-30 11:26:49'),
+(14, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-30 12:38:24', '2026-01-30 12:38:26'),
+(15, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 0, '2026-01-30 12:38:27', '2026-01-30 12:38:27');
 
 -- --------------------------------------------------------
 
@@ -1023,7 +1177,8 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `product_name`, `barcode`, `category_id`, `hsn_code`, `description`, `unit`, `selling_price`, `tax_id`, `total_stock`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'KASAVU KERALA SAREE GOLD', NULL, 1, '5208', '', 'Pcs', 250.00, 1, 0, 'active', '2026-01-26 04:09:44', '2026-01-27 03:14:09');
+(1, 'KASAVU KERALA SAREE GOLD', NULL, 9, '5208', '', 'Pcs', 250.00, 1, 0, 'active', '2026-01-26 04:09:44', '2026-01-30 11:59:01'),
+(2, 'Plain Neli Border', NULL, 4, '5208', '', 'Pcs', 930.00, 2, 0, 'active', '2026-01-30 10:57:15', '2026-01-30 11:58:26');
 
 -- --------------------------------------------------------
 
@@ -1046,8 +1201,13 @@ CREATE TABLE `product_categories` (
 --
 
 INSERT INTO `product_categories` (`id`, `category_name`, `parent_id`, `description`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'KASAVU', NULL, '', 'active', '2026-01-26 04:08:20', '2026-01-26 04:08:20'),
-(2, 'Plain', NULL, '', 'active', '2026-01-26 04:08:26', '2026-01-26 04:08:26');
+(3, 'Sarees', NULL, '', 'active', '2026-01-30 11:55:11', '2026-01-30 11:55:11'),
+(4, 'Plain', 8, '', 'active', '2026-01-30 11:55:56', '2026-01-30 11:57:28'),
+(5, 'Butta', 8, '', 'active', '2026-01-30 11:56:03', '2026-01-30 11:57:46'),
+(6, 'Fancy', 3, '', 'active', '2026-01-30 11:56:27', '2026-01-30 11:56:27'),
+(7, 'Low Cost Cotton Mix', 3, '', 'active', '2026-01-30 11:56:50', '2026-01-30 11:56:50'),
+(8, 'Chettinad', 3, '', 'active', '2026-01-30 11:57:21', '2026-01-30 11:57:21'),
+(9, 'Kasavu', 3, '', 'active', '2026-01-30 11:58:50', '2026-01-30 11:58:50');
 
 -- --------------------------------------------------------
 
@@ -1184,6 +1344,8 @@ CREATE TABLE `return_shipments` (
   `waybill_date` date DEFAULT NULL,
   `packages_count` int(11) DEFAULT NULL,
   `ewaybill_number` varchar(50) DEFAULT NULL,
+  `waybill_image` varchar(255) DEFAULT NULL,
+  `delivery_status` enum('Pending','In Transit','Completed','Cancelled') DEFAULT 'Pending',
   `status` varchar(20) DEFAULT 'Pending',
   `item_count` int(11) DEFAULT 0,
   `notes` text DEFAULT NULL,
@@ -1457,6 +1619,51 @@ CREATE TABLE `sales_order_items` (
   `rate` decimal(12,2) NOT NULL DEFAULT 0.00,
   `tax_percentage` decimal(5,2) NOT NULL DEFAULT 0.00,
   `amount` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sales_returns`
+--
+
+CREATE TABLE `sales_returns` (
+  `id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `invoice_id` int(11) DEFAULT NULL,
+  `return_number` varchar(50) NOT NULL,
+  `return_date` date NOT NULL,
+  `subtotal` decimal(15,2) DEFAULT 0.00,
+  `tax_amount` decimal(15,2) DEFAULT 0.00,
+  `total_amount` decimal(15,2) DEFAULT 0.00,
+  `reason` text DEFAULT NULL,
+  `status` varchar(20) DEFAULT 'Draft',
+  `zoho_credit_note_id` varchar(100) DEFAULT NULL,
+  `zoho_sync_status` varchar(20) DEFAULT 'Not Synced',
+  `zoho_sync_at` datetime DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sales_return_items`
+--
+
+CREATE TABLE `sales_return_items` (
+  `id` int(11) NOT NULL,
+  `sales_return_id` int(11) NOT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `quantity` decimal(10,2) DEFAULT 0.00,
+  `rate` decimal(15,2) DEFAULT 0.00,
+  `tax_percentage` decimal(5,2) DEFAULT 0.00,
+  `amount` decimal(15,2) DEFAULT 0.00,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -1755,6 +1962,12 @@ INSERT INTO `zoho_settings` (`id`, `client_id`, `client_secret`, `refresh_token`
 --
 
 --
+-- Indexes for table `accounts`
+--
+ALTER TABLE `accounts`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `addresses`
 --
 ALTER TABLE `addresses`
@@ -1777,7 +1990,8 @@ ALTER TABLE `agent_payments`
   ADD UNIQUE KEY `payment_number` (`payment_number`),
   ADD KEY `agent_payments_bank_account_id_foreign` (`bank_account_id`),
   ADD KEY `agent_id` (`agent_id`),
-  ADD KEY `payment_date` (`payment_date`);
+  ADD KEY `payment_date` (`payment_date`),
+  ADD KEY `agent_payments_bank_transaction_id_foreign` (`bank_transaction_id`);
 
 --
 -- Indexes for table `agent_payment_items`
@@ -1828,6 +2042,12 @@ ALTER TABLE `bill_items`
   ADD KEY `bill_items_tax_id_foreign` (`tax_id`);
 
 --
+-- Indexes for table `calendar_reminders`
+--
+ALTER TABLE `calendar_reminders`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `countries`
 --
 ALTER TABLE `countries`
@@ -1850,7 +2070,8 @@ ALTER TABLE `employees`
 --
 ALTER TABLE `expenses`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `expenses_bank_account_id_foreign` (`bank_account_id`);
+  ADD KEY `expenses_bank_account_id_foreign` (`bank_account_id`),
+  ADD KEY `expenses_bank_transaction_id_foreign` (`bank_transaction_id`);
 
 --
 -- Indexes for table `expense_categories`
@@ -1884,7 +2105,21 @@ ALTER TABLE `invoice_payments`
   ADD UNIQUE KEY `payment_number` (`payment_number`),
   ADD KEY `invoice_payments_invoice_id_foreign` (`invoice_id`),
   ADD KEY `invoice_payments_customer_id_foreign` (`customer_id`),
-  ADD KEY `invoice_payments_bank_account_id_foreign` (`bank_account_id`);
+  ADD KEY `invoice_payments_bank_account_id_foreign` (`bank_account_id`),
+  ADD KEY `invoice_payments_bank_transaction_id_foreign` (`bank_transaction_id`);
+
+--
+-- Indexes for table `invoice_status_history`
+--
+ALTER TABLE `invoice_status_history`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `ledger_entries`
+--
+ALTER TABLE `ledger_entries`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `account_id` (`account_id`);
 
 --
 -- Indexes for table `loans`
@@ -2035,6 +2270,18 @@ ALTER TABLE `sales_order_items`
   ADD KEY `sales_order_items_product_id_foreign` (`product_id`);
 
 --
+-- Indexes for table `sales_returns`
+--
+ALTER TABLE `sales_returns`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `sales_return_items`
+--
+ALTER TABLE `sales_return_items`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `settings`
 --
 ALTER TABLE `settings`
@@ -2107,10 +2354,16 @@ ALTER TABLE `zoho_settings`
 --
 
 --
+-- AUTO_INCREMENT for table `accounts`
+--
+ALTER TABLE `accounts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
 -- AUTO_INCREMENT for table `addresses`
 --
 ALTER TABLE `addresses`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `agents`
@@ -2140,7 +2393,7 @@ ALTER TABLE `attendance`
 -- AUTO_INCREMENT for table `bank_accounts`
 --
 ALTER TABLE `bank_accounts`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `bank_transactions`
@@ -2159,6 +2412,12 @@ ALTER TABLE `bills`
 --
 ALTER TABLE `bill_items`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `calendar_reminders`
+--
+ALTER TABLE `calendar_reminders`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `countries`
@@ -2194,19 +2453,31 @@ ALTER TABLE `expense_categories`
 -- AUTO_INCREMENT for table `invoices`
 --
 ALTER TABLE `invoices`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `invoice_items`
 --
 ALTER TABLE `invoice_items`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `invoice_payments`
 --
 ALTER TABLE `invoice_payments`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `invoice_status_history`
+--
+ALTER TABLE `invoice_status_history`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ledger_entries`
+--
+ALTER TABLE `ledger_entries`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `loans`
@@ -2236,7 +2507,7 @@ ALTER TABLE `modules`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `payments`
@@ -2254,13 +2525,13 @@ ALTER TABLE `permissions`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `product_categories`
 --
 ALTER TABLE `product_categories`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `product_images`
@@ -2321,6 +2592,18 @@ ALTER TABLE `sales_orders`
 --
 ALTER TABLE `sales_order_items`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `sales_returns`
+--
+ALTER TABLE `sales_returns`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `sales_return_items`
+--
+ALTER TABLE `sales_return_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `states`
@@ -2392,7 +2675,8 @@ ALTER TABLE `agents`
 --
 ALTER TABLE `agent_payments`
   ADD CONSTRAINT `agent_payments_agent_id_foreign` FOREIGN KEY (`agent_id`) REFERENCES `agents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `agent_payments_bank_account_id_foreign` FOREIGN KEY (`bank_account_id`) REFERENCES `bank_accounts` (`id`) ON DELETE CASCADE ON UPDATE SET NULL;
+  ADD CONSTRAINT `agent_payments_bank_account_id_foreign` FOREIGN KEY (`bank_account_id`) REFERENCES `bank_accounts` (`id`) ON DELETE CASCADE ON UPDATE SET NULL,
+  ADD CONSTRAINT `agent_payments_bank_transaction_id_foreign` FOREIGN KEY (`bank_transaction_id`) REFERENCES `bank_transactions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `agent_payment_items`
@@ -2433,7 +2717,8 @@ ALTER TABLE `bill_items`
 -- Constraints for table `expenses`
 --
 ALTER TABLE `expenses`
-  ADD CONSTRAINT `expenses_bank_account_id_foreign` FOREIGN KEY (`bank_account_id`) REFERENCES `bank_accounts` (`id`) ON DELETE CASCADE ON UPDATE SET NULL;
+  ADD CONSTRAINT `expenses_bank_account_id_foreign` FOREIGN KEY (`bank_account_id`) REFERENCES `bank_accounts` (`id`) ON DELETE CASCADE ON UPDATE SET NULL,
+  ADD CONSTRAINT `expenses_bank_transaction_id_foreign` FOREIGN KEY (`bank_transaction_id`) REFERENCES `bank_transactions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `invoices`
@@ -2455,8 +2740,15 @@ ALTER TABLE `invoice_items`
 --
 ALTER TABLE `invoice_payments`
   ADD CONSTRAINT `invoice_payments_bank_account_id_foreign` FOREIGN KEY (`bank_account_id`) REFERENCES `bank_accounts` (`id`) ON DELETE CASCADE ON UPDATE SET NULL,
+  ADD CONSTRAINT `invoice_payments_bank_transaction_id_foreign` FOREIGN KEY (`bank_transaction_id`) REFERENCES `bank_transactions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `invoice_payments_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `invoice_payments_invoice_id_foreign` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `ledger_entries`
+--
+ALTER TABLE `ledger_entries`
+  ADD CONSTRAINT `ledger_entries_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `loans`

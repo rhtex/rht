@@ -197,6 +197,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('sales_returns/create', 'SalesReturnController::create', ['filter' => 'permission:invoice.edit']);
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
     $routes->get('sales_returns/sync-zoho', 'SalesReturnController::syncFromZoho', ['filter' => 'permission:zoho.sync']);
+    $routes->get('sales_returns/customer-state/(:num)', 'SalesReturnController::getCustomerState/$1');
 
     // Purchase (Vendors) Management
     $routes->get('vendors', 'VendorController::index', ['filter' => 'permission:vendor.view']);

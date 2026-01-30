@@ -35,6 +35,11 @@
                                 </option>
                             <?php endforeach; ?>
                         </select>
+                        <div class="mt-2">
+                            <span id="taxModeIndicator" class="badge bg-secondary" style="display: none;">
+                                <i class="fas fa-info-circle"></i> <span id="taxModeText">Select vendor to see tax mode</span>
+                            </span>
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Return Action <span class="text-danger">*</span></label>
@@ -86,6 +91,19 @@
                             </tr>
                         </tbody>
                         <tfoot id="totalRow" style="display:none;">
+                            <tr>
+                                <td colspan="3" class="text-end fw-bold">Subtotal:</td>
+                                <td>₹<span id="subtotal">0.00</span></td>
+                                <td></td>
+                            </tr>
+                            <tbody id="taxBreakdownBody">
+                                <!-- Dynamic tax rows will be inserted here -->
+                            </tbody>
+                            <tr>
+                                <td colspan="3" class="text-end">Total Tax:</td>
+                                <td>₹<span id="taxAmount">0.00</span></td>
+                                <td></td>
+                            </tr>
                             <tr class="table-secondary fw-bold">
                                 <td colspan="3" class="text-end">Total Amount:</td>
                                 <td>₹<span id="totalAmount">0.00</span></td>
@@ -128,12 +146,43 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let items = [];
     let total = 0;
+    let isInterState = false;
+    const taxModeIndicator = document.getElementById('taxModeIndicator');
+    const taxModeText = document.getElementById('taxModeText');
     
-    // Focus barcode input when vendor is selected
+    // Focus barcode input when vendor is selected and fetch vendor state
     vendorSelect.addEventListener('change', function() {
-        if (this.value) {
-            barcodeInput.focus();
+        const vendorId = this.value;
+        
+        if (!vendorId) {
+            isInterState = false;
+            taxModeIndicator.style.display = 'none';
+            return;
         }
+        
+        // Fetch vendor state for GST calculation
+        fetch('<?= site_url('bills/vendor-state') ?>/' + vendorId)
+            .then(response => response.json())
+            .then(data => {
+                isInterState = data.is_inter_state;
+                
+                // Update tax mode indicator
+                taxModeIndicator.style.display = 'inline-block';
+                if (isInterState) {
+                    taxModeIndicator.className = 'badge bg-info';
+                    taxModeText.textContent = 'Inter-State Transaction (IGST)';
+                } else {
+                    taxModeIndicator.className = 'badge bg-success';
+                    taxModeText.textContent = 'Intra-State Transaction (CGST + SGST)';
+                }
+                
+                updateTotals();
+            })
+            .catch(error => {
+                console.error('Error fetching vendor state:', error);
+            });
+        
+        barcodeInput.focus();
     });
     
     // Handle Enter key in barcode input
@@ -251,7 +300,63 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function updateTotals() {
         itemCount.textContent = items.length;
-        total = items.reduce((sum, item) => sum + parseFloat(item.purchase_price), 0);
+        
+        // Calculate subtotal (assuming purchase_price includes tax for now)
+        // In a real scenario, you'd need tax_percentage from the product data
+        let subtotal = 0;
+        let taxBreakdown = {};
+        let totalTax = 0;
+        
+        items.forEach(item => {
+            const price = parseFloat(item.purchase_price);
+            // Assuming 18% GST for vendor returns (you can modify this based on product data)
+            const taxRate = 18;
+            const priceWithoutTax = price / (1 + (taxRate / 100));
+            const tax = price - priceWithoutTax;
+            
+            subtotal += priceWithoutTax;
+            taxBreakdown[taxRate] = (taxBreakdown[taxRate] || 0) + tax;
+            totalTax += tax;
+        });
+        
+        // Generate dynamic tax rows
+        const taxBody = document.getElementById('taxBreakdownBody');
+        taxBody.innerHTML = '';
+        
+        Object.keys(taxBreakdown).sort((a, b) => a - b).forEach(percentage => {
+            const amount = taxBreakdown[percentage];
+            const rate = parseFloat(percentage);
+            
+            if (isInterState) {
+                taxBody.innerHTML += `
+                    <tr>
+                        <td colspan="3" class="text-end">IGST (${rate}%):</td>
+                        <td>₹${amount.toFixed(2)}</td>
+                        <td></td>
+                    </tr>
+                `;
+            } else {
+                const halfAmount = amount / 2;
+                const halfRate = rate / 2;
+                taxBody.innerHTML += `
+                    <tr>
+                        <td colspan="3" class="text-end">CGST (${halfRate}%):</td>
+                        <td>₹${halfAmount.toFixed(2)}</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="text-end">SGST (${halfRate}%):</td>
+                        <td>₹${halfAmount.toFixed(2)}</td>
+                        <td></td>
+                    </tr>
+                `;
+            }
+        });
+        
+        total = subtotal + totalTax;
+        
+        document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+        document.getElementById('taxAmount').textContent = totalTax.toFixed(2);
         totalAmount.textContent = total.toFixed(2);
         
         if (items.length > 0) {

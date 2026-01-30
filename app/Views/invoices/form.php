@@ -35,6 +35,11 @@
                                 </option>
                                 <?php endforeach; ?>
                             </select>
+                            <div class="mt-2">
+                                <span id="taxModeIndicator" class="badge bg-secondary" style="display: none;">
+                                    <i class="fas fa-info-circle"></i> <span id="taxModeText">Select customer to see tax mode</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -486,8 +491,12 @@ function calculateTotals() {
 // Fetch customer state and info when customer is selected
 document.getElementById('customerSelect').addEventListener('change', function() {
     const customerId = this.value;
+    const taxModeIndicator = document.getElementById('taxModeIndicator');
+    const taxModeText = document.getElementById('taxModeText');
+    
     if (!customerId) {
         isInterState = false;
+        taxModeIndicator.style.display = 'none';
         calculateTotals();
         return;
     }
@@ -497,6 +506,17 @@ document.getElementById('customerSelect').addEventListener('change', function() 
         .then(data => {
             isInterState = data.is_inter_state;
             currentCreditDays = data.credit_period_days || 0;
+            
+            // Update tax mode indicator
+            taxModeIndicator.style.display = 'inline-block';
+            if (isInterState) {
+                taxModeIndicator.className = 'badge bg-info';
+                taxModeText.textContent = 'Inter-State Transaction (IGST)';
+            } else {
+                taxModeIndicator.className = 'badge bg-success';
+                taxModeText.textContent = 'Intra-State Transaction (CGST + SGST)';
+            }
+            
             calculateDueDate();
             calculateTotals();
             

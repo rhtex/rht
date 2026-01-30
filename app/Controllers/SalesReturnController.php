@@ -216,4 +216,26 @@ class SalesReturnController extends BaseController
 
         return redirect()->to('sales_returns')->with('success', "Synced $syncedCount credit notes from Zoho.");
     }
+
+    /**
+     * Get customer state for GST calculation (AJAX endpoint)
+     */
+    public function getCustomerState($customerId)
+    {
+        $db = \Config\Database::connect();
+        $address = $db->table('addresses')
+                      ->where('owner_id', $customerId)
+                      ->where('owner_type', 'customer')
+                      ->where('address_type', 'billing')
+                      ->get()->getRowArray();
+
+        $companyStateId = get_setting('company_state');
+        $customerStateId = $address['state_id'] ?? null;
+
+        return $this->response->setJSON([
+            'customer_state_id' => $customerStateId,
+            'company_state_id'  => $companyStateId,
+            'is_inter_state'    => ($customerStateId !== null && $companyStateId !== null && $customerStateId != $companyStateId)
+        ]);
+    }
 }

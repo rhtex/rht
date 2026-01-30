@@ -35,6 +35,11 @@
                                 </option>
                                 <?php endforeach; ?>
                             </select>
+                            <div class="mt-2">
+                                <span id="taxModeIndicator" class="badge bg-secondary" style="display: none;">
+                                    <i class="fas fa-info-circle"></i> <span id="taxModeText">Select vendor to see tax mode</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -353,8 +358,12 @@ function calculateTotals() {
 // Fetch vendor state when vendor is selected
 document.getElementById('vendorSelect').addEventListener('change', function() {
     const vendorId = this.value;
+    const taxModeIndicator = document.getElementById('taxModeIndicator');
+    const taxModeText = document.getElementById('taxModeText');
+    
     if (!vendorId) {
         isInterState = false;
+        taxModeIndicator.style.display = 'none';
         calculateTotals();
         return;
     }
@@ -363,6 +372,17 @@ document.getElementById('vendorSelect').addEventListener('change', function() {
         .then(response => response.json())
         .then(data => {
             isInterState = data.is_inter_state;
+            
+            // Update tax mode indicator
+            taxModeIndicator.style.display = 'inline-block';
+            if (isInterState) {
+                taxModeIndicator.className = 'badge bg-info';
+                taxModeText.textContent = 'Inter-State Transaction (IGST)';
+            } else {
+                taxModeIndicator.className = 'badge bg-success';
+                taxModeText.textContent = 'Intra-State Transaction (CGST + SGST)';
+            }
+            
             console.log('Vendor state:', data.vendor_state_id, 'Company state:', data.company_state_id, 'Inter-state:', isInterState);
             calculateTotals();
         })

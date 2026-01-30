@@ -59,7 +59,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="mb-3">
-                            <label class="form-label">Reference Number</label>
+                            <label class="form-label">P.O number</label>
                             <input type="text" name="reference_number" class="form-control" value="<?= $quotation['reference_number'] ?? '' ?>" placeholder="e.g. Lead ID">
                         </div>
                     </div>

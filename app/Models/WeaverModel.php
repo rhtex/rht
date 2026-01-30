@@ -31,4 +31,26 @@ class WeaverModel extends Model
     protected $validationMessages   = [];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
+
+    /**
+     * Get weavers with filters
+     */
+    public function getWeaversWithFilters($filters = [])
+    {
+        $builder = $this->builder();
+
+        if (!empty($filters['search'])) {
+            $builder->groupStart()
+                    ->like('name', $filters['search'])
+                    ->orLike('code', $filters['search'])
+                    ->orLike('phone', $filters['search'])
+                    ->groupEnd();
+        }
+
+        if (!empty($filters['status'])) {
+            $builder->where('status', $filters['status']);
+        }
+
+        return $builder->orderBy('name', 'ASC')->get()->getResultArray();
+    }
 }

@@ -51,7 +51,10 @@
                     <div class="col-md-2">
                         <div class="mb-3">
                             <label class="form-label">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Filter</button>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary flex-grow-1"><i class="fas fa-search"></i> Filter</button>
+                                <a href="<?= site_url('agent-payments/reports') ?>" class="btn btn-outline-secondary" title="Clear Filters"><i class="fas fa-times"></i></a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -71,38 +74,30 @@
                         <tr>
                             <th>Agent Name</th>
                             <th class="text-center">Commission %</th>
-                            <th class="text-center">Total Invoices</th>
-                            <th class="text-end">Total Commission</th>
-                            <th class="text-end">Paid</th>
-                            <th class="text-end">Pending</th>
+                            <th class="text-center">Pending Invoices</th>
+                            <th class="text-end">Pending Commission</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($summary)): ?>
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
+                                <td colspan="5" class="text-center text-muted py-4">
                                     <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
                                     No commission data found
                                 </td>
                             </tr>
                         <?php else: ?>
                             <?php 
-                            $grandTotalCommission = 0;
-                            $grandTotalPaid = 0;
                             $grandTotalPending = 0;
                             foreach ($summary as $row): 
-                                $grandTotalCommission += $row['total_commission'];
-                                $grandTotalPaid += $row['paid_commission'];
                                 $grandTotalPending += $row['pending_commission'];
                             ?>
                                 <tr>
                                     <td><strong><?= esc($row['agent_name']) ?></strong></td>
                                     <td class="text-center"><?= number_format($row['commission_percentage'], 2) ?>%</td>
-                                    <td class="text-center"><?= $row['total_invoices'] ?></td>
-                                    <td class="text-end fw-bold">₹<?= number_format($row['total_commission'], 2) ?></td>
-                                    <td class="text-end text-success">₹<?= number_format($row['paid_commission'], 2) ?></td>
-                                    <td class="text-end text-warning">₹<?= number_format($row['pending_commission'], 2) ?></td>
+                                    <td class="text-center fw-bold"><?= $row['pending_invoices_count'] ?></td>
+                                    <td class="text-end fw-bold text-warning">₹<?= number_format($row['pending_commission'], 2) ?></td>
                                     <td class="text-center">
                                         <?php if ($row['pending_commission'] > 0): ?>
                                              <div class="btn-group">
@@ -121,9 +116,7 @@
                                 </tr>
                             <?php endforeach; ?>
                             <tr class="table-primary fw-bold">
-                                <td colspan="3" class="text-end">Grand Total:</td>
-                                <td class="text-end">₹<?= number_format($grandTotalCommission, 2) ?></td>
-                                <td class="text-end text-success">₹<?= number_format($grandTotalPaid, 2) ?></td>
+                                <td colspan="3" class="text-end">Grand Total Pending:</td>
                                 <td class="text-end text-warning">₹<?= number_format($grandTotalPending, 2) ?></td>
                                 <td></td>
                             </tr>

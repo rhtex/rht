@@ -21,6 +21,8 @@ class BillController extends BaseController
     protected $taxModel;
     protected $zohoService;
 
+    protected $accountingModel;
+
     public function __construct()
     {
         $this->billModel = new BillModel();
@@ -31,6 +33,7 @@ class BillController extends BaseController
         $this->bankAccountModel = new BankAccountModel();
         $this->taxModel = new \App\Models\TaxModel();
         $this->zohoService = new ZohoBooksService();
+        $this->accountingModel = new \App\Models\AccountingModel();
     }
 
     public function index()
@@ -137,6 +140,41 @@ class BillController extends BaseController
         if ($db->transStatus() === false) {
             return redirect()->back()->withInput()->with('error', 'Failed to create bill.');
         }
+
+        // --- ACCOUNTING LEDGER ---
+        $finalBill = $this->billModel->find($billId);
+        $billDate = $finalBill['bill_date'];
+        $billRef = "Purchase Bill: " . $finalBill['bill_number'];
+
+        // Calculations for Ledger
+        $totalDiscount = 0;
+        if ($finalBill['discount_type'] == 'Percentage') {
+            $totalDiscount = ($finalBill['subtotal'] * $finalBill['discount_amount']) / 100;
+        } else {
+            $totalDiscount = $finalBill['discount_amount'];
+        }
+
+        // 1. Dr Cost of Purchase (Gross Subtotal)
+        $this->accountingModel->postEntry('Cost of Purchase', $billDate, $finalBill['subtotal'], 0, $billRef, 'bill', $billId);
+
+        // 2. Dr GST Receivable (Input Tax)
+        if ($finalBill['tax_amount'] > 0) {
+            $this->accountingModel->postEntry('GST Receivable', $billDate, $finalBill['tax_amount'], 0, "GST on $billRef", 'bill', $billId);
+        }
+
+        // 3. Dr Shipping / Other Expense (If any)
+        if ($finalBill['shipping_charge'] > 0) {
+            $this->accountingModel->postEntry('Cost of Purchase', $billDate, $finalBill['shipping_charge'], 0, "Shipping handling for $billRef", 'bill', $billId);
+        }
+
+        // 4. Cr Vendor Payment Discount (Income from discount)
+        if ($totalDiscount > 0) {
+            $this->accountingModel->postEntry('Vendor Payment Discount', $billDate, 0, $totalDiscount, "Discount Received on $billRef", 'bill', $billId);
+        }
+
+        // 5. Cr Accounts Payable (Total amount owed)
+        $this->accountingModel->postEntry('Accounts Payable', $billDate, 0, $finalBill['total_amount'], $billRef, 'bill', $billId);
+        // ------------------------
 
         // Auto-push to Zoho Books
         $this->pushToZoho($billId);
@@ -331,6 +369,23 @@ class BillController extends BaseController
 
         $this->paymentModel->insert($paymentData);
         $paymentId = $this->paymentModel->getInsertID();
+
+        // --- ACCOUNTING LEDGER ---
+        $paymentDate = $paymentData['payment_date'];
+        $paymentRef = "Vendor Payment: " . $paymentNumber . " (Ref: " . $bill['bill_number'] . ")";
+
+        // 1. Dr Accounts Payable (Liability decreases)
+        $this->accountingModel->postEntry('Accounts Payable', $paymentDate, $grossSettlement, 0, "Gross settlement for $paymentNumber", 'vendor_payment', $paymentId);
+
+        // 2. Cr Bank/Cash (Asset decreases)
+        $paymentAccount = ($paymentData['payment_mode'] == 'Cash') ? 'Cash' : 'Bank Account';
+        $this->accountingModel->postEntry($paymentAccount, $paymentDate, 0, $amount, $paymentRef, 'vendor_payment', $paymentId);
+
+        // 3. Cr Vendor Payment Discount (Income increases)
+        if ($discount > 0) {
+            $this->accountingModel->postEntry('Vendor Payment Discount', $paymentDate, 0, $discount, "Discount received on $paymentNumber", 'vendor_payment', $paymentId);
+        }
+        // ------------------------
 
         // Update bill paid amount with gross settlement
         $newPaidAmount = $bill['paid_amount'] + $grossSettlement;

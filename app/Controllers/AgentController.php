@@ -21,12 +21,14 @@ class AgentController extends BaseController
 
     public function index()
     {
-        $data['agents'] = $this->agentModel
-            ->select('agents.*, states.name as state_name, countries.name as country_name')
-            ->join('states', 'states.id = agents.state_id', 'left')
-            ->join('countries', 'countries.id = agents.country_id', 'left')
-            ->findAll();
+        $filters = [
+            'search' => $this->request->getGet('search'),
+        ];
+
+        $data['agents'] = $this->agentModel->getAgentsWithFilters($filters);
         $data['title'] = 'Agents';
+        $data['filters'] = $filters;
+
         return view('agents/index', $data);
     }
 

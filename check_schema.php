@@ -1,12 +1,15 @@
 <?php
-$conn = new mysqli('localhost', 'root', '', 'rasidev_hr');
-$tables = ['roles', 'modules', 'permissions', 'role_permissions'];
-foreach ($tables as $t) {
-    echo "Table: $t\n";
-    $res = $conn->query("DESCRIBE $t");
-    while($row = $res->fetch_assoc()) {
-        echo "  " . $row['Field'] . " (" . $row['Type'] . ")\n";
-    }
-    echo "\n";
+$c = new mysqli('localhost', 'root', '', 'rasidev_hr');
+if ($c->connect_error) die("Connection failed: " . $c->connect_error);
+
+echo "Table: ledger_entries\n";
+$res = $c->query('DESCRIBE ledger_entries');
+while($row = $res->fetch_assoc()) {
+    echo "  " . $row['Field'] . " (" . $row['Type'] . ")\n";
 }
-$conn->close();
+
+echo "\nTable: accounts\n";
+$res = $c->query('DESCRIBE accounts');
+while($row = $res->fetch_assoc()) {
+    echo "  " . $row['Field'] . " (" . $row['Type'] . ")\n";
+}

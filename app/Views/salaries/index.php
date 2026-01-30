@@ -7,18 +7,52 @@
     <div class="col-sm-6">
         <h1>Salary History</h1>
     </div>
-    <div class="col-sm-6">
-        <form action="<?= site_url('salaries') ?>" method="get" class="float-sm-end d-flex">
-            <input type="month" name="month" class="form-control me-2" value="<?= $month ?>" onchange="this.form.submit()">
-            <a href="<?= site_url('salaries/calculate?month='.$month) ?>" class="btn btn-success text-nowrap">
-                <i class="fas fa-calculator"></i> Calculate Monthly Salary
-            </a>
-        </form>
+    <div class="col-sm-6 text-end">
+        <a href="<?= site_url('salaries/calculate?month='.$month) ?>" class="btn btn-success text-nowrap">
+            <i class="fas fa-calculator"></i> Calculate Monthly Salary
+        </a>
     </div>
 </div>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<div class="card card-outline card-primary mb-3">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-filter me-1"></i> Filters</h3>
+    </div>
+    <div class="card-body">
+        <form action="<?= site_url('salaries') ?>" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="employee_id" class="form-label">Employee</label>
+                <select name="employee_id" id="employee_id" class="form-select select2">
+                    <option value="">All Employees</option>
+                    <?php foreach($employees as $e): ?>
+                        <option value="<?= $e['id'] ?>" <?= $filters['employee_id'] == $e['id'] ? 'selected' : '' ?>><?= esc($e['first_name'] . ' ' . $e['last_name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="month" class="form-label">Month</label>
+                <input type="month" name="month" id="month" class="form-control" value="<?= $month ?>">
+            </div>
+            <div class="col-md-3">
+                <label for="is_paid" class="form-label">Status</label>
+                <select name="is_paid" id="is_paid" class="form-select">
+                    <option value="">All</option>
+                    <option value="1" <?= $filters['is_paid'] === '1' ? 'selected' : '' ?>>Paid</option>
+                    <option value="0" <?= $filters['is_paid'] === '0' ? 'selected' : '' ?>>Unpaid</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <div class="btn-group w-100">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                    <a href="<?= site_url('salaries') ?>" class="btn btn-secondary"><i class="fas fa-undo"></i> Reset</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card card-outline card-primary">
     <div class="card-header">
         <h3 class="card-title">Salaries for <?= date('F Y', strtotime($month)) ?></h3>

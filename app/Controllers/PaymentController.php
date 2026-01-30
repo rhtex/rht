@@ -24,12 +24,18 @@ class PaymentController extends BaseController
 
     public function index()
     {
-        $data['payments'] = $this->paymentModel->select('payments.*, bills.bill_number, vendors.name as vendor_name')
-                                              ->join('bills', 'bills.id = payments.bill_id')
-                                              ->join('vendors', 'vendors.id = payments.vendor_id')
-                                              ->orderBy('payments.payment_date', 'DESC')
-                                              ->findAll();
+        $filters = [
+            'vendor_id'    => $this->request->getGet('vendor_id'),
+            'payment_mode' => $this->request->getGet('payment_mode'),
+            'date_from'    => $this->request->getGet('date_from'),
+            'date_to'      => $this->request->getGet('date_to'),
+        ];
+
+        $data['payments'] = $this->paymentModel->getPaymentsWithFilters($filters);
+        $data['vendors'] = $this->vendorModel->where('status', 'active')->orderBy('name', 'ASC')->findAll();
         $data['title'] = 'Payments History';
+        $data['filters'] = $filters;
+
         return view('payments/index', $data);
     }
 

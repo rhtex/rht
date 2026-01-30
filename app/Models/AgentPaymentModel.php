@@ -14,7 +14,7 @@ class AgentPaymentModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'payment_number', 'agent_id', 'payment_date', 'payment_mode',
-        'bank_account_id', 'amount', 'reference_number', 'notes',
+        'bank_account_id', 'bank_transaction_id', 'amount', 'reference_number', 'notes',
         'created_by', 'updated_by'
     ];
 
@@ -33,10 +33,70 @@ class AgentPaymentModel extends Model
     /**
      * Get payments with agent details
      */
-    public function getPaymentsWithAgent($filters = [])
+    public function getDatatablePayments($start, $length, $search, $order)
     {
-        $builder = $this->select('agent_payments.*, agents.agent_name, agents.phone_number')
-                        ->join('agents', 'agents.id = agent_payments.agent_id', 'left');
+        $builder = $this->builder();
+        $builder->select('agent_payments.*, agents.agent_name, agents.phone_number')
+                ->join('agents', 'agents.id = agent_payments.agent_id', 'left');
+
+        // Search
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('agent_payments.payment_number', $search)
+                ->orLike('agents.agent_name', $search)
+                ->orLike('agent_payments.payment_mode', $search)
+                ->orLike('agent_payments.reference_number', $search)
+                ->groupEnd();
+        }
+
+        // Sorting
+        $columns = [
+            0 => 'agent_payments.payment_number',
+            1 => 'agent_payments.payment_date',
+            2 => 'agents.agent_name',
+            3 => 'agents.phone_number',
+            4 => 'agent_payments.payment_mode',
+            5 => 'agent_payments.reference_number',
+            6 => 'agent_payments.amount'
+        ];
+
+        if (isset($order[0]['column']) && isset($columns[$order[0]['column']])) {
+            $builder->orderBy($columns[$order[0]['column']], $order[0]['dir']);
+        } else {
+            $builder->orderBy('agent_payments.payment_date', 'DESC');
+        }
+
+        // Pagination
+        if ($length != -1) {
+            $builder->limit($length, $start);
+        }
+
+        return $builder->get()->getResultArray();
+    }
+
+    public function countDatatableFiltered($search)
+    {
+        $builder = $this->builder();
+        $builder->join('agents', 'agents.id = agent_payments.agent_id', 'left');
+        
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('agent_payments.payment_number', $search)
+                ->orLike('agents.agent_name', $search)
+                ->orLike('agent_payments.payment_mode', $search)
+                ->orLike('agent_payments.reference_number', $search)
+                ->groupEnd();
+        }
+
+        return $builder->countAllResults();
+    }
+
+    public function getPaymentsWithAgent($filters = [], $limit = 0, $offset = 0)
+    {
+        // Use the builder directly to avoid Model state issues
+        $builder = $this->builder();
+        $builder->select('agent_payments.*, agents.agent_name, agents.phone_number')
+                ->join('agents', 'agents.id = agent_payments.agent_id', 'left');
 
         if (!empty($filters['agent_id'])) {
             $builder->where('agent_payments.agent_id', $filters['agent_id']);
@@ -54,9 +114,14 @@ class AgentPaymentModel extends Model
             $builder->where('agent_payments.payment_mode', $filters['payment_mode']);
         }
 
-        return $builder->orderBy('agent_payments.payment_date', 'DESC')
-                       ->orderBy('agent_payments.id', 'DESC')
-                       ->findAll();
+        $builder->orderBy('agent_payments.payment_date', 'DESC')
+                ->orderBy('agent_payments.id', 'DESC');
+
+        if ($limit > 0) {
+            $builder->limit($limit, $offset);
+        }
+
+        return $builder->get()->getResultArray();
     }
 
     /**
@@ -139,6 +204,7 @@ class AgentPaymentModel extends Model
         $builder = $db->table('agents')
                      ->select('agents.id, agents.agent_name, agents.commission_percentage,
                               COUNT(DISTINCT invoices.id) as total_invoices,
+                              COUNT(DISTINCT CASE WHEN invoices.agent_commission_status = "Unpaid" THEN invoices.id END) as pending_invoices_count,
                               COALESCE(SUM(CASE WHEN invoices.agent_commission_status = "Unpaid" THEN invoices.agent_commission_amount ELSE 0 END), 0) as pending_commission,
                               COALESCE(SUM(CASE WHEN invoices.agent_commission_status = "Paid" THEN invoices.agent_commission_amount ELSE 0 END), 0) as paid_commission,
                               COALESCE(SUM(invoices.agent_commission_amount), 0) as total_commission')

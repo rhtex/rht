@@ -15,8 +15,15 @@ class ExpenseCategoryController extends BaseController
 
     public function index()
     {
-        $data['categories'] = $this->categoryModel->findAll();
+        $filters = [
+            'search' => $this->request->getGet('search'),
+            'status' => $this->request->getGet('status'),
+        ];
+
+        $data['categories'] = $this->categoryModel->getCategoriesWithFilters($filters);
         $data['title'] = 'Expense Categories';
+        $data['filters'] = $filters;
+
         return view('expense_categories/index', $data);
     }
 

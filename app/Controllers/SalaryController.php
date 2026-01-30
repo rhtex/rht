@@ -30,15 +30,17 @@ class SalaryController extends BaseController
 
     public function index()
     {
-        $month = $this->request->getGet('month') ?? date('Y-m');
+        $filters = [
+            'month'       => $this->request->getGet('month') ?? date('Y-m'),
+            'employee_id' => $this->request->getGet('employee_id'),
+            'is_paid'     => $this->request->getGet('is_paid'),
+        ];
 
-        $data['salaries'] = $this->salaryModel
-            ->select('salaries.*, employees.first_name, employees.last_name')
-            ->join('employees', 'employees.id = salaries.employee_id')
-            ->where('salary_month', $month . '-01')
-            ->findAll();
+        $data['salaries'] = $this->salaryModel->getSalariesWithFilters($filters);
+        $data['employees'] = $this->employeeModel->where('status', 'active')->orderBy('first_name', 'ASC')->findAll();
         
-        $data['month'] = $month;
+        $data['month'] = $filters['month'];
+        $data['filters'] = $filters;
 
         return view('salaries/index', $data);
     }

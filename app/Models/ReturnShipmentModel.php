@@ -15,7 +15,7 @@ class ReturnShipmentModel extends Model
     protected $allowedFields    = [
         'vendor_id', 'reference_no', 'return_date', 'transport_name', 
         'waybill_number', 'waybill_date', 'packages_count', 'ewaybill_number',
-        'status', 'item_count', 'notes', 'created_at', 'updated_at'
+        'waybill_image', 'delivery_status', 'status', 'item_count', 'notes', 'created_at', 'updated_at'
     ];
 
     protected $useTimestamps = true;

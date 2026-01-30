@@ -82,6 +82,35 @@
     </div>
 
     <div class="col-md-8">
+        <div class="card card-outline card-info mb-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-filter me-1"></i> Filters</h3>
+            </div>
+            <div class="card-body">
+                <form action="<?= site_url('bank_accounts/statement/' . $account['id']) ?>" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="type" class="form-label">Type</label>
+                        <select name="type" id="type" class="form-select">
+                            <option value="">All Types</option>
+                            <option value="credit" <?= $filters['type'] == 'credit' ? 'selected' : '' ?>>Credit</option>
+                            <option value="debit" <?= $filters['type'] == 'debit' ? 'selected' : '' ?>>Debit</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="date_from" class="form-label">From</label>
+                        <input type="date" name="date_from" id="date_from" class="form-control" value="<?= $filters['date_from'] ?>">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="date_to" class="form-label">To</label>
+                        <input type="date" name="date_to" id="date_to" class="form-control" value="<?= $filters['date_to'] ?>">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="card card-outline card-info">
             <div class="card-header">
                 <h3 class="card-title">Transaction History</h3>

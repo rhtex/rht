@@ -1,6 +1,7 @@
 <?php
-$conn = new mysqli('localhost', 'root', '', 'rasidev_hr');
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
-$res = $conn->query('SHOW TABLES');
-while($row = $res->fetch_row()) echo $row[0].PHP_EOL;
+$conn = new mysqli("localhost", "root", "", "rasidev_hr");
+$result = $conn->query("SHOW TABLES");
+while($row = $result->fetch_array()) {
+    echo $row[0] . "\n";
+}
 $conn->close();

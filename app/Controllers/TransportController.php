@@ -21,12 +21,14 @@ class TransportController extends BaseController
 
     public function index()
     {
-        $data['transports'] = $this->transportModel
-            ->select('transports.*, states.name as state_name, countries.name as country_name')
-            ->join('states', 'states.id = transports.state_id', 'left')
-            ->join('countries', 'countries.id = transports.country_id', 'left')
-            ->findAll();
+        $filters = [
+            'search' => $this->request->getGet('search'),
+        ];
+
+        $data['transports'] = $this->transportModel->getTransportsWithFilters($filters);
         $data['title'] = 'Transports';
+        $data['filters'] = $filters;
+
         return view('transports/index', $data);
     }
 

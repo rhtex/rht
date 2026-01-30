@@ -32,6 +32,34 @@ class PaymentModel extends Model
     ];
 
     /**
+     * Get payments with filters
+     */
+    public function getPaymentsWithFilters($filters = [])
+    {
+        $builder = $this->select('payments.*, bills.bill_number, vendors.name as vendor_name')
+                        ->join('bills', 'bills.id = payments.bill_id')
+                        ->join('vendors', 'vendors.id = payments.vendor_id');
+
+        if (!empty($filters['vendor_id'])) {
+            $builder->where('payments.vendor_id', $filters['vendor_id']);
+        }
+
+        if (!empty($filters['payment_mode'])) {
+            $builder->where('payments.payment_mode', $filters['payment_mode']);
+        }
+
+        if (!empty($filters['date_from'])) {
+            $builder->where('payments.payment_date >=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $builder->where('payments.payment_date <=', $filters['date_to']);
+        }
+
+        return $builder->orderBy('payments.payment_date', 'DESC')->findAll();
+    }
+
+    /**
      * Get payments by bill ID
      */
     public function getPaymentsByBill($billId)

@@ -47,6 +47,19 @@
                         <option value="inactive" <?= (old('status', $customer['status'] ?? '') === 'inactive') ? 'selected' : '' ?>>Inactive</option>
                     </select>
                 </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Assigned Agent</label>
+                    <select name="agent_id" class="form-select select2">
+                        <option value="">-- Select Agent --</option>
+                        <?php if (isset($agents)): ?>
+                            <?php foreach($agents as $agent): ?>
+                                <option value="<?= $agent['id'] ?>" <?= (old('agent_id', $customer['agent_id'] ?? '') == $agent['id']) ? 'selected' : '' ?>>
+                                    <?= esc($agent['agent_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
 
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Phone <span class="text-danger">*</span></label>
@@ -132,8 +145,19 @@
                         </div>
                     </div>
                     <div class="mb-2">
+                        <label class="form-label">Country <span class="text-danger">*</span></label>
+                        <select name="billing_country_id" id="billing_country_id" class="form-select select2" required>
+                            <option value="">Select Country</option>
+                            <?php foreach($countries as $country): ?>
+                                <option value="<?= $country['id'] ?>" <?= (old('billing_country_id', $billing_address['country_id'] ?? '') == $country['id']) ? 'selected' : (($country['name'] == 'India' && empty($billing_address)) ? 'selected' : '') ?>>
+                                    <?= esc($country['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-2">
                         <label class="form-label">State <span class="text-danger">*</span></label>
-                        <select name="billing_state_id" class="form-select" required>
+                        <select name="billing_state_id" id="billing_state_id" class="form-select select2" required>
                             <option value="">Select State</option>
                             <?php foreach($states as $state): ?>
                                 <option value="<?= $state['id'] ?>" <?= (old('billing_state_id', $billing_address['state_id'] ?? '') == $state['id']) ? 'selected' : '' ?>>
@@ -146,6 +170,12 @@
 
                 <div class="col-md-6">
                     <h6><strong>Shipping Address</strong> <small class="text-muted">(Leave empty if same as billing)</small></h6>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="copy_billing_address">
+                        <label class="form-check-label" for="copy_billing_address">
+                            Same as Billing Address
+                        </label>
+                    </div>
                     <div class="mb-2">
                         <label class="form-label">Address Line 1</label>
                         <input type="text" name="shipping_address_line1" class="form-control" value="<?= old('shipping_address_line1', $shipping_address['address_line1'] ?? '') ?>">
@@ -165,8 +195,19 @@
                         </div>
                     </div>
                     <div class="mb-2">
+                        <label class="form-label">Country</label>
+                        <select name="shipping_country_id" id="shipping_country_id" class="form-select select2">
+                            <option value="">Select Country</option>
+                            <?php foreach($countries as $country): ?>
+                                <option value="<?= $country['id'] ?>" <?= (old('shipping_country_id', $shipping_address['country_id'] ?? '') == $country['id']) ? 'selected' : (($country['name'] == 'India' && empty($shipping_address)) ? 'selected' : '') ?>>
+                                    <?= esc($country['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-2">
                         <label class="form-label">State</label>
-                        <select name="shipping_state_id" class="form-select">
+                        <select name="shipping_state_id" id="shipping_state_id" class="form-select select2">
                             <option value="">Select State</option>
                             <?php foreach($states as $state): ?>
                                 <option value="<?= $state['id'] ?>" <?= (old('shipping_state_id', $shipping_address['state_id'] ?? '') == $state['id']) ? 'selected' : '' ?>>
@@ -188,4 +229,100 @@
         </div>
     </form>
 </div>
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script>
+    $(document).ready(function() {
+        // Initialize Select2 if not already done globally
+        $('.select2').select2({
+            theme: 'bootstrap-5'
+        });
+
+        // Function to load states based on country
+        function loadStates(countryId, stateElementId, selectedStateId = null) {
+            if (!countryId) {
+                $('#' + stateElementId).html('<option value="">Select State</option>');
+                $('#' + stateElementId).trigger('change'); // Notify Select2 of change
+                return;
+            }
+
+            $.ajax({
+                url: '<?= site_url('master-data/states/') ?>' + countryId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    var options = '<option value="">Select State</option>';
+                    $.each(response, function(index, state) {
+                        var selected = (selectedStateId && selectedStateId == state.id) ? 'selected' : '';
+                        options += '<option value="' + state.id + '" ' + selected + '>' + state.name + '</option>';
+                    });
+                    $('#' + stateElementId).html(options);
+                    $('#' + stateElementId).trigger('change'); // Notify Select2 of change
+                },
+                error: function() {
+                    console.error('Failed to fetch states');
+                    $('#' + stateElementId).html('<option value="">Select State</option>');
+                    $('#' + stateElementId).trigger('change'); // Notify Select2 of change
+                }
+            });
+        }
+
+        // Event listener for Billing Country
+        $('#billing_country_id').change(function() {
+            var countryId = $(this).val();
+            var selectedStateId = '<?= old('billing_state_id', $billing_address['state_id'] ?? '') ?>';
+            loadStates(countryId, 'billing_state_id', selectedStateId);
+        });
+
+        // Event listener for Shipping Country
+        $('#shipping_country_id').change(function() {
+            var countryId = $(this).val();
+            var selectedStateId = '<?= old('shipping_state_id', $shipping_address['state_id'] ?? '') ?>';
+            loadStates(countryId, 'shipping_state_id', selectedStateId);
+        });
+
+        // Initial load for states if countries are pre-selected (e.g., on edit or old data)
+        if ($('#billing_country_id').val()) {
+            $('#billing_country_id').trigger('change');
+        }
+        if ($('#shipping_country_id').val()) {
+            $('#shipping_country_id').trigger('change');
+        }
+
+
+        // Copy Billing Address Logic
+        $('#copy_billing_address').change(function() {
+            if ($(this).is(':checked')) {
+                $('input[name="shipping_address_line1"]').val($('input[name="billing_address_line1"]').val());
+                $('input[name="shipping_address_line2"]').val($('input[name="billing_address_line2"]').val());
+                $('input[name="shipping_city"]').val($('input[name="billing_city"]').val());
+                $('input[name="shipping_pincode"]').val($('input[name="billing_pincode"]').val());
+                
+                // Copy Country first
+                var billingCountry = $('#billing_country_id').val();
+                var billingState = $('#billing_state_id').val();
+                
+                // Set shipping country
+                $('#shipping_country_id').val(billingCountry).trigger('change');
+
+                // Copy the options from billing state to shipping state directly
+                var billingStateOptions = $('#billing_state_id').html();
+                $('#shipping_state_id').html(billingStateOptions);
+                $('#shipping_state_id').val(billingState).trigger('change');
+
+            } 
+        });
+
+        // Also update if billing fields change while checkbox is checked
+        $('input[name^="billing_"], #billing_country_id, #billing_state_id').on('input change', function() {
+            if ($('#copy_billing_address').is(':checked')) {
+                 $('#copy_billing_address').trigger('change');
+            }
+        });
+        
+        // Trigger generic change event to ensure Select2 updates visual display if needed
+        // But for copying, direct modification might need explicit trigger.
+    });
+</script>
 <?= $this->endSection() ?>

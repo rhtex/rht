@@ -20,4 +20,22 @@ class ExpenseCategoryModel extends Model
         'category_name' => 'required|min_length[3]|is_unique[expense_categories.category_name,id,{id}]',
         'status'        => 'required|in_list[active,inactive]',
     ];
+
+    /**
+     * Get categories with filters
+     */
+    public function getCategoriesWithFilters($filters = [])
+    {
+        $builder = $this->builder();
+
+        if (!empty($filters['search'])) {
+            $builder->like('category_name', $filters['search']);
+        }
+
+        if (!empty($filters['status'])) {
+            $builder->where('status', $filters['status']);
+        }
+
+        return $builder->orderBy('category_name', 'ASC')->get()->getResultArray();
+    }
 }

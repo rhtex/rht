@@ -11,6 +11,8 @@ $routes->post('attemptLogin', 'AuthController::attemptLogin');
 $routes->get('logout', 'AuthController::logout');
 $routes->get('lang/(:segment)', 'Home::lang/$1');
 
+
+
 // Dashboard protected group
 $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard', 'Home::index');
@@ -145,6 +147,23 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('bank_accounts/transactions/update/(:num)', 'BankTransactionController::update/$1', ['filter' => 'permission:bank_account.edit']);
     $routes->get('bank_accounts/transactions/delete/(:num)', 'BankTransactionController::delete/$1', ['filter' => 'permission:bank_account.edit']);
 
+    // Bank Reconciliation
+    $routes->get('reconciliation', 'ReconciliationController::index', ['filter' => 'permission:bank_account.view']);
+    $routes->get('reconciliation/account/(:num)', 'ReconciliationController::account/$1', ['filter' => 'permission:bank_account.view']);
+    $routes->post('reconciliation/match', 'ReconciliationController::match', ['filter' => 'permission:bank_account.edit']);
+    $routes->post('reconciliation/unmatch', 'ReconciliationController::unmatch', ['filter' => 'permission:bank_account.edit']);
+    $routes->get('reconciliation/report/(:num)/(:any)/(:any)', 'ReconciliationController::report/$1/$2/$3', ['filter' => 'permission:bank_account.view']);
+
+    // Calendar Routes
+    $routes->group('calendar', function($routes) {
+        $routes->get('/', 'CalendarController::index');
+        $routes->get('fetch', 'CalendarController::fetchEvents');
+        $routes->post('store', 'CalendarController::store');
+        $routes->post('update/(:num)', 'CalendarController::update/$1');
+        $routes->post('delete/(:num)', 'CalendarController::delete/$1');
+        $routes->get('check', 'CalendarController::checkReminders');
+    });
+
     // Expense Management
     $routes->get('expenses', 'ExpenseController::index', ['filter' => 'permission:expense.view']);
     $routes->get('expenses/create', 'ExpenseController::create', ['filter' => 'permission:expense.create']);
@@ -163,12 +182,20 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 
     // Sales (Customers) Management
     $routes->get('customers', 'CustomerController::index', ['filter' => 'permission:customer.view']);
+    $routes->get('customers/datatable', 'CustomerController::datatable', ['filter' => 'permission:customer.view']);
     $routes->get('customers/create', 'CustomerController::create', ['filter' => 'permission:customer.create']);
     $routes->post('customers/store', 'CustomerController::store', ['filter' => 'permission:customer.create']);
     $routes->get('customers/view/(:num)', 'CustomerController::view/$1', ['filter' => 'permission:customer.view']);
     $routes->get('customers/edit/(:num)', 'CustomerController::edit/$1', ['filter' => 'permission:customer.edit']);
     $routes->post('customers/update/(:num)', 'CustomerController::update/$1', ['filter' => 'permission:customer.edit']);
     $routes->get('customers/delete/(:num)', 'CustomerController::delete/$1', ['filter' => 'permission:customer.delete']);
+    $routes->get('customers/sync-zoho', 'CustomerController::syncZoho', ['filter' => 'permission:zoho.sync']);
+
+    // Sales Returns
+    $routes->get('sales_returns', 'SalesReturnController::index', ['filter' => 'permission:invoice.view']);
+    $routes->get('sales_returns/create', 'SalesReturnController::create', ['filter' => 'permission:invoice.edit']);
+    $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
+    $routes->get('sales_returns/sync-zoho', 'SalesReturnController::syncFromZoho', ['filter' => 'permission:zoho.sync']);
 
     // Purchase (Vendors) Management
     $routes->get('vendors', 'VendorController::index', ['filter' => 'permission:vendor.view']);
@@ -178,6 +205,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('vendors/returns/process', 'VendorController::processReturnBatch', ['filter' => 'permission:vendor.edit']);
     $routes->get('vendors/create', 'VendorController::create', ['filter' => 'permission:vendor.create']);
     $routes->post('vendors/store', 'VendorController::store', ['filter' => 'permission:vendor.create']);
+    $routes->get('vendors/view/(:num)', 'VendorController::view/$1', ['filter' => 'permission:vendor.view']);
     $routes->get('vendors/edit/(:num)', 'VendorController::edit/$1', ['filter' => 'permission:vendor.edit']);
     $routes->post('vendors/update/(:num)', 'VendorController::update/$1', ['filter' => 'permission:vendor.edit']);
     $routes->get('vendors/delete/(:num)', 'VendorController::delete/$1', ['filter' => 'permission:vendor.delete']);
@@ -186,6 +214,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     // Return Shipments
     $routes->get('vendors/returns/shipments', 'VendorController::listShipments', ['filter' => 'permission:vendor.view']);
     $routes->post('vendors/returns/shipments/update/(:num)', 'VendorController::updateShipment/$1', ['filter' => 'permission:vendor.edit']);
+    $routes->post('vendors/returns/shipments/update-status/(:num)', 'VendorController::updateShipmentStatus/$1', ['filter' => 'permission:vendor.edit']);
 
     // Inventory (Categories)
     $routes->get('product_categories', 'ProductCategoryController::index', ['filter' => 'permission:product_category.view']);
@@ -264,6 +293,10 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('invoices/print/(:num)', 'InvoiceController::print/$1', ['filter' => 'permission:invoice.view']);
     $routes->get('invoices/customer-state/(:num)', 'InvoiceController::getCustomerState/$1');
     $routes->get('invoices/mark-sent/(:num)', 'InvoiceController::markAsSent/$1');
+    $routes->get('invoices/tracking', 'InvoiceController::tracking', ['filter' => 'permission:invoice.view']);
+    $routes->post('invoices/update-waybill/(:num)', 'InvoiceController::updateWaybill/$1', ['filter' => 'permission:invoice.edit']);
+    $routes->post('invoices/update-delivery-status/(:num)', 'InvoiceController::updateDeliveryStatus/$1', ['filter' => 'permission:invoice.edit']);
+    $routes->get('invoices/history/(:num)', 'InvoiceController::getHistory/$1');
 
     // Customer Receipts (Invoice Payments)
     $routes->get('invoice_payments', 'InvoicePaymentController::index', ['filter' => 'permission:invoice.view']);
@@ -281,6 +314,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 
     // Agent Payments
     $routes->get('agent-payments', 'AgentPaymentController::index', ['filter' => 'permission:agent_payments.view']);
+    $routes->get('agent-payments/datatable', 'AgentPaymentController::datatable', ['filter' => 'permission:agent_payments.view']);
     $routes->get('agent-payments/create', 'AgentPaymentController::create', ['filter' => 'permission:agent_payments.create']);
     $routes->get('agent-payments/create/(:num)', 'AgentPaymentController::create/$1', ['filter' => 'permission:agent_payments.create']);
     $routes->post('agent-payments/store', 'AgentPaymentController::store', ['filter' => 'permission:agent_payments.create']);

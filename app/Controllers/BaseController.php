@@ -41,5 +41,35 @@ abstract class BaseController extends Controller
 
         // Preload any models, libraries, etc, here.
         // $this->session = service('session');
+
+        // Check for calendar reminders due today
+        $this->checkCalendarReminders();
+    }
+
+    /**
+     * Check for due reminders and create notifications
+     */
+    protected function checkCalendarReminders()
+    {
+        // Only run check if session exists and user is logged in
+        if (session()->has('isLoggedIn')) {
+            $reminderModel = new \App\Models\CalendarReminderModel();
+            $notificationModel = new \App\Models\NotificationModel();
+            
+            $dueReminders = $reminderModel->getDueReminders();
+            
+            foreach ($dueReminders as $reminder) {
+                $notificationModel->insert([
+                    'type' => 'reminder',
+                    'title' => 'Reminder: ' . $reminder['title'],
+                    'message' => $reminder['description'] ?? 'No description provided.',
+                    'link' => 'calendar',
+                    'reference_id' => $reminder['id'],
+                    'is_read' => 0
+                ]);
+
+                $reminderModel->update($reminder['id'], ['is_notified' => 1]);
+            }
+        }
     }
 }

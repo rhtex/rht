@@ -38,4 +38,28 @@ class AgentModel extends Model
     protected $validationMessages   = [];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
+
+    /**
+     * Get agents with filters
+     */
+    public function getAgentsWithFilters($filters = [])
+    {
+        $builder = $this->select('agents.*, states.name as state_name, countries.name as country_name')
+                        ->join('states', 'states.id = agents.state_id', 'left')
+                        ->join('countries', 'countries.id = agents.country_id', 'left');
+
+        if (!empty($filters['search'])) {
+            $builder->groupStart()
+                    ->like('agent_name', $filters['search'])
+                    ->orLike('phone_number', $filters['search'])
+                    ->orLike('city', $filters['search'])
+                    ->groupEnd();
+        }
+
+        if (!empty($filters['city'])) {
+            $builder->where('city', $filters['city']);
+        }
+
+        return $builder->orderBy('agent_name', 'ASC')->findAll();
+    }
 }

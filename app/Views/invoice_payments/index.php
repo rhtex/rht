@@ -14,6 +14,49 @@
         </div>
     </div>
 
+    <div class="card card-outline card-success mb-3">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-filter me-1"></i> Filters</h3>
+        </div>
+        <div class="card-body">
+            <form action="<?= site_url('invoice_payments') ?>" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="customer_id" class="form-label">Customer</label>
+                    <select name="customer_id" id="customer_id" class="form-select select2">
+                        <option value="">All Customers</option>
+                        <?php foreach($customers as $c): ?>
+                            <option value="<?= $c['id'] ?>" <?= $filters['customer_id'] == $c['id'] ? 'selected' : '' ?>><?= esc($c['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="payment_mode" class="form-label">Payment Mode</label>
+                    <select name="payment_mode" id="payment_mode" class="form-select">
+                        <option value="">All Modes</option>
+                        <option value="Cash" <?= $filters['payment_mode'] == 'Cash' ? 'selected' : '' ?>>Cash</option>
+                        <option value="Bank Transfer" <?= $filters['payment_mode'] == 'Bank Transfer' ? 'selected' : '' ?>>Bank Transfer</option>
+                        <option value="Cheque" <?= $filters['payment_mode'] == 'Cheque' ? 'selected' : '' ?>>Cheque</option>
+                        <option value="Other" <?= $filters['payment_mode'] == 'Other' ? 'selected' : '' ?>>Other</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="date_from" class="form-label">From Date</label>
+                    <input type="date" name="date_from" id="date_from" class="form-control" value="<?= $filters['date_from'] ?>">
+                </div>
+                <div class="col-md-2">
+                    <label for="date_to" class="form-label">To Date</label>
+                    <input type="date" name="date_to" id="date_to" class="form-control" value="<?= $filters['date_to'] ?>">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <div class="btn-group w-100">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                        <a href="<?= site_url('invoice_payments') ?>" class="btn btn-secondary"><i class="fas fa-undo"></i> Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card card-outline card-success">
         <div class="card-header">
             <h3 class="card-title">All Receipts</h3>

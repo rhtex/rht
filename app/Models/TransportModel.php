@@ -34,4 +34,25 @@ class TransportModel extends Model
     protected $validationMessages   = [];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
+
+    /**
+     * Get transports with filters
+     */
+    public function getTransportsWithFilters($filters = [])
+    {
+        $builder = $this->select('transports.*, states.name as state_name, countries.name as country_name')
+                        ->join('states', 'states.id = transports.state_id', 'left')
+                        ->join('countries', 'countries.id = transports.country_id', 'left');
+
+        if (!empty($filters['search'])) {
+            $builder->groupStart()
+                    ->like('transport_name', $filters['search'])
+                    ->orLike('transport_code', $filters['search'])
+                    ->orLike('branch_phone_number', $filters['search'])
+                    ->orLike('branch', $filters['search'])
+                    ->groupEnd();
+        }
+
+        return $builder->orderBy('transport_name', 'ASC')->findAll();
+    }
 }

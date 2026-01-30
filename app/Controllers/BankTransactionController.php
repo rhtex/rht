@@ -23,9 +23,16 @@ class BankTransactionController extends BaseController
             return redirect()->to('bank_accounts')->with('error', 'Bank account not found.');
         }
 
+        $filters = [
+            'type'      => $this->request->getGet('type'),
+            'date_from' => $this->request->getGet('date_from'),
+            'date_to'   => $this->request->getGet('date_to'),
+        ];
+
         $data['account'] = $account;
-        $data['transactions'] = $this->transactionModel->getTransactionsByAccount($accountId);
+        $data['transactions'] = $this->transactionModel->getTransactionsWithFilters($accountId, $filters);
         $data['title'] = $account['bank_name'] . ' - Statement';
+        $data['filters'] = $filters;
         
         return view('bank_accounts/statement', $data);
     }

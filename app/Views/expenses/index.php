@@ -16,6 +16,48 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<div class="card card-outline card-primary mb-3">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-filter me-1"></i> Filters</h3>
+    </div>
+    <div class="card-body">
+        <form action="<?= site_url('expenses') ?>" method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="category_id" class="form-label">Category</label>
+                <select name="category_id" id="category_id" class="form-select select2">
+                    <option value="">All Categories</option>
+                    <?php foreach($categories as $c): ?>
+                        <option value="<?= $c['id'] ?>" <?= $filters['category_id'] == $c['id'] ? 'selected' : '' ?>><?= esc($c['category_name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="bank_account_id" class="form-label">Bank Account</label>
+                <select name="bank_account_id" id="bank_account_id" class="form-select select2">
+                    <option value="">All Accounts</option>
+                    <?php foreach($bank_accounts as $ba): ?>
+                        <option value="<?= $ba['id'] ?>" <?= $filters['bank_account_id'] == $ba['id'] ? 'selected' : '' ?>><?= esc($ba['bank_name']) ?> (<?= substr($ba['account_number'], -4) ?>)</option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="date_from" class="form-label">From Date</label>
+                <input type="date" name="date_from" id="date_from" class="form-control" value="<?= $filters['date_from'] ?>">
+            </div>
+            <div class="col-md-2">
+                <label for="date_to" class="form-label">To Date</label>
+                <input type="date" name="date_to" id="date_to" class="form-control" value="<?= $filters['date_to'] ?>">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <div class="btn-group w-100">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                    <a href="<?= site_url('expenses') ?>" class="btn btn-secondary"><i class="fas fa-undo"></i> Reset</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card card-outline card-primary">
     <div class="card-header">
         <h3 class="card-title">List of Expenses</h3>

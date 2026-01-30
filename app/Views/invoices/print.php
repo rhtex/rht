@@ -44,7 +44,7 @@
                 <p><strong>Date:</strong> <?= date('d/m/Y', strtotime($invoice['invoice_date'])) ?></p>
                 <p><strong>Due Date:</strong> <?= date('d/m/Y', strtotime($invoice['due_date'])) ?></p>
                 <?php if ($invoice['reference_number']): ?>
-                    <p><strong>Ref #:</strong> <?= esc($invoice['reference_number']) ?></p>
+                    <p><strong>P.O number:</strong> <?= esc($invoice['reference_number']) ?></p>
                 <?php endif; ?>
                 <?php if ($invoice['transport_name']): ?>
                     <p><strong>Transport:</strong> <?= esc($invoice['transport_name']) ?></p>

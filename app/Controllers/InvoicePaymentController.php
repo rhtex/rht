@@ -27,12 +27,18 @@ class InvoicePaymentController extends BaseController
 
     public function index()
     {
-        $data['payments'] = $this->paymentModel->select('invoice_payments.*, invoices.invoice_number, customers.name as customer_name')
-                                              ->join('invoices', 'invoices.id = invoice_payments.invoice_id')
-                                              ->join('customers', 'customers.id = invoice_payments.customer_id')
-                                              ->orderBy('invoice_payments.payment_date', 'DESC')
-                                              ->findAll();
+        $filters = [
+            'customer_id'  => $this->request->getGet('customer_id'),
+            'payment_mode' => $this->request->getGet('payment_mode'),
+            'date_from'    => $this->request->getGet('date_from'),
+            'date_to'      => $this->request->getGet('date_to'),
+        ];
+
+        $data['payments'] = $this->paymentModel->getPaymentsWithFilters($filters);
+        $data['customers'] = $this->customerModel->where('status', 'active')->orderBy('name', 'ASC')->findAll();
         $data['title'] = 'Customer Receipts';
+        $data['filters'] = $filters;
+
         return view('invoice_payments/index', $data);
     }
 
@@ -153,5 +159,44 @@ class InvoicePaymentController extends BaseController
         // Note: Zoho payment deletion could be added here if needed
 
         return redirect()->to('invoice_payments')->with('success', 'Receipt deleted successfully.');
+    }
+
+    public function pushToZoho($id)
+    {
+        $payment = $this->paymentModel->find($id);
+        if (!$payment) return;
+
+        $invoice = $this->invoiceModel->find($payment['invoice_id']);
+        if (!$invoice || !$invoice['zoho_invoice_id']) return;
+
+        $customer = $this->customerModel->find($payment['customer_id']);
+        if (!$customer || !$customer['zoho_contact_id']) return;
+
+        $data = [
+            'customer_id' => $customer['zoho_contact_id'],
+            'payment_mode' => $payment['payment_mode'],
+            'amount' => $payment['amount'],
+            'date' => $payment['payment_date'],
+            'reference_number' => $payment['reference_number'],
+            'invoices' => [
+                [
+                    'invoice_id' => $invoice['zoho_invoice_id'],
+                    'amount_applied' => $payment['amount']
+                ]
+            ]
+        ];
+
+        $response = $this->zohoService->createCustomerPayment($data);
+        
+        if ($response['success']) {
+            $zohoId = $response['data']['payment']['payment_id'];
+            $this->paymentModel->update($id, [
+                'zoho_payment_id' => $zohoId,
+                'zoho_sync_status' => 'Synced',
+                'zoho_sync_at' => date('Y-m-d H:i:s')
+            ]);
+        } else {
+            log_message('error', 'Zoho Push Error for Customer Payment ' . $id . ': ' . $response['message']);
+        }
     }
 }

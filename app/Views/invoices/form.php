@@ -40,13 +40,13 @@
                     <div class="col-md-3">
                         <div class="mb-3">
                             <label class="form-label">Invoice Date <span class="text-danger">*</span></label>
-                            <input type="date" name="invoice_date" class="form-control" value="<?= $invoice['invoice_date'] ?? date('Y-m-d') ?>" required>
+                            <input type="date" name="invoice_date" id="invoiceDate" class="form-control" value="<?= $invoice['invoice_date'] ?? date('Y-m-d') ?>" required onchange="calculateDueDate()">
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="mb-3">
-                            <label class="form-label">Due Date <span class="text-danger">*</span></label>
-                            <input type="date" name="due_date" class="form-control" value="<?= $invoice['due_date'] ?? date('Y-m-d', strtotime('+30 days')) ?>" required>
+                            <label class="form-label text-primary">Due Date <span class="text-danger">*</span></label>
+                            <input type="date" name="due_date" id="dueDate" class="form-control fw-bold border-primary" value="<?= $invoice['due_date'] ?? date('Y-m-d', strtotime('+30 days')) ?>" required>
                         </div>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="mb-3">
-                            <label class="form-label">Reference Number</label>
+                            <label class="form-label">P.O number</label>
                             <input type="text" name="reference_number" class="form-control" value="<?= $invoice['reference_number'] ?? '' ?>" placeholder="e.g. PO number">
                         </div>
                     </div>
@@ -93,25 +93,13 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Waybill / LR No.</label>
-                            <input type="text" name="waybill_number" class="form-control" value="<?= $invoice['waybill_number'] ?? '' ?>" placeholder="e.g. 123456789">
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="mb-3">
-                            <label class="form-label">Waybill Date</label>
-                            <input type="date" name="waybill_date" class="form-control" value="<?= $invoice['waybill_date'] ?? '' ?>">
-                        </div>
-                    </div>
-                    <div class="col-md-2">
+                    <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label">E-Waybill No.</label>
                             <input type="text" name="ewaybill_number" class="form-control" value="<?= $invoice['ewaybill_number'] ?? '' ?>" placeholder="E-Waybill No">
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label">No. of Packages</label>
                             <input type="number" name="packages_count" class="form-control" value="<?= $invoice['packages_count'] ?? '' ?>" placeholder="Qty">
@@ -296,6 +284,21 @@
 <script>
 let rowIndex = <?= $invoice && !empty($invoice['items']) ? count($invoice['items']) : 1 ?>;
 let isInterState = false;
+let currentCreditDays = 0;
+
+function calculateDueDate() {
+    const invoiceDateVal = document.getElementById('invoiceDate').value;
+    if (!invoiceDateVal) return;
+    
+    const date = new Date(invoiceDateVal);
+    date.setDate(date.getDate() + parseInt(currentCreditDays));
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    document.getElementById('dueDate').value = `${year}-${month}-${day}`;
+}
 
 function addLineItem() {
     const tbody = document.getElementById('itemsBody');
@@ -456,7 +459,7 @@ function calculateTotals() {
     document.getElementById('totalAmount').value = netTotal.toFixed(2);
 }
 
-// Fetch customer state when customer is selected
+// Fetch customer state and info when customer is selected
 document.getElementById('customerSelect').addEventListener('change', function() {
     const customerId = this.value;
     if (!customerId) {
@@ -469,7 +472,20 @@ document.getElementById('customerSelect').addEventListener('change', function() 
         .then(response => response.json())
         .then(data => {
             isInterState = data.is_inter_state;
+            currentCreditDays = data.credit_period_days || 0;
+            calculateDueDate();
             calculateTotals();
+            
+            // Auto Select Agent if assigned to customer
+            if (data.agent_id) {
+                const agentSelect = $('#agentSelect');
+                agentSelect.val(data.agent_id).trigger('change');
+                
+                // Also update commission percent if provided
+                if (data.agent_commission) {
+                     $('#agentCommissionPercent').val(data.agent_commission);
+                }
+            }
         })
         .catch(error => {
             console.error('Error fetching customer state:', error);

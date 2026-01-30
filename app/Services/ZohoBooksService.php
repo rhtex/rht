@@ -311,4 +311,51 @@ class ZohoBooksService
         $url = $this->settings['api_base_url'] . '/salesorders/' . $zohoSalesOrderId . '/status/void';
         return $this->makeRequest($url, 'POST');
     }
+
+    // ==================== CREDIT NOTES (SALES RETURNS) API ====================
+
+    /**
+     * Get credit notes from Zoho Books
+     */
+    public function getCreditNotes($page = 1)
+    {
+        $url = $this->settings['api_base_url'] . '/creditnotes?page=' . $page;
+        return $this->makeRequest($url);
+    }
+
+    /**
+     * Get single credit note by Zoho ID
+     */
+    public function getCreditNoteById($zohoCreditNoteId)
+    {
+        $url = $this->settings['api_base_url'] . '/creditnotes/' . $zohoCreditNoteId;
+        return $this->makeRequest($url);
+    }
+
+    /**
+     * Create credit note in Zoho Books
+     */
+    public function createCreditNote($data)
+    {
+        $url = $this->settings['api_base_url'] . '/creditnotes';
+        return $this->makeRequest($url, 'POST', $data);
+    }
+
+    /**
+     * Update credit note in Zoho Books
+     */
+    public function updateCreditNote($zohoCreditNoteId, $data)
+    {
+        $url = $this->settings['api_base_url'] . '/creditnotes/' . $zohoCreditNoteId;
+        return $this->makeRequest($url, 'PUT', $data);
+    }
+
+    /**
+     * Void a credit note in Zoho Books
+     */
+    public function voidCreditNote($zohoCreditNoteId)
+    {
+        $url = $this->settings['api_base_url'] . '/creditnotes/' . $zohoCreditNoteId . '/status/void';
+        return $this->makeRequest($url, 'POST');
+    }
 }

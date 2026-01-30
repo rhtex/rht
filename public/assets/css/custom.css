@@ -62,14 +62,6 @@ h4,
     font-size: var(--font-size-table);
 }
 
-/* =============================
-     Sidebar & Navigation
-     ============================= */
-.nav-link p {
-    font-size: var(--font-size-sidebar);
-    /* Reduced sidebar font size */
-}
-
 .nav-link {
     padding-top: var(--nav-link-padding-top);
     padding-bottom: var(--nav-link-padding-bottom);
@@ -115,14 +107,10 @@ h4,
     }
 }
 
-.card-header .nav-item .nav-link {
-    color: white;
+.text-primary {
+    font-size: 16px;
 }
 
-.card-header .nav-item .nav-link:hover {
-    color: antiquewhite;
-}
-
-.card-header .nav-item .nav-link.active {
-    color: black;
+.btn {
+    font-size: 15px;
 }

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\CustomerModel;
+use App\Models\AgentModel;
 use App\Models\StateModel;
 use App\Models\AddressModel;
 use App\Services\ZohoBooksService;
@@ -11,32 +12,67 @@ class CustomerController extends BaseController
 {
     protected $customerModel;
     protected $stateModel;
+    protected $countryModel;
     protected $addressModel;
     protected $zohoService;
+    protected $agentModel;
 
     public function __construct()
     {
         $this->customerModel = new CustomerModel();
         $this->stateModel = new StateModel();
+        $this->countryModel = new \App\Models\CountryModel();
         $this->addressModel = new AddressModel();
         $this->zohoService = new ZohoBooksService();
+        $this->agentModel = new AgentModel();
     }
 
     public function index()
     {
-        $data['customers'] = $this->customerModel
-            ->select('customers.*, addresses.address_line1, addresses.city, states.name as state_name')
-            ->join('addresses', 'addresses.owner_id = customers.id AND addresses.owner_type = "customer" AND addresses.address_type = "billing" AND addresses.is_active = 1', 'left')
-            ->join('states', 'states.id = addresses.state_id', 'left')
-            ->findAll();
+        $limit = 25;
+        $page = $this->request->getGet('page') ?? 1;
+        $offset = ($page - 1) * $limit;
+
+        $filters = [
+            'search'     => $this->request->getGet('search'),
+            'agent_id'   => $this->request->getGet('agent_id'),
+            'status'     => $this->request->getGet('status'),
+            'sort_by'    => $this->request->getGet('sort_by'),
+            'sort_order' => $this->request->getGet('sort_order'),
+        ];
+
+        if ($this->request->isAJAX()) {
+            $customers = $this->customerModel->getCustomersWithFilters($filters, $limit, $offset);
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $customers,
+                'has_more' => count($customers) == $limit
+            ]);
+        }
+
+        $data['customers'] = $this->customerModel->getCustomersWithFilters($filters, $limit, 0);
+        $data['agents'] = $this->agentModel->findAll();
         $data['title'] = 'Customer Management';
+        $data['filters'] = $filters;
+        $data['has_more'] = count($data['customers']) == $limit;
+
         return view('customers/index', $data);
     }
 
     public function create()
     {
-        $data['states'] = $this->stateModel->orderBy('name', 'ASC')->findAll();
+        $data['countries'] = $this->countryModel->orderBy('CASE WHEN name = "India" THEN 0 ELSE 1 END', 'ASC', false)->orderBy('name', 'ASC')->findAll();
+        // Just fetch empty states or states for default country (India) if we want.
+        // For simplicity, let's pass all states or let JS handle it.
+        // Actually, better to pass all states if not too many, OR handle via AJAX.
+        // Existing code passed all states. Let's keep it but ideally we filter.
+        // If we want dynamic, we usually just pass empty array or default country states.
+        // Let's stick to existing pattern but add countries.
+        $data['states'] = $this->stateModel->orderBy('name', 'ASC')->findAll(); 
+        $data['agents'] = $this->agentModel->findAll();
         $data['title'] = 'Add New Customer';
+        $data['billing_address'] = [];
+        $data['shipping_address'] = [];
         return view('customers/form', $data);
     }
 
@@ -74,13 +110,26 @@ class CustomerController extends BaseController
             return redirect()->to('customers')->with('error', 'Customer not found.');
         }
 
+        $data['agent'] = null;
+        if (!empty($data['customer']['agent_id'])) {
+            $data['agent'] = $this->agentModel->find($data['customer']['agent_id']);
+        }
+
         $data['billing_address'] = $this->addressModel->getActiveAddress('customer', $id, 'billing');
         $data['shipping_address'] = $this->addressModel->getActiveAddress('customer', $id, 'shipping');
+        
+        $data['billing_country'] = null;
+        $data['billing_state'] = null;
+        $data['shipping_country'] = null;
+        $data['shipping_state'] = null;
+
         if ($data['billing_address']) {
             $data['billing_state'] = $this->stateModel->find($data['billing_address']['state_id']);
+            $data['billing_country'] = $this->countryModel->find($data['billing_address']['country_id']);
         }
          if ($data['shipping_address']) {
             $data['shipping_state'] = $this->stateModel->find($data['shipping_address']['state_id']);
+            $data['shipping_country'] = $this->countryModel->find($data['shipping_address']['country_id']);
         }
 
         // Fetch Transactions
@@ -102,6 +151,13 @@ class CustomerController extends BaseController
                                          ->orderBy('payment_date', 'DESC')
                                          ->findAll();
 
+        $returnModel = new \App\Models\SalesReturnModel();
+        $data['returns'] = $returnModel->getReturnsByCustomer($id);
+
+        // Calculate Pending Balance (matching Model logic)
+        $vendorWithBalance = $this->customerModel->getCustomersWithFilters(['search' => $data['customer']['name']], 1, 0);
+        $data['pending_balance'] = !empty($vendorWithBalance) ? $vendorWithBalance[0]['pending_balance'] : 0;
+
         $data['title'] = $data['customer']['name'];
         return view('customers/view', $data);
     }
@@ -116,7 +172,9 @@ class CustomerController extends BaseController
         $data['billing_address'] = $this->addressModel->getActiveAddress('customer', $id, 'billing');
         $data['shipping_address'] = $this->addressModel->getActiveAddress('customer', $id, 'shipping');
 
+        $data['countries'] = $this->countryModel->orderBy('CASE WHEN name = "India" THEN 0 ELSE 1 END', 'ASC', false)->orderBy('name', 'ASC')->findAll();
         $data['states'] = $this->stateModel->orderBy('name', 'ASC')->findAll();
+        $data['agents'] = $this->agentModel->findAll();
         $data['title'] = 'Edit Customer';
         return view('customers/form', $data);
     }
@@ -182,7 +240,7 @@ class CustomerController extends BaseController
                 'city'    => $billing['city'] ?? '',
                 'state'   => $billingState['name'] ?? '',
                 'zip'     => $billing['pincode'] ?? '',
-                'country' => 'India'
+                'country' => 'India' // Still hardcoded for Zoho push per simplified requirement? Or should I change this too? Use logic.
             ],
             'shipping_address' => [
                 'address' => $shipping['address_line1'] ?? '',
@@ -193,6 +251,16 @@ class CustomerController extends BaseController
                 'country' => 'India'
             ]
         ];
+        
+        // Update country for Zoho push
+        if ($billing && isset($billing['country_id'])) {
+             $c = $this->countryModel->find($billing['country_id']);
+             if ($c) $data['billing_address']['country'] = $c['name'];
+        }
+        if ($shipping && isset($shipping['country_id'])) {
+             $c = $this->countryModel->find($shipping['country_id']);
+             if ($c) $data['shipping_address']['country'] = $c['name'];
+        }
 
         $response = $this->zohoService->pushContact($data, $customer['zoho_contact_id']);
         
@@ -279,6 +347,10 @@ class CustomerController extends BaseController
         $stateName = $zohoAddr['state'] ?? '';
         $state = $this->stateModel->where('name', $stateName)->first();
         
+        $countryName = $zohoAddr['country'] ?? 'India'; // Default to India if not provided?
+        $country = $this->countryModel->where('name', $countryName)->first();
+        $countryId = $country ? $country['id'] : 1; // Default to 1 (India) if not found
+
         $newData = [
             'owner_type'    => $ownerType,
             'owner_id'      => $ownerId,
@@ -288,7 +360,7 @@ class CustomerController extends BaseController
             'city'          => $zohoAddr['city'] ?? '',
             'pincode'       => $zohoAddr['zip'] ?? '',
             'state_id'      => $state['id'] ?? null,
-            'country_id'    => 1,
+            'country_id'    => $countryId,
             'is_active'     => 1
         ];
 
@@ -296,7 +368,7 @@ class CustomerController extends BaseController
         
         if ($existing) {
             $isChanged = false;
-            foreach (['address_line1', 'city', 'pincode', 'state_id'] as $field) {
+            foreach (['address_line1', 'city', 'pincode', 'state_id', 'country_id'] as $field) {
                 if (($existing[$field] ?? '') != ($newData[$field] ?? '')) {
                     $isChanged = true;
                     break;
@@ -327,7 +399,7 @@ class CustomerController extends BaseController
             'city'          => $this->request->getPost('billing_city'),
             'state_id'      => $this->request->getPost('billing_state_id'),
             'pincode'       => $this->request->getPost('billing_pincode'),
-            'country_id'    => 1, // India
+            'country_id'    => $this->request->getPost('billing_country_id') ?: 1,
             'is_active'     => 1
         ];
 
@@ -335,7 +407,7 @@ class CustomerController extends BaseController
         
         if ($existingBilling) {
             $isChanged = false;
-            foreach (['address_line1', 'address_line2', 'city', 'state_id', 'pincode'] as $field) {
+            foreach (['address_line1', 'address_line2', 'city', 'state_id', 'pincode', 'country_id'] as $field) {
                 if (($existingBilling[$field] ?? '') != ($billingData[$field] ?? '')) {
                     $isChanged = true;
                     break;
@@ -361,7 +433,7 @@ class CustomerController extends BaseController
                 'city'          => $this->request->getPost('shipping_city'),
                 'state_id'      => $this->request->getPost('shipping_state_id'),
                 'pincode'       => $this->request->getPost('shipping_pincode'),
-                'country_id'    => 1,
+                'country_id'    => $this->request->getPost('shipping_country_id') ?: 1,
                 'is_active'     => 1
             ];
 
@@ -369,7 +441,7 @@ class CustomerController extends BaseController
             
             if ($existingShipping) {
                 $isChanged = false;
-                foreach (['address_line1', 'address_line2', 'city', 'state_id', 'pincode'] as $field) {
+                foreach (['address_line1', 'address_line2', 'city', 'state_id', 'pincode', 'country_id'] as $field) {
                     if (($existingShipping[$field] ?? '') != ($shippingData[$field] ?? '')) {
                         $isChanged = true;
                         break;

@@ -15,8 +15,15 @@ class WeaverController extends BaseController
 
     public function index()
     {
-        $data['weavers'] = $this->weaverModel->orderBy('created_at', 'DESC')->findAll();
+        $filters = [
+            'search' => $this->request->getGet('search'),
+            'status' => $this->request->getGet('status'),
+        ];
+
+        $data['weavers'] = $this->weaverModel->getWeaversWithFilters($filters);
         $data['title'] = 'Weavers';
+        $data['filters'] = $filters;
+
         return view('production/weavers/index', $data);
     }
 

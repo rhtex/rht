@@ -22,10 +22,16 @@ class LoanController extends BaseController
 
     public function index()
     {
-        $data['loans'] = $this->loanModel->select('loans.*, employees.first_name, employees.last_name')
-            ->join('employees', 'employees.id = loans.employee_id')
-            ->orderBy('id', 'DESC')
-            ->findAll();
+        $filters = [
+            'employee_id'   => $this->request->getGet('employee_id'),
+            'status'        => $this->request->getGet('status'),
+            'credit_status' => $this->request->getGet('credit_status'),
+        ];
+
+        $data['loans'] = $this->loanModel->getLoansWithFilters($filters);
+        $data['employees'] = $this->employeeModel->where('status', 'active')->orderBy('first_name', 'ASC')->findAll();
+        $data['title'] = 'Loans';
+        $data['filters'] = $filters;
         
         return view('loans/index', $data);
     }

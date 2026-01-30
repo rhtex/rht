@@ -29,7 +29,7 @@
                     <table class="table table-sm">
                         <tr><th width="40%">Quotation #:</th><td class="fw-bold"><?= esc($quotation['quotation_number']) ?></td></tr>
                         <tr><th>Customer:</th><td><?= esc($quotation['customer_name']) ?></td></tr>
-                        <tr><th>Reference:</th><td><?= esc($quotation['reference_number']) ?: '-' ?></td></tr>
+                        <tr><th>P.O number:</th><td><?= esc($quotation['reference_number']) ?: '-' ?></td></tr>
                         <tr><th>Status:</th>
                             <td>
                                 <?php

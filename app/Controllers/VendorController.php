@@ -30,12 +30,31 @@ class VendorController extends BaseController
 
     public function index()
     {
-        $data['vendors'] = $this->vendorModel
-            ->select('vendors.*, addresses.address_line1, addresses.city, states.name as state_name')
-            ->join('addresses', 'addresses.owner_id = vendors.id AND addresses.owner_type = "vendor" AND addresses.address_type = "billing" AND addresses.is_active = 1', 'left')
-            ->join('states', 'states.id = addresses.state_id', 'left')
-            ->findAll();
+        $limit = 25;
+        $page = $this->request->getGet('page') ?? 1;
+        $offset = ($page - 1) * $limit;
+
+        $filters = [
+            'search'     => $this->request->getGet('search'),
+            'status'     => $this->request->getGet('status'),
+            'sort_by'    => $this->request->getGet('sort_by'),
+            'sort_order' => $this->request->getGet('sort_order'),
+        ];
+
+        if ($this->request->isAJAX()) {
+            $vendors = $this->vendorModel->getVendorsWithFilters($filters, $limit, $offset);
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $vendors,
+                'has_more' => count($vendors) == $limit
+            ]);
+        }
+
+        $data['vendors'] = $this->vendorModel->getVendorsWithFilters($filters, $limit, 0);
         $data['title'] = 'Vendor Management';
+        $data['filters'] = $filters;
+        $data['has_more'] = count($data['vendors']) == $limit;
+
         return view('vendors/index', $data);
     }
 
@@ -111,6 +130,47 @@ class VendorController extends BaseController
         $this->pushToZoho($id);
 
         return redirect()->to('vendors')->with('success', 'Vendor updated successfully.');
+    }
+
+    public function view($id)
+    {
+        $data['vendor'] = $this->vendorModel->find($id);
+        if (!$data['vendor']) {
+            return redirect()->to('vendors')->with('error', 'Vendor not found.');
+        }
+
+        // Get Address
+        $data['billing_address'] = $this->addressModel->getActiveAddress('vendor', $id, 'billing');
+        $data['billing_state'] = $data['billing_address'] ? $this->stateModel->find($data['billing_address']['state_id']) : null;
+
+        // Fetch Transactions
+        $billModel = new \App\Models\BillModel();
+        $data['bills'] = $billModel->where('vendor_id', $id)->orderBy('bill_date', 'DESC')->findAll();
+
+        $paymentModel = new \App\Models\PaymentModel();
+        $data['payments'] = $paymentModel->getPaymentsByVendor($id);
+
+        $data['credits'] = $this->creditModel->getCreditsByVendor($id);
+        $data['available_credit'] = $this->creditModel->getAvailableBalance($id);
+
+        $shipmentModel = new \App\Models\ReturnShipmentModel();
+        $data['shipments'] = $shipmentModel->where('vendor_id', $id)->orderBy('created_at', 'DESC')->findAll();
+
+        // Pending Balance calculation (matching Model logic)
+        $pendingBalanceSql = "(
+            CASE 
+                WHEN balance_type = 'Dr' THEN -opening_balance 
+                ELSE opening_balance 
+            END + 
+            COALESCE((SELECT SUM(balance) FROM bills WHERE vendor_id = vendors.id), 0)
+        )";
+        // Since we already have the vendor, let's just do a manual calc or fetch again with calc.
+        // Easiest is to use the model method we just added but for a single vendor.
+        $vendorWithBalance = $this->vendorModel->getVendorsWithFilters(['search' => $data['vendor']['name']], 1, 0);
+        $data['pending_balance'] = !empty($vendorWithBalance) ? $vendorWithBalance[0]['pending_balance'] : 0;
+
+        $data['title'] = $data['vendor']['name'];
+        return view('vendors/view', $data);
     }
 
     public function delete($id)
@@ -482,25 +542,113 @@ class VendorController extends BaseController
 
     public function listShipments()
     {
+        $limit = 25;
+        $offset = intval($this->request->getGet('offset') ?? 0);
+        
+        $vendor_id = $this->request->getGet('vendor_id');
+        $delivery_status = $this->request->getGet('delivery_status');
+        $search = $this->request->getGet('search');
+
         $shipmentModel = new \App\Models\ReturnShipmentModel();
-        $data['shipments'] = $shipmentModel->getShipmentsWithVendor();
-        $data['title'] = 'Return Shipments';
+        $vendorModel = new \App\Models\VendorModel();
+
+        $builder = $shipmentModel->select('return_shipments.*, vendors.name as vendor_name')
+                                 ->join('vendors', 'vendors.id = return_shipments.vendor_id', 'left');
+
+        // Apply filters
+        if ($vendor_id !== null && $vendor_id !== '') {
+            $builder->where('return_shipments.vendor_id', $vendor_id);
+        }
+        if ($delivery_status !== null && $delivery_status !== '') {
+            $builder->where('return_shipments.delivery_status', $delivery_status);
+        }
+        if ($search !== null && $search !== '') {
+            $builder->like('return_shipments.reference_no', $search);
+        }
+
+        $countBuilder = clone $builder;
+        $totalResults = $countBuilder->countAllResults(false);
+
+        $shipments = $builder->orderBy('return_shipments.created_at', 'DESC')
+                             ->findAll($limit, $offset);
+
+        $data = [
+            'title'           => 'Return Shipments',
+            'shipments'       => $shipments,
+            'vendors'         => $vendorModel->where('status', 'active')->findAll(),
+            'total_count'     => $totalResults,
+            'filters'         => [
+                'vendor_id'       => $vendor_id,
+                'delivery_status' => $delivery_status,
+                'search'          => $search,
+            ],
+            'limit'           => $limit,
+            'offset'          => $offset,
+            'has_more'        => ($offset + $limit) < $totalResults
+        ];
+
+        if ($this->request->isAJAX()) {
+            return view('vendors/return_shipment_rows', $data);
+        }
+        
         return view('vendors/return_shipments', $data);
     }
 
     public function updateShipment($id)
     {
         $shipmentModel = new \App\Models\ReturnShipmentModel();
+        $shipment = $shipmentModel->find($id);
+        
+        if (!$shipment) {
+            return redirect()->back()->with('error', 'Shipment not found.');
+        }
+
+        $validationRules = [
+            'transport_name'  => 'required',
+            'waybill_number'  => 'required',
+            'waybill_date'    => 'required|valid_date',
+            'waybill_image'   => 'permit_empty|max_size[waybill_image,2048]|is_image[waybill_image]'
+        ];
+
+        if (!$this->validate($validationRules)) {
+            return redirect()->back()->with('error', 'Validation failed: ' . implode(', ', $this->validator->getErrors()));
+        }
+
         $data = [
-            'transport_name' => $this->request->getPost('transport_name'),
-            'waybill_number' => $this->request->getPost('waybill_number'),
-            'waybill_date' => $this->request->getPost('waybill_date') ?: null,
+            'transport_name'  => $this->request->getPost('transport_name'),
+            'waybill_number'  => $this->request->getPost('waybill_number'),
+            'waybill_date'    => $this->request->getPost('waybill_date') ?: null,
             'ewaybill_number' => $this->request->getPost('ewaybill_number'),
-            'packages_count' => $this->request->getPost('packages_count') ?: null,
-            'status' => $this->request->getPost('status')
+            'packages_count'  => $this->request->getPost('packages_count') ?: null,
+        ];
+
+        $img = $this->request->getFile('waybill_image');
+        if ($img && $img->isValid() && !$img->hasMoved()) {
+            $newName = $img->getRandomName();
+            $img->move(ROOTPATH . 'public/uploads/vendor_returns', $newName);
+            $data['waybill_image'] = $newName;
+        }
+        
+        $shipmentModel->update($id, $data);
+        return redirect()->back()->with('success', 'Waybill information updated successfully.');
+    }
+
+    public function updateShipmentStatus($id)
+    {
+        $shipmentModel = new \App\Models\ReturnShipmentModel();
+        $shipment = $shipmentModel->find($id);
+        
+        if (!$shipment) {
+            return redirect()->back()->with('error', 'Shipment not found.');
+        }
+
+        $status = $this->request->getPost('delivery_status');
+        $data = [
+            'delivery_status' => $status,
+            'status' => ($status == 'Completed') ? 'Delivered' : 'Shipped'
         ];
         
         $shipmentModel->update($id, $data);
-        return redirect()->back()->with('success', 'Shipment updated successfully.');
+        return redirect()->back()->with('success', 'Shipment status updated successfully.');
     }
 }

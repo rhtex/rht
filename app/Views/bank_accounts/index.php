@@ -16,6 +16,34 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<div class="card card-outline card-primary mb-3">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-filter me-1"></i> Filters</h3>
+    </div>
+    <div class="card-body">
+        <form action="<?= site_url('bank_accounts') ?>" method="get" class="row g-3">
+            <div class="col-md-6">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" name="search" id="search" class="form-control" placeholder="Search by name, account #, or branch..." value="<?= $filters['search'] ?>">
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="active" <?= $filters['status'] == 'active' ? 'selected' : '' ?>>Active</option>
+                    <option value="inactive" <?= $filters['status'] == 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <div class="btn-group w-100">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                    <a href="<?= site_url('bank_accounts') ?>" class="btn btn-secondary"><i class="fas fa-undo"></i> Reset</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card card-outline card-primary">
     <div class="card-header">
         <h3 class="card-title">List of Bank Accounts</h3>

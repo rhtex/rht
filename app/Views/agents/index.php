@@ -18,6 +18,23 @@
 
 <div class="content">
     <div class="container-fluid">
+        <div class="card mb-3">
+            <div class="card-body">
+                <form action="<?= site_url('agents') ?>" method="get" class="row g-3">
+                    <div class="col-md-9">
+                        <label for="search" class="form-label">Search</label>
+                        <input type="text" name="search" id="search" class="form-control" placeholder="Search by name, phone, or city..." value="<?= $filters['search'] ?>">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="btn-group w-100">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                            <a href="<?= site_url('agents') ?>" class="btn btn-secondary"><i class="fas fa-undo"></i> Reset</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-body p-0">
                 <table class="table table-striped">

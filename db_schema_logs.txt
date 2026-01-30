@@ -1,0 +1,142 @@
+--- TABLE: bank_transactions ---
+id                   int(11) unsigned     NO        
+bank_account_id      int(11) unsigned     NO        
+transaction_date     date                 NO        
+description          varchar(255)         YES       
+type                 enum('credit','debit') NO        
+amount               decimal(15,2)        NO        
+reference_number     varchar(100)         YES       
+balance_after        decimal(15,2)        NO        
+created_at           datetime             YES       
+updated_at           datetime             YES       
+
+--- TABLE: invoice_payments ---
+id                   int(11) unsigned     NO        
+invoice_id           int(11) unsigned     NO        
+customer_id          int(11) unsigned     NO        
+bank_account_id      int(11) unsigned     YES       
+payment_number       varchar(50)          NO        
+payment_date         date                 NO        
+payment_mode         varchar(50)          NO        
+amount               decimal(12,2)        NO        
+discount_amount      decimal(12,2)        NO        
+mahimai_amount       decimal(12,2)        NO        
+postal_charges       decimal(12,2)        NO        
+reference_number     varchar(100)         YES       
+zoho_payment_id      varchar(100)         YES       
+zoho_sync_status     enum('Pending','Synced','Failed') NO        
+notes                text                 YES       
+created_by           int(11) unsigned     YES       
+updated_by           int(11) unsigned     YES       
+zoho_sync_at         datetime             YES       
+created_at           datetime             YES       
+updated_at           datetime             YES       
+
+--- TABLE: payments ---
+id                   int(11) unsigned     NO        
+bill_id              int(11) unsigned     NO        
+vendor_id            int(11) unsigned     NO        
+zoho_payment_id      varchar(100)         YES       
+bank_transaction_id  int(11) unsigned     YES       
+payment_number       varchar(50)          NO        
+payment_date         date                 NO        
+payment_mode         enum('Cash','Bank Transfer','Cheque','Credit Card','Debit Card','UPI','Other') YES       
+amount               decimal(12,2)        YES       
+discount_amount      decimal(12,2)        YES       
+mahimai_amount       decimal(12,2)        YES       
+postal_charges       decimal(12,2)        YES       
+reference_number     varchar(100)         YES       
+bank_account_id      int(11) unsigned     YES       
+zoho_sync_status     enum('Pending','Synced','Failed') YES       
+notes                text                 YES       
+created_by           int(11) unsigned     YES       
+updated_by           int(11) unsigned     YES       
+zoho_sync_at         datetime             YES       
+created_at           datetime             YES       
+updated_at           datetime             YES       
+
+--- TABLE: expenses ---
+id                   int(11) unsigned     NO        
+expense_date         date                 NO        
+category_id          int(11) unsigned     YES       
+category             varchar(100)         NO        
+amount               decimal(15,2)        NO        
+description          text                 YES       
+payment_mode         varchar(50)          NO        
+bank_account_id      int(11) unsigned     YES       
+reference_number     varchar(100)         YES       
+created_at           datetime             YES       
+updated_at           datetime             YES       
+
+--- TABLE: invoices ---
+id                   int(11) unsigned     NO        
+customer_id          int(11) unsigned     NO        
+agent_id             int(11) unsigned     YES       
+agent_commission_percent decimal(5,2)         YES       
+agent_commission_amount decimal(15,2)        YES       
+agent_commission_status enum('Unpaid','Paid') YES       
+agent_commission_paid_at datetime             YES       
+invoice_number       varchar(50)          NO        
+zoho_invoice_id      varchar(100)         YES       
+zoho_sync_status     enum('Pending','Synced','Failed') NO        
+invoice_date         date                 NO        
+due_date             date                 NO        
+reference_number     varchar(100)         YES       
+transport_name       varchar(150)         YES       
+waybill_number       varchar(50)          YES       
+packages_count       int(11)              YES       
+waybill_date         date                 YES       
+ewaybill_number      varchar(50)          YES       
+waybill_image        varchar(255)         YES       
+delivery_status      enum('Pending','In Transit','Delivered','Cancelled') YES       
+status               enum('Draft','Open','Paid','Partially Paid','Overdue','Void') NO        
+subtotal             decimal(12,2)        NO        
+discount_amount      decimal(12,2)        NO        
+discount_type        enum('Fixed','Percentage') NO        
+shipping_charge      decimal(12,2)        NO        
+cgst_amount          decimal(12,2)        NO        
+sgst_amount          decimal(12,2)        NO        
+igst_amount          decimal(12,2)        NO        
+tax_amount           decimal(12,2)        NO        
+roundoff_amount      decimal(12,2)        NO        
+total_amount         decimal(12,2)        NO        
+paid_amount          decimal(12,2)        NO        
+balance              decimal(12,2)        NO        
+notes                text                 YES       
+terms                text                 YES       
+created_by           int(11) unsigned     YES       
+updated_by           int(11) unsigned     YES       
+zoho_sync_at         datetime             YES       
+created_at           datetime             YES       
+updated_at           datetime             YES       
+
+--- TABLE: bills ---
+id                   int(11) unsigned     NO        
+vendor_id            int(11) unsigned     NO        
+bill_number          varchar(50)          NO        
+zoho_bill_id         varchar(100)         YES       
+zoho_sync_status     enum('Pending','Synced','Failed') YES       
+bill_date            date                 NO        
+due_date             date                 NO        
+reference_number     varchar(100)         YES       
+status               enum('Draft','Open','Paid','Partially Paid','Overdue','Void') YES       
+subtotal             decimal(12,2)        YES       
+discount_amount      decimal(12,2)        YES       
+discount_type        enum('Amount','Percentage') YES       
+shipping_charge      decimal(12,2)        YES       
+roundoff_amount      decimal(10,2)        YES       
+cgst_amount          decimal(12,2)        YES       
+sgst_amount          decimal(12,2)        YES       
+igst_amount          decimal(12,2)        YES       
+tax_amount           decimal(12,2)        YES       
+total_amount         decimal(12,2)        YES       
+paid_amount          decimal(12,2)        YES       
+balance              decimal(12,2)        YES       
+notes                text                 YES       
+terms                text                 YES       
+created_by           int(11) unsigned     YES       
+updated_by           int(11) unsigned     YES       
+zoho_sync_at         datetime             YES       
+created_at           datetime             YES       
+updated_at           datetime             YES       
+

@@ -40,7 +40,36 @@ class EmployeeModel extends Model
         'basic_salary'  => 'required|numeric',
         'daily_working_hours' => 'required|numeric',
         'employment_type' => 'required|in_list[Permanent,Temporary]',
-        // Images (handled in Controller/Service, but rules here for basics)
-        // 'photo' => 'uploaded[photo]|max_size[photo,2048]|is_image[photo]' // Validating file uploads in model can be tricky if optional on edit
     ];
+
+    /**
+     * Get employees with filters
+     */
+    public function getEmployeesWithFilters($filters = [])
+    {
+        $builder = $this->select('employees.*, users.id as user_id, states.name as state_name, countries.name as country_name')
+                        ->join('users', 'users.employee_id = employees.id', 'left')
+                        ->join('states', 'states.id = employees.state_id', 'left')
+                        ->join('countries', 'countries.id = employees.country_id', 'left')
+                        ->where('employees.deleted_at', null);
+
+        if (!empty($filters['search'])) {
+            $builder->groupStart()
+                    ->like('first_name', $filters['search'])
+                    ->orLike('last_name', $filters['search'])
+                    ->orLike('mobile_number', $filters['search'])
+                    ->orLike('email', $filters['search'])
+                    ->groupEnd();
+        }
+
+        if (!empty($filters['status'])) {
+            $builder->where('employees.status', $filters['status']);
+        }
+
+        if (!empty($filters['employment_type'])) {
+            $builder->where('employees.employment_type', $filters['employment_type']);
+        }
+
+        return $builder->orderBy('first_name', 'ASC')->findAll();
+    }
 }

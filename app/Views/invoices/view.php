@@ -46,7 +46,7 @@
                     <table class="table table-sm">
                         <tr><th width="40%">Invoice Number:</th><td class="fw-bold"><?= esc($invoice['invoice_number']) ?></td></tr>
                         <tr><th>Customer:</th><td><?= esc($invoice['customer_name']) ?></td></tr>
-                        <tr><th>Reference Number:</th><td><?= esc($invoice['reference_number']) ?: '-' ?></td></tr>
+                        <tr><th>P.O number:</th><td><?= esc($invoice['reference_number']) ?: '-' ?></td></tr>
                         <tr><th>Status:</th>
                             <td>
                                 <?php
@@ -65,6 +65,32 @@
                         </tr>
                         <tr><th>Transport:</th><td><?= esc($invoice['transport_name']) ?: '-' ?></td></tr>
                         <tr><th>Waybill / LR:</th><td><?= esc($invoice['waybill_number']) ?: '-' ?></td></tr>
+                        <tr><th>Waybill Date:</th><td><?= $invoice['waybill_date'] ? date('d/m/Y', strtotime($invoice['waybill_date'])) : '-' ?></td></tr>
+                        <tr>
+                            <th>Delivery Status:</th>
+                            <td>
+                                <?php
+                                $delStatusColors = [
+                                    'Pending' => 'secondary',
+                                    'In Transit' => 'primary',
+                                    'Delivered' => 'success',
+                                    'Cancelled' => 'danger'
+                                ];
+                                $delColor = $delStatusColors[$invoice['delivery_status']] ?? 'secondary';
+                                ?>
+                                <span class="badge bg-<?= $delColor ?>"><?= esc($invoice['delivery_status']) ?></span>
+                            </td>
+                        </tr>
+                        <?php if ($invoice['waybill_image']): ?>
+                            <tr>
+                                <th>Waybill Image:</th>
+                                <td>
+                                    <a href="<?= base_url('uploads/waybills/' . $invoice['waybill_image']) ?>" target="_blank">
+                                        <img src="<?= base_url('uploads/waybills/' . $invoice['waybill_image']) ?>" alt="Waybill" style="max-width: 150px; cursor: pointer;" class="img-thumbnail">
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
                     </table>
                 </div>
                 <div class="col-md-6">
@@ -88,6 +114,44 @@
             </div>
         </div>
     </div>
+
+    <!-- Delivery History Timeline -->
+    <div class="card card-outline card-info mt-3">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-history"></i> Delivery History</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="timeline-v2">
+                <?php if (empty($history)): ?>
+                    <p class="text-muted text-center p-3">No tracking history available yet.</p>
+                <?php else: ?>
+                    <?php foreach ($history as $h): ?>
+                        <div class="timeline-item">
+                            <div class="timeline-date"><?= date('d/m/Y H:i', strtotime($h['created_at'])) ?> by <?= esc($h['user_name'] ?: 'System') ?></div>
+                            <div class="timeline-content">
+                                <span class="timeline-status text-primary"><?= esc($h['status']) ?></span>
+                                <div class="mt-1"><?= esc($h['description']) ?></div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    .timeline-v2 { position: relative; padding: 10px 0; }
+    .timeline-item { padding: 10px 0 10px 40px; position: relative; border-left: 2px solid #e9ecef; margin-left: 20px; }
+    .timeline-item::before { content: ''; position: absolute; left: -9px; top: 15px; width: 16px; height: 16px; border-radius: 50%; background: #007bff; border: 3px solid #fff; }
+    .timeline-date { font-size: 0.85rem; color: #6c757d; margin-bottom: 5px; }
+    .timeline-content { background: #f8f9fa; padding: 10px 15px; border-radius: 8px; }
+    .timeline-status { font-weight: 600; color: #343a40; }
+    </style>
 
     <!-- Agent Commission Information -->
     <?php if (!empty($invoice['agent_id']) && !empty($agent)): ?>

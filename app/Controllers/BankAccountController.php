@@ -15,8 +15,15 @@ class BankAccountController extends BaseController
 
     public function index()
     {
-        $data['accounts'] = $this->bankAccountModel->findAll();
+        $filters = [
+            'search' => $this->request->getGet('search'),
+            'status' => $this->request->getGet('status'),
+        ];
+
+        $data['accounts'] = $this->bankAccountModel->getAccountsWithFilters($filters);
         $data['title'] = 'Bank Accounts';
+        $data['filters'] = $filters;
+
         return view('bank_accounts/index', $data);
     }
 

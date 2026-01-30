@@ -24,13 +24,16 @@ class EmployeeController extends BaseController
 
     public function index()
     {
-        $data['employees'] = $this->employeeModel
-            ->select('employees.*, users.id as user_id, states.name as state_name, countries.name as country_name')
-            ->join('users', 'users.employee_id = employees.id', 'left')
-            ->join('states', 'states.id = employees.state_id', 'left')
-            ->join('countries', 'countries.id = employees.country_id', 'left')
-            ->where('employees.deleted_at', null)
-            ->findAll();
+        $filters = [
+            'search'          => $this->request->getGet('search'),
+            'status'          => $this->request->getGet('status'),
+            'employment_type' => $this->request->getGet('employment_type'),
+        ];
+
+        $data['employees'] = $this->employeeModel->getEmployeesWithFilters($filters);
+        $data['title'] = 'Employees';
+        $data['filters'] = $filters;
+
         return view('employees/index', $data);
     }
 

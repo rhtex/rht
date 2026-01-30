@@ -257,7 +257,7 @@
         <div class="totals-section">
             <div class="totals-table">
                 <div class="totals-row">
-                    <span>Invoice Subtotal:</span>
+                    <span>Total Sales Value:</span>
                     <span>₹<?= number_format($totalInvoices, 2) ?></span>
                 </div>
                 <div class="totals-row">

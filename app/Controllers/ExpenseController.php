@@ -11,21 +11,33 @@ class ExpenseController extends BaseController
     protected $expenseModel;
     protected $bankAccountModel;
 
+    protected $accountingModel;
+
     public function __construct()
     {
         $this->expenseModel = new ExpenseModel();
         $this->bankAccountModel = new BankAccountModel();
+        $this->accountingModel = new \App\Models\AccountingModel();
     }
 
     public function index()
     {
-        $data['expenses'] = $this->expenseModel
-            ->select('expenses.*, bank_accounts.bank_name, bank_accounts.account_number, expense_categories.category_name')
-            ->join('bank_accounts', 'bank_accounts.id = expenses.bank_account_id', 'left')
-            ->join('expense_categories', 'expense_categories.id = expenses.category_id', 'left')
-            ->orderBy('expense_date', 'DESC')
-            ->findAll();
+        $filters = [
+            'category_id'     => $this->request->getGet('category_id'),
+            'bank_account_id' => $this->request->getGet('bank_account_id'),
+            'date_from'       => $this->request->getGet('date_from'),
+            'date_to'         => $this->request->getGet('date_to'),
+        ];
+
+        $data['expenses'] = $this->expenseModel->getExpensesWithFilters($filters);
+        
+        $categoryModel = new ExpenseCategoryModel();
+        $data['categories'] = $categoryModel->where('status', 'active')->orderBy('category_name', 'ASC')->findAll();
+        $data['bank_accounts'] = $this->bankAccountModel->where('status', 'active')->orderBy('bank_name', 'ASC')->findAll();
+        
         $data['title'] = 'Expense Management';
+        $data['filters'] = $filters;
+        
         return view('expenses/index', $data);
     }
 
@@ -44,7 +56,22 @@ class ExpenseController extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->expenseModel->errors());
         }
 
+        $expenseId = $this->expenseModel->getInsertID();
         $data = $this->request->getPost();
+
+        // --- ACCOUNTING LEDGER ---
+        $categoryModel = new ExpenseCategoryModel();
+        $cat = $categoryModel->find($data['category_id']);
+        $categoryName = $cat ? $cat['category_name'] : 'General Expense';
+        
+        // Ensure category account exists or use generic
+        $paymentAccount = (strpos(strtolower($data['payment_mode']), 'cash') !== false) ? 'Cash' : 'Bank Account';
+        
+        // Dr Expense
+        $this->accountingModel->postEntry($categoryName, $data['expense_date'], $data['amount'], 0, $data['description'], 'expense', $expenseId);
+        // Cr Bank/Cash
+        $this->accountingModel->postEntry($paymentAccount, $data['expense_date'], 0, $data['amount'], "Expense: $categoryName", 'expense', $expenseId);
+        // ------------------------
 
         // Optional: Deduct from bank balance if bank_account_id is provided
         if (!empty($data['bank_account_id'])) {

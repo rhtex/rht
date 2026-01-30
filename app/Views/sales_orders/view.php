@@ -29,7 +29,7 @@
                     <table class="table table-sm">
                         <tr><th width="40%">Order #:</th><td class="fw-bold"><?= esc($order['sales_order_number']) ?></td></tr>
                         <tr><th>Customer:</th><td><?= esc($order['customer_name']) ?></td></tr>
-                        <tr><th>Reference:</th><td><?= esc($order['reference_number']) ?: '-' ?></td></tr>
+                        <tr><th>P.O number:</th><td><?= esc($order['reference_number']) ?: '-' ?></td></tr>
                         <tr><th>Status:</th>
                             <td>
                                 <?php

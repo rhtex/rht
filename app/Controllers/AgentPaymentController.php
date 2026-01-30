@@ -16,6 +16,8 @@ class AgentPaymentController extends BaseController
     protected $invoiceModel;
     protected $bankModel;
 
+    protected $accountingModel;
+
     public function __construct()
     {
         $this->paymentModel = new AgentPaymentModel();
@@ -23,25 +25,112 @@ class AgentPaymentController extends BaseController
         $this->agentModel = new AgentModel();
         $this->invoiceModel = new InvoiceModel();
         $this->bankModel = new BankAccountModel();
+        $this->accountingModel = new \App\Models\AccountingModel();
     }
 
     /**
      * List all agent payments
      */
+    public function datatable()
+    {
+        $request = \Config\Services::request();
+        
+        $start = $request->getGet('start');
+        $length = $request->getGet('length');
+        $search = $request->getGet('search')['value'] ?? '';
+        $order = $request->getGet('order');
+
+        $data = $this->paymentModel->getDatatablePayments($start, $length, $search, $order);
+        $totalRecords = $this->paymentModel->countAll();
+        $filteredRecords = $this->paymentModel->countDatatableFiltered($search);
+        
+        // Format data for DataTables
+        $formattedData = [];
+        foreach ($data as $row) {
+            $formattedData[] = [
+                '<strong>' . esc($row['payment_number']) . '</strong>',
+                date('d/m/Y', strtotime($row['payment_date'])),
+                esc($row['agent_name']),
+                esc($row['phone_number']),
+                '<span class="badge text-bg-info">' . esc($row['payment_mode']) . '</span>',
+                esc($row['reference_number']) ?: '-',
+                '<div class="text-end fw-bold">₹' . number_format($row['amount'], 2) . '</div>',
+                '<div class="text-center">
+                    <div class="btn-group btn-group-sm">
+                        <a href="' . site_url('agent-payments/view/' . $row['id']) . '" class="btn btn-info" title="View"><i class="fas fa-eye"></i></a>
+                        <a href="' . site_url('agent-payments/delete/' . $row['id']) . '" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')" title="Delete"><i class="fas fa-trash"></i></a>
+                    </div>
+                 </div>'
+            ];
+        }
+
+        return $this->response->setJSON([
+            'draw' => intval($request->getGet('draw')),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $formattedData
+        ]);
+    }
+
     public function index()
     {
+        $limit = 25;
+        $offset = intval($this->request->getGet('offset') ?? 0);
+        
         $filters = [
             'agent_id'     => $this->request->getGet('agent_id'),
+            'payment_mode' => $this->request->getGet('payment_mode'),
             'date_from'    => $this->request->getGet('date_from'),
             'date_to'      => $this->request->getGet('date_to'),
-            'payment_mode' => $this->request->getGet('payment_mode'),
+            'search'       => $this->request->getGet('search'),
         ];
 
-        $data['payments'] = $this->paymentModel->getPaymentsWithAgent($filters);
-        $data['agents'] = $this->agentModel->findAll();
-        $data['title'] = 'Agent Payments';
-        $data['filters'] = $filters;
+        $builder = $this->paymentModel->builder();
+        $builder->select('agent_payments.*, agents.agent_name, agents.phone_number')
+                ->join('agents', 'agents.id = agent_payments.agent_id', 'left');
 
+        if (!empty($filters['agent_id'])) {
+            $builder->where('agent_payments.agent_id', $filters['agent_id']);
+        }
+        if (!empty($filters['payment_mode'])) {
+            $builder->where('agent_payments.payment_mode', $filters['payment_mode']);
+        }
+        if (!empty($filters['date_from'])) {
+            $builder->where('agent_payments.payment_date >=', $filters['date_from']);
+        }
+        if (!empty($filters['date_to'])) {
+            $builder->where('agent_payments.payment_date <=', $filters['date_to']);
+        }
+        if (!empty($filters['search'])) {
+            $builder->groupStart()
+                    ->like('agent_payments.payment_number', $filters['search'])
+                    ->orLike('agent_payments.reference_number', $filters['search'])
+                    ->groupEnd();
+        }
+
+        $countBuilder = clone $builder;
+        $totalResults = $countBuilder->countAllResults(false);
+
+        $payments = $builder->orderBy('agent_payments.payment_date', 'DESC')
+                            ->orderBy('agent_payments.id', 'DESC')
+                            ->get($limit, $offset)
+                            ->getResultArray();
+
+        $data = [
+            'title'        => 'Agent Payments',
+            'payments'     => $payments,
+            'agents'       => $this->agentModel->orderBy('agent_name', 'ASC')->findAll(),
+            'total_count'  => $totalResults,
+            'filters'      => $filters,
+            'limit'        => $limit,
+            'offset'       => $offset,
+            'has_more'     => ($offset + $limit) < $totalResults
+        ];
+
+        if ($this->request->isAJAX()) {
+            return view('agent_payments/rows', $data);
+        }
+        
         return view('agent_payments/index', $data);
     }
 
@@ -90,6 +179,21 @@ class AgentPaymentController extends BaseController
         }
 
         $paymentId = $this->paymentModel->getInsertID();
+
+        // --- ACCOUNTING LEDGER ---
+        $paymentDate = $paymentData['payment_date'];
+        $agent = $this->agentModel->find($paymentData['agent_id']);
+        $agentName = $agent ? $agent['agent_name'] : 'Unknown';
+        $paymentRef = "Agent Payment: " . $paymentData['payment_number'] . " to $agentName";
+
+        // 1. Dr Agent Commission Expense (Expense increases)
+        $this->accountingModel->postEntry('Agent Commission Expense', $paymentDate, $paymentData['amount'], 0, $paymentRef, 'agent_payment', $paymentId);
+
+        // 2. Cr Bank/Cash (Asset decreases)
+        $paymentAccount = ($paymentData['payment_mode'] == 'Cash') ? 'Cash' : 'Bank Account';
+        $this->accountingModel->postEntry($paymentAccount, $paymentDate, 0, $paymentData['amount'], $paymentRef, 'agent_payment', $paymentId);
+        // ------------------------
+
         $invoiceIds = $this->request->getPost('invoice_ids') ?? [];
 
         // Insert payment items and update invoice commission status

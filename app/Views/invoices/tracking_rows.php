@@ -29,7 +29,7 @@
             $delColor = $delStatusColors[$inv['delivery_status']] ?? 'secondary';
             ?>
             <span class="badge bg-<?= $delColor ?>"><?= esc($inv['delivery_status']) ?></span>
-            <?php if ($inv['delivery_status'] == 'Delivered' && $inv['delivered_date']): ?>
+            <?php if ($inv['delivery_status'] == 'Delivered' && ($inv['delivered_date'] ?? null)): ?>
                 <div class="small mt-1 text-muted"><?= date('d/m/Y', strtotime($inv['delivered_date'])) ?></div>
             <?php endif; ?>
         </td>
@@ -40,7 +40,10 @@
                             'id' => $inv['id'],
                             'invoice_number' => $inv['invoice_number'],
                             'waybill_number' => $inv['waybill_number'],
-                            'waybill_date' => $inv['waybill_date']
+                            'waybill_date' => $inv['waybill_date'],
+                            'transport_amount' => $inv['transport_amount'] ?? 0,
+                            'transport_pay_type' => $inv['transport_pay_type'] ?? 'To Pay',
+                            'waybill_shipping_charge' => $inv['waybill_shipping_charge'] ?? 0
                         ])) ?>)">
                     <i class="fas fa-truck"></i><span> Waybill</span>
                 </button>

@@ -112,13 +112,38 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Waybill / LR Number <span class="text-danger">*</span></label>
-                        <input type="text" name="waybill_number" id="modalWaybillNumber" class="form-control" required>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Waybill / LR Number <span class="text-danger">*</span></label>
+                            <input type="text" name="waybill_number" id="modalWaybillNumber" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Waybill Date <span class="text-danger">*</span></label>
+                            <input type="date" name="waybill_date" id="modalWaybillDate" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Transport Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₹</span>
+                                <input type="number" step="0.01" name="transport_amount" id="modalTransportAmount" class="form-control" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Payment Type</label>
+                            <select name="transport_pay_type" id="modalTransportPayType" class="form-select">
+                                <option value="To Pay">To Pay</option>
+                                <option value="Paid">Paid</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Waybill Date <span class="text-danger">*</span></label>
-                        <input type="date" name="waybill_date" id="modalWaybillDate" class="form-control" required>
+                        <label class="form-label">Shipping Charge (Booking/Extra)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" step="0.01" name="waybill_shipping_charge" id="modalWaybillShippingCharge" class="form-control" placeholder="0.00">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Waybill Image / Photo</label>
@@ -279,6 +304,9 @@ function openWaybillModal(data) {
     document.getElementById('waybillInvoiceNumber').textContent = data.invoice_number;
     document.getElementById('modalWaybillNumber').value = data.waybill_number || '';
     document.getElementById('modalWaybillDate').value = data.waybill_date || '';
+    document.getElementById('modalTransportAmount').value = data.transport_amount || '';
+    document.getElementById('modalTransportPayType').value = data.transport_pay_type || 'To Pay';
+    document.getElementById('modalWaybillShippingCharge').value = data.waybill_shipping_charge || '';
     
     document.getElementById('updateWaybillForm').action = '<?= site_url('invoices/update-waybill') ?>/' + data.id;
     modal.show();

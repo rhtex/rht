@@ -205,6 +205,184 @@ class CustomerController extends BaseController
         return redirect()->to('customers')->with('success', 'Customer updated successfully.');
     }
 
+    public function statement($id)
+    {
+        $data['customer'] = $this->customerModel->find($id);
+        if (!$data['customer']) {
+            return redirect()->to('customers')->with('error', 'Customer not found.');
+        }
+
+        $dateFrom = $this->request->getGet('date_from');
+        $dateTo = $this->request->getGet('date_to');
+
+        // Fetch Invoices
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $invoicesBuilder = $invoiceModel->where('customer_id', $id);
+        if ($dateFrom) $invoicesBuilder->where('invoice_date >=', $dateFrom);
+        if ($dateTo) $invoicesBuilder->where('invoice_date <=', $dateTo);
+        $invoices = $invoicesBuilder->orderBy('invoice_date', 'ASC')->findAll();
+
+        // Fetch Payments
+        $paymentModel = new \App\Models\InvoicePaymentModel();
+        $paymentsBuilder = $paymentModel->select('invoice_payments.*, invoices.invoice_number')
+                                 ->join('invoices', 'invoices.id = invoice_payments.invoice_id')
+                                 ->where('invoices.customer_id', $id);
+        if ($dateFrom) $paymentsBuilder->where('payment_date >=', $dateFrom);
+        if ($dateTo) $paymentsBuilder->where('payment_date <=', $dateTo);
+        $payments = $paymentsBuilder->orderBy('payment_date', 'ASC')->findAll();
+
+        // Fetch Returns
+        $returnModel = new \App\Models\SalesReturnModel();
+        $returnsBuilder = $returnModel->where('customer_id', $id);
+        if ($dateFrom) $returnsBuilder->where('return_date >=', $dateFrom);
+        if ($dateTo) $returnsBuilder->where('return_date <=', $dateTo);
+        $returns = $returnsBuilder->orderBy('return_date', 'ASC')->findAll();
+
+        // Prepare Transactions
+        $transactions = [];
+
+        // Initial Balance (if no date filter, use opening balance. if date filter, need to calculate balance before dateFrom)
+        $openingBalance = $data['customer']['opening_balance'];
+        $openingType = $data['customer']['balance_type']; // Dr or Cr
+
+        if ($dateFrom) {
+            // Calculate balance before dateFrom
+            $prevInvoices = $invoiceModel->where('customer_id', $id)->where('invoice_date <', $dateFrom)->selectSum('total_amount')->first();
+            $prevPayments = $paymentModel->join('invoices', 'invoices.id = invoice_payments.invoice_id')
+                                         ->where('invoices.customer_id', $id)->where('payment_date <', $dateFrom)->selectSum('amount')->first();
+            $prevReturns = $returnModel->where('customer_id', $id)->where('return_date <', $dateFrom)->selectSum('total_amount')->first();
+
+            $prevDebit = ($openingType == 'Dr' ? $openingBalance : 0) + ($prevInvoices['total_amount'] ?? 0);
+            $prevCredit = ($openingType == 'Cr' ? $openingBalance : 0) + ($prevPayments['amount'] ?? 0) + ($prevReturns['total_amount'] ?? 0);
+
+            if ($prevDebit >= $prevCredit) {
+                $openingBalance = $prevDebit - $prevCredit;
+                $openingType = 'Dr';
+            } else {
+                $openingBalance = $prevCredit - $prevDebit;
+                $openingType = 'Cr';
+            }
+            $data['opening_balance_desc'] = 'Balance as on ' . date('d M, Y', strtotime($dateFrom));
+        } else {
+            $data['opening_balance_desc'] = 'Opening Balance';
+        }
+
+        $data['opening_balance'] = $openingBalance;
+        $data['opening_type'] = $openingType;
+
+        // Invoices (Debit)
+        foreach ($invoices as $inv) {
+            $transactions[] = [
+                'date' => $inv['invoice_date'],
+                'type' => 'Invoice',
+                'reference' => $inv['invoice_number'],
+                'debit' => $inv['total_amount'],
+                'credit' => 0,
+                'description' => 'Invoice #' . $inv['invoice_number']
+            ];
+        }
+
+        // Payments (Credit)
+        foreach ($payments as $pay) {
+            $transactions[] = [
+                'date' => $pay['payment_date'],
+                'type' => 'Payment',
+                'reference' => $pay['payment_number'] ?: 'REC-'.$pay['id'],
+                'debit' => 0,
+                'credit' => $pay['amount'],
+                'description' => 'Payment for Invoice #' . $pay['invoice_number'] . ' (' . $pay['payment_mode'] . ')'
+            ];
+        }
+
+        // Returns (Credit)
+        foreach ($returns as $ret) {
+            $transactions[] = [
+                'date' => $ret['return_date'],
+                'type' => 'Return',
+                'reference' => $ret['return_number'],
+                'debit' => 0,
+                'credit' => $ret['total_amount'],
+                'description' => 'Sales Return #' . $ret['return_number']
+            ];
+        }
+
+        // Sort by date
+        usort($transactions, function($a, $b) {
+            return strtotime($a['date']) - strtotime($b['date']);
+        });
+
+        $data['transactions'] = $transactions;
+        $data['date_from'] = $dateFrom;
+        $data['date_to'] = $dateTo;
+        
+        $data['billing_address'] = $this->addressModel->getActiveAddress('customer', $id, 'billing');
+        $data['billing_state'] = $data['billing_address'] ? $this->stateModel->find($data['billing_address']['state_id']) : null;
+
+        $format = $this->request->getGet('format');
+
+        if ($format == 'pdf') {
+            $data['is_pdf'] = true;
+            $dompdf = new \Dompdf\Dompdf();
+            $dompdf->loadHtml(view('customers/statement', $data));
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+            $dompdf->stream("Statement_{$data['customer']['name']}_" . date('Ymd') . ".pdf", ["Attachment" => true]);
+            exit();
+        }
+
+        if ($format == 'csv') {
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename=Statement_' . str_replace(' ', '_', $data['customer']['name']) . '_' . date('Ymd') . '.csv');
+            $output = fopen('php://output', 'w');
+            
+            // Header Info
+            fputcsv($output, ['RASI DESIGNS']);
+            fputcsv($output, ['Statement of Account']);
+            fputcsv($output, ['Customer:', $data['customer']['name']]);
+            fputcsv($output, ['Period:', ($dateFrom ?: 'Beginning') . ' - ' . ($dateTo ?: date('Y-m-d'))]);
+            fputcsv($output, ['Balance:', number_format(abs($finalBalance), 2, '.', '') . ' ' . ($finalBalance >= 0 ? 'Dr' : 'Cr')]);
+            fputcsv($output, []);
+            
+            // Table Header
+            fputcsv($output, ['Date', 'Type', 'Reference', 'Description', 'Debit (Dr)', 'Credit (Cr)', 'Running Balance']);
+            
+            // Opening Balance
+            fputcsv($output, [
+                $dateFrom ?: '---',
+                'Opening Balance',
+                '',
+                $data['opening_balance_desc'],
+                $openingType == 'Dr' ? number_format($opening_balance, 2, '.', '') : '0.00',
+                $openingType == 'Cr' ? number_format($opening_balance, 2, '.', '') : '0.00',
+                number_format($opening_balance, 2, '.', '') . ' ' . $openingType
+            ]);
+            
+            $runningBalance = ($openingType == 'Dr' ? $opening_balance : -$opening_balance);
+            foreach ($transactions as $t) {
+                $runningBalance += ($t['debit'] - $t['credit']);
+                $balanceType = $runningBalance >= 0 ? 'Dr' : 'Cr';
+                fputcsv($output, [
+                    $t['date'],
+                    $t['type'],
+                    $t['reference'],
+                    $t['description'],
+                    $t['debit'] > 0 ? number_format($t['debit'], 2, '.', '') : '0.00',
+                    $t['credit'] > 0 ? number_format($t['credit'], 2, '.', '') : '0.00',
+                    number_format(abs($runningBalance), 2, '.', '') . ' ' . $balanceType
+                ]);
+            }
+
+            fputcsv($output, []);
+            fputcsv($output, ['', '', '', 'TOTALS', number_format($totalDebit, 2, '.', ''), number_format($totalCredit, 2, '.', ''), '']);
+            fputcsv($output, ['', '', '', 'FINAL BALANCE', '', '', number_format(abs($finalBalance), 2, '.', '') . ' ' . ($finalBalance >= 0 ? 'Dr' : 'Cr')]);
+            
+            fclose($output);
+            exit();
+        }
+
+        return view('customers/statement', $data);
+    }
+
     public function delete($id)
     {
         $this->customerModel->delete($id);

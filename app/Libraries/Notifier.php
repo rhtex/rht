@@ -58,5 +58,29 @@ class Notifier
                 ]);
             }
         }
+
+        // 3. Auto-Resolve: Mark notifications as read if the issue is fixed
+        $unread = $notificationModel->where('is_read', 0)->findAll();
+        foreach ($unread as $notify) {
+            $resolved = false;
+            
+            if ($notify['type'] == 'low_stock') {
+                $prod = $productModel->find($notify['reference_id']);
+                if ($prod && $prod['total_stock'] >= 10) $resolved = true;
+            } 
+            elseif ($notify['type'] == 'lr_update') {
+                $inv = $invoiceModel->find($notify['reference_id']);
+                if ($inv && !empty($inv['waybill_number'])) $resolved = true;
+            }
+            elseif ($notify['type'] == 'reminder') {
+                $reminderModel = new \App\Models\CalendarReminderModel();
+                $rem = $reminderModel->find($notify['reference_id']);
+                if ($rem && $rem['status'] == 'completed') $resolved = true;
+            }
+
+            if ($resolved) {
+                $notificationModel->update($notify['id'], ['is_read' => 1]);
+            }
+        }
     }
 }

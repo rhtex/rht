@@ -280,7 +280,9 @@
         </div>
     </form>
 </div>
+<?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
 <script>
 let rowIndex = <?= $invoice && !empty($invoice['items']) ? count($invoice['items']) : 1 ?>;
 let isInterState = false;
@@ -332,20 +334,42 @@ function addLineItem() {
 }
 
 function updateProductDetails(select) {
-    const option = select.options[select.selectedIndex];
-    const row = select.closest('tr');
-    const hsn = option.getAttribute('data-hsn');
-    const rate = option.getAttribute('data-rate');
-    const gst = option.getAttribute('data-gst');
+    const $select = $(select);
+    const $option = $select.find(':selected');
     
-    if (hsn) row.querySelector('.hsn').value = hsn;
-    if (rate) row.querySelector('.rate').value = rate;
-    if (gst) row.querySelector('.gst').value = gst;
+    if (!$option.val()) return; // Ignore "Select Product" placeholder
+    
+    const row = select.closest('tr');
+    const hsn = $option.attr('data-hsn') || '';
+    const rate = parseFloat($option.attr('data-rate')) || 0;
+    const gstAttr = $option.attr('data-gst');
+    
+    row.querySelector('.hsn').value = hsn;
+    row.querySelector('.rate').value = rate.toFixed(2);
+    
+    // Robustly select GST percentage
+    if (gstAttr !== undefined && gstAttr !== null) {
+        const gstVal = parseFloat(gstAttr);
+        const gstSelect = row.querySelector('.gst');
+        let matched = false;
+        
+        for (let i = 0; i < gstSelect.options.length; i++) {
+            if (parseFloat(gstSelect.options[i].value) === gstVal) {
+                gstSelect.selectedIndex = i;
+                matched = true;
+                break;
+            }
+        }
+        
+        if (!matched) {
+            gstSelect.value = "0"; // Fallback to 0 if no match
+        }
+    }
     
     // Set description to product name if empty
     const descInput = row.querySelector('input[name*="[description]"]');
-    if (!descInput.value) {
-        descInput.value = option.text;
+    if (descInput && (!descInput.value || descInput.value === '')) {
+        descInput.value = $option.text().trim();
     }
     
     calculateRow(select);
@@ -492,12 +516,7 @@ document.getElementById('customerSelect').addEventListener('change', function() 
         });
 });
 
-// Update commission when agent is selected
-$('#agentSelect').on('change', function() {
-    const selectedOption = $(this).find(':selected');
-    const commission = selectedOption.data('commission') || 0;
-    $('#agentCommissionPercent').val(commission);
-});
+// This will be initialized in initSelect2
 
 // Barcode Scanner Logic
 document.getElementById('barcodeScanner').addEventListener('keypress', function(e) {
@@ -616,15 +635,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Initialize Select2
-    $('.select2').each(function() {
-        $(this).select2({
-            theme: 'bootstrap-5',
-            placeholder: $(this).data('placeholder') || '-- Select --',
-            allowClear: true,
-            width: '100%'
-        });
-    });
+    // Initialize all Select2 elements
+    initSelect2();
 });
 
 // Re-initialize Select2 for dynamic rows
@@ -638,20 +650,32 @@ function initSelect2(element) {
     
     if (element) {
         const select = $(element);
+        // Destroy if already initialized to avoid issues
+        if (select.data('select2')) {
+            select.select2('destroy');
+        }
+        
         select.select2(config);
+        
+        // Specifically for product selection
         if (select.hasClass('product-select')) {
-            select.on('select2:select', function(e) {
+            select.off('select2:select').on('select2:select', function(e) {
                 updateProductDetails(this);
             });
         }
+        
+        // Specifically for agent selection
+        if (select.attr('id') === 'agentSelect') {
+            select.off('change').on('change', function() {
+                const selectedOption = $(this).find(':selected');
+                const commission = selectedOption.data('commission') || 0;
+                $('#agentCommissionPercent').val(commission);
+            });
+        }
     } else {
-        const selects = $('.select2');
-        selects.select2({
-            theme: 'bootstrap-5',
-            width: '100%'
-        });
-        $('.product-select').on('select2:select', function(e) {
-            updateProductDetails(this);
+        // Initialize all select2 elements on the page
+        $('.select2').each(function() {
+            initSelect2(this);
         });
     }
 }

@@ -8,19 +8,24 @@ class RegisterAgentPaymentsModule extends Migration
 {
     public function up()
     {
-        // Insert module
-        $this->db->table('modules')->insert([
-            'module_name' => 'Agent Payments',
-            'module_key'  => 'agent_payments',
-            'description' => 'Manage agent commission payments',
-            'icon'        => 'fas fa-hand-holding-usd',
-            'parent_id'   => null,
-            'sort_order'  => 40,
-            'is_active'   => 1,
-            'created_at'  => date('Y-m-d H:i:s'),
-        ]);
-
-        $moduleId = $this->db->insertID();
+        // Check if module already exists
+        $existing = $this->db->table('modules')->where('module_key', 'agent_payments')->get()->getRow();
+        if ($existing) {
+            $moduleId = $existing->id;
+        } else {
+            // Insert module
+            $this->db->table('modules')->insert([
+                'module_name' => 'Agent Payments',
+                'module_key'  => 'agent_payments',
+                'description' => 'Manage agent commission payments',
+                'icon'        => 'fas fa-hand-holding-usd',
+                'parent_id'   => null,
+                'sort_order'  => 40,
+                'is_active'   => 1,
+                'created_at'  => date('Y-m-d H:i:s'),
+            ]);
+            $moduleId = $this->db->insertID();
+        }
 
         // Insert permissions
         $permissions = [
@@ -54,7 +59,12 @@ class RegisterAgentPaymentsModule extends Migration
             ],
         ];
 
-        $this->db->table('permissions')->insertBatch($permissions);
+        // Check if permissions already exist
+        $existingPermissions = $this->db->table('permissions')->where('module_id', $moduleId)->countAllResults();
+        
+        if ($existingPermissions == 0) {
+            $this->db->table('permissions')->insertBatch($permissions);
+        }
 
         // Assign all permissions to Admin role (role_id = 1)
         $permissionIds = $this->db->table('permissions')
@@ -72,7 +82,16 @@ class RegisterAgentPaymentsModule extends Migration
         }
 
         if (!empty($rolePermissions)) {
-            $this->db->table('role_permissions')->insertBatch($rolePermissions);
+            foreach ($rolePermissions as $rp) {
+                $exists = $this->db->table('role_permissions')
+                    ->where('role_id', $rp['role_id'])
+                    ->where('permission_id', $rp['permission_id'])
+                    ->countAllResults();
+                
+                if ($exists == 0) {
+                    $this->db->table('role_permissions')->insert($rp);
+                }
+            }
         }
     }
 

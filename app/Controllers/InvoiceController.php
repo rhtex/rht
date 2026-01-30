@@ -41,6 +41,7 @@ class InvoiceController extends BaseController
         $this->zohoService = new ZohoBooksService();
         $this->accountingModel = new \App\Models\AccountingModel();
         $this->historyModel = new \App\Models\InvoiceStatusHistoryModel();
+        $this->expenseModel = new \App\Models\ExpenseModel();
     }
 
     public function index()
@@ -123,7 +124,7 @@ class InvoiceController extends BaseController
 
         // Calculate Taxes and Totals
         $customer = $this->customerModel->find($invoiceData['customer_id']);
-        $companyStateId = get_setting('company_state_id');
+        $companyStateId = get_setting('company_state');
         
         // Get customer state
         $customerAddress = $db->table('addresses')
@@ -259,13 +260,13 @@ class InvoiceController extends BaseController
             $agentCommission = $agent['commission_percentage'] ?? 0;
         }
 
-        $companyStateId = get_setting('company_state_id');
-        $customerStateId = $address['state_id'] ?? $companyStateId;
+        $companyStateId = get_setting('company_state');
+        $customerStateId = $address['state_id'] ?? null;
 
         return $this->response->setJSON([
             'customer_state_id' => $customerStateId,
             'company_state_id'  => $companyStateId,
-            'is_inter_state'    => ($customerStateId != $companyStateId),
+            'is_inter_state'    => ($customerStateId !== null && $companyStateId !== null && $customerStateId != $companyStateId),
             'agent_id'          => $agentId,
             'agent_commission'  => $agentCommission,
             'credit_period_days'=> $customer['credit_period_days'] ?? 0
@@ -319,7 +320,7 @@ class InvoiceController extends BaseController
 
         // Recalculate
         $customer = $this->customerModel->find($invoiceData['customer_id']);
-        $companyStateId = get_setting('company_state_id');
+        $companyStateId = get_setting('company_state');
         $customerAddress = $db->table('addresses')
                              ->where('owner_id', $invoiceData['customer_id'])
                              ->where('owner_type', 'customer')
@@ -699,16 +700,25 @@ class InvoiceController extends BaseController
         $validationRules = [
             'waybill_number'  => 'required',
             'waybill_date'    => 'required|valid_date',
-            'waybill_image'   => 'permit_empty|max_size[waybill_image,2048]|is_image[waybill_image]'
+            'waybill_image'   => 'permit_empty|max_size[waybill_image,2048]|is_image[waybill_image]',
+            'transport_amount' => 'permit_empty|numeric',
+            'waybill_shipping_charge' => 'permit_empty|numeric'
         ];
 
         if (!$this->validate($validationRules)) {
             return redirect()->back()->with('error', 'Validation failed: ' . implode(', ', $this->validator->getErrors()));
         }
 
+        $transport_amount = $this->request->getPost('transport_amount') ?: 0;
+        $transport_pay_type = $this->request->getPost('transport_pay_type') ?: 'To Pay';
+        $waybill_shipping_charge = $this->request->getPost('waybill_shipping_charge') ?: 0;
+
         $updateData = [
             'waybill_number'  => $this->request->getPost('waybill_number'),
             'waybill_date'    => $this->request->getPost('waybill_date'),
+            'transport_amount' => $transport_amount,
+            'transport_pay_type' => $transport_pay_type,
+            'waybill_shipping_charge' => $waybill_shipping_charge
         ];
 
         $img = $this->request->getFile('waybill_image');
@@ -719,11 +729,60 @@ class InvoiceController extends BaseController
         }
 
         if ($this->invoiceModel->update($id, $updateData)) {
+            $waybill_number = $updateData['waybill_number'];
+            $invoice_no = $invoice['invoice_number'];
+
+            // 1. Handle Transport Expense (if Paid)
+            if ($transport_pay_type === 'Paid' && $transport_amount > 0) {
+                $desc = "Transport for INV: $invoice_no (Waybill: $waybill_number)";
+                // Check if already recorded to avoid duplicates
+                $existing = $this->expenseModel->where('description', $desc)->first();
+                if (!$existing) {
+                    $expenseData = [
+                        'expense_date' => $updateData['waybill_date'],
+                        'category_id'  => 7, // SENDING PARCEL
+                        'amount'       => $transport_amount,
+                        'description'  => $desc,
+                        'payment_mode' => 'Cash',
+                        'reference_number' => $waybill_number
+                    ];
+                    if ($this->expenseModel->insert($expenseData)) {
+                        $expId = $this->expenseModel->getInsertID();
+                        // Post to Ledger
+                        $this->accountingModel->postEntry('SENDING PARCEL', $expenseData['expense_date'], $transport_amount, 0, $desc, 'expense', $expId);
+                        $this->accountingModel->postEntry('Cash', $expenseData['expense_date'], 0, $transport_amount, "Expense: $desc", 'expense', $expId);
+                    }
+                }
+            }
+
+            // 2. Handle Shipping Charge Expense
+            if ($waybill_shipping_charge > 0) {
+                $desc = "Shipping/Booking Charge for INV: $invoice_no (Waybill: $waybill_number)";
+                // Check if already recorded
+                $existing = $this->expenseModel->where('description', $desc)->first();
+                if (!$existing) {
+                    $expenseData = [
+                        'expense_date' => $updateData['waybill_date'],
+                        'category_id'  => 7, // SENDING PARCEL
+                        'amount'       => $waybill_shipping_charge,
+                        'description'  => $desc,
+                        'payment_mode' => 'Cash',
+                        'reference_number' => $waybill_number
+                    ];
+                    if ($this->expenseModel->insert($expenseData)) {
+                        $expId = $this->expenseModel->getInsertID();
+                        // Post to Ledger
+                        $this->accountingModel->postEntry('SENDING PARCEL', $expenseData['expense_date'], $waybill_shipping_charge, 0, $desc, 'expense', $expId);
+                        $this->accountingModel->postEntry('Cash', $expenseData['expense_date'], 0, $waybill_shipping_charge, "Expense: $desc", 'expense', $expId);
+                    }
+                }
+            }
+
             // Log history
             $this->historyModel->insert([
                 'invoice_id' => $id,
                 'status'     => 'Booked',
-                'description'=> "Waybill updated: " . $updateData['waybill_number'],
+                'description'=> "Waybill updated: " . $waybill_number . " (Transport: $transport_pay_type)",
                 'created_by' => session('user_id')
             ]);
             
@@ -732,7 +791,7 @@ class InvoiceController extends BaseController
                 $this->invoiceModel->update($id, ['delivery_status' => 'Booked']);
             }
 
-            return redirect()->back()->with('success', 'Waybill information updated successfully.');
+            return redirect()->back()->with('success', 'Waybill information updated and expenses recorded successfully.');
         }
 
         return redirect()->back()->with('error', 'Failed to update waybill information.');
@@ -781,5 +840,141 @@ class InvoiceController extends BaseController
     {
         $history = $this->historyModel->getHistoryByInvoice($id);
         return $this->response->setJSON($history);
+    }
+
+    public function docTracking()
+    {
+        $limit = 25;
+        $offset = intval($this->request->getGet('offset') ?? 0);
+        
+        $customer_id = $this->request->getGet('customer_id');
+        $doc_status = $this->request->getGet('doc_status');
+        $search = $this->request->getGet('search');
+
+        $this->invoiceModel->select('invoices.*, customers.name as customer_name')
+                           ->join('customers', 'customers.id = invoices.customer_id', 'left');
+
+        // Document Tracking Condition: (Incomplete Doc Info OR Not Received)
+        $this->invoiceModel->groupStart()
+                            ->where('invoices.doc_status !=', 'Delivered')
+                            ->orWhere('invoices.doc_tracking_number', null)
+                            ->orWhere('invoices.doc_tracking_number', '')
+                        ->groupEnd();
+
+        // Dynamic Filters
+        if ($customer_id !== null && $customer_id !== '') {
+            $this->invoiceModel->where('invoices.customer_id', $customer_id);
+        }
+        if ($doc_status !== null && $doc_status !== '') {
+            $this->invoiceModel->where('invoices.doc_status', $doc_status);
+        }
+        if ($search !== null && $search !== '') {
+            $this->invoiceModel->like('invoices.invoice_number', $search);
+        }
+
+        // Get count before limit
+        $totalResults = $this->invoiceModel->countAllResults(false);
+
+        $invoices = $this->invoiceModel->orderBy('invoices.invoice_date', 'DESC')
+                                       ->findAll($limit, $offset);
+
+        $data = [
+            'title'           => 'Invoice Document Tracking',
+            'invoices'        => $invoices,
+            'customers'       => $this->customerModel->where('status', 'active')->findAll(),
+            'total_count'     => $totalResults,
+            'filters'         => [
+                'customer_id'     => $customer_id,
+                'doc_status'      => $doc_status,
+                'search'          => $search,
+            ],
+            'limit'           => $limit,
+            'offset'          => $offset,
+            'has_more'        => ($offset + $limit) < $totalResults
+        ];
+
+        if ($this->request->isAJAX()) {
+            return view('invoices/doc_tracking_rows', $data);
+        }
+        
+        return view('invoices/doc_tracking', $data);
+    }
+
+    public function updateDocDetails($id)
+    {
+        $invoice = $this->invoiceModel->find($id);
+        if (!$invoice) {
+            return redirect()->back()->with('error', 'Invoice not found.');
+        }
+
+        $validationRules = [
+            'doc_courier_name'    => 'required',
+            'doc_tracking_number' => 'required',
+            'doc_dispatched_date' => 'required|valid_date'
+        ];
+
+        if (!$this->validate($validationRules)) {
+            return redirect()->back()->with('error', 'Validation failed: ' . implode(', ', $this->validator->getErrors()));
+        }
+
+        $updateData = [
+            'doc_courier_name'    => $this->request->getPost('doc_courier_name'),
+            'doc_tracking_number' => $this->request->getPost('doc_tracking_number'),
+            'doc_dispatched_date' => $this->request->getPost('doc_dispatched_date'),
+            'doc_status'          => 'Dispatched'
+        ];
+
+        if ($this->invoiceModel->update($id, $updateData)) {
+            // Log history
+            $this->historyModel->insert([
+                'invoice_id' => $id,
+                'status'     => 'Dispatched',
+                'description'=> "Doc Dispatched via " . $updateData['doc_courier_name'] . " (Tracking: " . $updateData['doc_tracking_number'] . ")",
+                'created_by' => session('user_id')
+            ]);
+
+            return redirect()->back()->with('success', 'Document tracking information updated successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Failed to update document tracking information.');
+    }
+
+    public function updateDocStatus($id)
+    {
+        $invoice = $this->invoiceModel->find($id);
+        if (!$invoice) {
+            return redirect()->back()->with('error', 'Invoice not found.');
+        }
+
+        $validationRules = [
+            'doc_status'        => 'required|in_list[Pending,Dispatched,Delivered,Returned]',
+            'doc_received_date' => 'permit_empty|valid_date'
+        ];
+
+        if (!$this->validate($validationRules)) {
+            return redirect()->back()->with('error', 'Validation failed: ' . implode(', ', $this->validator->getErrors()));
+        }
+
+        $newStatus = $this->request->getPost('doc_status');
+        $receivedDate = $this->request->getPost('doc_received_date');
+        
+        $updateData = ['doc_status' => $newStatus];
+        if ($newStatus === 'Delivered' && !empty($receivedDate)) {
+            $updateData['doc_received_date'] = $receivedDate;
+        }
+
+        if ($this->invoiceModel->update($id, $updateData)) {
+            // Log history
+            $this->historyModel->insert([
+                'invoice_id' => $id,
+                'status'     => "Doc $newStatus",
+                'description'=> "Document status updated to " . $newStatus . ($newStatus === 'Delivered' ? " on " . $receivedDate : ""),
+                'created_by' => session('user_id')
+            ]);
+
+            return redirect()->back()->with('success', 'Document status updated successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Failed to update document status.');
     }
 }

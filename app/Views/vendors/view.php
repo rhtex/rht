@@ -10,6 +10,9 @@
     </div>
     <div class="col-sm-6 text-end">
         <div class="btn-group">
+            <a href="<?= site_url('vendors/statement/'.$vendor['id']) ?>" class="btn btn-info shadow-sm text-white">
+                <i class="fas fa-file-invoice me-1"></i> Statement
+            </a>
             <a href="<?= site_url('vendors/edit/'.$vendor['id']) ?>" class="btn btn-warning shadow-sm">
                 <i class="fas fa-edit me-1"></i> Edit Profile
             </a>

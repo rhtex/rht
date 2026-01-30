@@ -106,6 +106,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="<?= site_url('invoices/doc-tracking') ?>" class="nav-link">
+                                <i class="nav-icon fas fa-file-contract text-warning"></i>
+                                <p>Invoice Doc Tracking</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="<?= site_url('sales_returns') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-undo text-danger"></i>
                                 <p>Sales Returns</p>

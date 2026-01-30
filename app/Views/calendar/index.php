@@ -57,6 +57,7 @@ Calendar & Tasks
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="addReminderForm">
+                <?= csrf_field() ?>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Title</label>
@@ -190,7 +191,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle Complete
     $('#completeEventBtn').on('click', function() {
-        $.post('<?= base_url('calendar/update/') ?>' + currentEventId, {status: 'completed'}, function(response) {
+        $.post('<?= base_url('calendar/update/') ?>' + currentEventId, {
+            status: 'completed',
+            '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+        }, function(response) {
             if (response.success) {
                 $('#eventDetailsModal').modal('hide');
                 calendar.refetchEvents();
@@ -202,7 +206,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle Delete
     $('#deleteEventBtn').on('click', function() {
         if (confirm('Are you sure you want to delete this task?')) {
-            $.post('<?= base_url('calendar/delete/') ?>' + currentEventId, {}, function(response) {
+            $.post('<?= base_url('calendar/delete/') ?>' + currentEventId, {
+                '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+            }, function(response) {
                 if (response.success) {
                     $('#eventDetailsModal').modal('hide');
                     calendar.refetchEvents();

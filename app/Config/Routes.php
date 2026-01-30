@@ -189,6 +189,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('customers/edit/(:num)', 'CustomerController::edit/$1', ['filter' => 'permission:customer.edit']);
     $routes->post('customers/update/(:num)', 'CustomerController::update/$1', ['filter' => 'permission:customer.edit']);
     $routes->get('customers/delete/(:num)', 'CustomerController::delete/$1', ['filter' => 'permission:customer.delete']);
+    $routes->get('customers/statement/(:num)', 'CustomerController::statement/$1', ['filter' => 'permission:customer.view']);
     $routes->get('customers/sync-zoho', 'CustomerController::syncZoho', ['filter' => 'permission:zoho.sync']);
 
     // Sales Returns
@@ -209,6 +210,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('vendors/edit/(:num)', 'VendorController::edit/$1', ['filter' => 'permission:vendor.edit']);
     $routes->post('vendors/update/(:num)', 'VendorController::update/$1', ['filter' => 'permission:vendor.edit']);
     $routes->get('vendors/delete/(:num)', 'VendorController::delete/$1', ['filter' => 'permission:vendor.delete']);
+    $routes->get('vendors/statement/(:num)', 'VendorController::statement/$1', ['filter' => 'permission:vendor.view']);
     $routes->post('vendors/processReturn/(:num)', 'VendorController::processReturn/$1', ['filter' => 'permission:vendor.edit']);
     
     // Return Shipments
@@ -296,6 +298,9 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('invoices/tracking', 'InvoiceController::tracking', ['filter' => 'permission:invoice.view']);
     $routes->post('invoices/update-waybill/(:num)', 'InvoiceController::updateWaybill/$1', ['filter' => 'permission:invoice.edit']);
     $routes->post('invoices/update-delivery-status/(:num)', 'InvoiceController::updateDeliveryStatus/$1', ['filter' => 'permission:invoice.edit']);
+    $routes->get('invoices/doc-tracking', 'InvoiceController::docTracking', ['filter' => 'permission:invoice.view']);
+    $routes->post('invoices/update-doc-details/(:num)', 'InvoiceController::updateDocDetails/$1', ['filter' => 'permission:invoice.edit']);
+    $routes->post('invoices/update-doc-status/(:num)', 'InvoiceController::updateDocStatus/$1', ['filter' => 'permission:invoice.edit']);
     $routes->get('invoices/history/(:num)', 'InvoiceController::getHistory/$1');
 
     // Customer Receipts (Invoice Payments)

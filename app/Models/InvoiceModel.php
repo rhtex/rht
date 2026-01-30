@@ -16,7 +16,9 @@ class InvoiceModel extends Model
         'customer_id', 'agent_id', 'agent_commission_percent', 'agent_commission_amount',
         'agent_commission_status', 'agent_commission_paid_at', 'invoice_number', 'zoho_invoice_id',
         'zoho_sync_status', 'invoice_date', 'due_date', 'reference_number', 'transport_name',
-        'waybill_number', 'packages_count', 'waybill_date', 'ewaybill_number', 'waybill_image', 'delivery_status', 'delivered_date', 'status', 'subtotal', 'discount_amount', 'discount_type',
+        'waybill_number', 'packages_count', 'waybill_date', 'ewaybill_number', 'waybill_image', 'transport_amount', 'transport_pay_type', 'waybill_shipping_charge', 
+        'doc_courier_name', 'doc_tracking_number', 'doc_dispatched_date', 'doc_status', 'doc_received_date',
+        'delivery_status', 'delivered_date', 'status', 'subtotal', 'discount_amount', 'discount_type',
         'shipping_charge', 'cgst_amount', 'sgst_amount', 'igst_amount', 'tax_amount',
         'roundoff_amount', 'total_amount', 'paid_amount', 'balance', 'notes', 'terms',
         'created_by', 'updated_by', 'zoho_sync_at'

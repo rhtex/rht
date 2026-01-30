@@ -180,6 +180,184 @@ class VendorController extends BaseController
         return redirect()->to('vendors')->with('success', 'Vendor deleted successfully.');
     }
 
+    public function statement($id)
+    {
+        $data['vendor'] = $this->vendorModel->find($id);
+        if (!$data['vendor']) {
+            return redirect()->to('vendors')->with('error', 'Vendor not found.');
+        }
+
+        $dateFrom = $this->request->getGet('date_from');
+        $dateTo = $this->request->getGet('date_to');
+
+        // Fetch Bills
+        $billModel = new \App\Models\BillModel();
+        $billsBuilder = $billModel->where('vendor_id', $id);
+        if ($dateFrom) $billsBuilder->where('bill_date >=', $dateFrom);
+        if ($dateTo) $billsBuilder->where('bill_date <=', $dateTo);
+        $bills = $billsBuilder->orderBy('bill_date', 'ASC')->findAll();
+
+        // Fetch Payments
+        $paymentModel = new \App\Models\PaymentModel();
+        $paymentsBuilder = $paymentModel->select('payments.*, bills.bill_number')
+                                 ->join('bills', 'bills.id = payments.bill_id')
+                                 ->where('bills.vendor_id', $id);
+        if ($dateFrom) $paymentsBuilder->where('payment_date >=', $dateFrom);
+        if ($dateTo) $paymentsBuilder->where('payment_date <=', $dateTo);
+        $payments = $paymentsBuilder->orderBy('payment_date', 'ASC')->findAll();
+
+        // Fetch Credits (Returns)
+        $creditsBuilder = $this->creditModel->where('vendor_id', $id);
+        if ($dateFrom) $creditsBuilder->where('created_at >=', $dateFrom . ' 00:00:00');
+        if ($dateTo) $creditsBuilder->where('created_at <=', $dateTo . ' 23:59:59');
+        $credits = $creditsBuilder->orderBy('created_at', 'ASC')->findAll();
+
+        // Prepare Transactions
+        $transactions = [];
+
+        // Initial Balance
+        $openingBalance = $data['vendor']['opening_balance'];
+        $openingType = $data['vendor']['balance_type']; // Dr or Cr
+
+        if ($dateFrom) {
+            // Calculate balance before dateFrom
+            $prevBills = $billModel->where('vendor_id', $id)->where('bill_date <', $dateFrom)->selectSum('total_amount')->first();
+            $prevPayments = $paymentModel->join('bills', 'bills.id = payments.bill_id')
+                                         ->where('bills.vendor_id', $id)->where('payment_date <', $dateFrom)->selectSum('amount')->first();
+            $prevCredits = $this->creditModel->where('vendor_id', $id)->where('created_at <', $dateFrom . ' 00:00:00')->selectSum('amount')->first();
+
+            // Vendor Liability: Cr (Opening Cr + Bills) - Dr (Opening Dr + Payments + Credits)
+            $prevCredit = ($openingType == 'Cr' ? $openingBalance : 0) + ($prevBills['total_amount'] ?? 0);
+            $prevDebit = ($openingType == 'Dr' ? $openingBalance : 0) + ($prevPayments['amount'] ?? 0) + ($prevCredits['amount'] ?? 0);
+
+            if ($prevCredit >= $prevDebit) {
+                $openingBalance = $prevCredit - $prevDebit;
+                $openingType = 'Cr';
+            } else {
+                $openingBalance = $prevDebit - $prevCredit;
+                $openingType = 'Dr';
+            }
+            $data['opening_balance_desc'] = 'Balance as on ' . date('d M, Y', strtotime($dateFrom));
+        } else {
+            $data['opening_balance_desc'] = 'Opening Balance';
+        }
+
+        $data['opening_balance'] = $openingBalance;
+        $data['opening_type'] = $openingType;
+
+        // Bills (Credit - Increase Liability)
+        foreach ($bills as $bill) {
+            $transactions[] = [
+                'date' => $bill['bill_date'],
+                'type' => 'Bill',
+                'reference' => $bill['bill_number'],
+                'debit' => 0,
+                'credit' => $bill['total_amount'],
+                'description' => 'Purchase Bill #' . $bill['bill_number']
+            ];
+        }
+
+        // Payments (Debit - Decrease Liability)
+        foreach ($payments as $pay) {
+            $transactions[] = [
+                'date' => $pay['payment_date'],
+                'type' => 'Payment',
+                'reference' => $pay['payment_number'] ?: 'PAY-'.$pay['id'],
+                'debit' => $pay['amount'],
+                'credit' => 0,
+                'description' => 'Payment for Bill #' . $pay['bill_number'] . ' (' . $pay['payment_mode'] . ')'
+            ];
+        }
+
+        // Credits / Returns (Debit - Decrease Liability)
+        foreach ($credits as $credit) {
+            $transactions[] = [
+                'date' => date('Y-m-d', strtotime($credit['created_at'])),
+                'type' => 'Credit Note',
+                'reference' => $credit['reference_no'],
+                'debit' => $credit['amount'],
+                'credit' => 0,
+                'description' => 'Vendor Credit: ' . $credit['notes']
+            ];
+        }
+
+        // Sort by date
+        usort($transactions, function($a, $b) {
+            return strtotime($a['date']) - strtotime($b['date']);
+        });
+
+        $data['transactions'] = $transactions;
+        $data['date_from'] = $dateFrom;
+        $data['date_to'] = $dateTo;
+        
+        $data['billing_address'] = $this->addressModel->getActiveAddress('vendor', $id, 'billing');
+        $data['billing_state'] = $data['billing_address'] ? $this->stateModel->find($data['billing_address']['state_id']) : null;
+
+        $format = $this->request->getGet('format');
+
+        if ($format == 'pdf') {
+            $data['is_pdf'] = true;
+            $dompdf = new \Dompdf\Dompdf();
+            $dompdf->loadHtml(view('vendors/statement', $data));
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+            $dompdf->stream("Statement_{$data['vendor']['name']}_" . date('Ymd') . ".pdf", ["Attachment" => true]);
+            exit();
+        }
+
+        if ($format == 'csv') {
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename=Statement_' . str_replace(' ', '_', $data['vendor']['name']) . '_' . date('Ymd') . '.csv');
+            $output = fopen('php://output', 'w');
+            
+            // Header Info
+            fputcsv($output, ['RASI DESIGNS']);
+            fputcsv($output, ['Vendor Statement']);
+            fputcsv($output, ['Vendor:', $data['vendor']['name']]);
+            fputcsv($output, ['Period:', ($dateFrom ?: 'Beginning') . ' - ' . ($dateTo ?: date('Y-m-d'))]);
+            fputcsv($output, ['Net Balance Payable:', number_format(abs($finalBalance), 2, '.', '') . ' ' . ($finalBalance >= 0 ? 'Cr' : 'Dr')]);
+            fputcsv($output, []);
+            
+            // Table Header
+            fputcsv($output, ['Date', 'Type', 'Reference', 'Description', 'Debit (Dr)', 'Credit (Cr)', 'Running Balance']);
+            
+            // Opening Balance
+            fputcsv($output, [
+                $dateFrom ?: '---',
+                'Opening Balance',
+                '',
+                $data['opening_balance_desc'],
+                $openingType == 'Dr' ? number_format($opening_balance, 2, '.', '') : '0.00',
+                $openingType == 'Cr' ? number_format($opening_balance, 2, '.', '') : '0.00',
+                number_format($opening_balance, 2, '.', '') . ' ' . $openingType
+            ]);
+            
+            $runningBalance = ($openingType == 'Cr' ? $opening_balance : -$opening_balance);
+            foreach ($transactions as $t) {
+                $runningBalance += ($t['credit'] - $t['debit']);
+                $balanceType = $runningBalance >= 0 ? 'Cr' : 'Dr';
+                fputcsv($output, [
+                    $t['date'],
+                    $t['type'],
+                    $t['reference'],
+                    $t['description'],
+                    $t['debit'] > 0 ? number_format($t['debit'], 2, '.', '') : '0.00',
+                    $t['credit'] > 0 ? number_format($t['credit'], 2, '.', '') : '0.00',
+                    number_format(abs($runningBalance), 2, '.', '') . ' ' . $balanceType
+                ]);
+            }
+
+            fputcsv($output, []);
+            fputcsv($output, ['', '', '', 'TOTALS', number_format($totalDebit, 2, '.', ''), number_format($totalCredit, 2, '.', ''), '']);
+            fputcsv($output, ['', '', '', 'NET PAYABLE', '', '', number_format(abs($finalBalance), 2, '.', '') . ' ' . ($finalBalance >= 0 ? 'Cr' : 'Dr')]);
+            
+            fclose($output);
+            exit();
+        }
+
+        return view('vendors/statement', $data);
+    }
+
     private function pushToZoho($id)
     {
         $vendor = $this->vendorModel->find($id);

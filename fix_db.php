@@ -1,24 +1,70 @@
 <?php
-// Bootstrap CodeIgniter
-define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR);
-require_once __DIR__ . '/vendor/autoload.php';
-$app = require_once __DIR__ . '/app/Config/Paths.php';
-$app = new \CodeIgniter\CodeIgniter(new \Config\Paths());
-$app->initialize();
+
+require_once 'vendor/autoload.php';
+require_once 'app/Config/Paths.php';
+$paths = new Config\Paths();
+require_once 'system/Test/bootstrap.php';
 
 $db = \Config\Database::connect();
-$fields = $db->getFieldNames('invoices');
-echo "Columns in 'invoices':\n";
-print_r($fields);
+$forge = \Config\Database::forge();
 
-if (!in_array('waybill_image', $fields)) {
-    echo "\n'waybill_image' is MISSING. Attempting to add it via SQL...\n";
-    try {
-        $db->query("ALTER TABLE invoices ADD COLUMN waybill_image VARCHAR(255) NULL AFTER ewaybill_number");
-        echo "Successfully added 'waybill_image' column.\n";
-    } catch (\Exception $e) {
-        echo "Error adding column: " . $e->getMessage() . "\n";
-    }
+$tables = ['invoices', 'invoice_status_history'];
+
+echo "Checking tables...\n";
+
+// 1. Check invoices for delivered_date
+$fields = $db->getFieldNames('invoices');
+if (!in_array('delivered_date', $fields)) {
+    echo "Adding delivered_date to invoices...\n";
+    $forge->addColumn('invoices', [
+        'delivered_date' => [
+            'type' => 'DATE',
+            'null' => true,
+            'after' => 'delivery_status'
+        ]
+    ]);
 } else {
-    echo "\n'waybill_image' ALREADY EXISTS.\n";
+    echo "delivered_date already exists in invoices.\n";
 }
+
+// 2. Create invoice_status_history if missing
+if (!$db->tableExists('invoice_status_history')) {
+    echo "Creating invoice_status_history table...\n";
+    $forge->addField([
+        'id' => [
+            'type'           => 'INT',
+            'constraint'     => 11,
+            'unsigned'       => true,
+            'auto_increment' => true,
+        ],
+        'invoice_id' => [
+            'type'       => 'INT',
+            'constraint' => 11,
+            'unsigned'   => true,
+        ],
+        'status' => [
+            'type'       => 'VARCHAR',
+            'constraint' => '50',
+        ],
+        'description' => [
+            'type' => 'TEXT',
+            'null' => true,
+        ],
+        'created_at' => [
+            'type' => 'DATETIME',
+            'null' => true,
+        ],
+        'created_by' => [
+            'type'       => 'INT',
+            'constraint' => 11,
+            'unsigned'   => true,
+            'null'       => true,
+        ],
+    ]);
+    $forge->addKey('id', true);
+    $forge->createTable('invoice_status_history');
+} else {
+    echo "invoice_status_history table already exists.\n";
+}
+
+echo "Done!\n";

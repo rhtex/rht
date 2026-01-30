@@ -1,28 +1,26 @@
-<div class="col-12">
-    <div class="card notify-card <?= $notify['is_read'] ? '' : 'unread' ?> shadow-sm">
-        <div class="card-body p-4">
-            <div class="d-flex align-items-center">
-                <div class="icon-box me-4 <?= $notify['type'] == 'low_stock' ? 'bg-soft-warning' : 'bg-soft-info' ?>">
-                    <i class="fas fa-<?= $notify['type'] == 'low_stock' ? 'exclamation-triangle' : 'truck-loading' ?>"></i>
-                </div>
-                <div class="flex-grow-1">
-                    <div class="d-flex justify-content-between">
-                        <h6 class="fw-bold mb-1 text-dark"><?= esc($notify['title']) ?></h6>
-                        <span class="text-muted smaller"><?= date('M d, h:i A', strtotime($notify['created_at'])) ?></span>
-                    </div>
-                    <p class="text-muted small mb-0"><?= esc($notify['message']) ?></p>
-                </div>
-                <div class="ms-4 d-flex gap-2">
-                    <?php if($notify['link']): ?>
-                        <a href="<?= site_url($notify['link']) ?>" class="btn btn-sm btn-soft-primary px-3 rounded-pill fw-bold">Resolve</a>
-                    <?php endif; ?>
-                    <?php if(!$notify['is_read']): ?>
-                        <a href="<?= site_url('notifications/markAsRead/'.$notify['id']) ?>" class="btn btn-sm btn-light border px-2 rounded-circle" title="Mark as Read">
-                            <i class="fas fa-check"></i>
-                        </a>
-                    <?php endif; ?>
-                </div>
-            </div>
+<tr class="<?= $notify['is_read'] ? '' : 'bg-soft-primary-light' ?>" style="<?= !$notify['is_read'] ? 'border-left: 3px solid #4f46e5;' : '' ?>">
+    <td class="ps-3">
+        <div class="icon-box <?= $notify['type'] == 'low_stock' ? 'bg-soft-warning' : ($notify['type'] == 'lr_update' ? 'bg-soft-info' : 'bg-soft-success') ?>" style="width: 28px; height: 28px; border-radius: 6px; font-size: 0.8rem;">
+            <i class="fas fa-<?= $notify['type'] == 'low_stock' ? 'exclamation-triangle' : ($notify['type'] == 'lr_update' ? 'truck-loading' : 'bell') ?>"></i>
         </div>
-    </div>
-</div>
+    </td>
+    <td>
+        <div class="fw-bold text-dark mb-0" style="font-size: 0.85rem;"><?= esc($notify['title']) ?></div>
+        <div class="text-muted smaller"><?= esc($notify['message']) ?></div>
+    </td>
+    <td class="text-muted smaller">
+        <?= date('d M, h:i A', strtotime($notify['created_at'])) ?>
+    </td>
+    <td class="text-end pe-3">
+        <div class="d-flex justify-content-end gap-1">
+            <?php if($notify['link']): ?>
+                <a href="<?= site_url($notify['link']) ?>" class="btn btn-xs btn-soft-primary fw-bold" title="Resolve">Resolve</a>
+            <?php endif; ?>
+            <?php if(!$notify['is_read']): ?>
+                <a href="<?= site_url('notifications/markAsRead/'.$notify['id']) ?>" class="btn btn-xs btn-outline-secondary" title="Mark as Read">
+                    <i class="fas fa-check"></i>
+                </a>
+            <?php endif; ?>
+        </div>
+    </td>
+</tr>

@@ -35,9 +35,9 @@ class VendorController extends BaseController
         $offset = ($page - 1) * $limit;
 
         $filters = [
-            'search'     => $this->request->getGet('search'),
-            'status'     => $this->request->getGet('status'),
-            'sort_by'    => $this->request->getGet('sort_by'),
+            'search' => $this->request->getGet('search'),
+            'status' => $this->request->getGet('status'),
+            'sort_by' => $this->request->getGet('sort_by'),
             'sort_order' => $this->request->getGet('sort_order'),
         ];
 
@@ -193,23 +193,29 @@ class VendorController extends BaseController
         // Fetch Bills
         $billModel = new \App\Models\BillModel();
         $billsBuilder = $billModel->where('vendor_id', $id);
-        if ($dateFrom) $billsBuilder->where('bill_date >=', $dateFrom);
-        if ($dateTo) $billsBuilder->where('bill_date <=', $dateTo);
+        if ($dateFrom)
+            $billsBuilder->where('bill_date >=', $dateFrom);
+        if ($dateTo)
+            $billsBuilder->where('bill_date <=', $dateTo);
         $bills = $billsBuilder->orderBy('bill_date', 'ASC')->findAll();
 
         // Fetch Payments
         $paymentModel = new \App\Models\PaymentModel();
         $paymentsBuilder = $paymentModel->select('payments.*, bills.bill_number')
-                                 ->join('bills', 'bills.id = payments.bill_id')
-                                 ->where('bills.vendor_id', $id);
-        if ($dateFrom) $paymentsBuilder->where('payment_date >=', $dateFrom);
-        if ($dateTo) $paymentsBuilder->where('payment_date <=', $dateTo);
+            ->join('bills', 'bills.id = payments.bill_id')
+            ->where('bills.vendor_id', $id);
+        if ($dateFrom)
+            $paymentsBuilder->where('payment_date >=', $dateFrom);
+        if ($dateTo)
+            $paymentsBuilder->where('payment_date <=', $dateTo);
         $payments = $paymentsBuilder->orderBy('payment_date', 'ASC')->findAll();
 
         // Fetch Credits (Returns)
         $creditsBuilder = $this->creditModel->where('vendor_id', $id);
-        if ($dateFrom) $creditsBuilder->where('created_at >=', $dateFrom . ' 00:00:00');
-        if ($dateTo) $creditsBuilder->where('created_at <=', $dateTo . ' 23:59:59');
+        if ($dateFrom)
+            $creditsBuilder->where('created_at >=', $dateFrom . ' 00:00:00');
+        if ($dateTo)
+            $creditsBuilder->where('created_at <=', $dateTo . ' 23:59:59');
         $credits = $creditsBuilder->orderBy('created_at', 'ASC')->findAll();
 
         // Prepare Transactions
@@ -223,7 +229,7 @@ class VendorController extends BaseController
             // Calculate balance before dateFrom
             $prevBills = $billModel->where('vendor_id', $id)->where('bill_date <', $dateFrom)->selectSum('total_amount')->first();
             $prevPayments = $paymentModel->join('bills', 'bills.id = payments.bill_id')
-                                         ->where('bills.vendor_id', $id)->where('payment_date <', $dateFrom)->selectSum('amount')->first();
+                ->where('bills.vendor_id', $id)->where('payment_date <', $dateFrom)->selectSum('amount')->first();
             $prevCredits = $this->creditModel->where('vendor_id', $id)->where('created_at <', $dateFrom . ' 00:00:00')->selectSum('amount')->first();
 
             // Vendor Liability: Cr (Opening Cr + Bills) - Dr (Opening Dr + Payments + Credits)
@@ -262,7 +268,7 @@ class VendorController extends BaseController
             $transactions[] = [
                 'date' => $pay['payment_date'],
                 'type' => 'Payment',
-                'reference' => $pay['payment_number'] ?: 'PAY-'.$pay['id'],
+                'reference' => $pay['payment_number'] ?: 'PAY-' . $pay['id'],
                 'debit' => $pay['amount'],
                 'credit' => 0,
                 'description' => 'Payment for Bill #' . $pay['bill_number'] . ' (' . $pay['payment_mode'] . ')'
@@ -282,14 +288,27 @@ class VendorController extends BaseController
         }
 
         // Sort by date
-        usort($transactions, function($a, $b) {
+        usort($transactions, function ($a, $b) {
             return strtotime($a['date']) - strtotime($b['date']);
         });
 
         $data['transactions'] = $transactions;
         $data['date_from'] = $dateFrom;
         $data['date_to'] = $dateTo;
-        
+
+        // Calculate Totals
+        $totalDebit = 0;
+        $totalCredit = 0;
+        foreach ($transactions as $t) {
+            $totalDebit += $t['debit'];
+            $totalCredit += $t['credit'];
+        }
+        $finalBalance = ($openingType == 'Cr' ? $openingBalance : -$openingBalance) + $totalCredit - $totalDebit;
+
+        $data['totalDebit'] = $totalDebit;
+        $data['totalCredit'] = $totalCredit;
+        $data['finalBalance'] = $finalBalance;
+
         $data['billing_address'] = $this->addressModel->getActiveAddress('vendor', $id, 'billing');
         $data['billing_state'] = $data['billing_address'] ? $this->stateModel->find($data['billing_address']['state_id']) : null;
 
@@ -309,7 +328,7 @@ class VendorController extends BaseController
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename=Statement_' . str_replace(' ', '_', $data['vendor']['name']) . '_' . date('Ymd') . '.csv');
             $output = fopen('php://output', 'w');
-            
+
             // Header Info
             fputcsv($output, ['RASI DESIGNS']);
             fputcsv($output, ['Vendor Statement']);
@@ -317,22 +336,22 @@ class VendorController extends BaseController
             fputcsv($output, ['Period:', ($dateFrom ?: 'Beginning') . ' - ' . ($dateTo ?: date('Y-m-d'))]);
             fputcsv($output, ['Net Balance Payable:', number_format(abs($finalBalance), 2, '.', '') . ' ' . ($finalBalance >= 0 ? 'Cr' : 'Dr')]);
             fputcsv($output, []);
-            
+
             // Table Header
             fputcsv($output, ['Date', 'Type', 'Reference', 'Description', 'Debit (Dr)', 'Credit (Cr)', 'Running Balance']);
-            
+
             // Opening Balance
             fputcsv($output, [
                 $dateFrom ?: '---',
                 'Opening Balance',
                 '',
                 $data['opening_balance_desc'],
-                $openingType == 'Dr' ? number_format($opening_balance, 2, '.', '') : '0.00',
-                $openingType == 'Cr' ? number_format($opening_balance, 2, '.', '') : '0.00',
-                number_format($opening_balance, 2, '.', '') . ' ' . $openingType
+                $openingType == 'Dr' ? number_format($openingBalance, 2, '.', '') : '0.00',
+                $openingType == 'Cr' ? number_format($openingBalance, 2, '.', '') : '0.00',
+                number_format($openingBalance, 2, '.', '') . ' ' . $openingType
             ]);
-            
-            $runningBalance = ($openingType == 'Cr' ? $opening_balance : -$opening_balance);
+
+            $runningBalance = ($openingType == 'Cr' ? $openingBalance : -$openingBalance);
             foreach ($transactions as $t) {
                 $runningBalance += ($t['credit'] - $t['debit']);
                 $balanceType = $runningBalance >= 0 ? 'Cr' : 'Dr';
@@ -350,7 +369,7 @@ class VendorController extends BaseController
             fputcsv($output, []);
             fputcsv($output, ['', '', '', 'TOTALS', number_format($totalDebit, 2, '.', ''), number_format($totalCredit, 2, '.', ''), '']);
             fputcsv($output, ['', '', '', 'NET PAYABLE', '', '', number_format(abs($finalBalance), 2, '.', '') . ' ' . ($finalBalance >= 0 ? 'Cr' : 'Dr')]);
-            
+
             fclose($output);
             exit();
         }
@@ -361,7 +380,8 @@ class VendorController extends BaseController
     private function pushToZoho($id)
     {
         $vendor = $this->vendorModel->find($id);
-        if (!$vendor) return;
+        if (!$vendor)
+            return;
 
         $billing = $this->addressModel->getActiveAddress('vendor', $id, 'billing');
         $billingState = $billing ? $this->stateModel->find($billing['state_id']) : null;
@@ -370,29 +390,29 @@ class VendorController extends BaseController
             'contact_name' => $vendor['name'],
             'company_name' => $vendor['name'], // Vendor name is the company name
             'contact_type' => 'vendor',
-            'email'        => $vendor['email'],
-            'phone'        => $vendor['phone'],
-            'mobile'       => $vendor['whatsapp_number'] ?? $vendor['phone'],
-            'website'      => $vendor['website'],
-            'gst_no'       => $vendor['gstin'],
-            'pan'          => $vendor['pan_number'],
+            'email' => $vendor['email'],
+            'phone' => $vendor['phone'],
+            'mobile' => $vendor['whatsapp_number'] ?? $vendor['phone'],
+            'website' => $vendor['website'],
+            'gst_no' => $vendor['gstin'],
+            'pan' => $vendor['pan_number'],
             'billing_address' => [
                 'address' => $billing['address_line1'] ?? '',
                 'street2' => $billing['address_line2'] ?? '',
-                'city'    => $billing['city'] ?? '',
-                'state'   => $billingState['name'] ?? '',
-                'zip'     => $billing['pincode'] ?? '',
+                'city' => $billing['city'] ?? '',
+                'state' => $billingState['name'] ?? '',
+                'zip' => $billing['pincode'] ?? '',
                 'country' => 'India'
             ]
         ];
 
         $response = $this->zohoService->pushContact($data, $vendor['zoho_contact_id']);
-        
+
         if ($response['success']) {
             $zohoId = $response['data']['contact']['contact_id'];
             $this->vendorModel->update($id, [
                 'zoho_contact_id' => $zohoId,
-                'zoho_sync_at'    => date('Y-m-d H:i:s')
+                'zoho_sync_at' => date('Y-m-d H:i:s')
             ]);
         } else {
             log_message('error', 'Zoho Push Error for Vendor ' . $id . ': ' . $response['message']);
@@ -404,81 +424,190 @@ class VendorController extends BaseController
         $page = 1;
         $hasMore = true;
         $syncedCount = 0;
+        $maxContactsPerRun = 100; // Limit to prevent timeout
+        $startTime = time();
+        $maxExecutionTime = 100; // Leave 20 seconds buffer before PHP timeout
 
-        while ($hasMore) {
-            $response = $this->zohoService->getContacts('vendor', $page);
-            
-            if (!$response['success']) {
-                if ($syncedCount > 0) break;
-                return redirect()->to('vendors')->with('error', 'Failed to fetch from Zoho: ' . $response['message']);
-            }
+        try {
+            while ($hasMore && $syncedCount < $maxContactsPerRun) {
+                // Check if we're approaching timeout
+                if ((time() - $startTime) > $maxExecutionTime) {
+                    log_message('warning', "Zoho Vendor Sync: Stopping due to time limit. Synced $syncedCount vendors.");
+                    return redirect()->to('vendors')->with('warning', "Partially synced $syncedCount vendors. Please run sync again to continue.");
+                }
 
-            $contacts = $response['data']['contacts'] ?? [];
-            if (empty($contacts)) break;
+                $response = $this->zohoService->getContacts('vendor', $page);
 
-            foreach ($contacts as $contact) {
-                $existing = $this->vendorModel->where('zoho_contact_id', $contact['contact_id'])->first();
-                
-                $vendorData = [
-                    'zoho_contact_id' => $contact['contact_id'],
-                    'name'            => $contact['company_name'] ?: $contact['contact_name'], // Prefer company name
-                    'email'           => $contact['email'],
-                    'phone'           => $contact['phone'],
-                    'website'         => $contact['website'],
-                    'zoho_sync_at'    => date('Y-m-d H:i:s'),
-                    'status'          => 'active'
-                ];
+                if (!$response['success']) {
+                    if ($syncedCount > 0)
+                        break;
+                    return redirect()->to('vendors')->with('error', 'Failed to fetch from Zoho: ' . $response['message']);
+                }
 
-                if ($existing) {
-                    $this->vendorModel->update($existing['id'], $vendorData);
-                    $vendorId = $existing['id'];
-                } else {
-                    $byEmail = $this->vendorModel->where('email', $contact['email'])->first();
-                    if ($byEmail && !empty($contact['email'])) {
-                        $this->vendorModel->update($byEmail['id'], $vendorData);
-                        $vendorId = $byEmail['id'];
+                $contacts = $response['data']['contacts'] ?? [];
+                if (empty($contacts))
+                    break;
+
+                foreach ($contacts as $contact) {
+                    if ($syncedCount >= $maxContactsPerRun) {
+                        break;
+                    }
+
+                    $existing = $this->vendorModel->where('zoho_contact_id', $contact['contact_id'])->first();
+
+                    // Skip if synced in the last 5 minutes (to avoid re-processing same contacts)
+                    if ($existing && !empty($existing['zoho_sync_at'])) {
+                        $lastSyncTime = strtotime($existing['zoho_sync_at']);
+                        $fiveMinutesAgo = time() - (5 * 60);
+                        if ($lastSyncTime > $fiveMinutesAgo) {
+                            continue; // Skip recently synced contact
+                        }
+                    }
+
+                    // Get phone number from Zoho (prioritize mobile, then phone)
+                    $rawPhone = ($contact['mobile'] ?? '') ?: ($contact['phone'] ?? '') ?: '';
+                    $phoneNumbers = preg_split('/[,\\s\\/]+/', $rawPhone);
+                    $phone = trim($phoneNumbers[0] ?? '');
+                    $phone = preg_replace('/[^0-9+]/', '', $phone);
+                    if (strlen($phone) > 15) {
+                        $phone = substr($phone, 0, 15);
+                    }
+
+                    $vendorData = [
+                        'zoho_contact_id' => $contact['contact_id'],
+                        'name' => $contact['company_name'] ?: $contact['contact_name'],
+                        'email' => $contact['email'] ?? '',
+                        'phone' => $phone,
+                        'website' => $contact['website'] ?? '',
+                        'gst_type' => !empty($contact['gst_no']) ? 'Regular' : 'Unregistered',
+                        'gstin' => $contact['gst_no'] ?? '',
+                        'balance_type' => 'Cr',
+                        'opening_balance' => 0,
+                        'zoho_sync_at' => date('Y-m-d H:i:s'),
+                        'status' => 'active'
+                    ];
+
+                    if ($existing) {
+                        if (!$this->vendorModel->update($existing['id'], $vendorData)) {
+                            log_message('error', 'Zoho Sync: Failed to update vendor ID ' . $existing['id']);
+                            continue;
+                        }
+                        $vendorId = $existing['id'];
                     } else {
-                        $this->vendorModel->insert($vendorData);
+                        if (!$this->vendorModel->insert($vendorData)) {
+                            log_message('error', 'Zoho Sync: Failed to insert vendor (Zoho ID: ' . $contact['contact_id'] . ')');
+                            continue;
+                        }
                         $vendorId = $this->vendorModel->getInsertID();
                     }
+
+                    // Check if addresses exist in list endpoint data
+                    $hasAddressesInList = !empty($contact['billing_address']) || !empty($contact['shipping_address']);
+
+                    if ($hasAddressesInList) {
+                        // Use addresses from list endpoint directly (faster)
+                        if (!empty($contact['billing_address'])) {
+                            $this->syncAddress($vendorId, 'vendor', 'billing', $contact['billing_address']);
+                        }
+                        if (!empty($contact['shipping_address'])) {
+                            $this->syncAddress($vendorId, 'vendor', 'shipping', $contact['shipping_address']);
+                        }
+                    } else {
+                        // Fetch individual contact details only if addresses missing
+                        $detailResponse = $this->zohoService->getContactById($contact['contact_id']);
+                        if ($detailResponse['success'] && isset($detailResponse['data']['contact'])) {
+                            $detailedContact = $detailResponse['data']['contact'];
+
+                            if (isset($detailedContact['billing_address'])) {
+                                $this->syncAddress($vendorId, 'vendor', 'billing', $detailedContact['billing_address']);
+                            }
+                            if (isset($detailedContact['shipping_address'])) {
+                                $this->syncAddress($vendorId, 'vendor', 'shipping', $detailedContact['shipping_address']);
+                            }
+                        }
+                    }
+
+                    $syncedCount++;
                 }
 
-                if (isset($contact['billing_address'])) {
-                    $this->syncAddress($vendorId, 'vendor', 'billing', $contact['billing_address']);
-                }
-
-                $syncedCount++;
+                $hasMore = $response['data']['page_context']['has_more_page'] ?? false;
+                $page++;
             }
 
-            $hasMore = $response['data']['page_context']['has_more_page'] ?? false;
-            $page++;
+            $message = "Successfully synced $syncedCount vendors from Zoho.";
+            if ($syncedCount >= $maxContactsPerRun) {
+                $message .= " Maximum limit reached. Run sync again to continue.";
+            }
+
+            return redirect()->to('vendors')->with('success', $message);
+
+        } catch (\Exception $e) {
+            log_message('error', 'Zoho Vendor Sync Exception: ' . $e->getMessage());
+            if ($syncedCount > 0) {
+                return redirect()->to('vendors')->with('warning', "Partially synced $syncedCount vendors. Error: " . $e->getMessage());
+            }
+            return redirect()->to('vendors')->with('error', 'Sync failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Sync address for a single vendor from Zoho Books
+     */
+    public function syncAddressFromZoho($vendorId)
+    {
+        $vendor = $this->vendorModel->find($vendorId);
+
+        if (!$vendor || empty($vendor['zoho_contact_id'])) {
+            return redirect()->back()->with('error', 'Vendor not found or not linked to Zoho.');
         }
 
-        return redirect()->to('vendors')->with('success', "Successfully synced $syncedCount vendors from Zoho.");
+        try {
+            $detailResponse = $this->zohoService->getContactById($vendor['zoho_contact_id']);
+
+            if ($detailResponse['success'] && isset($detailResponse['data']['contact'])) {
+                $detailedContact = $detailResponse['data']['contact'];
+
+                if (isset($detailedContact['billing_address'])) {
+                    $this->syncAddress($vendorId, 'vendor', 'billing', $detailedContact['billing_address']);
+                }
+                if (isset($detailedContact['shipping_address'])) {
+                    $this->syncAddress($vendorId, 'vendor', 'shipping', $detailedContact['shipping_address']);
+                }
+
+                return redirect()->back()->with('success', 'Address synced successfully from Zoho Books.');
+            }
+
+            return redirect()->back()->with('error', 'Could not fetch address from Zoho Books.');
+
+        } catch (\Exception $e) {
+            log_message('error', 'Zoho Address Sync Exception: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Address sync failed: ' . $e->getMessage());
+        }
     }
 
     private function syncAddress($ownerId, $ownerType, $addressType, $zohoAddr)
     {
-        if (empty($zohoAddr['address']) && empty($zohoAddr['city'])) return;
+        if (empty($zohoAddr['address']) && empty($zohoAddr['city']))
+            return;
 
         $stateName = $zohoAddr['state'] ?? '';
         $state = $this->stateModel->where('name', $stateName)->first();
-        
+
         $newData = [
-            'owner_type'    => $ownerType,
-            'owner_id'      => $ownerId,
-            'address_type'  => $addressType,
+            'owner_type' => $ownerType,
+            'owner_id' => $ownerId,
+            'address_type' => $addressType,
             'address_line1' => $zohoAddr['address'] ?? '',
             'address_line2' => $zohoAddr['street2'] ?? '',
-            'city'          => $zohoAddr['city'] ?? '',
-            'pincode'       => $zohoAddr['zip'] ?? '',
-            'state_id'      => $state['id'] ?? null,
-            'country_id'    => 1,
-            'is_active'     => 1
+            'city' => $zohoAddr['city'] ?? '',
+            'pincode' => $zohoAddr['zip'] ?? '',
+            'state_id' => $state['id'] ?? null,
+            'country_id' => 1,
+            'is_active' => 1
         ];
 
         $existing = $this->addressModel->getActiveAddress($ownerType, $ownerId, $addressType);
-        
+
         if ($existing) {
             $isChanged = false;
             foreach (['address_line1', 'city', 'pincode', 'state_id'] as $field) {
@@ -497,30 +626,61 @@ class VendorController extends BaseController
         }
     }
 
+    public function getDetails($id)
+    {
+        $vendor = $this->vendorModel->find($id);
+        if (!$vendor) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Vendor not found'])->setStatusCode(404);
+        }
+
+        $billingAddress = $this->addressModel->getAddressWithNames('vendor', $id, 'billing');
+
+        $billingText = $billingAddress ?
+            "{$billingAddress['address_line1']}\n" .
+            ($billingAddress['address_line2'] ? "{$billingAddress['address_line2']}\n" : "") .
+            "{$billingAddress['city']}, {$billingAddress['state_name']}, {$billingAddress['country_name']} - {$billingAddress['pincode']}" : "N/A";
+
+        $settingsModel = new \App\Models\SettingModel();
+        $companyStateId = $settingsModel->getSetting('company_state') ?? null;
+
+        $stateId = $billingAddress['state_id'] ?? null;
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'state_id' => $stateId,
+            'is_inter_state' => ($stateId != $companyStateId),
+            'billing_address' => $billingText,
+            'phone' => $vendor['phone'] ?? '',
+            'whatsapp_number' => $vendor['whatsapp_number'] ?? '',
+            'state_name' => $billingAddress['state_name'] ?? '',
+            'country_name' => $billingAddress['country_name'] ?? '',
+            'gst_type' => $vendor['gst_type'] ?? 'Unregistered',
+            'gstin' => $vendor['gstin'] ?? 'N/A',
+        ]);
+    }
+
     /**
      * Save addresses from form data
      */
     private function saveAddresses($ownerType, $ownerId)
     {
-        // Get address data from POST
         $addressData = [
-            'owner_type'    => $ownerType,
-            'owner_id'      => $ownerId,
-            'address_type'  => 'billing',
+            'owner_type' => $ownerType,
+            'owner_id' => $ownerId,
+            'address_type' => 'billing',
             'address_line1' => $this->request->getPost('address_line1'),
             'address_line2' => $this->request->getPost('address_line2'),
-            'city'          => $this->request->getPost('address_city'),
-            'state_id'      => $this->request->getPost('address_state_id'),
-            'pincode'       => $this->request->getPost('address_pincode'),
-            'country_id'    => 1, // India
-            'is_active'     => 1
+            'city' => $this->request->getPost('address_city'),
+            'state_id' => $this->request->getPost('address_state_id'),
+            'pincode' => $this->request->getPost('address_pincode'),
+            'country_id' => 1, // India
+            'is_active' => 1
         ];
 
-        // Check if address exists
         $existing = $this->addressModel->getActiveAddress($ownerType, $ownerId, 'billing');
-        
+
+        $isChanged = true;
         if ($existing) {
-            // Check if address has changed
             $isChanged = false;
             foreach (['address_line1', 'address_line2', 'city', 'state_id', 'pincode'] as $field) {
                 if (($existing[$field] ?? '') != ($addressData[$field] ?? '')) {
@@ -528,22 +688,25 @@ class VendorController extends BaseController
                     break;
                 }
             }
+        }
 
-            if ($isChanged) {
-                // Deactivate old address and create new one
-                $this->addressModel->deactivateOthers($ownerType, $ownerId, 'billing');
-                $this->addressModel->insert($addressData);
+        if ($isChanged) {
+            log_message('debug', "Vendor Address Update - Change detected for billing address of $ownerType $ownerId");
+
+            // Validate before proceeding
+            if (!$this->addressModel->validate($addressData)) {
+                log_message('error', "Vendor Address Update - Validation failed for billing: " . json_encode($this->addressModel->errors()));
+                return; // Transaction will be rolled back by the parent store/update method if transStatus() is checked
             }
-        } else {
-            // Create new address
+
+            $this->addressModel->deactivateOthers($ownerType, $ownerId, 'billing');
             $this->addressModel->insert($addressData);
         }
     }
-
     public function pendingReturns()
     {
         $filters = [
-            'vendor_id'     => $this->request->getGet('vendor_id'),
+            'vendor_id' => $this->request->getGet('vendor_id'),
             'return_action' => $this->request->getGet('return_action') ?? 'Pending'
         ];
 
@@ -551,24 +714,24 @@ class VendorController extends BaseController
         $data['vendors'] = $this->vendorModel->findAll();
         $data['filters'] = $filters;
         $data['title'] = 'Pending Returns';
-        
+
         return view('vendors/pending_returns', $data);
     }
 
     public function processReturn($itemId)
     {
         $action = $this->request->getPost('return_action'); // Returned or Exchanged
-        
+
         if (!in_array($action, ['Returned', 'Exchanged'])) {
             return redirect()->back()->with('error', 'Invalid action selected.');
         }
 
         $data = [
             'return_action' => $action,
-             // If exchanged, maybe status changes? detailed tracking might require new item, 
-             // but for now we track action on the rejected item.
-             // If exchanged, arguably status is 'returned' too or kept as rejected with note.
-            'status' => 'returned' 
+            // If exchanged, maybe status changes? detailed tracking might require new item, 
+            // but for now we track action on the rejected item.
+            // If exchanged, arguably status is 'returned' too or kept as rejected with note.
+            'status' => 'returned'
         ];
 
         $this->itemModel->update($itemId, $data);
@@ -586,41 +749,41 @@ class VendorController extends BaseController
     {
         $barcode = $this->request->getPost('barcode');
         $vendorId = $this->request->getPost('vendor_id');
-        
+
         $item = $this->itemModel->where('barcode', $barcode)->first();
-        
+
         if (!$item) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Item not found with this barcode.'
             ]);
         }
-        
+
         if ($item['vendor_id'] != $vendorId) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'This item does not belong to the selected vendor.'
             ]);
         }
-        
+
         if ($item['status'] != 'rejected' || $item['is_approved'] != 'Rejected') {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'This item is not rejected and cannot be returned.'
             ]);
         }
-        
+
         if ($item['return_action'] != 'Pending') {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'This item has already been processed as ' . $item['return_action'] . '.'
             ]);
         }
-        
+
         // Get product name
         $productModel = new \App\Models\ProductModel();
         $product = $productModel->find($item['product_id']);
-        
+
         return $this->response->setJSON([
             'success' => true,
             'item' => [
@@ -638,44 +801,44 @@ class VendorController extends BaseController
         $vendorId = $this->request->getPost('vendor_id');
         $action = $this->request->getPost('return_action');
         $itemIds = $this->request->getPost('item_ids'); // Array of item IDs
-        
+
         if (empty($itemIds)) {
             return redirect()->back()->with('error', 'No items selected for return.');
         }
-        
+
         if (!in_array($action, ['Returned', 'Exchanged'])) {
             return redirect()->back()->with('error', 'Invalid return action.');
         }
-        
+
         $db = \Config\Database::connect();
         $db->transStart();
-        
+
         $totalAmount = 0;
         $processedCount = 0;
         $validItemIds = [];
-        
+
         foreach ($itemIds as $itemId) {
             $item = $this->itemModel->find($itemId);
-            
+
             if ($item && $item['vendor_id'] == $vendorId && $item['return_action'] == 'Pending') {
                 $this->itemModel->update($itemId, [
                     'return_action' => $action,
                     'status' => 'returned'
                 ]);
-                
+
                 if ($action == 'Returned') {
                     $totalAmount += $item['purchase_price'];
                 }
-                
+
                 $processedCount++;
                 $validItemIds[] = $itemId;
             }
         }
-        
+
         // Create Return Shipment Record FIRST to get ID
         if ($processedCount > 0) {
             $refNo = 'RET-' . date('Ymd') . '-' . strtoupper(substr(md5(time()), 0, 6));
-            
+
             $shipmentModel = new \App\Models\ReturnShipmentModel();
             $shipmentId = $shipmentModel->insert([
                 'vendor_id' => $vendorId,
@@ -685,15 +848,15 @@ class VendorController extends BaseController
                 'status' => 'Pending',
                 'notes' => "Return action: {$action}"
             ]);
-            
+
             // Link items to shipment
             $this->itemModel->whereIn('id', $validItemIds)->set(['return_shipment_id' => $shipmentId])->update();
         }
-        
+
         // Create vendor credit if action is Returned
         if ($action == 'Returned' && $totalAmount > 0) {
             // Ref number is already generated
-            
+
             $this->creditModel->insert([
                 'vendor_id' => $vendorId,
                 'amount' => $totalAmount,
@@ -703,18 +866,18 @@ class VendorController extends BaseController
                 'created_by' => session('user_id')
             ]);
         }
-        
+
         $db->transComplete();
-        
+
         if ($db->transStatus() === false) {
             return redirect()->back()->with('error', 'Failed to process return batch.');
         }
-        
+
         $message = "Successfully processed {$processedCount} items as {$action}.";
         if ($action == 'Returned' && $totalAmount > 0) {
             $message .= " Vendor credit of ₹" . number_format($totalAmount, 2) . " created.";
         }
-        
+
         return redirect()->to('vendors/returns/shipments')->with('success', $message);
     }
 
@@ -722,7 +885,7 @@ class VendorController extends BaseController
     {
         $limit = 25;
         $offset = intval($this->request->getGet('offset') ?? 0);
-        
+
         $vendor_id = $this->request->getGet('vendor_id');
         $delivery_status = $this->request->getGet('delivery_status');
         $search = $this->request->getGet('search');
@@ -731,7 +894,7 @@ class VendorController extends BaseController
         $vendorModel = new \App\Models\VendorModel();
 
         $builder = $shipmentModel->select('return_shipments.*, vendors.name as vendor_name')
-                                 ->join('vendors', 'vendors.id = return_shipments.vendor_id', 'left');
+            ->join('vendors', 'vendors.id = return_shipments.vendor_id', 'left');
 
         // Apply filters
         if ($vendor_id !== null && $vendor_id !== '') {
@@ -748,44 +911,174 @@ class VendorController extends BaseController
         $totalResults = $countBuilder->countAllResults(false);
 
         $shipments = $builder->orderBy('return_shipments.created_at', 'DESC')
-                             ->findAll($limit, $offset);
+            ->findAll($limit, $offset);
 
         $data = [
-            'title'           => 'Return Shipments',
-            'shipments'       => $shipments,
-            'vendors'         => $vendorModel->where('status', 'active')->findAll(),
-            'total_count'     => $totalResults,
-            'filters'         => [
-                'vendor_id'       => $vendor_id,
+            'title' => 'Return Shipments',
+            'shipments' => $shipments,
+            'vendors' => $vendorModel->where('status', 'active')->findAll(),
+            'total_count' => $totalResults,
+            'filters' => [
+                'vendor_id' => $vendor_id,
                 'delivery_status' => $delivery_status,
-                'search'          => $search,
+                'search' => $search,
             ],
-            'limit'           => $limit,
-            'offset'          => $offset,
-            'has_more'        => ($offset + $limit) < $totalResults
+            'limit' => $limit,
+            'offset' => $offset,
+            'has_more' => ($offset + $limit) < $totalResults
         ];
 
         if ($this->request->isAJAX()) {
             return view('vendors/return_shipment_rows', $data);
         }
-        
-        return view('vendors/return_shipments', $data);
+
+        return view('vendors/return_list', $data);
+    }
+
+    /**
+     * Show manual mapping page for Zoho contacts
+     */
+    public function mapZohoContacts()
+    {
+        // Get all vendors
+        $data['vendors'] = $this->vendorModel
+            ->select('vendors.*')
+            ->orderBy('vendors.name', 'ASC')
+            ->findAll();
+
+        $data['title'] = 'Map Zoho Contacts - Vendors';
+        return view('vendors/map_zoho', $data);
+    }
+
+    /**
+     * Get Zoho vendor contacts list via AJAX
+     */
+    public function getZohoContacts()
+    {
+        try {
+            $search = $this->request->getGet('search') ?? '';
+
+            $response = $this->zohoService->getVendors($search);
+
+            if ($response['success']) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'contacts' => $response['data']['contacts'] ?? []
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to fetch Zoho vendors'
+            ]);
+
+        } catch (\Exception $e) {
+            log_message('error', 'Zoho Vendors Fetch Error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Save manual mapping between vendor and Zoho contact
+     */
+    public function saveMapping()
+    {
+        $vendorId = $this->request->getPost('vendor_id');
+        $zohoContactId = $this->request->getPost('zoho_contact_id');
+
+        if (!$vendorId || !$zohoContactId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid data provided'
+            ]);
+        }
+
+        try {
+            // Update vendor with Zoho contact ID
+            $updated = $this->vendorModel->update($vendorId, [
+                'zoho_contact_id' => $zohoContactId,
+                'zoho_sync_at' => date('Y-m-d H:i:s')
+            ]);
+
+            if ($updated) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Mapping saved successfully'
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to save mapping'
+            ]);
+
+        } catch (\Exception $e) {
+            log_message('error', 'Save Mapping Error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Remove Zoho mapping from vendor
+     */
+    public function removeMapping()
+    {
+        $vendorId = $this->request->getPost('vendor_id');
+
+        if (!$vendorId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid vendor ID'
+            ]);
+        }
+
+        try {
+            $updated = $this->vendorModel->update($vendorId, [
+                'zoho_contact_id' => null,
+                'zoho_sync_at' => null
+            ]);
+
+            if ($updated) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Mapping removed successfully'
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to remove mapping'
+            ]);
+
+        } catch (\Exception $e) {
+            log_message('error', 'Remove Mapping Error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
     }
 
     public function updateShipment($id)
     {
         $shipmentModel = new \App\Models\ReturnShipmentModel();
         $shipment = $shipmentModel->find($id);
-        
+
         if (!$shipment) {
             return redirect()->back()->with('error', 'Shipment not found.');
         }
 
         $validationRules = [
-            'transport_name'  => 'required',
-            'waybill_number'  => 'required',
-            'waybill_date'    => 'required|valid_date',
-            'waybill_image'   => 'permit_empty|max_size[waybill_image,2048]|is_image[waybill_image]'
+            'transport_name' => 'required',
+            'waybill_number' => 'required',
+            'waybill_date' => 'required|valid_date',
+            'waybill_image' => 'permit_empty|max_size[waybill_image,2048]|is_image[waybill_image]'
         ];
 
         if (!$this->validate($validationRules)) {
@@ -793,11 +1086,11 @@ class VendorController extends BaseController
         }
 
         $data = [
-            'transport_name'  => $this->request->getPost('transport_name'),
-            'waybill_number'  => $this->request->getPost('waybill_number'),
-            'waybill_date'    => $this->request->getPost('waybill_date') ?: null,
+            'transport_name' => $this->request->getPost('transport_name'),
+            'waybill_number' => $this->request->getPost('waybill_number'),
+            'waybill_date' => $this->request->getPost('waybill_date') ?: null,
             'ewaybill_number' => $this->request->getPost('ewaybill_number'),
-            'packages_count'  => $this->request->getPost('packages_count') ?: null,
+            'packages_count' => $this->request->getPost('packages_count') ?: null,
         ];
 
         $img = $this->request->getFile('waybill_image');
@@ -806,7 +1099,7 @@ class VendorController extends BaseController
             $img->move(ROOTPATH . 'public/uploads/vendor_returns', $newName);
             $data['waybill_image'] = $newName;
         }
-        
+
         $shipmentModel->update($id, $data);
         return redirect()->back()->with('success', 'Waybill information updated successfully.');
     }
@@ -815,7 +1108,7 @@ class VendorController extends BaseController
     {
         $shipmentModel = new \App\Models\ReturnShipmentModel();
         $shipment = $shipmentModel->find($id);
-        
+
         if (!$shipment) {
             return redirect()->back()->with('error', 'Shipment not found.');
         }
@@ -825,7 +1118,7 @@ class VendorController extends BaseController
             'delivery_status' => $status,
             'status' => ($status == 'Completed') ? 'Delivered' : 'Shipped'
         ];
-        
+
         $shipmentModel->update($id, $data);
         return redirect()->back()->with('success', 'Shipment status updated successfully.');
     }

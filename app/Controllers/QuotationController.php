@@ -36,13 +36,13 @@ class QuotationController extends BaseController
     {
         $filters = [
             'customer_id' => $this->request->getGet('customer_id'),
-            'status'      => $this->request->getGet('status'),
+            'status' => $this->request->getGet('status'),
         ];
 
         $data['quotations'] = $this->quotationModel->getQuotationsWithCustomer($filters);
         $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
         $data['title'] = 'Quotations';
-        
+
         return view('quotations/index', $data);
     }
 
@@ -56,7 +56,7 @@ class QuotationController extends BaseController
         $data['quotation_number'] = $this->quotationModel->generateQuotationNumber();
         $data['title'] = 'Create Quotation';
         $data['quotation'] = null;
-        
+
         return view('quotations/form', $data);
     }
 
@@ -66,22 +66,23 @@ class QuotationController extends BaseController
         $db->transStart();
 
         $quotationData = [
-            'customer_id'      => $this->request->getPost('customer_id'),
-            'agent_id'         => $this->request->getPost('agent_id') ?: null,
+            'customer_id' => $this->request->getPost('customer_id'),
+            'agent_id' => $this->request->getPost('agent_id') ?: null,
             'quotation_number' => $this->request->getPost('quotation_number'),
-            'quotation_date'   => $this->request->getPost('quotation_date'),
-            'expiry_date'      => $this->request->getPost('expiry_date'),
+            'quotation_date' => $this->request->getPost('quotation_date'),
+            'expiry_date' => $this->request->getPost('expiry_date'),
             'reference_number' => $this->request->getPost('reference_number'),
-            'transport_name'   => $this->request->getPost('transport_name'),
-            'waybill_number'   => $this->request->getPost('waybill_number'),
-            'notes'            => $this->request->getPost('notes'),
-            'terms'            => $this->request->getPost('terms'),
-            'discount_amount'  => $this->request->getPost('discount_amount') ?? 0,
-            'discount_type'    => $this->request->getPost('discount_type') ?? 'Fixed',
-            'shipping_charge'  => $this->request->getPost('shipping_charge') ?? 0,
-            'roundoff_amount'  => $this->request->getPost('roundoff_amount') ?? 0,
-            'created_by'       => session('user_id'),
-            'status'           => 'Draft'
+            'transport_name' => $this->request->getPost('transport_name'),
+            'waybill_number' => $this->request->getPost('waybill_number'),
+            'notes' => $this->request->getPost('notes'),
+            'terms' => $this->request->getPost('terms'),
+            'discount_amount' => $this->request->getPost('discount_amount') ?? 0,
+            'discount_type' => $this->request->getPost('discount_type') ?? 'Fixed',
+            'shipping_charge' => $this->request->getPost('shipping_charge') ?? 0,
+            'roundoff_amount' => $this->request->getPost('roundoff_amount') ?? 0,
+            'is_inter_state' => $this->request->getPost('is_inter_state') ?? 0,
+            'created_by' => session('user_id'),
+            'status' => 'Draft'
         ];
 
         // Manual Calculation for Totals
@@ -92,7 +93,7 @@ class QuotationController extends BaseController
         }
 
         $totalDiscount = ($quotationData['discount_type'] == 'Percentage') ? ($subtotal * $quotationData['discount_amount'] / 100) : $quotationData['discount_amount'];
-        
+
         $taxAmount = 0;
         foreach ($items as $item) {
             $itemAmt = $item['quantity'] * $item['rate'];
@@ -112,14 +113,14 @@ class QuotationController extends BaseController
 
         foreach ($items as $item) {
             $this->itemModel->insert([
-                'quotation_id'   => $quotationId,
-                'product_id'     => $item['product_id'] ?: null,
-                'description'    => $item['description'],
-                'hsn_code'       => $item['hsn_code'],
-                'quantity'       => $item['quantity'],
-                'rate'           => $item['rate'],
+                'quotation_id' => $quotationId,
+                'product_id' => $item['product_id'] ?: null,
+                'description' => $item['description'],
+                'hsn_code' => $item['hsn_code'],
+                'quantity' => $item['quantity'],
+                'rate' => $item['rate'],
                 'tax_percentage' => $item['tax_percentage'],
-                'amount'         => $item['quantity'] * $item['rate']
+                'amount' => $item['quantity'] * $item['rate']
             ]);
         }
 
@@ -168,20 +169,21 @@ class QuotationController extends BaseController
         $db->transStart();
 
         $quotationData = [
-            'customer_id'      => $this->request->getPost('customer_id'),
-            'agent_id'         => $this->request->getPost('agent_id') ?: null,
-            'quotation_date'   => $this->request->getPost('quotation_date'),
-            'expiry_date'      => $this->request->getPost('expiry_date'),
+            'customer_id' => $this->request->getPost('customer_id'),
+            'agent_id' => $this->request->getPost('agent_id') ?: null,
+            'quotation_date' => $this->request->getPost('quotation_date'),
+            'expiry_date' => $this->request->getPost('expiry_date'),
             'reference_number' => $this->request->getPost('reference_number'),
-            'transport_name'   => $this->request->getPost('transport_name'),
-            'waybill_number'   => $this->request->getPost('waybill_number'),
-            'notes'            => $this->request->getPost('notes'),
-            'terms'            => $this->request->getPost('terms'),
-            'discount_amount'  => $this->request->getPost('discount_amount') ?? 0,
-            'discount_type'    => $this->request->getPost('discount_type') ?? 'Fixed',
-            'shipping_charge'  => $this->request->getPost('shipping_charge') ?? 0,
-            'roundoff_amount'  => $this->request->getPost('roundoff_amount') ?? 0,
-            'updated_by'       => session('user_id'),
+            'transport_name' => $this->request->getPost('transport_name'),
+            'waybill_number' => $this->request->getPost('waybill_number'),
+            'notes' => $this->request->getPost('notes'),
+            'terms' => $this->request->getPost('terms'),
+            'discount_amount' => $this->request->getPost('discount_amount') ?? 0,
+            'discount_type' => $this->request->getPost('discount_type') ?? 'Fixed',
+            'shipping_charge' => $this->request->getPost('shipping_charge') ?? 0,
+            'roundoff_amount' => $this->request->getPost('roundoff_amount') ?? 0,
+            'is_inter_state' => $this->request->getPost('is_inter_state') ?? 0,
+            'updated_by' => session('user_id'),
         ];
 
         $items = $this->request->getPost('items');
@@ -191,7 +193,7 @@ class QuotationController extends BaseController
         }
 
         $totalDiscount = ($quotationData['discount_type'] == 'Percentage') ? ($subtotal * $quotationData['discount_amount'] / 100) : $quotationData['discount_amount'];
-        
+
         $taxAmount = 0;
         foreach ($items as $item) {
             $itemAmt = $item['quantity'] * $item['rate'];
@@ -208,14 +210,14 @@ class QuotationController extends BaseController
         $this->itemModel->where('quotation_id', $id)->delete();
         foreach ($items as $item) {
             $this->itemModel->insert([
-                'quotation_id'   => $id,
-                'product_id'     => $item['product_id'] ?: null,
-                'description'    => $item['description'],
-                'hsn_code'       => $item['hsn_code'],
-                'quantity'       => $item['quantity'],
-                'rate'           => $item['rate'],
+                'quotation_id' => $id,
+                'product_id' => $item['product_id'] ?: null,
+                'description' => $item['description'],
+                'hsn_code' => $item['hsn_code'],
+                'quantity' => $item['quantity'],
+                'rate' => $item['rate'],
                 'tax_percentage' => $item['tax_percentage'],
-                'amount'         => $item['quantity'] * $item['rate']
+                'amount' => $item['quantity'] * $item['rate']
             ]);
         }
 
@@ -259,28 +261,29 @@ class QuotationController extends BaseController
         $quotation = $this->quotationModel->getQuotationById($id);
         $customer = $this->customerModel->find($quotation['customer_id']);
 
-        if (!$customer['zoho_contact_id']) return false;
+        if (!$customer['zoho_contact_id'])
+            return false;
 
         $zohoData = [
-            'customer_id'     => $customer['zoho_contact_id'],
+            'customer_id' => $customer['zoho_contact_id'],
             'estimate_number' => $quotation['quotation_number'],
-            'date'            => $quotation['quotation_date'],
-            'expiry_date'     => $quotation['expiry_date'],
-            'reference_number'=> $quotation['reference_number'],
-            'discount'        => $quotation['discount_amount'],
-            'discount_type'   => strtolower($quotation['discount_type']),
+            'date' => $quotation['quotation_date'],
+            'expiry_date' => $quotation['expiry_date'],
+            'reference_number' => $quotation['reference_number'],
+            'discount' => $quotation['discount_amount'],
+            'discount_type' => strtolower($quotation['discount_type']),
             'shipping_charge' => $quotation['shipping_charge'],
-            'notes'           => $quotation['notes'],
-            'terms'           => $quotation['terms'],
-            'line_items'      => []
+            'notes' => $quotation['notes'],
+            'terms' => $quotation['terms'],
+            'line_items' => []
         ];
 
         foreach ($quotation['items'] as $item) {
             $zohoData['line_items'][] = [
-                'name'           => $item['description'],
-                'rate'           => $item['rate'],
-                'quantity'       => $item['quantity'],
-                'hsn_or_sac'     => $item['hsn_code'],
+                'name' => $item['description'],
+                'rate' => $item['rate'],
+                'quantity' => $item['quantity'],
+                'hsn_or_sac' => $item['hsn_code'],
                 'tax_percentage' => $item['tax_percentage']
             ];
         }
@@ -295,7 +298,7 @@ class QuotationController extends BaseController
             $this->quotationModel->update($id, [
                 'zoho_estimate_id' => $response['data']['estimate']['estimate_id'],
                 'zoho_sync_status' => 'Synced',
-                'zoho_sync_at'     => date('Y-m-d H:i:s')
+                'zoho_sync_at' => date('Y-m-d H:i:s')
             ]);
             return true;
         }
@@ -307,13 +310,14 @@ class QuotationController extends BaseController
     public function print($id)
     {
         $data['quotation'] = $this->quotationModel->getQuotationById($id);
-        if (!$data['quotation']) return 'Quotation not found';
-        
+        if (!$data['quotation'])
+            return 'Quotation not found';
+
         $data['company_name'] = get_setting('app_name', 'RasiDev');
         $data['company_address'] = get_setting('company_address', '');
         $data['company_gstin'] = get_setting('company_gstin', '');
         $data['title'] = 'Quotation ' . $data['quotation']['quotation_number'];
-        
+
         return view('quotations/print', $data);
     }
 }

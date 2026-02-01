@@ -16,12 +16,12 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
 // Dashboard protected group
 $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard', 'Home::index');
-    
+
     // Notifications
     $routes->get('notifications', 'NotificationController::index');
     $routes->get('notifications/markAsRead/(:num)', 'NotificationController::markAsRead/$1');
     $routes->get('notifications/markAllRead', 'NotificationController::markAllRead');
-    
+
     // Profile
     $routes->get('profile/change_password', 'AuthController::changePassword');
     $routes->post('profile/change_password', 'AuthController::updatePassword');
@@ -155,7 +155,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('reconciliation/report/(:num)/(:any)/(:any)', 'ReconciliationController::report/$1/$2/$3', ['filter' => 'permission:bank_account.view']);
 
     // Calendar Routes
-    $routes->group('calendar', function($routes) {
+    $routes->group('calendar', function ($routes) {
         $routes->get('/', 'CalendarController::index');
         $routes->get('fetch', 'CalendarController::fetchEvents');
         $routes->post('store', 'CalendarController::store');
@@ -190,14 +190,13 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('customers/update/(:num)', 'CustomerController::update/$1', ['filter' => 'permission:customer.edit']);
     $routes->get('customers/delete/(:num)', 'CustomerController::delete/$1', ['filter' => 'permission:customer.delete']);
     $routes->get('customers/statement/(:num)', 'CustomerController::statement/$1', ['filter' => 'permission:customer.view']);
-    $routes->get('customers/sync-zoho', 'CustomerController::syncZoho', ['filter' => 'permission:zoho.sync']);
+    $routes->get('customers/details/(:num)', 'CustomerController::getDetails/$1');
 
     // Sales Returns
     $routes->get('sales_returns', 'SalesReturnController::index', ['filter' => 'permission:invoice.view']);
     $routes->get('sales_returns/create', 'SalesReturnController::create', ['filter' => 'permission:invoice.edit']);
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
     $routes->get('sales_returns/sync-zoho', 'SalesReturnController::syncFromZoho', ['filter' => 'permission:zoho.sync']);
-    $routes->get('sales_returns/customer-state/(:num)', 'SalesReturnController::getCustomerState/$1');
 
     // Purchase (Vendors) Management
     $routes->get('vendors', 'VendorController::index', ['filter' => 'permission:vendor.view']);
@@ -207,13 +206,14 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('vendors/returns/process', 'VendorController::processReturnBatch', ['filter' => 'permission:vendor.edit']);
     $routes->get('vendors/create', 'VendorController::create', ['filter' => 'permission:vendor.create']);
     $routes->post('vendors/store', 'VendorController::store', ['filter' => 'permission:vendor.create']);
+    $routes->get('vendors/details/(:num)', 'VendorController::getDetails/$1', ['filter' => 'permission:vendor.view']);
     $routes->get('vendors/view/(:num)', 'VendorController::view/$1', ['filter' => 'permission:vendor.view']);
     $routes->get('vendors/edit/(:num)', 'VendorController::edit/$1', ['filter' => 'permission:vendor.edit']);
     $routes->post('vendors/update/(:num)', 'VendorController::update/$1', ['filter' => 'permission:vendor.edit']);
     $routes->get('vendors/delete/(:num)', 'VendorController::delete/$1', ['filter' => 'permission:vendor.delete']);
     $routes->get('vendors/statement/(:num)', 'VendorController::statement/$1', ['filter' => 'permission:vendor.view']);
     $routes->post('vendors/processReturn/(:num)', 'VendorController::processReturn/$1', ['filter' => 'permission:vendor.edit']);
-    
+
     // Return Shipments
     $routes->get('vendors/returns/shipments', 'VendorController::listShipments', ['filter' => 'permission:vendor.view']);
     $routes->post('vendors/returns/shipments/update/(:num)', 'VendorController::updateShipment/$1', ['filter' => 'permission:vendor.edit']);
@@ -261,7 +261,6 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('bills/payment/(:num)', 'BillController::storePayment/$1', ['filter' => 'permission:bill.edit']);
     $routes->get('bills/sync-zoho', 'BillController::syncFromZoho', ['filter' => 'permission:zoho.sync']);
     $routes->get('bills/print/(:num)', 'BillController::print/$1', ['filter' => 'permission:bill.view']);
-    $routes->get('bills/vendor-state/(:num)', 'BillController::getVendorState/$1');
 
     // Quotations
     $routes->get('quotations', 'QuotationController::index', ['filter' => 'permission:quotation.view']);
@@ -294,7 +293,6 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('invoices/payment/(:num)', 'InvoiceController::recordPayment/$1', ['filter' => 'permission:invoice.edit']);
     $routes->post('invoices/payment/(:num)', 'InvoiceController::storePayment/$1', ['filter' => 'permission:invoice.edit']);
     $routes->get('invoices/print/(:num)', 'InvoiceController::print/$1', ['filter' => 'permission:invoice.view']);
-    $routes->get('invoices/customer-state/(:num)', 'InvoiceController::getCustomerState/$1');
     $routes->get('invoices/mark-sent/(:num)', 'InvoiceController::markAsSent/$1');
     $routes->get('invoices/tracking', 'InvoiceController::tracking', ['filter' => 'permission:invoice.view']);
     $routes->post('invoices/update-waybill/(:num)', 'InvoiceController::updateWaybill/$1', ['filter' => 'permission:invoice.edit']);
@@ -333,14 +331,25 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     // Master Data AJAX
     $routes->get('master-data/states/(:num)', 'MasterDataController::getStatesByCountry/$1');
 
-    // Zoho Integration
-    $routes->get('zoho-settings', 'ZohoSettingsController::index', ['filter' => 'permission:zoho.view']);
-    $routes->post('zoho-settings/update', 'ZohoSettingsController::update', ['filter' => 'permission:zoho.edit']);
-    $routes->get('customers/sync-zoho', 'CustomerController::syncZoho', ['filter' => 'permission:zoho.sync']);
-    $routes->get('vendors/sync-zoho', 'VendorController::syncZoho', ['filter' => 'permission:zoho.sync']);
+    // API Routes for n8n Integration
+    $routes->group('api', ['filter' => 'apiauth'], function ($routes) {
+        // Customer APIs
+        $routes->get('customers', 'ApiController::getCustomers');
+        $routes->get('customers/(:num)', 'ApiController::getCustomer/$1');
+        $routes->put('customers/(:num)', 'ApiController::updateCustomer/$1');
+        $routes->post('customers/(:num)/zoho-link', 'ApiController::linkCustomerToZoho/$1');
+        $routes->post('customers/(:num)/address/sync', 'ApiController::syncCustomerAddress/$1');
+
+        // Vendor APIs
+        $routes->get('vendors', 'ApiController::getVendors');
+        $routes->get('vendors/(:num)', 'ApiController::getVendor/$1');
+        $routes->put('vendors/(:num)', 'ApiController::updateVendor/$1');
+        $routes->post('vendors/(:num)/zoho-link', 'ApiController::linkVendorToZoho/$1');
+        $routes->post('vendors/(:num)/address/sync', 'ApiController::syncVendorAddress/$1');
+    });
 
     // Tax Routes
-    $routes->group('settings/taxes', function($routes) {
+    $routes->group('settings/taxes', function ($routes) {
         $routes->get('', 'TaxController::index', ['filter' => 'permission:tax.view']);
         $routes->get('new', 'TaxController::new', ['filter' => 'permission:tax.create']);
         $routes->post('create', 'TaxController::create', ['filter' => 'permission:tax.create']);

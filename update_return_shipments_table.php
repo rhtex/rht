@@ -1,8 +1,9 @@
-<?php
+<?php require_once __DIR__ . '/debug_helpers.php'; ?>
+
 $conn = new mysqli("localhost", "root", "", "rasidev_hr");
 
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    safe_die("Connection failed: " . $conn->connect_error);
 }
 
 // Add waybill_image and delivery_status

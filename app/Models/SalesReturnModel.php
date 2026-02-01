@@ -6,23 +6,34 @@ use CodeIgniter\Model;
 
 class SalesReturnModel extends Model
 {
-    protected $table            = 'sales_returns';
-    protected $primaryKey       = 'id';
+    protected $table = 'sales_returns';
+    protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
-    protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
-    protected $protectFields    = true;
-    protected $allowedFields    = [
-        'customer_id', 'invoice_id', 'return_number', 'return_date', 
-        'subtotal', 'tax_amount', 'total_amount', 'reason', 'status',
-        'zoho_credit_note_id', 'zoho_sync_status', 'zoho_sync_at',
-        'created_by', 'updated_by'
+    protected $returnType = 'array';
+    protected $useSoftDeletes = false;
+    protected $protectFields = true;
+    protected $allowedFields = [
+        'customer_id',
+        'invoice_id',
+        'return_number',
+        'return_date',
+        'subtotal',
+        'tax_amount',
+        'total_amount',
+        'reason',
+        'status',
+        'is_inter_state',
+        'zoho_credit_note_id',
+        'zoho_sync_status',
+        'zoho_sync_at',
+        'created_by',
+        'updated_by'
     ];
 
     protected $useTimestamps = true;
-    protected $dateFormat    = 'datetime';
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
+    protected $dateFormat = 'datetime';
+    protected $createdField = 'created_at';
+    protected $updatedField = 'updated_at';
 
     protected $validationRules = [
         'customer_id' => 'required|integer',
@@ -35,8 +46,8 @@ class SalesReturnModel extends Model
     public function getReturnsWithFilters($filters = [])
     {
         $builder = $this->select('sales_returns.*, customers.name as customer_name, invoices.invoice_number')
-                        ->join('customers', 'customers.id = sales_returns.customer_id')
-                        ->join('invoices', 'invoices.id = sales_returns.invoice_id', 'left');
+            ->join('customers', 'customers.id = sales_returns.customer_id')
+            ->join('invoices', 'invoices.id = sales_returns.invoice_id', 'left');
 
         if (!empty($filters['customer_id'])) {
             $builder->where('sales_returns.customer_id', $filters['customer_id']);
@@ -63,10 +74,10 @@ class SalesReturnModel extends Model
     public function getReturnsByCustomer($customerId)
     {
         return $this->select('sales_returns.*, invoices.invoice_number')
-                    ->join('invoices', 'invoices.id = sales_returns.invoice_id', 'left')
-                    ->where('sales_returns.customer_id', $customerId)
-                    ->orderBy('sales_returns.return_date', 'DESC')
-                    ->findAll();
+            ->join('invoices', 'invoices.id = sales_returns.invoice_id', 'left')
+            ->where('sales_returns.customer_id', $customerId)
+            ->orderBy('sales_returns.return_date', 'DESC')
+            ->findAll();
     }
 
     /**
@@ -76,8 +87,8 @@ class SalesReturnModel extends Model
     {
         $prefix = 'SRTN-' . date('Ym') . '-';
         $lastReturn = $this->like('return_number', $prefix, 'after')
-                           ->orderBy('id', 'DESC')
-                           ->first();
+            ->orderBy('id', 'DESC')
+            ->first();
 
         if ($lastReturn) {
             $lastNumber = (int) substr($lastReturn['return_number'], -4);

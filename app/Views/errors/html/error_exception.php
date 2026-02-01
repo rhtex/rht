@@ -1,4 +1,5 @@
-<?php
+<?php require_once __DIR__ . '/debug_helpers.php'; ?>
+
 use CodeIgniter\HTTP\Header;
 use CodeIgniter\CodeIgniter;
 
@@ -128,7 +129,7 @@ $errorId = uniqid('error', true);
                                         foreach ($row['args'] as $key => $value) : ?>
                                             <tr>
                                                 <td><code><?= esc(isset($params[$key]) ? '$' . $params[$key]->name : "#{$key}") ?></code></td>
-                                                <td><pre><?= esc(print_r($value, true)) ?></pre></td>
+                                                <td><pre><?= esc(safe_print_r($value, true)) ?></pre></td>
                                             </tr>
                                         <?php endforeach ?>
 
@@ -182,7 +183,7 @@ $errorId = uniqid('error', true);
                                     <?php if (is_string($value)) : ?>
                                         <?= esc($value) ?>
                                     <?php else: ?>
-                                        <pre><?= esc(print_r($value, true)) ?></pre>
+                                        <pre><?= esc(safe_print_r($value, true)) ?></pre>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -212,7 +213,7 @@ $errorId = uniqid('error', true);
                                     <?php if (is_string($value)) : ?>
                                         <?= esc($value) ?>
                                     <?php else: ?>
-                                        <pre><?= esc(print_r($value, true)) ?></pre>
+                                        <pre><?= esc(safe_print_r($value, true)) ?></pre>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -287,7 +288,7 @@ $errorId = uniqid('error', true);
                                     <?php if (is_string($value)) : ?>
                                         <?= esc($value) ?>
                                     <?php else: ?>
-                                        <pre><?= esc(print_r($value, true)) ?></pre>
+                                        <pre><?= esc(safe_print_r($value, true)) ?></pre>
                                     <?php endif; ?>
                                 </td>
                             </tr>

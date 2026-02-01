@@ -26,6 +26,7 @@ class InvoiceController extends BaseController
     protected $zohoService;
     protected $accountingModel;
     protected $historyModel;
+    protected $expenseModel;
 
     public function __construct()
     {
@@ -48,15 +49,15 @@ class InvoiceController extends BaseController
     {
         $filters = [
             'customer_id' => $this->request->getGet('customer_id'),
-            'status'      => $this->request->getGet('status'),
-            'date_from'   => $this->request->getGet('date_from'),
-            'date_to'     => $this->request->getGet('date_to'),
+            'status' => $this->request->getGet('status'),
+            'date_from' => $this->request->getGet('date_from'),
+            'date_to' => $this->request->getGet('date_to'),
         ];
 
         $data['invoices'] = $this->invoiceModel->getInvoicesWithCustomer($filters);
         $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
         $data['title'] = 'Invoices';
-        
+
         return view('invoices/index', $data);
     }
 
@@ -70,7 +71,7 @@ class InvoiceController extends BaseController
         $data['invoice_number'] = $this->invoiceModel->generateInvoiceNumber();
         $data['title'] = 'Create New Invoice';
         $data['invoice'] = null;
-        
+
         return view('invoices/form', $data);
     }
 
@@ -80,26 +81,27 @@ class InvoiceController extends BaseController
         $db->transStart();
 
         $invoiceData = [
-            'customer_id'      => $this->request->getPost('customer_id'),
-            'agent_id'         => $this->request->getPost('agent_id') ?: null,
+            'customer_id' => $this->request->getPost('customer_id'),
+            'agent_id' => $this->request->getPost('agent_id') ?: null,
             'agent_commission_percent' => $this->request->getPost('agent_commission_percent') ?? 0,
-            'invoice_number'   => $this->request->getPost('invoice_number'),
-            'invoice_date'     => $this->request->getPost('invoice_date'),
-            'due_date'         => $this->request->getPost('due_date'),
+            'invoice_number' => $this->request->getPost('invoice_number'),
+            'invoice_date' => $this->request->getPost('invoice_date'),
+            'due_date' => $this->request->getPost('due_date'),
             'reference_number' => $this->request->getPost('reference_number'),
-            'transport_name'   => $this->request->getPost('transport_name'),
-            'waybill_number'   => $this->request->getPost('waybill_number'),
-            'waybill_date'     => $this->request->getPost('waybill_date') ?: null,
-            'ewaybill_number'  => $this->request->getPost('ewaybill_number'),
-            'packages_count'   => $this->request->getPost('packages_count') ?: null,
-            'notes'            => $this->request->getPost('notes'),
-            'terms'            => $this->request->getPost('terms'),
-            'discount_amount'  => $this->request->getPost('discount_amount') ?? 0,
-            'discount_type'    => $this->request->getPost('discount_type') ?? 'Fixed',
-            'shipping_charge'  => $this->request->getPost('shipping_charge') ?? 0,
-            'roundoff_amount'  => $this->request->getPost('roundoff_amount') ?? 0,
-            'created_by'       => session('user_id'),
-            'status'           => 'Draft'
+            'transport_name' => $this->request->getPost('transport_name'),
+            'waybill_number' => $this->request->getPost('waybill_number'),
+            'waybill_date' => $this->request->getPost('waybill_date') ?: null,
+            'ewaybill_number' => $this->request->getPost('ewaybill_number'),
+            'packages_count' => $this->request->getPost('packages_count') ?: null,
+            'notes' => $this->request->getPost('notes'),
+            'terms' => $this->request->getPost('terms'),
+            'discount_amount' => $this->request->getPost('discount_amount') ?? 0,
+            'discount_type' => $this->request->getPost('discount_type') ?? 'Fixed',
+            'shipping_charge' => $this->request->getPost('shipping_charge') ?? 0,
+            'roundoff_amount' => $this->request->getPost('roundoff_amount') ?? 0,
+            'is_inter_state' => $this->request->getPost('is_inter_state') ?? 0,
+            'created_by' => session('user_id'),
+            'status' => 'Draft'
         ];
 
         if (!$this->invoiceModel->insert($invoiceData)) {
@@ -111,29 +113,33 @@ class InvoiceController extends BaseController
 
         foreach ($items as $item) {
             $this->itemModel->insert([
-                'invoice_id'     => $invoiceId,
-                'product_id'     => $item['product_id'] ?: null,
-                'description'    => $item['description'],
-                'hsn_code'       => $item['hsn_code'],
-                'quantity'       => $item['quantity'],
-                'rate'           => $item['rate'],
+                'invoice_id' => $invoiceId,
+                'product_id' => $item['product_id'] ?: null,
+                'description' => $item['description'],
+                'hsn_code' => $item['hsn_code'],
+                'quantity' => $item['quantity'],
+                'rate' => $item['rate'],
                 'tax_percentage' => $item['tax_percentage'],
-                'amount'         => $item['quantity'] * $item['rate']
+                'amount' => $item['quantity'] * $item['rate']
             ]);
         }
 
         // Calculate Taxes and Totals
-        $customer = $this->customerModel->find($invoiceData['customer_id']);
         $companyStateId = get_setting('company_state');
-        
+
         // Get customer state
         $customerAddress = $db->table('addresses')
-                             ->where('owner_id', $invoiceData['customer_id'])
-                             ->where('owner_type', 'customer')
-                             ->where('address_type', 'billing')
-                             ->get()->getRowArray();
-        
-        $customerStateId = $customerAddress['state_id'] ?? $companyStateId;
+            ->where('owner_id', $invoiceData['customer_id'])
+            ->where('owner_type', 'customer')
+            ->where('address_type', 'billing')
+            ->get()->getRowArray();
+
+        $customerStateId = $customerAddress['state_id'] ?? null;
+
+        // Use company state if customer state is missing (fallback to intra-state)
+        if ($customerStateId === null) {
+            $customerStateId = $companyStateId;
+        }
 
         $this->invoiceModel->calculateGST($invoiceId, $customerStateId, $companyStateId);
 
@@ -141,7 +147,7 @@ class InvoiceController extends BaseController
         if ($invoiceData['agent_id']) {
             $updatedInvoice = $this->invoiceModel->find($invoiceId);
             $commissionPercent = $this->request->getPost('agent_commission_percent') ?: 0;
-            
+
             // If percent is 0 but an agent is selected, try to get their default percent
             if ($commissionPercent == 0) {
                 $agent = $this->agentModel->find($invoiceData['agent_id']);
@@ -151,11 +157,11 @@ class InvoiceController extends BaseController
             $taxableSubtotal = $updatedInvoice['subtotal'];
             $discountValue = ($updatedInvoice['discount_type'] == 'Percentage') ? ($taxableSubtotal * $updatedInvoice['discount_amount'] / 100) : $updatedInvoice['discount_amount'];
             $commissionAmount = (($taxableSubtotal - $discountValue) * $commissionPercent) / 100;
-            
+
             $this->invoiceModel->update($invoiceId, [
                 'agent_commission_percent' => $commissionPercent,
-                'agent_commission_amount'  => $commissionAmount,
-                'agent_commission_status'  => 'Unpaid'
+                'agent_commission_amount' => $commissionAmount,
+                'agent_commission_status' => 'Unpaid'
             ]);
         }
 
@@ -169,7 +175,7 @@ class InvoiceController extends BaseController
         $finalInvoice = $this->invoiceModel->find($invoiceId);
         $invDate = $finalInvoice['invoice_date'];
         $invRef = "Sale Invoice: " . $finalInvoice['invoice_number'];
-        
+
         // 1. Calculations for Ledger
         $totalDiscount = 0;
         if ($finalInvoice['discount_type'] == 'Percentage') {
@@ -180,7 +186,7 @@ class InvoiceController extends BaseController
 
         // 2. Dr Accounts Receivable (Total amount due)
         $this->accountingModel->postEntry('Accounts Receivable', $invDate, $finalInvoice['total_amount'], 0, $invRef, 'invoice', $invoiceId);
-        
+
         // 3. Dr Customer Discount (Expense - if any)
         if ($totalDiscount > 0) {
             $this->accountingModel->postEntry('Customer Discount', $invDate, $totalDiscount, 0, "Discount Allowed on $invRef", 'invoice', $invoiceId);
@@ -188,7 +194,7 @@ class InvoiceController extends BaseController
 
         // 4. Cr Sales Income (Gross Subtotal)
         $this->accountingModel->postEntry('Sales Income', $invDate, 0, $finalInvoice['subtotal'], $invRef, 'invoice', $invoiceId);
-        
+
         // 5. Cr GST Payable (Tax)
         if ($finalInvoice['tax_amount'] > 0) {
             $this->accountingModel->postEntry('GST Payable', $invDate, 0, $finalInvoice['tax_amount'], "GST on $invRef", 'invoice', $invoiceId);
@@ -241,37 +247,6 @@ class InvoiceController extends BaseController
         return view('invoices/form', $data);
     }
 
-    public function getCustomerState($customerId)
-    {
-        $db = \Config\Database::connect();
-        $address = $db->table('addresses')
-                      ->where('owner_id', $customerId)
-                      ->where('owner_type', 'customer')
-                      ->where('address_type', 'billing')
-                      ->get()->getRowArray();
-
-        // Get info about the customer (agent)
-        $customer = $this->customerModel->find($customerId);
-        $agentId = $customer['agent_id'] ?? null;
-        $agentCommission = 0;
-
-        if ($agentId) {
-            $agent = $this->agentModel->find($agentId);
-            $agentCommission = $agent['commission_percentage'] ?? 0;
-        }
-
-        $companyStateId = get_setting('company_state');
-        $customerStateId = $address['state_id'] ?? null;
-
-        return $this->response->setJSON([
-            'customer_state_id' => $customerStateId,
-            'company_state_id'  => $companyStateId,
-            'is_inter_state'    => ($customerStateId !== null && $companyStateId !== null && $customerStateId != $companyStateId),
-            'agent_id'          => $agentId,
-            'agent_commission'  => $agentCommission,
-            'credit_period_days'=> $customer['credit_period_days'] ?? 0
-        ]);
-    }
 
     public function update($id)
     {
@@ -279,24 +254,25 @@ class InvoiceController extends BaseController
         $db->transStart();
 
         $invoiceData = [
-            'customer_id'      => $this->request->getPost('customer_id'),
-            'agent_id'         => $this->request->getPost('agent_id') ?: null,
+            'customer_id' => $this->request->getPost('customer_id'),
+            'agent_id' => $this->request->getPost('agent_id') ?: null,
             'agent_commission_percent' => $this->request->getPost('agent_commission_percent') ?? 0,
-            'invoice_date'     => $this->request->getPost('invoice_date'),
-            'due_date'         => $this->request->getPost('due_date'),
+            'invoice_date' => $this->request->getPost('invoice_date'),
+            'due_date' => $this->request->getPost('due_date'),
             'reference_number' => $this->request->getPost('reference_number'),
-            'transport_name'   => $this->request->getPost('transport_name'),
-            'waybill_number'   => $this->request->getPost('waybill_number'),
-            'waybill_date'     => $this->request->getPost('waybill_date') ?: null,
-            'ewaybill_number'  => $this->request->getPost('ewaybill_number'),
-            'packages_count'   => $this->request->getPost('packages_count') ?: null,
-            'notes'            => $this->request->getPost('notes'),
-            'terms'            => $this->request->getPost('terms'),
-            'discount_amount'  => $this->request->getPost('discount_amount') ?? 0,
-            'discount_type'    => $this->request->getPost('discount_type') ?? 'Fixed',
-            'shipping_charge'  => $this->request->getPost('shipping_charge') ?? 0,
-            'roundoff_amount'  => $this->request->getPost('roundoff_amount') ?? 0,
-            'updated_by'       => session('user_id'),
+            'transport_name' => $this->request->getPost('transport_name'),
+            'waybill_number' => $this->request->getPost('waybill_number'),
+            'waybill_date' => $this->request->getPost('waybill_date') ?: null,
+            'ewaybill_number' => $this->request->getPost('ewaybill_number'),
+            'packages_count' => $this->request->getPost('packages_count') ?: null,
+            'notes' => $this->request->getPost('notes'),
+            'terms' => $this->request->getPost('terms'),
+            'discount_amount' => $this->request->getPost('discount_amount') ?? 0,
+            'discount_type' => $this->request->getPost('discount_type') ?? 'Fixed',
+            'shipping_charge' => $this->request->getPost('shipping_charge') ?? 0,
+            'roundoff_amount' => $this->request->getPost('roundoff_amount') ?? 0,
+            'is_inter_state' => $this->request->getPost('is_inter_state') ?? 0,
+            'updated_by' => session('user_id'),
         ];
 
         $this->invoiceModel->update($id, $invoiceData);
@@ -307,27 +283,30 @@ class InvoiceController extends BaseController
 
         foreach ($items as $item) {
             $this->itemModel->insert([
-                'invoice_id'     => $id,
-                'product_id'     => $item['product_id'] ?: null,
-                'description'    => $item['description'],
-                'hsn_code'       => $item['hsn_code'],
-                'quantity'       => $item['quantity'],
-                'rate'           => $item['rate'],
+                'invoice_id' => $id,
+                'product_id' => $item['product_id'] ?: null,
+                'description' => $item['description'],
+                'hsn_code' => $item['hsn_code'],
+                'quantity' => $item['quantity'],
+                'rate' => $item['rate'],
                 'tax_percentage' => $item['tax_percentage'],
-                'amount'         => $item['quantity'] * $item['rate']
+                'amount' => $item['quantity'] * $item['rate']
             ]);
         }
 
         // Recalculate
-        $customer = $this->customerModel->find($invoiceData['customer_id']);
         $companyStateId = get_setting('company_state');
         $customerAddress = $db->table('addresses')
-                             ->where('owner_id', $invoiceData['customer_id'])
-                             ->where('owner_type', 'customer')
-                             ->where('address_type', 'billing')
-                             ->get()->getRowArray();
-        
-        $customerStateId = $customerAddress['state_id'] ?? $companyStateId;
+            ->where('owner_id', $invoiceData['customer_id'])
+            ->where('owner_type', 'customer')
+            ->where('address_type', 'billing')
+            ->get()->getRowArray();
+
+        $customerStateId = $customerAddress['state_id'] ?? null;
+
+        if ($customerStateId === null) {
+            $customerStateId = $companyStateId;
+        }
 
         $this->invoiceModel->calculateGST($id, $customerStateId, $companyStateId);
 
@@ -335,7 +314,7 @@ class InvoiceController extends BaseController
         if ($invoiceData['agent_id']) {
             $updatedInvoice = $this->invoiceModel->find($id);
             $commissionPercent = $this->request->getPost('agent_commission_percent') ?: 0;
-            
+
             // If percent is 0 but an agent is selected, try to get their default percent
             if ($commissionPercent == 0) {
                 $agent = $this->agentModel->find($invoiceData['agent_id']);
@@ -345,11 +324,11 @@ class InvoiceController extends BaseController
             $taxableSubtotal = $updatedInvoice['subtotal'];
             $discountValue = ($updatedInvoice['discount_type'] == 'Percentage') ? ($taxableSubtotal * $updatedInvoice['discount_amount'] / 100) : $updatedInvoice['discount_amount'];
             $commissionAmount = (($taxableSubtotal - $discountValue) * $commissionPercent) / 100;
-            
+
             $this->invoiceModel->update($id, [
                 'agent_commission_percent' => $commissionPercent,
-                'agent_commission_amount'  => $commissionAmount,
-                'agent_commission_status'  => $updatedInvoice['agent_commission_status'] ?: 'Unpaid'
+                'agent_commission_amount' => $commissionAmount,
+                'agent_commission_status' => $updatedInvoice['agent_commission_status'] ?: 'Unpaid'
             ]);
         } else {
             $this->invoiceModel->update($id, [
@@ -420,11 +399,11 @@ class InvoiceController extends BaseController
             return redirect()->to('invoices')->with('error', 'Invoice not found.');
         }
 
-        $grossSettlement = (float)$this->request->getPost('gross_settlement');
-        $amount = (float)$this->request->getPost('amount');
-        $discount = (float)$this->request->getPost('discount_amount') ?? 0;
-        $mahimai = (float)$this->request->getPost('mahimai_amount') ?? 0;
-        $postal = (float)$this->request->getPost('postal_charges') ?? 0;
+        $grossSettlement = (float) $this->request->getPost('gross_settlement');
+        $amount = (float) $this->request->getPost('amount');
+        $discount = (float) $this->request->getPost('discount_amount') ?? 0;
+        $mahimai = (float) $this->request->getPost('mahimai_amount') ?? 0;
+        $postal = (float) $this->request->getPost('postal_charges') ?? 0;
 
         if ($grossSettlement > $invoice['balance'] + 0.01) {
             return redirect()->back()->withInput()->with('error', 'Gross settlement cannot exceed invoice balance.');
@@ -436,21 +415,21 @@ class InvoiceController extends BaseController
         $paymentNumber = $this->paymentModel->generatePaymentNumber();
 
         $paymentData = [
-            'invoice_id'         => $invoiceId,
-            'customer_id'        => $invoice['customer_id'],
-            'payment_number'     => $paymentNumber,
-            'payment_date'       => $this->request->getPost('payment_date'),
-            'payment_mode'       => $this->request->getPost('payment_mode'),
-            'amount'             => $amount,
-            'discount_amount'    => $discount,
-            'mahimai_amount'     => $mahimai,
-            'postal_charges'     => $postal,
-            'reference_number'   => $this->request->getPost('reference_number'),
-            'bank_account_id'    => $this->request->getPost('bank_account_id'),
-            'notes'              => $this->request->getPost('notes'),
-            'created_by'         => session('user_id'),
-            'updated_by'         => session('user_id'),
-            'zoho_sync_status'   => 'Pending'
+            'invoice_id' => $invoiceId,
+            'customer_id' => $invoice['customer_id'],
+            'payment_number' => $paymentNumber,
+            'payment_date' => $this->request->getPost('payment_date'),
+            'payment_mode' => $this->request->getPost('payment_mode'),
+            'amount' => $amount,
+            'discount_amount' => $discount,
+            'mahimai_amount' => $mahimai,
+            'postal_charges' => $postal,
+            'reference_number' => $this->request->getPost('reference_number'),
+            'bank_account_id' => $this->request->getPost('bank_account_id') ?: null,
+            'notes' => $this->request->getPost('notes'),
+            'created_by' => session('user_id'),
+            'updated_by' => session('user_id'),
+            'zoho_sync_status' => 'Pending'
         ];
 
         $this->paymentModel->insert($paymentData);
@@ -510,30 +489,29 @@ class InvoiceController extends BaseController
         }
 
         $zohoData = [
-            'customer_id'    => $customer['zoho_contact_id'],
+            'customer_id' => $customer['zoho_contact_id'],
             'invoice_number' => $invoice['invoice_number'],
-            'date'           => $invoice['invoice_date'],
-            'due_date'       => $invoice['due_date'],
-            'reference_number'=> $invoice['reference_number'],
-            'discount'       => $invoice['discount_amount'],
-            'discount_type'  => strtolower($invoice['discount_type']),
-            'shipping_charge'=> $invoice['shipping_charge'],
-            'notes'          => $invoice['notes'],
-            'terms'          => $invoice['terms'],
-            'line_items'     => []
+            'date' => $invoice['invoice_date'],
+            'due_date' => $invoice['due_date'],
+            'reference_number' => $invoice['reference_number'],
+            'discount' => $invoice['discount_amount'],
+            'discount_type' => strtolower($invoice['discount_type']),
+            'shipping_charge' => $invoice['shipping_charge'],
+            'notes' => $invoice['notes'],
+            'terms' => $invoice['terms'],
+            'line_items' => []
         ];
 
         foreach ($invoice['items'] as $item) {
             $zohoData['line_items'][] = [
-                'name'        => $item['description'],
+                'name' => $item['description'],
                 'description' => $item['description'],
-                'rate'        => $item['rate'],
-                'quantity'    => $item['quantity'],
-                'hsn_or_sac'  => $item['hsn_code'],
+                'rate' => $item['rate'],
+                'quantity' => $item['quantity'],
+                'hsn_or_sac' => $item['hsn_code'],
                 'tax_percentage' => $item['tax_percentage']
             ];
         }
-
         if ($invoice['zoho_invoice_id']) {
             $response = $this->zohoService->updateInvoice($invoice['zoho_invoice_id'], $zohoData);
         } else {
@@ -543,8 +521,8 @@ class InvoiceController extends BaseController
         if ($response['success']) {
             $this->invoiceModel->update($invoiceId, [
                 'zoho_invoice_id' => $response['data']['invoice']['invoice_id'],
-                'zoho_sync_status'=> 'Synced',
-                'zoho_sync_at'    => date('Y-m-d H:i:s')
+                'zoho_sync_status' => 'Synced',
+                'zoho_sync_at' => date('Y-m-d H:i:s')
             ]);
             return true;
         }
@@ -565,12 +543,12 @@ class InvoiceController extends BaseController
 
         $zohoData = [
             'customer_id' => $customer['zoho_contact_id'],
-            'payment_mode'=> $payment['payment_mode'],
-            'amount'      => $payment['amount'] + $payment['discount_amount'] + $payment['mahimai_amount'] + $payment['postal_charges'],
-            'date'        => $payment['payment_date'],
+            'payment_mode' => $payment['payment_mode'],
+            'amount' => $payment['amount'] + $payment['discount_amount'] + $payment['mahimai_amount'] + $payment['postal_charges'],
+            'date' => $payment['payment_date'],
             'reference_number' => $payment['reference_number'],
             'description' => $payment['notes'],
-            'invoices'    => [
+            'invoices' => [
                 [
                     'invoice_id' => $invoice['zoho_invoice_id'],
                     'amount_applied' => $payment['amount'] + $payment['discount_amount'] + $payment['mahimai_amount'] + $payment['postal_charges']
@@ -583,8 +561,8 @@ class InvoiceController extends BaseController
         if ($response['success']) {
             $this->paymentModel->update($paymentId, [
                 'zoho_payment_id' => $response['data']['payment']['payment_id'],
-                'zoho_sync_status'=> 'Synced',
-                'zoho_sync_at'    => date('Y-m-d H:i:s')
+                'zoho_sync_status' => 'Synced',
+                'zoho_sync_at' => date('Y-m-d H:i:s')
             ]);
             return true;
         }
@@ -596,13 +574,14 @@ class InvoiceController extends BaseController
     public function print($id)
     {
         $data['invoice'] = $this->invoiceModel->getInvoiceById($id);
-        if (!$data['invoice']) return 'Invoice not found';
-        
+        if (!$data['invoice'])
+            return 'Invoice not found';
+
         $data['company_name'] = get_setting('app_name', 'RasiDev');
         $data['company_address'] = get_setting('company_address', '');
         $data['company_gstin'] = get_setting('company_gstin', '');
         $data['title'] = 'Invoice ' . $data['invoice']['invoice_number'];
-        
+
         return view('invoices/print', $data);
     }
 
@@ -626,30 +605,30 @@ class InvoiceController extends BaseController
     {
         $limit = 25;
         $offset = intval($this->request->getGet('offset') ?? 0);
-        
+
         $customer_id = $this->request->getGet('customer_id');
         $delivery_status = $this->request->getGet('delivery_status');
         $search = $this->request->getGet('search');
 
         $this->invoiceModel->select('invoices.*, customers.name as customer_name')
-                           ->join('customers', 'customers.id = invoices.customer_id', 'left');
+            ->join('customers', 'customers.id = invoices.customer_id', 'left');
 
         // Base Tracking Condition: (Incomplete Waybill OR Not Delivered) 
         // AND Not "HAND in Person"
         $this->invoiceModel->groupStart()
-                        ->groupStart()
-                            ->where('invoices.waybill_number', null)
-                            ->orWhere('invoices.waybill_number', '')
-                            ->orWhere('invoices.waybill_date', null)
-                            ->orWhere('invoices.waybill_image', null)
-                            ->orWhere('invoices.waybill_image', '')
-                            ->orWhere('invoices.delivery_status !=', 'Delivered')
-                        ->groupEnd()
-                        ->groupStart()
-                            ->where('invoices.transport_name !=', 'HAND in Person')
-                            ->orWhere('invoices.transport_name', null)
-                        ->groupEnd()
-                    ->groupEnd();
+            ->groupStart()
+            ->where('invoices.waybill_number', null)
+            ->orWhere('invoices.waybill_number', '')
+            ->orWhere('invoices.waybill_date', null)
+            ->orWhere('invoices.waybill_image', null)
+            ->orWhere('invoices.waybill_image', '')
+            ->orWhere('invoices.delivery_status !=', 'Delivered')
+            ->groupEnd()
+            ->groupStart()
+            ->where('invoices.transport_name !=', 'HAND in Person')
+            ->orWhere('invoices.transport_name', null)
+            ->groupEnd()
+            ->groupEnd();
 
         // Dynamic Filters
         if ($customer_id !== null && $customer_id !== '') {
@@ -666,27 +645,27 @@ class InvoiceController extends BaseController
         $totalResults = $this->invoiceModel->countAllResults(false);
 
         $invoices = $this->invoiceModel->orderBy('invoices.invoice_date', 'DESC')
-                                       ->findAll($limit, $offset);
+            ->findAll($limit, $offset);
 
         $data = [
-            'title'           => 'Invoice Tracking',
-            'invoices'        => $invoices,
-            'customers'       => $this->customerModel->where('status', 'active')->findAll(),
-            'total_count'     => $totalResults,
-            'filters'         => [
-                'customer_id'     => $customer_id,
+            'title' => 'Invoice Tracking',
+            'invoices' => $invoices,
+            'customers' => $this->customerModel->where('status', 'active')->findAll(),
+            'total_count' => $totalResults,
+            'filters' => [
+                'customer_id' => $customer_id,
                 'delivery_status' => $delivery_status,
-                'search'          => $search,
+                'search' => $search,
             ],
-            'limit'           => $limit,
-            'offset'          => $offset,
-            'has_more'        => ($offset + $limit) < $totalResults
+            'limit' => $limit,
+            'offset' => $offset,
+            'has_more' => ($offset + $limit) < $totalResults
         ];
 
         if ($this->request->isAJAX()) {
             return view('invoices/tracking_rows', $data);
         }
-        
+
         return view('invoices/tracking', $data);
     }
 
@@ -698,9 +677,9 @@ class InvoiceController extends BaseController
         }
 
         $validationRules = [
-            'waybill_number'  => 'required',
-            'waybill_date'    => 'required|valid_date',
-            'waybill_image'   => 'permit_empty|max_size[waybill_image,2048]|is_image[waybill_image]',
+            'waybill_number' => 'required',
+            'waybill_date' => 'required|valid_date',
+            'waybill_image' => 'permit_empty|max_size[waybill_image,2048]|is_image[waybill_image]',
             'transport_amount' => 'permit_empty|numeric',
             'waybill_shipping_charge' => 'permit_empty|numeric'
         ];
@@ -714,8 +693,8 @@ class InvoiceController extends BaseController
         $waybill_shipping_charge = $this->request->getPost('waybill_shipping_charge') ?: 0;
 
         $updateData = [
-            'waybill_number'  => $this->request->getPost('waybill_number'),
-            'waybill_date'    => $this->request->getPost('waybill_date'),
+            'waybill_number' => $this->request->getPost('waybill_number'),
+            'waybill_date' => $this->request->getPost('waybill_date'),
             'transport_amount' => $transport_amount,
             'transport_pay_type' => $transport_pay_type,
             'waybill_shipping_charge' => $waybill_shipping_charge
@@ -740,9 +719,9 @@ class InvoiceController extends BaseController
                 if (!$existing) {
                     $expenseData = [
                         'expense_date' => $updateData['waybill_date'],
-                        'category_id'  => 7, // SENDING PARCEL
-                        'amount'       => $transport_amount,
-                        'description'  => $desc,
+                        'category_id' => 7, // SENDING PARCEL
+                        'amount' => $transport_amount,
+                        'description' => $desc,
                         'payment_mode' => 'Cash',
                         'reference_number' => $waybill_number
                     ];
@@ -763,9 +742,9 @@ class InvoiceController extends BaseController
                 if (!$existing) {
                     $expenseData = [
                         'expense_date' => $updateData['waybill_date'],
-                        'category_id'  => 7, // SENDING PARCEL
-                        'amount'       => $waybill_shipping_charge,
-                        'description'  => $desc,
+                        'category_id' => 7, // SENDING PARCEL
+                        'amount' => $waybill_shipping_charge,
+                        'description' => $desc,
                         'payment_mode' => 'Cash',
                         'reference_number' => $waybill_number
                     ];
@@ -781,11 +760,11 @@ class InvoiceController extends BaseController
             // Log history
             $this->historyModel->insert([
                 'invoice_id' => $id,
-                'status'     => 'Booked',
-                'description'=> "Waybill updated: " . $waybill_number . " (Transport: $transport_pay_type)",
+                'status' => 'Booked',
+                'description' => "Waybill updated: " . $waybill_number . " (Transport: $transport_pay_type)",
                 'created_by' => session('user_id')
             ]);
-            
+
             // Also update delivery_status to Booked if it was Pending
             if ($invoice['delivery_status'] == 'Pending' || empty($invoice['delivery_status'])) {
                 $this->invoiceModel->update($id, ['delivery_status' => 'Booked']);
@@ -806,7 +785,7 @@ class InvoiceController extends BaseController
 
         $validationRules = [
             'delivery_status' => 'required|in_list[Pending,Booked,In Transit,Delivered,Cancelled]',
-            'delivered_date'  => 'permit_empty|valid_date'
+            'delivered_date' => 'permit_empty|valid_date'
         ];
 
         if (!$this->validate($validationRules)) {
@@ -815,7 +794,7 @@ class InvoiceController extends BaseController
 
         $newStatus = $this->request->getPost('delivery_status');
         $deliveredDate = $this->request->getPost('delivered_date');
-        
+
         $updateData = ['delivery_status' => $newStatus];
         if ($newStatus === 'Delivered' && !empty($deliveredDate)) {
             $updateData['delivered_date'] = $deliveredDate;
@@ -825,8 +804,8 @@ class InvoiceController extends BaseController
             // Log history
             $this->historyModel->insert([
                 'invoice_id' => $id,
-                'status'     => $newStatus,
-                'description'=> "Status updated to " . $newStatus . ($newStatus === 'Delivered' ? " on " . $deliveredDate : ""),
+                'status' => $newStatus,
+                'description' => "Status updated to " . $newStatus . ($newStatus === 'Delivered' ? " on " . $deliveredDate : ""),
                 'created_by' => session('user_id')
             ]);
 
@@ -846,20 +825,20 @@ class InvoiceController extends BaseController
     {
         $limit = 25;
         $offset = intval($this->request->getGet('offset') ?? 0);
-        
+
         $customer_id = $this->request->getGet('customer_id');
         $doc_status = $this->request->getGet('doc_status');
         $search = $this->request->getGet('search');
 
         $this->invoiceModel->select('invoices.*, customers.name as customer_name')
-                           ->join('customers', 'customers.id = invoices.customer_id', 'left');
+            ->join('customers', 'customers.id = invoices.customer_id', 'left');
 
         // Document Tracking Condition: (Incomplete Doc Info OR Not Received)
         $this->invoiceModel->groupStart()
-                            ->where('invoices.doc_status !=', 'Delivered')
-                            ->orWhere('invoices.doc_tracking_number', null)
-                            ->orWhere('invoices.doc_tracking_number', '')
-                        ->groupEnd();
+            ->where('invoices.doc_status !=', 'Delivered')
+            ->orWhere('invoices.doc_tracking_number', null)
+            ->orWhere('invoices.doc_tracking_number', '')
+            ->groupEnd();
 
         // Dynamic Filters
         if ($customer_id !== null && $customer_id !== '') {
@@ -876,27 +855,27 @@ class InvoiceController extends BaseController
         $totalResults = $this->invoiceModel->countAllResults(false);
 
         $invoices = $this->invoiceModel->orderBy('invoices.invoice_date', 'DESC')
-                                       ->findAll($limit, $offset);
+            ->findAll($limit, $offset);
 
         $data = [
-            'title'           => 'Invoice Document Tracking',
-            'invoices'        => $invoices,
-            'customers'       => $this->customerModel->where('status', 'active')->findAll(),
-            'total_count'     => $totalResults,
-            'filters'         => [
-                'customer_id'     => $customer_id,
-                'doc_status'      => $doc_status,
-                'search'          => $search,
+            'title' => 'Invoice Document Tracking',
+            'invoices' => $invoices,
+            'customers' => $this->customerModel->where('status', 'active')->findAll(),
+            'total_count' => $totalResults,
+            'filters' => [
+                'customer_id' => $customer_id,
+                'doc_status' => $doc_status,
+                'search' => $search,
             ],
-            'limit'           => $limit,
-            'offset'          => $offset,
-            'has_more'        => ($offset + $limit) < $totalResults
+            'limit' => $limit,
+            'offset' => $offset,
+            'has_more' => ($offset + $limit) < $totalResults
         ];
 
         if ($this->request->isAJAX()) {
             return view('invoices/doc_tracking_rows', $data);
         }
-        
+
         return view('invoices/doc_tracking', $data);
     }
 
@@ -908,7 +887,7 @@ class InvoiceController extends BaseController
         }
 
         $validationRules = [
-            'doc_courier_name'    => 'required',
+            'doc_courier_name' => 'required',
             'doc_tracking_number' => 'required',
             'doc_dispatched_date' => 'required|valid_date'
         ];
@@ -918,18 +897,18 @@ class InvoiceController extends BaseController
         }
 
         $updateData = [
-            'doc_courier_name'    => $this->request->getPost('doc_courier_name'),
+            'doc_courier_name' => $this->request->getPost('doc_courier_name'),
             'doc_tracking_number' => $this->request->getPost('doc_tracking_number'),
             'doc_dispatched_date' => $this->request->getPost('doc_dispatched_date'),
-            'doc_status'          => 'Dispatched'
+            'doc_status' => 'Dispatched'
         ];
 
         if ($this->invoiceModel->update($id, $updateData)) {
             // Log history
             $this->historyModel->insert([
                 'invoice_id' => $id,
-                'status'     => 'Dispatched',
-                'description'=> "Doc Dispatched via " . $updateData['doc_courier_name'] . " (Tracking: " . $updateData['doc_tracking_number'] . ")",
+                'status' => 'Dispatched',
+                'description' => "Doc Dispatched via " . $updateData['doc_courier_name'] . " (Tracking: " . $updateData['doc_tracking_number'] . ")",
                 'created_by' => session('user_id')
             ]);
 
@@ -947,7 +926,7 @@ class InvoiceController extends BaseController
         }
 
         $validationRules = [
-            'doc_status'        => 'required|in_list[Pending,Dispatched,Delivered,Returned]',
+            'doc_status' => 'required|in_list[Pending,Dispatched,Delivered,Returned]',
             'doc_received_date' => 'permit_empty|valid_date'
         ];
 
@@ -957,7 +936,7 @@ class InvoiceController extends BaseController
 
         $newStatus = $this->request->getPost('doc_status');
         $receivedDate = $this->request->getPost('doc_received_date');
-        
+
         $updateData = ['doc_status' => $newStatus];
         if ($newStatus === 'Delivered' && !empty($receivedDate)) {
             $updateData['doc_received_date'] = $receivedDate;
@@ -967,8 +946,8 @@ class InvoiceController extends BaseController
             // Log history
             $this->historyModel->insert([
                 'invoice_id' => $id,
-                'status'     => "Doc $newStatus",
-                'description'=> "Document status updated to " . $newStatus . ($newStatus === 'Delivered' ? " on " . $receivedDate : ""),
+                'status' => "Doc $newStatus",
+                'description' => "Document status updated to " . $newStatus . ($newStatus === 'Delivered' ? " on " . $receivedDate : ""),
                 'created_by' => session('user_id')
             ]);
 

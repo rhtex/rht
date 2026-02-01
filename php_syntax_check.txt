@@ -1,0 +1,873 @@
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Commands\CheckPermissions.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Common.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\App.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Autoload.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Boot\development.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Boot\production.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Boot\testing.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Cache.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Constants.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\ContentSecurityPolicy.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Cookie.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Cors.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\CURLRequest.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Database.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\DocTypes.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Email.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Encryption.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Events.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Exceptions.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Feature.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Filters.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\ForeignCharacters.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Format.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Generators.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Honeypot.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Images.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Kint.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Logger.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Migrations.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Mimes.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Modules.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Optimize.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Pager.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Paths.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Publisher.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Routes.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Routing.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Security.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Services.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Session.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Toolbar.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\UserAgents.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Validation.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\View.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Config\Zoho.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\AgentController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\AgentPaymentController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\AttendanceController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\AuthController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\BankAccountController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\BankTransactionController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\BaseController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\BillController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\CalendarController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\CountryController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\CustomerController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\DebugController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\EmployeeController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\ExpenseCategoryController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\ExpenseController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\Home.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\InvoiceController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\InvoicePaymentController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\LoanController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\MasterDataController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\ModuleController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\NotificationController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\PaymentController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\PermissionController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\ProductCategoryController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\ProductController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\QuotationController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\ReconciliationController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\RoleController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\SalaryController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\SalesOrderController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\SalesReturnController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\SettingController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\StateController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\TaxController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\TransportController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\UserController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\VendorController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\WeaverController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Controllers\ZohoSettingsController.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100001_CreateRolesTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100002_CreateUsersTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100003_CreateModulesTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100004_CreatePermissionsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100005_CreateEmployeesTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100006_CreateAttendanceTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100007_CreateLoansTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100008_CreateSalariesTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100009_CreateRolePermissionsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100010_AddSalaryToEmployees.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100011_CreateSalaryIncrementsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100012_AddMultiplierToAttendance.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100013_AddLoanDatesAndFixStatus.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100014_CreateLoanPaymentsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100015_AddPaidStatusAndExemptionsToSalaries.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100016_AddCreditStatusToLoans.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100017_UpdateAttendanceStatusEnum.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100018_AddWorkingHoursToEmployeesAndAttendance.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100019_AddSurplusHoursToAttendance.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100020_CreateSettingsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100021_AddSettingsPermission.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100022_FinalizeSuperAdminPermissions.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100023_AddEmploymentTypeToEmployees.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-100024_AddEmployeeIdToUsers.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-110001_CreateCountriesTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-110002_CreateStatesTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-110003_CreateAgentsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-110004_CreateTransportTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-110005_AddLocationToEmployees.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-110006_RegisterNewModules.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-110007_ForceAddLocationToEmployees.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-120001_CreateBankAccountsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-120002_CreateExpensesTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-120003_RegisterFinanceModules.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-130000_RestoreAndFixPermissions.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-140000_FixPermissionsUrgent.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-150000_AddModuleAndPermissionManagement.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-160000_CreateBankTransactionsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-160001_AddBankTransactionPermissions.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-170000_CreateExpenseCategoriesAndAdjustExpenses.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-170001_RegisterExpenseCategoryModule.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-180000_CreateCustomersAndVendorsTables.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-180001_RegisterSalesAndPurchaseModules.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-190000_ExpandCustomersAndVendorsFields.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-193000_DropCustomerBankFields.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-200000_CreateAddressesTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-200500_MigrateExistingAddresses.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-210000_AddZohoFields.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-210500_CreateZohoSettingsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-21-211000_RegisterZohoSettingsModule.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-22-100001_CreateProductCategoriesTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-22-100002_CreateProductsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-22-100003_CreateProductImagesTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-22-100004_CreateProductItemsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-22-100005_CreateStockMovementsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-22-100006_RegisterInventoryModules.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-22-100007_AddVerificationToProductItems.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-22-100008_EnhanceApprovalProcess.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2024-01-22-120000_AddReturnActionToProductItems.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-22-120100_CreateVendorCreditsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-22-120200_CreateBillsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-22-120201_CreateBillItemsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-22-120202_CreatePaymentsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-22-120203_RegisterBillsModule.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-22-131500_AddDiscountShippingToBills.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-22-133000_CreateTaxesTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-22-134500_AddFieldsToBillsAndItems.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-26-101000_AddDeductionsToPayments.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-26-110000_CreateInvoicesTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-26-110001_CreateInvoiceItemsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-26-110002_CreateInvoicePaymentsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-26-110003_RegisterInvoicesModule.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-27-090000_CreateQuotationsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-27-090001_CreateQuotationItemsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-27-090002_CreateSalesOrdersTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-27-090003_CreateSalesOrderItemsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-27-090004_RegisterSalesModules.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-27-100000_AddPricingToProducts.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-27-110000_AddLogisticsToSalesDocuments.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-27-111000_AddBarcodeToProducts.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-27-113000_AddAgentCommissionFields.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-27-120000_CreateAgentPaymentsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-27-120001_CreateAgentPaymentItemsTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-27-120002_RegisterAgentPaymentsModule.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-28-043346_AddAgentIdToCustomers.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-28-062647_AddWaybillImageToInvoices.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-28-063425_AddDeliveryStatusToInvoices.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-28-110807_AddDeliveredDateAndStatusHistoryToInvoices.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-28-135000_AddAccountTypeToBankAccounts.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-28-135001_AddReconciliationFieldsToBankTransactions.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-28-135002_AddBankTransactionIdToInvoicePayments.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-28-135003_AddBankTransactionIdToExpenses.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-28-135004_AddBankTransactionIdToAgentPayments.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-28-135005_CreateDefaultCashAccount.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-28-161500_CreateCalendarRemindersTable.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-30-103304_AddWaybillExpenseFieldsToInvoices.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Migrations\2026-01-30-104802_AddDocTrackingToInvoices.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Seeds\AssignSuperAdminPermissions.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Seeds\IndiaStatesSeeder.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Seeds\MainSeeder.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Seeds\MasterDataSeeder.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Database\Seeds\PermissionSeeder.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Filters\AuthFilter.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Filters\LanguageFilter.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Filters\PermissionFilter.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Helpers\app_helper.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Helpers\time_helper.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Language\en\App.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Language\en\Validation.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Language\ta\App.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Libraries\Notifier.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\AccountingModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\AddressModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\AgentModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\AgentPaymentItemModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\AgentPaymentModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\AttendanceModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\BankAccountModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\BankTransactionModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\BillItemModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\BillModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\CalendarReminderModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\CountryModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\CustomerModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\EmployeeModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\ExpenseCategoryModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\ExpenseModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\InvoiceItemModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\InvoiceModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\InvoicePaymentModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\InvoiceStatusHistoryModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\LoanModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\LoanPaymentModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\ModuleModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\NotificationModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\PaymentModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\PermissionModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\ProductCategoryModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\ProductImageModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\ProductItemModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\ProductModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\QuotationItemModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\QuotationModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\ReconciliationModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\ReturnShipmentModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\RoleModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\RolePermissionModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\SalaryIncrementModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\SalaryModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\SalesOrderItemModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\SalesOrderModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\SalesReturnItemModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\SalesReturnModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\SettingModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\StateModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\TaxModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\TransportModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\UserModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\VendorCreditModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\VendorModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\WeaverModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Models\ZohoSettingsModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Services\AuthService.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Services\ImageUploadService.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Services\ZohoAuthService.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Services\ZohoBooksService.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\agents\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\agents\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\agents\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\agent_payments\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\agent_payments\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\agent_payments\preview_report.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\agent_payments\reports.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\agent_payments\rows.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\agent_payments\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\attendance\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\attendance\report.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\attendance\shortfall.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\auth\change_password.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\auth\login.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\bank_accounts\edit_transaction.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\bank_accounts\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\bank_accounts\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\bank_accounts\statement.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\bills\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\bills\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\bills\payment_form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\bills\print.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\bills\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\calendar\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\countries\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\countries\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\customers\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\customers\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\customers\statement.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\customers\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\dashboard\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\employees\create.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\employees\edit.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\employees\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\errors\cli\error_404.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\errors\cli\error_exception.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\errors\cli\production.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\errors\html\error_400.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\errors\html\error_404.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\errors\html\error_exception.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\errors\html\production.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\expenses\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\expenses\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\expense_categories\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\expense_categories\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\invoices\doc_tracking.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\invoices\doc_tracking_rows.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\invoices\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\invoices\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\invoices\payment_form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\invoices\print.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\invoices\tracking.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\invoices\tracking_rows.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\invoices\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\invoice_payments\edit.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\invoice_payments\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\invoice_payments\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\layouts\auth_layout.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\layouts\footer.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\layouts\header.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\layouts\master.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\layouts\print.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\layouts\sidebar.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\loans\create.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\loans\edit.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\loans\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\loans\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\modules\create.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\modules\edit.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\modules\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\notifications\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\notifications\partials\card.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\notifications\partials\empty_state.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\payments\edit.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\payments\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\payments\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\permissions\create.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\permissions\edit.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\permissions\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\production\weavers\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\production\weavers\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\products\approvals.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\products\create.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\products\edit.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\products\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\products\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\product_categories\edit.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\product_categories\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\quotations\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\quotations\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\quotations\print.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\quotations\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\reconciliation\account.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\reconciliation\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\reconciliation\report.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\roles\create.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\roles\edit.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\roles\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\roles\permissions.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\salaries\calculate.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\salaries\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\salaries\payslip.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\sales_orders\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\sales_orders\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\sales_orders\print.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\sales_orders\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\sales_returns\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\sales_returns\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\sales_returns\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\settings\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\settings\taxes\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\settings\taxes\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\states\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\states\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\transports\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\transports\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\transports\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\users\convert.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\users\create.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\users\edit.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\users\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\vendors\create_return.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\vendors\form.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\vendors\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\vendors\pending_returns.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\vendors\return_shipments.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\vendors\return_shipment_rows.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\vendors\statement.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\vendors\view.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\welcome_message.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\app\Views\zoho_settings\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\apply_schema.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\assign_all_perms.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\assign_perms.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_accounting_tables.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_categories.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_columns.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_columns_approve.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_columns_return.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_db.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_migrations.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_permissions.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_production_setup.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_product_cols.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_return_shipments.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_schema.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_schema_perms.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_specific_cols.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_tables.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\check_transports.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\composer-setup.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\create_production_module.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\create_remaining_tables.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\db_check.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\debug_bills.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\debug_login.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\debug_login_raw.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\debug_perms.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\dump_schema.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\fix_db.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\fix_production_permissions.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\force_add_column.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\inspect_data.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\inspect_modules.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\inspect_schema.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\list_all_tables.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\list_db_tables.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\list_tables.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\log_schema.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\manual_migrate.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\manual_migrate_approval.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\manual_migrate_return.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\preload.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\public\index.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\setup_accounting.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\temp_list_perms.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\tests\database\ExampleDatabaseTest.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\tests\session\ExampleSessionTest.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\tests\unit\HealthTest.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\tests\_support\Database\Migrations\2020-02-22-222222_example_migration.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\tests\_support\Database\Seeds\ExampleSeeder.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\tests\_support\Libraries\ConfigReader.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\tests\_support\Models\ExampleModel.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\tools\php_syntax_check.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\update_return_shipments_table.php
+
+No syntax errors detected in D:\xampp\htdocs\rasidev\tools/..\update_schema.php

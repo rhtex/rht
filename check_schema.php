@@ -1,6 +1,7 @@
-<?php
+<?php require_once __DIR__ . '/debug_helpers.php'; ?>
+
 $c = new mysqli('localhost', 'root', '', 'rasidev_hr');
-if ($c->connect_error) die("Connection failed: " . $c->connect_error);
+if ($c->connect_error) safe_die("Connection failed: " . $c->connect_error);
 
 echo "Table: ledger_entries\n";
 $res = $c->query('DESCRIBE ledger_entries');

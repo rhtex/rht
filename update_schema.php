@@ -1,9 +1,10 @@
-<?php
+<?php require_once __DIR__ . '/debug_helpers.php'; ?>
+
 // Database connection
 $conn = mysqli_connect('localhost', 'root', '', 'rasidev_hr');
 
 if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
+    safe_die("Connection failed: " . mysqli_connect_error());
 }
 
 // 1. Update Invoices Table

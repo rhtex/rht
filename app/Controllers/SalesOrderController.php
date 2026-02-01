@@ -36,13 +36,13 @@ class SalesOrderController extends BaseController
     {
         $filters = [
             'customer_id' => $this->request->getGet('customer_id'),
-            'status'      => $this->request->getGet('status'),
+            'status' => $this->request->getGet('status'),
         ];
 
         $data['orders'] = $this->orderModel->getOrdersWithCustomer($filters);
         $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
         $data['title'] = 'Sales Orders';
-        
+
         return view('sales_orders/index', $data);
     }
 
@@ -56,7 +56,7 @@ class SalesOrderController extends BaseController
         $data['order_number'] = $this->orderModel->generateOrderNumber();
         $data['title'] = 'Create Sales Order';
         $data['order'] = null;
-        
+
         return view('sales_orders/form', $data);
     }
 
@@ -66,22 +66,23 @@ class SalesOrderController extends BaseController
         $db->transStart();
 
         $orderData = [
-            'customer_id'        => $this->request->getPost('customer_id'),
-            'agent_id'           => $this->request->getPost('agent_id') ?: null,
+            'customer_id' => $this->request->getPost('customer_id'),
+            'agent_id' => $this->request->getPost('agent_id') ?: null,
             'sales_order_number' => $this->request->getPost('sales_order_number'),
-            'order_date'         => $this->request->getPost('order_date'),
-            'shipment_date'      => $this->request->getPost('shipment_date'),
-            'reference_number'   => $this->request->getPost('reference_number'),
-            'transport_name'     => $this->request->getPost('transport_name'),
-            'waybill_number'     => $this->request->getPost('waybill_number'),
-            'notes'              => $this->request->getPost('notes'),
-            'terms'              => $this->request->getPost('terms'),
-            'discount_amount'    => $this->request->getPost('discount_amount') ?? 0,
-            'discount_type'      => $this->request->getPost('discount_type') ?? 'Fixed',
-            'shipping_charge'    => $this->request->getPost('shipping_charge') ?? 0,
-            'roundoff_amount'    => $this->request->getPost('roundoff_amount') ?? 0,
-            'created_by'         => session('user_id'),
-            'status'             => 'Draft'
+            'order_date' => $this->request->getPost('order_date'),
+            'shipment_date' => $this->request->getPost('shipment_date'),
+            'reference_number' => $this->request->getPost('reference_number'),
+            'transport_name' => $this->request->getPost('transport_name'),
+            'waybill_number' => $this->request->getPost('waybill_number'),
+            'notes' => $this->request->getPost('notes'),
+            'terms' => $this->request->getPost('terms'),
+            'discount_amount' => $this->request->getPost('discount_amount') ?? 0,
+            'discount_type' => $this->request->getPost('discount_type') ?? 'Fixed',
+            'shipping_charge' => $this->request->getPost('shipping_charge') ?? 0,
+            'roundoff_amount' => $this->request->getPost('roundoff_amount') ?? 0,
+            'is_inter_state' => $this->request->getPost('is_inter_state') ?? 0,
+            'created_by' => session('user_id'),
+            'status' => 'Draft'
         ];
 
         $items = $this->request->getPost('items');
@@ -91,7 +92,7 @@ class SalesOrderController extends BaseController
         }
 
         $totalDiscount = ($orderData['discount_type'] == 'Percentage') ? ($subtotal * $orderData['discount_amount'] / 100) : $orderData['discount_amount'];
-        
+
         $taxAmount = 0;
         foreach ($items as $item) {
             $itemAmt = $item['quantity'] * $item['rate'];
@@ -112,13 +113,13 @@ class SalesOrderController extends BaseController
         foreach ($items as $item) {
             $this->itemModel->insert([
                 'sales_order_id' => $orderId,
-                'product_id'     => $item['product_id'] ?: null,
-                'description'    => $item['description'],
-                'hsn_code'       => $item['hsn_code'],
-                'quantity'       => $item['quantity'],
-                'rate'           => $item['rate'],
+                'product_id' => $item['product_id'] ?: null,
+                'description' => $item['description'],
+                'hsn_code' => $item['hsn_code'],
+                'quantity' => $item['quantity'],
+                'rate' => $item['rate'],
                 'tax_percentage' => $item['tax_percentage'],
-                'amount'         => $item['quantity'] * $item['rate']
+                'amount' => $item['quantity'] * $item['rate']
             ]);
         }
 
@@ -167,20 +168,21 @@ class SalesOrderController extends BaseController
         $db->transStart();
 
         $orderData = [
-            'customer_id'      => $this->request->getPost('customer_id'),
-            'agent_id'         => $this->request->getPost('agent_id') ?: null,
-            'order_date'       => $this->request->getPost('order_date'),
-            'shipment_date'    => $this->request->getPost('shipment_date'),
+            'customer_id' => $this->request->getPost('customer_id'),
+            'agent_id' => $this->request->getPost('agent_id') ?: null,
+            'order_date' => $this->request->getPost('order_date'),
+            'shipment_date' => $this->request->getPost('shipment_date'),
             'reference_number' => $this->request->getPost('reference_number'),
-            'transport_name'   => $this->request->getPost('transport_name'),
-            'waybill_number'   => $this->request->getPost('waybill_number'),
-            'notes'            => $this->request->getPost('notes'),
-            'terms'            => $this->request->getPost('terms'),
-            'discount_amount'  => $this->request->getPost('discount_amount') ?? 0,
-            'discount_type'    => $this->request->getPost('discount_type') ?? 'Fixed',
-            'shipping_charge'  => $this->request->getPost('shipping_charge') ?? 0,
-            'roundoff_amount'  => $this->request->getPost('roundoff_amount') ?? 0,
-            'updated_by'       => session('user_id'),
+            'transport_name' => $this->request->getPost('transport_name'),
+            'waybill_number' => $this->request->getPost('waybill_number'),
+            'notes' => $this->request->getPost('notes'),
+            'terms' => $this->request->getPost('terms'),
+            'discount_amount' => $this->request->getPost('discount_amount') ?? 0,
+            'discount_type' => $this->request->getPost('discount_type') ?? 'Fixed',
+            'shipping_charge' => $this->request->getPost('shipping_charge') ?? 0,
+            'roundoff_amount' => $this->request->getPost('roundoff_amount') ?? 0,
+            'is_inter_state' => $this->request->getPost('is_inter_state') ?? 0,
+            'updated_by' => session('user_id'),
         ];
 
         $items = $this->request->getPost('items');
@@ -190,7 +192,7 @@ class SalesOrderController extends BaseController
         }
 
         $totalDiscount = ($orderData['discount_type'] == 'Percentage') ? ($subtotal * $orderData['discount_amount'] / 100) : $orderData['discount_amount'];
-        
+
         $taxAmount = 0;
         foreach ($items as $item) {
             $itemAmt = $item['quantity'] * $item['rate'];
@@ -208,13 +210,13 @@ class SalesOrderController extends BaseController
         foreach ($items as $item) {
             $this->itemModel->insert([
                 'sales_order_id' => $id,
-                'product_id'     => $item['product_id'] ?: null,
-                'description'    => $item['description'],
-                'hsn_code'       => $item['hsn_code'],
-                'quantity'       => $item['quantity'],
-                'rate'           => $item['rate'],
+                'product_id' => $item['product_id'] ?: null,
+                'description' => $item['description'],
+                'hsn_code' => $item['hsn_code'],
+                'quantity' => $item['quantity'],
+                'rate' => $item['rate'],
                 'tax_percentage' => $item['tax_percentage'],
-                'amount'         => $item['quantity'] * $item['rate']
+                'amount' => $item['quantity'] * $item['rate']
             ]);
         }
 
@@ -258,28 +260,29 @@ class SalesOrderController extends BaseController
         $order = $this->orderModel->getOrderById($id);
         $customer = $this->customerModel->find($order['customer_id']);
 
-        if (!$customer['zoho_contact_id']) return false;
+        if (!$customer['zoho_contact_id'])
+            return false;
 
         $zohoData = [
-            'customer_id'         => $customer['zoho_contact_id'],
-            'salesorder_number'    => $order['sales_order_number'],
-            'date'                => $order['order_date'],
-            'shipment_date'       => $order['shipment_date'],
-            'reference_number'    => $order['reference_number'],
-            'discount'            => $order['discount_amount'],
-            'discount_type'       => strtolower($order['discount_type']),
-            'shipping_charge'     => $order['shipping_charge'],
-            'notes'               => $order['notes'],
-            'terms'               => $order['terms'],
-            'line_items'          => []
+            'customer_id' => $customer['zoho_contact_id'],
+            'salesorder_number' => $order['sales_order_number'],
+            'date' => $order['order_date'],
+            'shipment_date' => $order['shipment_date'],
+            'reference_number' => $order['reference_number'],
+            'discount' => $order['discount_amount'],
+            'discount_type' => strtolower($order['discount_type']),
+            'shipping_charge' => $order['shipping_charge'],
+            'notes' => $order['notes'],
+            'terms' => $order['terms'],
+            'line_items' => []
         ];
 
         foreach ($order['items'] as $item) {
             $zohoData['line_items'][] = [
-                'name'           => $item['description'],
-                'rate'           => $item['rate'],
-                'quantity'       => $item['quantity'],
-                'hsn_or_sac'     => $item['hsn_code'],
+                'name' => $item['description'],
+                'rate' => $item['rate'],
+                'quantity' => $item['quantity'],
+                'hsn_or_sac' => $item['hsn_code'],
                 'tax_percentage' => $item['tax_percentage']
             ];
         }
@@ -293,8 +296,8 @@ class SalesOrderController extends BaseController
         if ($response['success']) {
             $this->orderModel->update($id, [
                 'zoho_salesorder_id' => $response['data']['salesorder']['salesorder_id'],
-                'zoho_sync_status'  => 'Synced',
-                'zoho_sync_at'      => date('Y-m-d H:i:s')
+                'zoho_sync_status' => 'Synced',
+                'zoho_sync_at' => date('Y-m-d H:i:s')
             ]);
             return true;
         }
@@ -306,13 +309,14 @@ class SalesOrderController extends BaseController
     public function print($id)
     {
         $data['order'] = $this->orderModel->getOrderById($id);
-        if (!$data['order']) return 'Order not found';
-        
+        if (!$data['order'])
+            return 'Order not found';
+
         $data['company_name'] = get_setting('app_name', 'RasiDev');
         $data['company_address'] = get_setting('company_address', '');
         $data['company_gstin'] = get_setting('company_gstin', '');
         $data['title'] = 'Sales Order ' . $data['order']['sales_order_number'];
-        
+
         return view('sales_orders/print', $data);
     }
 }

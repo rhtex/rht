@@ -1,4 +1,5 @@
-<?php
+<?php require_once __DIR__ . '/debug_helpers.php'; ?>
+
 namespace App\Controllers;
 use App\Controllers\BaseController;
 class DebugController extends BaseController {
@@ -10,12 +11,12 @@ class DebugController extends BaseController {
         // 1. Check Modules
         $modules = $db->table('modules')->get()->getResultArray();
         echo "<h2>Modules (" . count($modules) . ")</h2>";
-        echo "<pre>"; print_r($modules); echo "</pre>";
+        echo "<pre>"; safe_print_r($modules); echo "</pre>";
 
         // 2. Check Permissions Count
         $perms = $db->table('permissions')->get()->getResultArray();
         echo "<h2>Permissions (" . count($perms) . ")</h2>";
-        // echo "<pre>"; print_r($perms); echo "</pre>";
+        // echo "<pre>"; safe_print_r($perms); echo "</pre>";
 
         // 3. Check Role 1 Permissions
         $rolePerms = $db->table('role_permissions')
@@ -25,7 +26,7 @@ class DebugController extends BaseController {
             ->get()->getResultArray();
             
         echo "<h2>Role 1 (Super Admin) Permissions (" . count($rolePerms) . ")</h2>";
-        echo "<pre>"; print_r($rolePerms); echo "</pre>";
+        echo "<pre>"; safe_print_r($rolePerms); echo "</pre>";
         
         // 4. Check specific keys
         $keys = array_column($rolePerms, 'permission_key');

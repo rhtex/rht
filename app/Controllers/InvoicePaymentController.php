@@ -28,10 +28,10 @@ class InvoicePaymentController extends BaseController
     public function index()
     {
         $filters = [
-            'customer_id'  => $this->request->getGet('customer_id'),
+            'customer_id' => $this->request->getGet('customer_id'),
             'payment_mode' => $this->request->getGet('payment_mode'),
-            'date_from'    => $this->request->getGet('date_from'),
-            'date_to'      => $this->request->getGet('date_to'),
+            'date_from' => $this->request->getGet('date_from'),
+            'date_to' => $this->request->getGet('date_to'),
         ];
 
         $data['payments'] = $this->paymentModel->getPaymentsWithFilters($filters);
@@ -45,10 +45,10 @@ class InvoicePaymentController extends BaseController
     public function view($id)
     {
         $data['payment'] = $this->paymentModel->select('invoice_payments.*, invoices.invoice_number, customers.name as customer_name, bank_accounts.bank_name, bank_accounts.account_number')
-                                             ->join('invoices', 'invoices.id = invoice_payments.invoice_id')
-                                             ->join('customers', 'customers.id = invoice_payments.customer_id')
-                                             ->join('bank_accounts', 'bank_accounts.id = invoice_payments.bank_account_id', 'left')
-                                             ->find($id);
+            ->join('invoices', 'invoices.id = invoice_payments.invoice_id')
+            ->join('customers', 'customers.id = invoice_payments.customer_id')
+            ->join('bank_accounts', 'bank_accounts.id = invoice_payments.bank_account_id', 'left')
+            ->find($id);
 
         if (!$data['payment']) {
             return redirect()->to('invoice_payments')->with('error', 'Receipt not found.');
@@ -80,12 +80,12 @@ class InvoicePaymentController extends BaseController
         }
 
         $invoice = $this->invoiceModel->find($payment['invoice_id']);
-        
-        $grossSettlement = (float)$this->request->getPost('gross_settlement');
-        $amount = (float)$this->request->getPost('amount');
-        $discount = (float)$this->request->getPost('discount_amount') ?? 0;
-        $mahimai = (float)$this->request->getPost('mahimai_amount') ?? 0;
-        $postal = (float)$this->request->getPost('postal_charges') ?? 0;
+
+        $grossSettlement = (float) $this->request->getPost('gross_settlement');
+        $amount = (float) $this->request->getPost('amount');
+        $discount = (float) $this->request->getPost('discount_amount') ?? 0;
+        $mahimai = (float) $this->request->getPost('mahimai_amount') ?? 0;
+        $postal = (float) $this->request->getPost('postal_charges') ?? 0;
 
         $oldSettlement = $payment['amount'] + $payment['discount_amount'] + $payment['mahimai_amount'] + $payment['postal_charges'];
         $currentInvoiceBalance = $invoice['balance'] + $oldSettlement;
@@ -98,16 +98,16 @@ class InvoicePaymentController extends BaseController
         $db->transStart();
 
         $paymentData = [
-            'payment_date'   => $this->request->getPost('payment_date'),
-            'payment_mode'   => $this->request->getPost('payment_mode'),
-            'amount'         => $amount,
-            'discount_amount'=> $discount,
+            'payment_date' => $this->request->getPost('payment_date'),
+            'payment_mode' => $this->request->getPost('payment_mode'),
+            'amount' => $amount,
+            'discount_amount' => $discount,
             'mahimai_amount' => $mahimai,
             'postal_charges' => $postal,
             'reference_number' => $this->request->getPost('reference_number'),
-            'bank_account_id'  => $this->request->getPost('bank_account_id'),
-            'notes'            => $this->request->getPost('notes'),
-            'updated_by'       => session('user_id'),
+            'bank_account_id' => $this->request->getPost('bank_account_id') ?: null,
+            'notes' => $this->request->getPost('notes'),
+            'updated_by' => session('user_id'),
         ];
 
         $this->paymentModel->update($id, $paymentData);
@@ -164,13 +164,16 @@ class InvoicePaymentController extends BaseController
     public function pushToZoho($id)
     {
         $payment = $this->paymentModel->find($id);
-        if (!$payment) return;
+        if (!$payment)
+            return;
 
         $invoice = $this->invoiceModel->find($payment['invoice_id']);
-        if (!$invoice || !$invoice['zoho_invoice_id']) return;
+        if (!$invoice || !$invoice['zoho_invoice_id'])
+            return;
 
         $customer = $this->customerModel->find($payment['customer_id']);
-        if (!$customer || !$customer['zoho_contact_id']) return;
+        if (!$customer || !$customer['zoho_contact_id'])
+            return;
 
         $data = [
             'customer_id' => $customer['zoho_contact_id'],
@@ -187,7 +190,7 @@ class InvoicePaymentController extends BaseController
         ];
 
         $response = $this->zohoService->createCustomerPayment($data);
-        
+
         if ($response['success']) {
             $zohoId = $response['data']['payment']['payment_id'];
             $this->paymentModel->update($id, [

@@ -1,7 +1,8 @@
-<?php
+<?php require_once __DIR__ . '/debug_helpers.php'; ?>
+
 $mysqli = new mysqli("localhost", "root", "", "rasidev_hr");
 if ($mysqli->connect_error) {
-    die("Connection failed: " . $mysqli->connect_error);
+    safe_die("Connection failed: " . $mysqli->connect_error);
 }
 
 // 1. Rename item_image to received_image

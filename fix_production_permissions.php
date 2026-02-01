@@ -1,6 +1,7 @@
-<?php
+<?php require_once __DIR__ . '/debug_helpers.php'; ?>
+
 $conn = mysqli_connect('localhost', 'root', '', 'rasidev_hr');
-if (!$conn) die("Connection failed: " . mysqli_connect_error());
+if (!$conn) safe_die("Connection failed: " . mysqli_connect_error());
 
 // 1. Ensure Module Exists
 $module_name = 'Production';
@@ -18,7 +19,7 @@ if (mysqli_num_rows($res) > 0) {
         $module_id = mysqli_insert_id($conn);
         echo "Module 'Production' created (ID: $module_id).\n";
     } else {
-        die("Error creating module: " . mysqli_error($conn));
+        safe_die("Error creating module: " . mysqli_error($conn));
     }
 }
 

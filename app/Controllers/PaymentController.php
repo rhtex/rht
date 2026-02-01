@@ -25,10 +25,10 @@ class PaymentController extends BaseController
     public function index()
     {
         $filters = [
-            'vendor_id'    => $this->request->getGet('vendor_id'),
+            'vendor_id' => $this->request->getGet('vendor_id'),
             'payment_mode' => $this->request->getGet('payment_mode'),
-            'date_from'    => $this->request->getGet('date_from'),
-            'date_to'      => $this->request->getGet('date_to'),
+            'date_from' => $this->request->getGet('date_from'),
+            'date_to' => $this->request->getGet('date_to'),
         ];
 
         $data['payments'] = $this->paymentModel->getPaymentsWithFilters($filters);
@@ -42,10 +42,10 @@ class PaymentController extends BaseController
     public function view($id)
     {
         $data['payment'] = $this->paymentModel->select('payments.*, bills.bill_number, vendors.name as vendor_name, bank_accounts.bank_name, bank_accounts.account_number')
-                                             ->join('bills', 'bills.id = payments.bill_id')
-                                             ->join('vendors', 'vendors.id = payments.vendor_id')
-                                             ->join('bank_accounts', 'bank_accounts.id = payments.bank_account_id', 'left')
-                                             ->find($id);
+            ->join('bills', 'bills.id = payments.bill_id')
+            ->join('vendors', 'vendors.id = payments.vendor_id')
+            ->join('bank_accounts', 'bank_accounts.id = payments.bank_account_id', 'left')
+            ->find($id);
 
         if (!$data['payment']) {
             return redirect()->to('payments')->with('error', 'Payment not found.');
@@ -77,16 +77,16 @@ class PaymentController extends BaseController
         }
 
         $bill = $this->billModel->find($payment['bill_id']);
-        
-        $grossSettlement = (float)$this->request->getPost('gross_settlement');
-        $amount = (float)$this->request->getPost('amount');
-        $discount = (float)$this->request->getPost('discount_amount') ?? 0;
-        $mahimai = (float)$this->request->getPost('mahimai_amount') ?? 0;
-        $postal = (float)$this->request->getPost('postal_charges') ?? 0;
+
+        $grossSettlement = (float) $this->request->getPost('gross_settlement');
+        $amount = (float) $this->request->getPost('amount');
+        $discount = (float) $this->request->getPost('discount_amount') ?? 0;
+        $mahimai = (float) $this->request->getPost('mahimai_amount') ?? 0;
+        $postal = (float) $this->request->getPost('postal_charges') ?? 0;
 
         // Current settlement in DB for this payment
         $oldSettlement = $payment['amount'] + $payment['discount_amount'] + $payment['mahimai_amount'] + $payment['postal_charges'];
-        
+
         // Validation: New balance if we revert old and apply new
         $currentBillBalance = $bill['balance'] + $oldSettlement;
         if ($grossSettlement > $currentBillBalance + 0.01) {
@@ -97,16 +97,16 @@ class PaymentController extends BaseController
         $db->transStart();
 
         $paymentData = [
-            'payment_date'   => $this->request->getPost('payment_date'),
-            'payment_mode'   => $this->request->getPost('payment_mode'),
-            'amount'         => $amount,
-            'discount_amount'=> $discount,
+            'payment_date' => $this->request->getPost('payment_date'),
+            'payment_mode' => $this->request->getPost('payment_mode'),
+            'amount' => $amount,
+            'discount_amount' => $discount,
             'mahimai_amount' => $mahimai,
             'postal_charges' => $postal,
             'reference_number' => $this->request->getPost('reference_number'),
-            'bank_account_id'  => $this->request->getPost('bank_account_id'),
-            'notes'            => $this->request->getPost('notes'),
-            'updated_by'       => session('user_id'),
+            'bank_account_id' => $this->request->getPost('bank_account_id') ?: null,
+            'notes' => $this->request->getPost('notes'),
+            'updated_by' => session('user_id'),
         ];
 
         $this->paymentModel->update($id, $paymentData);

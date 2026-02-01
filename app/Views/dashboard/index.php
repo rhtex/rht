@@ -297,41 +297,155 @@
             </div>
         </div>
 
-        <!-- Recent Transactions -->
-        <div class="col-xl-5 col-md-6 mb-2">
-            <div class="card chart-card border-0">
-                <div class="card-header px-3">VALUED CLIENT ACTIVITY</div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover custom-table align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Client</th>
-                                    <th>Orders</th>
-                                    <th class="text-end">Value (LTD)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($topCustomers as $cust): ?>
+        <div class="card chart-card border-0">
+            <div class="card-header px-3 d-flex justify-content-between align-items-center">
+                <span>RECENT ACTIVITY</span>
+                <ul class="nav nav-pills nav-sm" id="recentTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active py-1 px-3" style="font-size: 0.75rem;" id="invoices-tab"
+                            data-bs-toggle="tab" data-bs-target="#invoices" type="button" role="tab"
+                            aria-selected="true">Invoices</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link py-1 px-3" style="font-size: 0.75rem;" id="bills-tab"
+                            data-bs-toggle="tab" data-bs-target="#bills" type="button" role="tab"
+                            aria-selected="false">Bills</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body p-0">
+                <div class="tab-content" id="recentTabContent">
+                    <!-- Invoices Tab -->
+                    <div class="tab-pane fade show active" id="invoices" role="tabpanel" aria-labelledby="invoices-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover custom-table align-middle mb-0">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-sx bg-soft-primary me-2 rounded-circle text-center fw-bold"
-                                                    style="width: 24px; height: 24px; line-height: 24px; font-size: 10px;">
-                                                    <?= substr($cust['name'], 0, 1) ?>
-                                                </div>
-                                                <span class="text-truncate"
-                                                    style="max-width: 120px;"><?= esc($cust['name']) ?></span>
-                                            </div>
-                                        </td>
-                                        <td><span class="badge-soft bg-light text-muted"><?= $cust['total_orders'] ?></span>
-                                        </td>
-                                        <td class="text-end fw-bold text-primary">
-                                            ₹<?= number_format($cust['total_spent'] / 1000, 1) ?>K</td>
+                                        <th>Ref #</th>
+                                        <th>Date</th>
+                                        <th>Customer</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Amount</th>
+                                        <th class="text-end">Action</th>
                                     </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    <?php if (!empty($recentInvoices)): ?>
+                                        <?php foreach ($recentInvoices as $inv): ?>
+                                            <tr>
+                                                <td>
+                                                    <span class="fw-bold text-primary"><?= esc($inv['invoice_number']) ?></span>
+                                                </td>
+                                                <td class="text-muted"><?= date('d M', strtotime($inv['invoice_date'])) ?>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-sx bg-soft-info me-2 rounded-circle text-center fw-bold"
+                                                            style="width: 20px; height: 20px; line-height: 20px; font-size: 9px;">
+                                                            <?= substr($inv['customer_name'] ?? 'C', 0, 1) ?>
+                                                        </div>
+                                                        <span class="text-truncate"
+                                                            style="max-width: 100px;"><?= esc($inv['customer_name'] ?? 'N/A') ?></span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $statusClass = match ($inv['status']) {
+                                                        'Paid' => 'success',
+                                                        'Partially Paid' => 'warning',
+                                                        'Draft' => 'secondary',
+                                                        'Overdue' => 'danger',
+                                                        default => 'primary'
+                                                    };
+                                                    ?>
+                                                    <span
+                                                        class="badge-soft bg-<?= $statusClass ?> text-<?= $statusClass ?>"><?= $inv['status'] ?></span>
+                                                </td>
+                                                <td class="text-end fw-bold">
+                                                    ₹<?= number_format($inv['total_amount'], 2) ?>
+                                                </td>
+                                                <td class="text-end">
+                                                    <a href="<?= site_url('invoices/view/' . $inv['id']) ?>"
+                                                        class="btn btn-sm btn-white text-muted p-1"><i
+                                                            class="fas fa-eye"></i></a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="6" class="text-center py-3 text-muted">No recent invoices found.
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Bills Tab -->
+                    <div class="tab-pane fade" id="bills" role="tabpanel" aria-labelledby="bills-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover custom-table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Ref #</th>
+                                        <th>Date</th>
+                                        <th>Vendor</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Amount</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (!empty($recentBills)): ?>
+                                        <?php foreach ($recentBills as $bill): ?>
+                                            <tr>
+                                                <td>
+                                                    <span class="fw-bold text-primary"><?= esc($bill['bill_number']) ?></span>
+                                                </td>
+                                                <td class="text-muted"><?= date('d M', strtotime($bill['bill_date'])) ?>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-sx bg-soft-warning me-2 rounded-circle text-center fw-bold"
+                                                            style="width: 20px; height: 20px; line-height: 20px; font-size: 9px;">
+                                                            <?= substr($bill['vendor_name'] ?? 'V', 0, 1) ?>
+                                                        </div>
+                                                        <span class="text-truncate"
+                                                            style="max-width: 100px;"><?= esc($bill['vendor_name'] ?? 'N/A') ?></span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $statusClass = match ($bill['status']) {
+                                                        'Paid' => 'success',
+                                                        'Partially Paid' => 'warning',
+                                                        'Draft' => 'secondary',
+                                                        'Overdue' => 'danger',
+                                                        default => 'primary'
+                                                    };
+                                                    ?>
+                                                    <span
+                                                        class="badge-soft bg-<?= $statusClass ?> text-<?= $statusClass ?>"><?= $bill['status'] ?></span>
+                                                </td>
+                                                <td class="text-end fw-bold">
+                                                    ₹<?= number_format($bill['total_amount'], 2) ?>
+                                                </td>
+                                                <td class="text-end">
+                                                    <a href="<?= site_url('bills/view/' . $bill['id']) ?>"
+                                                        class="btn btn-sm btn-white text-muted p-1"><i
+                                                            class="fas fa-eye"></i></a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="6" class="text-center py-3 text-muted">No recent bills found.</td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

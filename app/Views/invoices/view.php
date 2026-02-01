@@ -239,35 +239,59 @@
                     <?php endif; ?>
 
                     <?php
-                    // Recalculate grouping for display (mirroring Bill logic)
-                    $taxGroups = [];
+                    // Group taxes by percentage (mirroring BILL logic but more robust)
+                    $cgstGroups = [];
+                    $sgstGroups = [];
+                    $igstGroups = [];
+                    
                     $subtotal = $invoice['subtotal'];
                     $discountAmt = ($invoice['discount_type'] == 'Percentage') ? ($subtotal * $invoice['discount_amount'] / 100) : $invoice['discount_amount'];
 
                     foreach ($invoice['items'] as $item) {
-                        $p = (float)$item['tax_percentage'];
-                        if ($p > 0) {
-                            $itemAmt = $item['quantity'] * $item['rate'];
-                            $itemDiscount = ($subtotal > 0) ? ($itemAmt / $subtotal * $discountAmt) : 0;
-                            $taxableVal = $itemAmt - $itemDiscount;
-                            $taxAmt = ($taxableVal * $p) / 100;
-
-                            if (!isset($taxGroups[$p])) $taxGroups[$p] = 0;
-                            $taxGroups[$p] += $taxAmt;
+                        $itemAmt = $item['quantity'] * $item['rate'];
+                        $itemDiscount = ($subtotal > 0) ? ($itemAmt / $subtotal * $discountAmt) : 0;
+                        $taxableVal = $itemAmt - $itemDiscount;
+                        
+                        // CGST
+                        $cr = (float)($item['cgst_rate'] ?? 0);
+                        if ($cr > 0) {
+                            if (!isset($cgstGroups["$cr"])) $cgstGroups["$cr"] = 0;
+                            $cgstGroups["$cr"] += ($taxableVal * $cr) / 100;
+                        }
+                        
+                        // SGST
+                        $sr = (float)($item['sgst_rate'] ?? 0);
+                        if ($sr > 0) {
+                            if (!isset($sgstGroups["$sr"])) $sgstGroups["$sr"] = 0;
+                            $sgstGroups["$sr"] += ($taxableVal * $sr) / 100;
+                        }
+                        
+                        // IGST
+                        $ir = (float)($item['igst_rate'] ?? 0);
+                        if ($ir > 0) {
+                            if (!isset($igstGroups["$ir"])) $igstGroups["$ir"] = 0;
+                            $igstGroups["$ir"] += ($taxableVal * $ir) / 100;
                         }
                     }
-                    ksort($taxGroups);
-                    $isInterState = ($invoice['igst_amount'] > 0);
+                    
+                    ksort($cgstGroups);
+                    ksort($sgstGroups);
+                    ksort($igstGroups);
                     ?>
 
-                    <?php foreach($taxGroups as $p => $amt): ?>
-                        <?php if ($isInterState): ?>
-                            <tr><td colspan="6" class="text-end">IGST (<?= $p+0 ?>%):</td><td class="text-end">₹<?= number_format($amt, 2) ?></td></tr>
-                        <?php else: ?>
-                            <tr><td colspan="6" class="text-end">CGST (<?= ($p/2)+0 ?>%):</td><td class="text-end">₹<?= number_format($amt/2, 2) ?></td></tr>
-                            <tr><td colspan="6" class="text-end">SGST (<?= ($p/2)+0 ?>%):</td><td class="text-end">₹<?= number_format($amt/2, 2) ?></td></tr>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
+                    <?php if ($invoice['is_inter_state']): ?>
+                        <?php foreach($igstGroups as $r => $amt): ?>
+                            <tr><td colspan="6" class="text-end">IGST (<?= $r+0 ?>%):</td><td class="text-end">₹<?= number_format($amt, 2) ?></td></tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <?php foreach($cgstGroups as $r => $amt): ?>
+                            <tr><td colspan="6" class="text-end">CGST (<?= $r+0 ?>%):</td><td class="text-end">₹<?= number_format($amt, 2) ?></td></tr>
+                        <?php endforeach; ?>
+                        
+                        <?php foreach($sgstGroups as $r => $amt): ?>
+                            <tr><td colspan="6" class="text-end">SGST (<?= $r+0 ?>%):</td><td class="text-end">₹<?= number_format($amt, 2) ?></td></tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
 
                     <?php if ($invoice['shipping_charge'] > 0): ?>
                         <tr><td colspan="6" class="text-end">Shipping Charges:</td><td class="text-end">₹<?= number_format($invoice['shipping_charge'], 2) ?></td></tr>

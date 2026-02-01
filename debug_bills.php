@@ -1,8 +1,9 @@
-<?php
+<?php require_once __DIR__ . '/debug_helpers.php'; ?>
+
 $mysqli = new mysqli("localhost", "root", "", "rasidev_hr");
 
 if ($mysqli->connect_error) {
-    die("Connection failed: " . $mysqli->connect_error);
+    safe_die("Connection failed: " . $mysqli->connect_error);
 }
 
 // Check vendors id type
@@ -10,7 +11,7 @@ echo "--- VENDORS Columns ---\n";
 $result = $mysqli->query("DESCRIBE vendors");
 while ($row = $result->fetch_assoc()) {
     if ($row['Field'] == 'id') {
-        print_r($row);
+        safe_print_r($row);
     }
 }
 
@@ -19,7 +20,7 @@ echo "\n--- USERS Columns ---\n";
 $result = $mysqli->query("DESCRIBE users");
 while ($row = $result->fetch_assoc()) {
     if ($row['Field'] == 'id') {
-        print_r($row);
+        safe_print_r($row);
     }
 }
 

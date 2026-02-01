@@ -22,7 +22,7 @@
         <div class="card-body">
             <form id="returnForm" action="<?= site_url('vendors/returns/process') ?>" method="post">
                 <?= csrf_field() ?>
-                
+
                 <!-- Vendor Selection -->
                 <div class="row mb-4">
                     <div class="col-md-6">
@@ -37,7 +37,8 @@
                         </select>
                         <div class="mt-2">
                             <span id="taxModeIndicator" class="badge bg-secondary" style="display: none;">
-                                <i class="fas fa-info-circle"></i> <span id="taxModeText">Select vendor to see tax mode</span>
+                                <i class="fas fa-info-circle"></i> <span id="taxModeText">Select vendor to see tax
+                                    mode</span>
                             </span>
                         </div>
                     </div>
@@ -56,13 +57,14 @@
                         <label class="form-label fw-bold">Scan Barcode</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-barcode"></i></span>
-                            <input type="text" id="barcodeInput" class="form-control form-control-lg" 
-                                   placeholder="Scan or type barcode here..." autocomplete="off">
+                            <input type="text" id="barcodeInput" class="form-control form-control-lg"
+                                placeholder="Scan or type barcode here..." autocomplete="off">
                             <button type="button" id="addBtn" class="btn btn-primary">
                                 <i class="fas fa-plus"></i> Add
                             </button>
                         </div>
-                        <small class="text-muted">Focus on this field and scan barcodes. Press Enter or click Add.</small>
+                        <small class="text-muted">Focus on this field and scan barcodes. Press Enter or click
+                            Add.</small>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Items Scanned</label>
@@ -131,132 +133,132 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const vendorSelect = document.getElementById('vendorSelect');
-    const barcodeInput = document.getElementById('barcodeInput');
-    const addBtn = document.getElementById('addBtn');
-    const scannedItems = document.getElementById('scannedItems');
-    const emptyRow = document.getElementById('emptyRow');
-    const itemCount = document.getElementById('itemCount');
-    const totalAmount = document.getElementById('totalAmount');
-    const totalRow = document.getElementById('totalRow');
-    const submitBtn = document.getElementById('submitBtn');
-    const hiddenInputs = document.getElementById('hiddenInputs');
-    const returnAction = document.getElementById('returnAction');
-    
-    let items = [];
-    let total = 0;
-    let isInterState = false;
-    const taxModeIndicator = document.getElementById('taxModeIndicator');
-    const taxModeText = document.getElementById('taxModeText');
-    
-    // Focus barcode input when vendor is selected and fetch vendor state
-    vendorSelect.addEventListener('change', function() {
-        const vendorId = this.value;
-        
-        if (!vendorId) {
-            isInterState = false;
-            taxModeIndicator.style.display = 'none';
-            return;
-        }
-        
-        // Fetch vendor state for GST calculation
-        fetch('<?= site_url('bills/vendor-state') ?>/' + vendorId)
-            .then(response => response.json())
-            .then(data => {
-                isInterState = data.is_inter_state;
-                
-                // Update tax mode indicator
-                taxModeIndicator.style.display = 'inline-block';
-                if (isInterState) {
-                    taxModeIndicator.className = 'badge bg-info';
-                    taxModeText.textContent = 'Inter-State Transaction (IGST)';
-                } else {
-                    taxModeIndicator.className = 'badge bg-success';
-                    taxModeText.textContent = 'Intra-State Transaction (CGST + SGST)';
-                }
-                
-                updateTotals();
-            })
-            .catch(error => {
-                console.error('Error fetching vendor state:', error);
-            });
-        
-        barcodeInput.focus();
-    });
-    
-    // Handle Enter key in barcode input
-    barcodeInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            addItem();
-        }
-    });
-    
-    // Handle Add button click
-    addBtn.addEventListener('click', addItem);
-    
-    function addItem() {
-        const vendorId = vendorSelect.value;
-        const barcode = barcodeInput.value.trim();
-        
-        if (!vendorId) {
-            alert('Please select a vendor first.');
-            vendorSelect.focus();
-            return;
-        }
-        
-        if (!barcode) {
-            alert('Please scan or enter a barcode.');
-            return;
-        }
-        
-        // Check if already scanned
-        if (items.find(item => item.barcode === barcode)) {
-            alert('This item has already been scanned!');
-            barcodeInput.value = '';
-            barcodeInput.focus();
-            return;
-        }
-        
-        // AJAX call to validate and fetch item details
-        fetch('<?= site_url('vendors/returns/scan') ?>', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: new URLSearchParams({
-                '<?= csrf_token() ?>': '<?= csrf_hash() ?>',
-                'barcode': barcode,
-                'vendor_id': vendorId
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                items.push(data.item);
-                addItemToTable(data.item);
-                updateTotals();
-                barcodeInput.value = '';
-                barcodeInput.focus();
-            } else {
-                alert('Error: ' + data.message);
-                barcodeInput.value = '';
-                barcodeInput.focus();
+    document.addEventListener('DOMContentLoaded', function () {
+        const vendorSelect = document.getElementById('vendorSelect');
+        const barcodeInput = document.getElementById('barcodeInput');
+        const addBtn = document.getElementById('addBtn');
+        const scannedItems = document.getElementById('scannedItems');
+        const emptyRow = document.getElementById('emptyRow');
+        const itemCount = document.getElementById('itemCount');
+        const totalAmount = document.getElementById('totalAmount');
+        const totalRow = document.getElementById('totalRow');
+        const submitBtn = document.getElementById('submitBtn');
+        const hiddenInputs = document.getElementById('hiddenInputs');
+        const returnAction = document.getElementById('returnAction');
+
+        let items = [];
+        let total = 0;
+        let isInterState = false;
+        const taxModeIndicator = document.getElementById('taxModeIndicator');
+        const taxModeText = document.getElementById('taxModeText');
+
+        // Focus barcode input when vendor is selected and fetch vendor state
+        vendorSelect.addEventListener('change', function () {
+            const vendorId = this.value;
+
+            if (!vendorId) {
+                isInterState = false;
+                taxModeIndicator.style.display = 'none';
+                return;
             }
-        })
-        .catch(error => {
-            alert('Network error. Please try again.');
-            console.error(error);
+
+            // Fetch vendor state for GST calculation
+            fetch('<?= site_url('vendors/details') ?>/' + vendorId)
+                .then(response => response.json())
+                .then(data => {
+                    isInterState = data.is_inter_state;
+
+                    // Update tax mode indicator
+                    taxModeIndicator.style.display = 'inline-block';
+                    if (isInterState) {
+                        taxModeIndicator.className = 'badge bg-info';
+                        taxModeText.textContent = 'Inter-State Transaction (IGST)';
+                    } else {
+                        taxModeIndicator.className = 'badge bg-success';
+                        taxModeText.textContent = 'Intra-State Transaction (CGST + SGST)';
+                    }
+
+                    updateTotals();
+                })
+                .catch(error => {
+                    console.error('Error fetching vendor state:', error);
+                });
+
+            barcodeInput.focus();
         });
-    }
-    
-    function addItemToTable(item) {
-        emptyRow.style.display = 'none';
-        
-        const row = document.createElement('tr');
-        row.innerHTML = `
+
+        // Handle Enter key in barcode input
+        barcodeInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addItem();
+            }
+        });
+
+        // Handle Add button click
+        addBtn.addEventListener('click', addItem);
+
+        function addItem() {
+            const vendorId = vendorSelect.value;
+            const barcode = barcodeInput.value.trim();
+
+            if (!vendorId) {
+                alert('Please select a vendor first.');
+                vendorSelect.focus();
+                return;
+            }
+
+            if (!barcode) {
+                alert('Please scan or enter a barcode.');
+                return;
+            }
+
+            // Check if already scanned
+            if (items.find(item => item.barcode === barcode)) {
+                alert('This item has already been scanned!');
+                barcodeInput.value = '';
+                barcodeInput.focus();
+                return;
+            }
+
+            // AJAX call to validate and fetch item details
+            fetch('<?= site_url('vendors/returns/scan') ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams({
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>',
+                    'barcode': barcode,
+                    'vendor_id': vendorId
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        items.push(data.item);
+                        addItemToTable(data.item);
+                        updateTotals();
+                        barcodeInput.value = '';
+                        barcodeInput.focus();
+                    } else {
+                        alert('Error: ' + data.message);
+                        barcodeInput.value = '';
+                        barcodeInput.focus();
+                    }
+                })
+                .catch(error => {
+                    alert('Network error. Please try again.');
+                    console.error(error);
+                });
+        }
+
+        function addItemToTable(item) {
+            emptyRow.style.display = 'none';
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
             <td><code>${item.barcode}</code></td>
             <td>${item.product_name}</td>
             <td><small class="text-danger">${item.rejection_reason || 'N/A'}</small></td>
@@ -267,78 +269,78 @@ document.addEventListener('DOMContentLoaded', function() {
                 </button>
             </td>
         `;
-        scannedItems.appendChild(row);
-        
-        // Add hidden input
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'item_ids[]';
-        input.value = item.id;
-        input.id = 'item_' + item.id;
-        hiddenInputs.appendChild(input);
-    }
-    
-    window.removeItem = function(barcode) {
-        const index = items.findIndex(item => item.barcode === barcode);
-        if (index > -1) {
-            const item = items[index];
-            items.splice(index, 1);
-            
-            // Remove row
-            scannedItems.children[index].remove();
-            
-            // Remove hidden input
-            document.getElementById('item_' + item.id).remove();
-            
-            updateTotals();
-            
-            if (items.length === 0) {
-                emptyRow.style.display = '';
-            }
+            scannedItems.appendChild(row);
+
+            // Add hidden input
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'item_ids[]';
+            input.value = item.id;
+            input.id = 'item_' + item.id;
+            hiddenInputs.appendChild(input);
         }
-    };
-    
-    function updateTotals() {
-        itemCount.textContent = items.length;
-        
-        // Calculate subtotal (assuming purchase_price includes tax for now)
-        // In a real scenario, you'd need tax_percentage from the product data
-        let subtotal = 0;
-        let taxBreakdown = {};
-        let totalTax = 0;
-        
-        items.forEach(item => {
-            const price = parseFloat(item.purchase_price);
-            // Assuming 18% GST for vendor returns (you can modify this based on product data)
-            const taxRate = 18;
-            const priceWithoutTax = price / (1 + (taxRate / 100));
-            const tax = price - priceWithoutTax;
-            
-            subtotal += priceWithoutTax;
-            taxBreakdown[taxRate] = (taxBreakdown[taxRate] || 0) + tax;
-            totalTax += tax;
-        });
-        
-        // Generate dynamic tax rows
-        const taxBody = document.getElementById('taxBreakdownBody');
-        taxBody.innerHTML = '';
-        
-        Object.keys(taxBreakdown).sort((a, b) => a - b).forEach(percentage => {
-            const amount = taxBreakdown[percentage];
-            const rate = parseFloat(percentage);
-            
-            if (isInterState) {
-                taxBody.innerHTML += `
+
+        window.removeItem = function (barcode) {
+            const index = items.findIndex(item => item.barcode === barcode);
+            if (index > -1) {
+                const item = items[index];
+                items.splice(index, 1);
+
+                // Remove row
+                scannedItems.children[index].remove();
+
+                // Remove hidden input
+                document.getElementById('item_' + item.id).remove();
+
+                updateTotals();
+
+                if (items.length === 0) {
+                    emptyRow.style.display = '';
+                }
+            }
+        };
+
+        function updateTotals() {
+            itemCount.textContent = items.length;
+
+            // Calculate subtotal (assuming purchase_price includes tax for now)
+            // In a real scenario, you'd need tax_percentage from the product data
+            let subtotal = 0;
+            let taxBreakdown = {};
+            let totalTax = 0;
+
+            items.forEach(item => {
+                const price = parseFloat(item.purchase_price);
+                // Assuming 18% GST for vendor returns (you can modify this based on product data)
+                const taxRate = 18;
+                const priceWithoutTax = price / (1 + (taxRate / 100));
+                const tax = price - priceWithoutTax;
+
+                subtotal += priceWithoutTax;
+                taxBreakdown[taxRate] = (taxBreakdown[taxRate] || 0) + tax;
+                totalTax += tax;
+            });
+
+            // Generate dynamic tax rows
+            const taxBody = document.getElementById('taxBreakdownBody');
+            taxBody.innerHTML = '';
+
+            Object.keys(taxBreakdown).sort((a, b) => a - b).forEach(percentage => {
+                const amount = taxBreakdown[percentage];
+                const rate = parseFloat(percentage);
+
+                if (isInterState) {
+                    taxBody.innerHTML += `
                     <tr>
                         <td colspan="3" class="text-end">IGST (${rate}%):</td>
                         <td>₹${amount.toFixed(2)}</td>
                         <td></td>
                     </tr>
                 `;
-            } else {
-                const halfAmount = amount / 2;
-                const halfRate = rate / 2;
-                taxBody.innerHTML += `
+                } else {
+                    const halfAmount = amount / 2;
+                    const halfRate = rate / 2;
+                    taxBody.innerHTML += `
                     <tr>
                         <td colspan="3" class="text-end">CGST (${halfRate}%):</td>
                         <td>₹${halfAmount.toFixed(2)}</td>
@@ -350,32 +352,32 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td></td>
                     </tr>
                 `;
+                }
+            });
+
+            total = subtotal + totalTax;
+
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('taxAmount').textContent = totalTax.toFixed(2);
+            totalAmount.textContent = total.toFixed(2);
+
+            if (items.length > 0) {
+                totalRow.style.display = '';
+                submitBtn.disabled = false;
+            } else {
+                totalRow.style.display = 'none';
+                submitBtn.disabled = true;
+            }
+        }
+
+        // Update total display when action changes
+        returnAction.addEventListener('change', function () {
+            if (this.value === 'Exchanged') {
+                totalRow.style.display = 'none';
+            } else if (items.length > 0) {
+                totalRow.style.display = '';
             }
         });
-        
-        total = subtotal + totalTax;
-        
-        document.getElementById('subtotal').textContent = subtotal.toFixed(2);
-        document.getElementById('taxAmount').textContent = totalTax.toFixed(2);
-        totalAmount.textContent = total.toFixed(2);
-        
-        if (items.length > 0) {
-            totalRow.style.display = '';
-            submitBtn.disabled = false;
-        } else {
-            totalRow.style.display = 'none';
-            submitBtn.disabled = true;
-        }
-    }
-    
-    // Update total display when action changes
-    returnAction.addEventListener('change', function() {
-        if (this.value === 'Exchanged') {
-            totalRow.style.display = 'none';
-        } else if (items.length > 0) {
-            totalRow.style.display = '';
-        }
     });
-});
 </script>
 <?= $this->endSection() ?>

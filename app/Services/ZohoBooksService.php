@@ -15,7 +15,7 @@ class ZohoBooksService
         $this->authService = new ZohoAuthService();
         $settingsModel = new ZohoSettingsModel();
         $this->settings = $settingsModel->getSettings();
-        
+
         $accessToken = $this->authService->getAccessToken();
         $this->headers = [
             'Authorization: Zoho-oauthtoken ' . $accessToken,
@@ -32,8 +32,20 @@ class ZohoBooksService
     public function getContacts($type = 'customer', $page = 1)
     {
         $contactType = ($type === 'customer') ? 'customer' : 'vendor';
-        $url = $this->settings['api_base_url'] . '/contacts?contact_type=' . $contactType . '&page=' . $page;
+        // IMPORTANT: detailedlist=true is required to get billing_address and shipping_address
+        $url = $this->settings['api_base_url'] . '/contacts?contact_type=' . $contactType . '&page=' . $page . '&detailedlist=true';
 
+        return $this->makeRequest($url);
+    }
+
+    /**
+     * Get individual contact details by contact ID
+     * This endpoint returns complete contact information including full billing and shipping addresses
+     * @param string $contactId Zoho contact ID
+     */
+    public function getContactById($contactId)
+    {
+        $url = $this->settings['api_base_url'] . '/contacts/' . $contactId;
         return $this->makeRequest($url);
     }
 
@@ -62,6 +74,8 @@ class ZohoBooksService
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HTTPHEADER => $this->headers,
+            CURLOPT_TIMEOUT => 30, // Increased from default to 30 seconds
+            CURLOPT_CONNECTTIMEOUT => 10, // Connection timeout 10 seconds
         ];
 
         if ($data) {
@@ -74,6 +88,7 @@ class ZohoBooksService
         curl_close($curl);
 
         if ($err) {
+            log_message('error', 'Zoho API cURL Error: ' . $err . ' URL: ' . $url);
             return ['success' => false, 'message' => $err];
         }
 
@@ -82,6 +97,7 @@ class ZohoBooksService
             return ['success' => true, 'data' => $result];
         }
 
+        log_message('error', 'Zoho API Error: ' . ($result['message'] ?? 'Unknown error') . ' URL: ' . $url);
         return ['success' => false, 'message' => $result['message'] ?? 'Unknown Zoho API error', 'raw' => $result];
     }
 
@@ -93,15 +109,15 @@ class ZohoBooksService
     public function getBills($page = 1, $filters = [])
     {
         $url = $this->settings['api_base_url'] . '/bills?page=' . $page;
-        
+
         if (!empty($filters['vendor_id'])) {
             $url .= '&vendor_id=' . $filters['vendor_id'];
         }
-        
+
         if (!empty($filters['status'])) {
             $url .= '&status=' . $filters['status'];
         }
-        
+
         return $this->makeRequest($url);
     }
 
@@ -177,15 +193,15 @@ class ZohoBooksService
     public function getInvoices($page = 1, $filters = [])
     {
         $url = $this->settings['api_base_url'] . '/invoices?page=' . $page;
-        
+
         if (!empty($filters['customer_id'])) {
             $url .= '&customer_id=' . $filters['customer_id'];
         }
-        
+
         if (!empty($filters['status'])) {
             $url .= '&status=' . $filters['status'];
         }
-        
+
         return $this->makeRequest($url);
     }
 

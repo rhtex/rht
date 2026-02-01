@@ -6,29 +6,50 @@ use CodeIgniter\Model;
 
 class BillModel extends Model
 {
-    protected $table            = 'bills';
-    protected $primaryKey       = 'id';
+    protected $table = 'bills';
+    protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
-    protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
-    protected $protectFields    = true;
-    protected $allowedFields    = [
-        'vendor_id', 'bill_number', 'zoho_bill_id', 'zoho_sync_status', 'bill_date', 'due_date',
-        'reference_number', 'status', 'subtotal', 'discount_amount', 'discount_type', 
-        'shipping_charge', 'roundoff_amount', 'cgst_amount', 'sgst_amount', 'igst_amount',
-        'tax_amount', 'total_amount', 'paid_amount', 'balance', 'notes', 'terms',
-        'created_by', 'updated_by', 'zoho_sync_at'
+    protected $returnType = 'array';
+    protected $useSoftDeletes = false;
+    protected $protectFields = true;
+    protected $allowedFields = [
+        'vendor_id',
+        'bill_number',
+        'zoho_bill_id',
+        'zoho_sync_status',
+        'bill_date',
+        'due_date',
+        'reference_number',
+        'status',
+        'is_inter_state',
+        'subtotal',
+        'discount_amount',
+        'discount_type',
+        'shipping_charge',
+        'roundoff_amount',
+        'cgst_amount',
+        'sgst_amount',
+        'igst_amount',
+        'tax_amount',
+        'total_amount',
+        'paid_amount',
+        'balance',
+        'notes',
+        'terms',
+        'created_by',
+        'updated_by',
+        'zoho_sync_at'
     ];
 
     protected $useTimestamps = true;
-    protected $dateFormat    = 'datetime';
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
+    protected $dateFormat = 'datetime';
+    protected $createdField = 'created_at';
+    protected $updatedField = 'updated_at';
 
     protected $validationRules = [
-        'vendor_id'  => 'required|integer',
-        'bill_date'  => 'required|valid_date',
-        'due_date'   => 'required|valid_date',
+        'vendor_id' => 'required|integer',
+        'bill_date' => 'required|valid_date',
+        'due_date' => 'required|valid_date',
     ];
 
     /**
@@ -37,7 +58,7 @@ class BillModel extends Model
     public function getBillsWithVendor($filters = [])
     {
         $builder = $this->select('bills.*, vendors.name as vendor_name')
-                        ->join('vendors', 'vendors.id = bills.vendor_id', 'left');
+            ->join('vendors', 'vendors.id = bills.vendor_id', 'left');
 
         if (!empty($filters['vendor_id'])) {
             $builder->where('bills.vendor_id', $filters['vendor_id']);
@@ -64,10 +85,10 @@ class BillModel extends Model
     public function getBillById($id)
     {
         $bill = $this->select('bills.*, vendors.name as vendor_name, states.id as vendor_state_id, states.name as vendor_state')
-                     ->join('vendors', 'vendors.id = bills.vendor_id', 'left')
-                     ->join('addresses', 'addresses.owner_id = vendors.id AND addresses.owner_type = "vendor" AND addresses.address_type = "billing"', 'left')
-                     ->join('states', 'states.id = addresses.state_id', 'left')
-                     ->find($id);
+            ->join('vendors', 'vendors.id = bills.vendor_id', 'left')
+            ->join('addresses', 'addresses.owner_id = vendors.id AND addresses.owner_type = "vendor" AND addresses.address_type = "billing" AND addresses.is_active = 1', 'left')
+            ->join('states', 'states.id = addresses.state_id', 'left')
+            ->find($id);
 
         if ($bill) {
             $itemModel = new \App\Models\BillItemModel();
@@ -86,7 +107,8 @@ class BillModel extends Model
     public function updateBalance($billId)
     {
         $bill = $this->find($billId);
-        if (!$bill) return false;
+        if (!$bill)
+            return false;
 
         $balance = $bill['total_amount'] - $bill['paid_amount'];
 
@@ -101,7 +123,7 @@ class BillModel extends Model
 
         return $this->update($billId, [
             'balance' => $balance,
-            'status'  => $status
+            'status' => $status
         ]);
     }
 
@@ -111,8 +133,8 @@ class BillModel extends Model
     public function getOverdueBills()
     {
         return $this->where('due_date <', date('Y-m-d'))
-                    ->whereIn('status', ['Open', 'Partially Paid'])
-                    ->findAll();
+            ->whereIn('status', ['Open', 'Partially Paid'])
+            ->findAll();
     }
 
     /**
@@ -148,15 +170,17 @@ class BillModel extends Model
         $cgst = 0;
         $sgst = 0;
         $igst = 0;
-        $isInterState = ($vendorStateId != $companyStateId);
+
+        // Prioritize the is_inter_state flag if it's explicitly set on the bill
+        $isInterState = isset($currentBill['is_inter_state']) ? (bool) $currentBill['is_inter_state'] : ($vendorStateId != $companyStateId);
 
         foreach ($items as $item) {
             $itemAmount = $item['quantity'] * $item['rate'];
-            
+
             // Apportion discount to this item proportionally
             $itemDiscount = ($subtotal > 0) ? ($itemAmount / $subtotal * $totalDiscount) : 0;
             $taxableValue = $itemAmount - $itemDiscount;
-            
+
             $taxAmount = ($taxableValue * $item['tax_percentage']) / 100;
 
             if ($isInterState) {
@@ -168,18 +192,18 @@ class BillModel extends Model
         }
 
         $totalTax = $cgst + $sgst + $igst;
-        
+
         // Total = (Subtotal - TotalDiscount) + Tax + Shipping + Roundoff
         $total = ($subtotal - $totalDiscount) + $totalTax + $shippingCharge + $roundoffAmount;
 
         $this->update($billId, [
-            'subtotal'     => $subtotal,
-            'cgst_amount'  => $cgst,
-            'sgst_amount'  => $sgst,
-            'igst_amount'  => $igst,
-            'tax_amount'   => $totalTax,
+            'subtotal' => $subtotal,
+            'cgst_amount' => $cgst,
+            'sgst_amount' => $sgst,
+            'igst_amount' => $igst,
+            'tax_amount' => $totalTax,
             'total_amount' => $total,
-            'balance'      => $total - ($currentBill['paid_amount'] ?? 0)
+            'balance' => $total - ($currentBill['paid_amount'] ?? 0)
         ]);
 
         return true;
@@ -192,8 +216,8 @@ class BillModel extends Model
     {
         $prefix = 'BILL-' . date('Ym') . '-';
         $lastBill = $this->like('bill_number', $prefix, 'after')
-                         ->orderBy('id', 'DESC')
-                         ->first();
+            ->orderBy('id', 'DESC')
+            ->first();
 
         if ($lastBill) {
             $lastNumber = (int) substr($lastBill['bill_number'], -4);

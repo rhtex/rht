@@ -1,6 +1,7 @@
-<?php
+<?php require_once __DIR__ . '/debug_helpers.php'; ?>
+
 $conn = new mysqli("localhost", "root", "", "rasidev_hr");
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+if ($conn->connect_error) safe_die("Connection failed: " . $conn->connect_error);
 
 // 1. Create accounts table
 $sql1 = "CREATE TABLE IF NOT EXISTS accounts (

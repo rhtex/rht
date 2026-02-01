@@ -1,6 +1,7 @@
-<?php
+<?php require_once __DIR__ . '/debug_helpers.php'; ?>
+
 $conn = new mysqli("localhost", "root", "", "rasidev_hr");
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+if ($conn->connect_error) safe_die("Connection failed: " . $conn->connect_error);
 
 $output = "";
 $tables = ['bank_transactions', 'invoice_payments', 'payments', 'expenses', 'invoices', 'bills'];

@@ -33,7 +33,6 @@
                 <p><strong>Date :</strong> <?= date('d/m/Y', strtotime($quotation['quotation_date'])) ?></p>
                 <?php if ($quotation['expiry_date']): ?><p><strong>Valid Until :</strong> <?= date('d/m/Y', strtotime($quotation['expiry_date'])) ?></p><?php endif; ?>
                 <?php if ($quotation['transport_name']): ?><p><strong>Transport :</strong> <?= esc($quotation['transport_name']) ?></p><?php endif; ?>
-                <?php if ($quotation['waybill_number']): ?><p><strong>Waybill :</strong> <?= esc($quotation['waybill_number']) ?></p><?php endif; ?>
             </div>
         </div>
 

@@ -40,7 +40,6 @@
                             </td>
                         </tr>
                         <tr><th>Transport:</th><td><?= esc($quotation['transport_name']) ?: '-' ?></td></tr>
-                        <tr><th>Waybill:</th><td><?= esc($quotation['waybill_number']) ?: '-' ?></td></tr>
                     </table>
                 </div>
                 <div class="col-md-6">

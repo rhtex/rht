@@ -330,6 +330,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 
     // Master Data AJAX
     $routes->get('master-data/states/(:num)', 'MasterDataController::getStatesByCountry/$1');
+    $routes->get('master-data/product-by-barcode', 'MasterDataController::getProductByBarcode');
 
     // API Routes for n8n Integration
     $routes->group('api', ['filter' => 'apiauth'], function ($routes) {

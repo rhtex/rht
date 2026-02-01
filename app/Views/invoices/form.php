@@ -165,7 +165,8 @@
         </div>
 
         <!-- Line Items -->
-        <div class="card card-outline card-secondary">
+        <div class="card card-outline card-secondary" id="lineItemsCard"
+            style="display: <?= ($invoice && !empty($invoice['customer_id'])) ? 'block' : 'none' ?>;">
             <div class="card-header">
                 <h3 class="card-title">Line Items</h3>
                 <div class="card-tools d-flex gap-2">
@@ -404,6 +405,14 @@
     }
 
     function addLineItem() {
+        // Validation: Check if customer is selected
+        const customerId = $('#customerSelect').val();
+        if (!customerId) {
+            toastr.error('Please select a customer first.');
+            $('#customerSelect').select2('open');
+            return;
+        }
+
         console.log('Adding new line item...');
         const tbody = document.getElementById('itemsBody');
         const row = document.createElement('tr');
@@ -942,14 +951,29 @@
             taxModeIndicator.hide();
         }
 
-        // 3. Trigger change logic if a customer is already selected (e.g., on Edit page)
-        const initialCustomer = $('#customerSelect').val();
-        if (initialCustomer) {
-            console.log('Page Load - triggering customer change logic for:', initialCustomer);
-            $('#customerSelect').trigger('change');
-        } else {
-            calculateTotals(); // Just in case
+        // 4. Unified Customer Change Handler
+        function handleCustomerChange() {
+            const customerId = $('select[name="customer_id"]').val();
+
+            // 1. Visibility Logic (Instant)
+            if (customerId) {
+                $('#lineItemsCard').slideDown();
+                // If specific invoice logic for tax/billing/shipping is needed here, add it
+                loadCustomerDetails(customerId);
+            } else {
+                $('#lineItemsCard').slideUp();
+                $('#taxModeIndicator').hide();
+                $('#customerAddressSection').hide();
+                $('#billingAddressDisplay').text('');
+                $('#shippingAddressDisplay').text('');
+            }
         }
+
+        // Bind to change event
+        $('select[name="customer_id"]').on('change', handleCustomerChange);
+
+        // Initial check on page load
+        handleCustomerChange();
 
         // Prevent double submission
         $('#invoiceForm').on('submit', function () {
@@ -959,6 +983,79 @@
             return true;
         });
     });
+
+    function loadCustomerDetails(customerId) {
+        if (!customerId) return;
+        // Function logic specific to customer details (currently none shown in snippet but keeping structure)
+    }
+    // Barcode Scanning Logic
+    $('#barcodeScanner').on('keypress', function (e) {
+        if (e.which === 13) { // Enter key
+            e.preventDefault();
+
+            // Validation: Check if customer is selected
+            const customerId = $('#customerSelect').val();
+            if (!customerId) {
+                toastr.error('Please select a customer first.');
+                $('#customerSelect').select2('open');
+                return;
+            }
+
+            const barcode = $(this).val().trim();
+            if (!barcode) return;
+
+            // Show loading state
+            const $input = $(this);
+            $input.prop('disabled', true);
+
+            $.ajax({
+                url: '<?= site_url('master-data/product-by-barcode') ?>',
+                method: 'GET',
+                data: { barcode: barcode },
+                success: function (response) {
+                    if (response.success && response.data) {
+                        addProductByBarcode(response.data);
+                        $input.val('').focus(); // Clear and keep focus for next scan
+                        toastr.success('Item added: ' + response.data.product_name);
+                    } else {
+                        toastr.error('Product not found for barcode: ' + barcode);
+                        $input.select();
+                    }
+                },
+                error: function (xhr) {
+                    // Check for 404
+                    if (xhr.status === 404) {
+                        toastr.error('Product not found for barcode: ' + barcode);
+                    } else {
+                        toastr.error('Error searching for barcode');
+                    }
+                    $input.select();
+                },
+                complete: function () {
+                    $input.prop('disabled', false).focus();
+                }
+            });
+        }
+    });
+
+    function addProductByBarcode(product) {
+        // Add new row
+        addLineItem();
+
+        // Get the last added row (which is the new one)
+        const $rows = $('.item-row');
+        const $lastRow = $rows.last();
+
+        // 1. Set Product in Select2
+        const $select = $lastRow.find('.product-select');
+
+        // Check if option exists
+        if ($select.find(`option[value="${product.id}"]`).length > 0) {
+            $select.val(product.id).trigger('change');
+        } else {
+            toastr.warning('Product found but not in list. Please check active status.');
+        }
+    }
 </script>
 <?= $this->endSection() ?>
 ```

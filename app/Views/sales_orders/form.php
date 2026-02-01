@@ -28,7 +28,7 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label">Customer <span class="text-danger">*</span></label>
-                            <select name="customer_id" id="customerId" class="form-select select2" required>
+                            <select name="customer_id" id="customerSelect" class="form-select select2" required>
                                 <option value="">-- Select Customer --</option>
                                 <?php foreach ($customers as $customer): ?>
                                     <option value="<?= $customer['id'] ?>" <?= ($order && $order['customer_id'] == $customer['id']) ? 'selected' : '' ?>>
@@ -155,10 +155,16 @@
         </div>
 
         <!-- Line Items -->
-        <div class="card card-outline card-secondary">
+        <div class="card card-outline card-secondary" id="lineItemsCard"
+            style="display: <?= ($order && !empty($order['customer_id'])) ? 'block' : 'none' ?>;">
             <div class="card-header">
                 <h3 class="card-title">Line Items</h3>
-                <div class="card-tools">
+                <div class="card-tools d-flex align-items-center">
+                    <div class="input-group input-group-sm me-2" style="width: 250px;">
+                        <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                        <input type="text" id="barcodeScan" class="form-control" placeholder="Scan Barcode / SKU"
+                            autocomplete="off">
+                    </div>
                     <button type="button" class="btn btn-sm btn-success" onclick="addLineItem()">
                         <i class="fas fa-plus"></i> Add Item
                     </button>
@@ -364,6 +370,13 @@
     let _taxOptionsHtml = '';
 
     function addLineItem() {
+        const customerId = $('#customerSelect').val();
+        if (!customerId) {
+            toastr.error('Please select a customer first.');
+            $('#customerSelect').select2('open');
+            return;
+        }
+
         const tbody = document.getElementById('itemsBody');
         const row = document.createElement('tr');
         row.className = 'item-row';
@@ -406,11 +419,12 @@
         const row = $select.closest('tr')[0];
         const hsn = $option.attr('data-hsn') || '';
         const rate = parseFloat($option.attr('data-rate')) || 0;
-        const gst = parseFloat($option.attr('data-gst')) || 0;
+        const gst = $option.attr('data-gst') || '0';
 
         row.querySelector('.hsn').value = hsn;
         row.querySelector('.rate').value = rate.toFixed(2);
-        row.querySelector('.gst').value = gst;
+        // Fix: Set GST dropdown value properly
+        $(row).find('.gst').val(gst).trigger('change');
         row.querySelector('input[name*="[description]"]').value = $option.text();
 
         calculateRow(select);
@@ -490,14 +504,7 @@
     }
 
     function updateTaxMode(customerId) {
-        if (!customerId) {
-            $('#billingAddressDisplay').text('Select Customer');
-            $('#shippingAddressDisplay').text('Select Customer');
-            $('#taxModeText').text('Select Customer');
-            $('#taxModeIndicator').removeClass('alert-success alert-warning').addClass('alert-info');
-            $('#contactInfoSection').hide();
-            return;
-        }
+        if (!customerId) return;
 
         $.get('<?= site_url('customers/details/') ?>' + customerId, function (data) {
             if (data.status === 'success') {
@@ -549,19 +556,33 @@
             updateProductDetails(this);
         });
 
-        // 4. Customer Change -> Tax Mode
-        $('select[name="customer_id"]').on('change', function () {
-            updateTaxMode($(this).val());
-        });
+        // 4. Unified Customer Change Handler
+        function handleCustomerChange() {
+            const customerId = $('select[name="customer_id"]').val();
 
-        // Initial tax mode if customer exists
-        const initialCustomer = $('select[name="customer_id"]').val();
-        if (initialCustomer) {
-            updateTaxMode(initialCustomer);
-        } else {
-            $('#taxModeText').text('Select Customer');
-            $('#taxModeIndicator').removeClass('alert-success alert-warning').addClass('alert-info');
+            // 1. Visibility Logic (Instant)
+            if (customerId) {
+                $('#lineItemsCard').slideDown();
+            } else {
+                $('#lineItemsCard').slideUp();
+                $('#contactInfoSection').slideUp();
+                $('#billingAddressDisplay').text('Select Customer');
+                $('#shippingAddressDisplay').text('Select Customer');
+                $('#taxModeText').text('Select Customer');
+                $('#taxModeIndicator').removeClass('alert-success alert-warning').addClass('alert-info');
+            }
+
+            // 2. Data Fetching Logic (Async)
+            if (customerId) {
+                updateTaxMode(customerId);
+            }
         }
+
+        // Bind to change event
+        $('select[name="customer_id"]').on('change', handleCustomerChange);
+
+        // Initial check on page load
+        handleCustomerChange();
 
         calculateTotals();
     });
@@ -585,6 +606,76 @@
                     width: '100%'
                 });
             });
+        }
+    }
+
+    // Barcode Scanning Logic
+    $('#barcodeScan').on('keypress', function (e) {
+        if (e.which === 13) { // Enter key
+            e.preventDefault();
+
+            const customerId = $('#customerSelect').val(); // Corrected ID to match the select element
+            if (!customerId) {
+                toastr.error('Please select a customer first.');
+                $('#customerSelect').select2('open'); // Corrected selector for opening
+                return;
+            }
+
+            const barcode = $(this).val().trim();
+            if (!barcode) return;
+
+            // Show loading state
+            const $input = $(this);
+            $input.prop('disabled', true);
+
+            $.ajax({
+                url: '<?= site_url('master-data/product-by-barcode') ?>',
+                method: 'GET',
+                data: { barcode: barcode },
+                success: function (response) {
+                    if (response.success && response.data) {
+                        addProductByBarcode(response.data);
+                        $input.val('').focus(); // Clear and keep focus for next scan
+                        toastr.success('Item added: ' + response.data.product_name);
+                    } else {
+                        toastr.error('Product not found for barcode: ' + barcode);
+                        $input.select();
+                    }
+                },
+                error: function (xhr) {
+                    // Check for 404
+                    if (xhr.status === 404) {
+                        toastr.error('Product not found for barcode: ' + barcode);
+                    } else {
+                        toastr.error('Error searching for barcode');
+                    }
+                    $input.select();
+                },
+                complete: function () {
+                    $input.prop('disabled', false).focus();
+                }
+            });
+        }
+    });
+
+    function addProductByBarcode(product) {
+        // Add new row
+        addLineItem();
+
+        // Get the last added row (which is the new one)
+        const $rows = $('.item-row');
+        const $lastRow = $rows.last();
+        const rowIndex = $rows.length - 1; // 0-based index
+
+        // 1. Set Product in Select2
+        const $select = $lastRow.find('.product-select');
+
+        // Check if option exists, if not create it (though it should exist if master data is complete)
+        if ($select.find(`option[value="${product.id}"]`).length > 0) {
+            $select.val(product.id).trigger('change');
+        } else {
+            // Option doesn't exist in the dropdown (maybe inactive or not loaded?)
+            toastr.warning('Product found but not in list. Please check active status.');
         }
     }
 </script>

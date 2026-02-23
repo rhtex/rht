@@ -25,6 +25,7 @@ class InvoiceModel extends Model
         'invoice_date',
         'due_date',
         'reference_number',
+        'po_date',
         'transport_name',
         'waybill_number',
         'packages_count',

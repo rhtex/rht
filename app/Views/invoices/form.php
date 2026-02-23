@@ -100,7 +100,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="mb-3">
                             <label class="form-label">Invoice Number</label>
                             <input type="text" name="invoice_number" class="form-control fw-bold"
@@ -114,7 +114,14 @@
                                 value="<?= $invoice['reference_number'] ?? '' ?>" placeholder="e.g. PO number">
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">P.O Date</label>
+                            <input type="date" name="po_date" class="form-control"
+                                value="<?= $invoice['po_date'] ?? '' ?>">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
                         <div class="mb-3">
                             <label class="form-label">Agent (Optional)</label>
                             <select name="agent_id" id="agentSelect" class="form-select select2">
@@ -135,8 +142,8 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="mb-3">
-                            <label class="form-label">Transport Name</label>
-                            <select name="transport_name" class="form-select select2">
+                            <label class="form-label">Transport Name <span class="text-danger">*</span></label>
+                            <select name="transport_name" class="form-select select2" required>
                                 <option value="">-- Select Transport --</option>
                                 <?php foreach ($transports as $transport): ?>
                                     <option value="<?= esc($transport['transport_name']) ?>" <?= ($invoice && $invoice['transport_name'] == $transport['transport_name']) ? 'selected' : '' ?>>
@@ -155,8 +162,8 @@
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label class="form-label">No. of Packages</label>
-                            <input type="number" name="packages_count" class="form-control"
+                            <label class="form-label">No. of Packages <span class="text-danger">*</span></label>
+                            <input type="number" required name="packages_count" class="form-control"
                                 value="<?= $invoice['packages_count'] ?? '' ?>" placeholder="Qty">
                         </div>
                     </div>

@@ -47,6 +47,7 @@
                         <tr><th width="40%">Invoice Number:</th><td class="fw-bold"><?= esc($invoice['invoice_number']) ?></td></tr>
                         <tr><th>Customer:</th><td><?= esc($invoice['customer_name']) ?></td></tr>
                         <tr><th>P.O number:</th><td><?= esc($invoice['reference_number']) ?: '-' ?></td></tr>
+                        <tr><th>P.O Date:</th><td><?= $invoice['po_date'] ? date('d/m/Y', strtotime($invoice['po_date'])) : '-' ?></td></tr>
                         <tr><th>Status:</th>
                             <td>
                                 <?php

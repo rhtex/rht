@@ -359,6 +359,12 @@
             updateTaxMode($(this).val());
         });
 
+        // Form submission - prevent double clicks
+        $('#returnForm').on('submit', function () {
+            const $btn = $(this).find('button[type="submit"]');
+            $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
+        });
+
         // Initial calculation
         calculateTotals();
     });

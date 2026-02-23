@@ -455,20 +455,7 @@
         <div class="col-xl-3 col-md-12 mb-2">
             <div class="card chart-card border-0" style="background: #f8fafc;">
                 <div class="card-body p-3">
-                    <div class="p-3 bg-white rounded-4 shadow-sm mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-bold text-muted">Stock Health</span>
-                            <span class="small fw-bold <?= ($lowStockCount > 0 ? 'text-danger' : 'text-success') ?>">
-                                <?= $lowStockCount ?> Issues
-                            </span>
-                        </div>
-                        <div class="progress progress-thin">
-                            <div class="progress-bar bg-primary" style="width: 75%"></div>
-                        </div>
-                        <p class="smaller text-muted mt-2 mb-0">Portfolio diversity looks strong.</p>
-                    </div>
-
-                    <div class="row g-2">
+                    <div class="row g-2 mt-2">
                         <div class="col-6">
                             <div
                                 class="p-3 bg-white rounded-4 text-center shadow-sm border-bottom border-3 border-info">

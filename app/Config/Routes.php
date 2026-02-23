@@ -100,6 +100,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('employees', 'EmployeeController::index', ['filter' => 'permission:employee.view']);
     $routes->get('employees/create', 'EmployeeController::create', ['filter' => 'permission:employee.create']);
     $routes->post('employees/store', 'EmployeeController::store', ['filter' => 'permission:employee.create']);
+    $routes->get('employees/view/(:num)', 'EmployeeController::view/$1', ['filter' => 'permission:employee.view']);
     $routes->get('employees/edit/(:num)', 'EmployeeController::edit/$1', ['filter' => 'permission:employee.edit']);
     $routes->post('employees/update/(:num)', 'EmployeeController::update/$1', ['filter' => 'permission:employee.edit']);
     $routes->get('employees/delete/(:num)', 'EmployeeController::delete/$1', ['filter' => 'permission:employee.delete']);
@@ -196,6 +197,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('sales_returns', 'SalesReturnController::index', ['filter' => 'permission:invoice.view']);
     $routes->get('sales_returns/create', 'SalesReturnController::create', ['filter' => 'permission:invoice.edit']);
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
+    $routes->get('sales_returns/view/(:num)', 'SalesReturnController::view/$1', ['filter' => 'permission:invoice.view']);
     $routes->get('sales_returns/sync-zoho', 'SalesReturnController::syncFromZoho', ['filter' => 'permission:zoho.sync']);
 
     // Purchase (Vendors) Management

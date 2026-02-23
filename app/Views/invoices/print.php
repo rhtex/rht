@@ -135,6 +135,9 @@
                 <?php if ($invoice['reference_number']): ?>
                     <p><strong>P.O number:</strong> <?= esc($invoice['reference_number']) ?></p>
                 <?php endif; ?>
+                <?php if ($invoice['po_date']): ?>
+                    <p><strong>P.O Date:</strong> <?= date('d/m/Y', strtotime($invoice['po_date'])) ?></p>
+                <?php endif; ?>
                 <?php if ($invoice['transport_name']): ?>
                     <p><strong>Transport:</strong> <?= esc($invoice['transport_name']) ?></p>
                 <?php endif; ?>

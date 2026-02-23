@@ -1,7 +1,9 @@
-<tr class="<?= $notify['is_read'] ? '' : 'bg-soft-primary-light' ?>" style="<?= !$notify['is_read'] ? 'border-left: 3px solid #4f46e5;' : '' ?>">
+<tr class="<?= $notify['is_read'] ? '' : 'bg-soft-primary-light' ?>"
+    style="<?= !$notify['is_read'] ? 'border-left: 3px solid #4f46e5;' : '' ?>">
     <td class="ps-3">
-        <div class="icon-box <?= $notify['type'] == 'low_stock' ? 'bg-soft-warning' : ($notify['type'] == 'lr_update' ? 'bg-soft-info' : 'bg-soft-success') ?>" style="width: 28px; height: 28px; border-radius: 6px; font-size: 0.8rem;">
-            <i class="fas fa-<?= $notify['type'] == 'low_stock' ? 'exclamation-triangle' : ($notify['type'] == 'lr_update' ? 'truck-loading' : 'bell') ?>"></i>
+        <div class="icon-box <?= $notify['type'] == 'lr_update' ? 'bg-soft-info' : 'bg-soft-success' ?>"
+            style="width: 28px; height: 28px; border-radius: 6px; font-size: 0.8rem;">
+            <i class="fas fa-<?= $notify['type'] == 'lr_update' ? 'truck-loading' : 'bell' ?>"></i>
         </div>
     </td>
     <td>
@@ -13,11 +15,13 @@
     </td>
     <td class="text-end pe-3">
         <div class="d-flex justify-content-end gap-1">
-            <?php if($notify['link']): ?>
-                <a href="<?= site_url($notify['link']) ?>" class="btn btn-xs btn-soft-primary fw-bold" title="Resolve">Resolve</a>
+            <?php if ($notify['link']): ?>
+                <a href="<?= site_url($notify['link']) ?>" class="btn btn-xs btn-soft-primary fw-bold"
+                    title="Resolve">Resolve</a>
             <?php endif; ?>
-            <?php if(!$notify['is_read']): ?>
-                <a href="<?= site_url('notifications/markAsRead/'.$notify['id']) ?>" class="btn btn-xs btn-outline-secondary" title="Mark as Read">
+            <?php if (!$notify['is_read']): ?>
+                <a href="<?= site_url('notifications/markAsRead/' . $notify['id']) ?>"
+                    class="btn btn-xs btn-outline-secondary" title="Mark as Read">
                     <i class="fas fa-check"></i>
                 </a>
             <?php endif; ?>

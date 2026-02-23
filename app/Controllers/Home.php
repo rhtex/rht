@@ -19,27 +19,26 @@ class Home extends BaseController
 
         // 1. Basic Counts & Summary
         $data['totalCustomers'] = $customerModel->countAllResults();
-        $data['totalProducts']  = $productModel->countAllResults();
-        $data['userCount']      = $userModel->countAllResults();
-        $data['employeeCount']  = $employeeModel->where('status', 'active')->countAllResults();
-        $data['lowStockCount']  = $productModel->where('total_stock <', 10)->countAllResults();
-        
+        $data['totalProducts'] = $productModel->countAllResults();
+        $data['userCount'] = $userModel->countAllResults();
+        $data['employeeCount'] = $employeeModel->where('status', 'active')->countAllResults();
+
         // 2. Stock Management
-        $data['itemsInStock']   = $productModel->selectSum('total_stock')->get()->getRow()->total_stock ?? 0;
+        $data['itemsInStock'] = $productModel->selectSum('total_stock')->get()->getRow()->total_stock ?? 0;
 
         // 3. Financial Totals (Current Year)
         $currentYear = date('Y');
         $data['totalSales'] = $invoiceModel->selectSum('total_amount')
-                                            ->where('status !=', 'Void')
-                                            ->where('status !=', 'Draft')
-                                            ->where('YEAR(invoice_date)', $currentYear)
-                                            ->get()->getRow()->total_amount ?? 0;
+            ->where('status !=', 'Void')
+            ->where('status !=', 'Draft')
+            ->where('YEAR(invoice_date)', $currentYear)
+            ->get()->getRow()->total_amount ?? 0;
 
         $data['totalPurchases'] = $billModel->selectSum('total_amount')
-                                            ->where('status !=', 'Void')
-                                            ->where('status !=', 'Draft')
-                                            ->where('YEAR(bill_date)', $currentYear)
-                                            ->get()->getRow()->total_amount ?? 0;
+            ->where('status !=', 'Void')
+            ->where('status !=', 'Draft')
+            ->where('YEAR(bill_date)', $currentYear)
+            ->get()->getRow()->total_amount ?? 0;
 
         // 4. Profit & Margins
         $data['totalProfit'] = $data['totalSales'] - $data['totalPurchases'];
@@ -47,8 +46,8 @@ class Home extends BaseController
 
         // 5. Agent Commissions
         $data['pendingCommissions'] = $invoiceModel->selectSum('agent_commission_amount')
-                                                   ->where('agent_commission_status', 'Unpaid')
-                                                   ->get()->getRow()->agent_commission_amount ?? 0;
+            ->where('agent_commission_status', 'Unpaid')
+            ->get()->getRow()->agent_commission_amount ?? 0;
 
         // 6. Monthly Trend Data (Last 6 Months)
         $months = [];
@@ -63,25 +62,25 @@ class Home extends BaseController
 
             // Sales per month
             $sTotal = $invoiceModel->selectSum('total_amount')
-                                       ->where("DATE_FORMAT(invoice_date, '%Y-%m')", $monthDay)
-                                       ->whereNotIn('status', ['Void', 'Draft'])
-                                       ->get()->getRow()->total_amount ?? 0;
-            $salesTrend[] = (float)$sTotal;
+                ->where("DATE_FORMAT(invoice_date, '%Y-%m')", $monthDay)
+                ->whereNotIn('status', ['Void', 'Draft'])
+                ->get()->getRow()->total_amount ?? 0;
+            $salesTrend[] = (float) $sTotal;
 
             // Purchases per month
             $pTotal = $billModel->selectSum('total_amount')
-                                         ->where("DATE_FORMAT(bill_date, '%Y-%m')", $monthDay)
-                                         ->whereNotIn('status', ['Void', 'Draft'])
-                                         ->get()->getRow()->total_amount ?? 0;
-            $purchaseTrend[] = (float)$pTotal;
+                ->where("DATE_FORMAT(bill_date, '%Y-%m')", $monthDay)
+                ->whereNotIn('status', ['Void', 'Draft'])
+                ->get()->getRow()->total_amount ?? 0;
+            $purchaseTrend[] = (float) $pTotal;
 
             // Profit per month
-            $profitTrend[] = (float)($sTotal - $pTotal);
+            $profitTrend[] = (float) ($sTotal - $pTotal);
 
             // Returns per month
             $returnCount = $returnModel->where("DATE_FORMAT(updated_at, '%Y-%m')", $monthDay)
-                                       ->where('status', 'rejected')
-                                       ->countAllResults();
+                ->where('status', 'rejected')
+                ->countAllResults();
             $returnTrend[] = $returnCount;
         }
 
@@ -122,10 +121,10 @@ class Home extends BaseController
             ->get()->getResultArray();
 
         // 7. Recent Lists
-        $data['recentInvoices'] = $invoiceModel->getInvoicesWithCustomer(); 
+        $data['recentInvoices'] = $invoiceModel->getInvoicesWithCustomer();
         $data['recentInvoices'] = array_slice($data['recentInvoices'], 0, 5);
 
-        $data['recentBills'] = $billModel->getBillsWithVendor(); 
+        $data['recentBills'] = $billModel->getBillsWithVendor();
         $data['recentBills'] = array_slice($data['recentBills'], 0, 5);
 
         // Refresh Notifications

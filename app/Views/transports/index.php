@@ -43,6 +43,7 @@
                             <th>ID</th>
                             <th>Transport Name</th>
                             <th>Code</th>
+                            <th>Type</th>
                             <th>Branch</th>
                             <th>Phone</th>
                             <th>GST</th>
@@ -55,6 +56,7 @@
                             <td><?= $transport['id'] ?></td>
                             <td><a href="<?= site_url('transports/view/'.$transport['id']) ?>" class="fw-bold text-dark"><?= $transport['transport_name'] ?></a></td>
                             <td><?= $transport['transport_code'] ?></td>
+                            <td><span class="badge bg-<?= ($transport['transport_type'] ?? 'Parcel Service') == 'Courier Service' ? 'primary' : 'info' ?>"><?= $transport['transport_type'] ?? 'Parcel Service' ?></span></td>
                             <td><?= $transport['branch'] ?></td>
                             <td><?= $transport['branch_phone_number'] ?></td>
                             <td><?= $transport['branch_gst_number'] ?></td>

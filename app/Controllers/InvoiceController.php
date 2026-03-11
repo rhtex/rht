@@ -767,10 +767,8 @@ class InvoiceController extends BaseController
                 'created_by' => session('user_id')
             ]);
 
-            // Also update delivery_status to Booked if it was Pending
-            if ($invoice['delivery_status'] == 'Pending' || empty($invoice['delivery_status'])) {
-                $this->invoiceModel->update($id, ['delivery_status' => 'Booked']);
-            }
+            // Update delivery_status to Booked
+            $this->invoiceModel->update($id, ['delivery_status' => 'Booked']);
 
             return redirect()->back()->with('success', 'Waybill information updated and expenses recorded successfully.');
         }

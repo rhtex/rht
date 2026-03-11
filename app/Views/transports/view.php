@@ -24,6 +24,9 @@
             <div class="card-body box-profile">
                 <h3 class="profile-username text-center"><?= esc($transport['transport_name']) ?></h3>
                 <p class="text-muted text-center"><?= esc($transport['transport_code']) ?></p>
+                <div class="text-center mb-3">
+                    <span class="badge bg-<?= ($transport['transport_type'] ?? 'Parcel Service') == 'Courier Service' ? 'primary' : 'info' ?>"><?= esc($transport['transport_type'] ?? 'Parcel Service') ?></span>
+                </div>
 
                 <ul class="list-group list-group-unbordered mb-3">
                     <li class="list-group-item">

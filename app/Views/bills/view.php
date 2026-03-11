@@ -20,6 +20,11 @@
         <div class="card-header">
             <h3 class="card-title">Bill Information</h3>
             <div class="card-tools">
+                <?php if ($bill['status'] == 'Draft'): ?>
+                    <a href="<?= site_url('bills/mark-open/' . $bill['id']) ?>" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to mark this bill as Open?');">
+                        <i class="fas fa-check-circle"></i> Mark as Open
+                    </a>
+                <?php endif; ?>
                 <?php if ($bill['status'] != 'Void' && $bill['status'] != 'Paid'): ?>
                     <a href="<?= site_url('bills/edit/' . $bill['id']) ?>" class="btn btn-sm btn-warning">
                         <i class="fas fa-edit"></i> Edit

@@ -258,6 +258,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('bills/view/(:num)', 'BillController::view/$1', ['filter' => 'permission:bill.view']);
     $routes->get('bills/edit/(:num)', 'BillController::edit/$1', ['filter' => 'permission:bill.edit']);
     $routes->post('bills/update/(:num)', 'BillController::update/$1', ['filter' => 'permission:bill.edit']);
+    $routes->get('bills/mark-open/(:num)', 'BillController::markAsOpen/$1', ['filter' => 'permission:bill.edit']);
     $routes->post('bills/void/(:num)', 'BillController::delete/$1', ['filter' => 'permission:bill.delete']);
     $routes->get('bills/payment/(:num)', 'BillController::recordPayment/$1', ['filter' => 'permission:bill.edit']);
     $routes->post('bills/payment/(:num)', 'BillController::storePayment/$1', ['filter' => 'permission:bill.edit']);

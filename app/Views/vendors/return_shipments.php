@@ -226,7 +226,8 @@ function openWaybillModal(data) {
 function openDeliveryModal(data) {
     const modal = new bootstrap.Modal(document.getElementById('deliveryModal'));
     $('#deliveryRef').text(data.reference_no);
-    $('#modalStatus').val(data.delivery_status || 'Pending');
+    const defaultStatus = data.delivery_status ? data.delivery_status.trim() : 'Pending';
+    $('#modalStatus').val(defaultStatus || 'Pending');
     
     $('#deliveryForm').attr('action', '<?= site_url('vendors/returns/shipments/update-status/') ?>' + data.id);
     modal.show();

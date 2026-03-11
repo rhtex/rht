@@ -315,7 +315,8 @@ function openWaybillModal(data) {
 function openDeliveryModal(data) {
     const modal = new bootstrap.Modal(document.getElementById('updateDeliveryModal'));
     document.getElementById('deliveryInvoiceNumber').textContent = data.invoice_number;
-    document.getElementById('modalDeliveryStatus').value = data.delivery_status || 'Pending';
+    const defaultStatus = data.delivery_status ? data.delivery_status.trim() : 'Pending';
+    document.getElementById('modalDeliveryStatus').value = defaultStatus || 'Pending';
     
     const delDateGroup = document.getElementById('deliveredDateGroup');
     const delStatusSelect = document.getElementById('modalDeliveryStatus');

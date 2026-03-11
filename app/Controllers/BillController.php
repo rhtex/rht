@@ -309,6 +309,25 @@ class BillController extends BaseController
         return redirect()->to('bills')->with('success', 'Bill voided successfully.');
     }
 
+    public function markAsOpen($id)
+    {
+        $bill = $this->billModel->find($id);
+        if (!$bill) {
+            return redirect()->to('bills')->with('error', 'Bill not found.');
+        }
+
+        if ($bill['status'] !== 'Draft') {
+            return redirect()->to('bills/view/' . $id)->with('error', 'Only Draft bills can be marked as Open.');
+        }
+
+        $this->billModel->update($id, [
+            'status' => 'Open',
+            'updated_by' => session('user_id')
+        ]);
+
+        return redirect()->to('bills/view/' . $id)->with('success', 'Bill marked as Open successfully.');
+    }
+
     public function recordPayment($billId)
     {
         $data['bill'] = $this->billModel->getBillById($billId);

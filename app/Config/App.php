@@ -16,7 +16,7 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-    public string $baseURL = 'http://localhost/rasidev/';
+    public string $baseURL = 'http://localhost';
 
     public string $siteName = 'RHT-SYSTEM';
 

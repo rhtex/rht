@@ -34,21 +34,6 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a href="<?= site_url('notifications') ?>" class="nav-link">
-                        <i class="nav-icon fas fa-bell text-warning"></i>
-                        <p>
-                            Notifications
-                            <?php 
-                                $notifModel = new \App\Models\NotificationModel();
-                                $unreadCount = count($notifModel->getUnread());
-                                if($unreadCount > 0): 
-                            ?>
-                                <span class="badge bg-danger float-end"><?= $unreadCount ?></span>
-                            <?php endif; ?>
-                        </p>
-                    </a>
-                </li>
 
                 <li class="nav-item">
                     <a href="<?= site_url('calendar') ?>" class="nav-link <?= $segment1 == 'calendar' ? 'active' : '' ?>">

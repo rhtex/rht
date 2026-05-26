@@ -16,19 +16,6 @@
         <!-- Start Navbar Links -->
         <ul class="navbar-nav ms-auto">
             <!-- User Menu Dropdown -->
-                <!-- Notifications Dropdown -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="<?= site_url('notifications') ?>">
-                        <i class="fas fa-bell"></i>
-                        <?php 
-                            $notifModel = new \App\Models\NotificationModel();
-                            $unreadCount = count($notifModel->getUnread());
-                            if($unreadCount > 0): 
-                        ?>
-                            <span class="badge bg-danger rounded-pill" style="font-size: 10px; position: absolute; top: 5px; right: 5px;"><?= $unreadCount ?></span>
-                        <?php endif; ?>
-                    </a>
-                </li>
 
                 <!-- Language Dropdown -->
                 <li class="nav-item dropdown">

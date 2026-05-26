@@ -169,29 +169,6 @@
 <?= $this->section('content') ?>
 <div class="dashboard-container">
 
-    <?php
-    $notifModel = new \App\Models\NotificationModel();
-    $unreadNotifs = $notifModel->getUnread();
-    if (!empty($unreadNotifs)):
-        ?>
-        <div class="alert border-0 shadow-sm d-flex align-items-center mb-3 animate__animated animate__shakeX"
-            style="background: #fff5f5; border-left: 5px solid #ff4d4d !important; border-radius: 12px;">
-            <div class="flex-shrink-0 me-3">
-                <div class="bg-danger bg-opacity-10 p-2 rounded-circle">
-                    <i class="fas fa-bolt text-danger"></i>
-                </div>
-            </div>
-            <div class="flex-grow-1">
-                <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.9rem;">Attention Required:
-                    <?= count($unreadNotifs) ?> Active Alerts
-                </h6>
-                <p class="mb-0 smaller text-muted"><?= esc($unreadNotifs[0]['message']) ?> ... <a
-                        href="<?= site_url('notifications') ?>" class="fw-bold text-danger text-decoration-none ms-1">View
-                        All Center</a></p>
-            </div>
-            <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
 
     <!-- Pulse Row -->
     <div class="row compact-row mb-2">

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 24, 2026 at 02:16 AM
+-- Generation Time: May 26, 2026 at 03:00 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -1949,52 +1949,6 @@ INSERT INTO `modules` (`id`, `module_name`, `module_slug`, `status`, `created_at
 -- --------------------------------------------------------
 
 --
--- Table structure for table `notifications`
---
-
-CREATE TABLE `notifications` (
-  `id` int(11) NOT NULL,
-  `type` varchar(50) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `message` text NOT NULL,
-  `link` varchar(255) DEFAULT NULL,
-  `reference_id` int(11) DEFAULT NULL,
-  `is_read` tinyint(1) DEFAULT 0,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `notifications`
---
-
-INSERT INTO `notifications` (`id`, `type`, `title`, `message`, `link`, `reference_id`, `is_read`, `created_at`, `updated_at`) VALUES
-(1, 'low_stock', 'Low Stock Alert', 'Product \'KASAVU KERALA SAREE GOLD\' is low in stock (0 units left).', 'products/view/1', 1, 1, '2026-01-27 07:52:38', '2026-01-28 06:35:59'),
-(2, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0002 is waiting for Transport LR (Waybill) update.', 'invoices/edit/2', 2, 1, '2026-01-27 07:52:38', '2026-01-28 06:35:59'),
-(3, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-28 05:12:11', '2026-01-28 05:12:32'),
-(4, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-28 05:12:33', '2026-01-28 06:35:59'),
-(5, 'low_stock', 'Low Stock Alert', 'Product \'KASAVU KERALA SAREE GOLD\' is low in stock (0 units left).', 'products/view/1', 1, 1, '2026-01-28 06:35:59', '2026-01-28 06:36:02'),
-(6, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-28 06:35:59', '2026-01-28 06:36:02'),
-(7, 'low_stock', 'Low Stock Alert', 'Product \'KASAVU KERALA SAREE GOLD\' is low in stock (0 units left).', 'products/view/1', 1, 1, '2026-01-28 06:36:02', '2026-01-30 10:26:36'),
-(8, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-28 06:36:02', '2026-01-30 10:22:40'),
-(9, 'reminder', 'Reminder: dfazdf', 'zdfAVSd', 'calendar', 1, 1, '2026-01-30 10:16:30', '2026-01-30 10:26:28'),
-(10, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-30 10:22:40', '2026-01-30 10:26:36'),
-(11, 'low_stock', 'Low Stock Alert', 'Product \'KASAVU KERALA SAREE GOLD\' is low in stock (0 units left).', 'products/view/1', 1, 1, '2026-01-30 10:26:36', '2026-02-23 15:23:43'),
-(12, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-30 10:26:36', '2026-01-30 12:38:23'),
-(13, 'low_stock', 'Low Stock Alert', 'Product \'Plain Neli Border\' is low in stock (0 units left).', 'products/view/2', 2, 1, '2026-01-30 11:26:49', '2026-02-23 15:23:43'),
-(14, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-30 12:38:24', '2026-01-30 12:38:26'),
-(15, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202601-0004 is waiting for Transport LR (Waybill) update.', 'invoices/edit/4', 4, 1, '2026-01-30 12:38:27', '2026-02-23 15:23:43'),
-(16, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202602-0001 is waiting for Transport LR (Waybill) update.', 'invoices/edit/5', 5, 1, '2026-02-01 08:30:01', '2026-02-23 15:23:43'),
-(17, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202602-0002 is waiting for Transport LR (Waybill) update.', 'invoices/edit/6', 6, 1, '2026-02-01 09:12:38', '2026-02-23 15:23:43'),
-(18, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202602-0001 is waiting for Transport LR (Waybill) update.', 'invoices/edit/9', 9, 1, '2026-02-23 15:23:28', '2026-02-23 15:23:43'),
-(19, 'low_stock', 'Low Stock Alert', 'Product \'KASAVU KERALA SAREE GOLD\' is low in stock (0 units left).', 'products/view/1', 1, 1, '2026-02-23 15:23:44', '2026-02-23 15:23:55'),
-(21, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202602-0001 is waiting for Transport LR (Waybill) update.', 'invoices/edit/9', 9, 1, '2026-02-23 15:23:44', '2026-02-23 15:43:18'),
-(23, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202602-0001 is waiting for Transport LR (Waybill) update.', 'invoices/edit/9', 9, 1, '2026-02-23 15:43:18', '2026-02-23 15:46:44'),
-(24, 'lr_update', 'Transport LR Missing', 'Invoice #INV-202602-0001 is waiting for Transport LR (Waybill) update.', 'invoices/edit/9', 9, 0, '2026-02-23 15:46:45', '2026-02-23 15:46:45');
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `payments`
 --
 
@@ -3055,7 +3009,7 @@ CREATE TABLE `zoho_settings` (
 --
 
 INSERT INTO `zoho_settings` (`id`, `client_id`, `client_secret`, `refresh_token`, `organization_id`, `access_token`, `token_expires_at`, `api_base_url`, `accounts_url`, `updated_at`) VALUES
-(1, '1000.NN5YO26HD1FNEAVGWDJPZ6URDWD56P', '336cd1abbe33ba652a86269a2fbd70abb159a0951c', '1000.636a7d3566eb7ab7ea4dcb1c07687cf0.224cae4ce87e06ed53270d05a847445a', '648833159', '1000.2caa117c4564da97cfad345bd8cbfd46.c555e2765a05291aead2c574797e680e', '2026-02-23 16:19:29', 'https://www.zohoapis.com/books/v3', 'https://accounts.zoho.com/oauth/v2/token', '2026-02-23 15:19:29');
+(1, '1000.NN5YO26HD1FNEAVGWDJPZ6URDWD56P', '336cd1abbe33ba652a86269a2fbd70abb159a0951c', '1000.636a7d3566eb7ab7ea4dcb1c07687cf0.224cae4ce87e06ed53270d05a847445a', '648833159', '1000.b10af30ffd0aec781385553398623871.306e9328809bba5bd6a1b7f78af323f1', '2026-05-26 13:05:59', 'https://www.zohoapis.com/books/v3', 'https://accounts.zoho.com/oauth/v2/token', '2026-05-26 12:05:59');
 
 --
 -- Indexes for dumped tables
@@ -3247,12 +3201,6 @@ ALTER TABLE `migrations`
 ALTER TABLE `modules`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `module_slug` (`module_slug`);
-
---
--- Indexes for table `notifications`
---
-ALTER TABLE `notifications`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `payments`
@@ -3602,12 +3550,6 @@ ALTER TABLE `migrations`
 --
 ALTER TABLE `modules`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
-
---
--- AUTO_INCREMENT for table `notifications`
---
-ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `payments`

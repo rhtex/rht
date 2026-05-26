@@ -76,6 +76,14 @@
     </div>
 </div>
 
+<div class="mb-3">
+    <a href="<?= base_url('sample_customer.csv') ?>" class="btn btn-link"><i class="bi bi-download"></i> Download Sample CSV</a>
+</div>
+<div class="mb-3">
+    <a href="<?= site_url('bulk-upload/form') ?>" class="btn btn-primary">
+        <i class="fas fa-upload"></i> Bulk Upload Customers
+    </a>
+</div>
 <div class="card card-outline card-primary">
     <div class="card-header">
         <h3 class="card-title">List of Customers</h3>

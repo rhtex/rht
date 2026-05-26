@@ -127,8 +127,6 @@ class Home extends BaseController
         $data['recentBills'] = $billModel->getBillsWithVendor();
         $data['recentBills'] = array_slice($data['recentBills'], 0, 5);
 
-        // Refresh Notifications
-        \App\Libraries\Notifier::refresh();
 
         return view('dashboard/index', $data);
     }

@@ -3,17 +3,13 @@
 namespace App\Controllers;
 
 use App\Models\CalendarReminderModel;
-use App\Models\NotificationModel;
-
 class CalendarController extends BaseController
 {
     protected $reminderModel;
-    protected $notificationModel;
 
     public function __construct()
     {
         $this->reminderModel = new CalendarReminderModel();
-        $this->notificationModel = new NotificationModel();
     }
 
     /**
@@ -137,15 +133,6 @@ class CalendarController extends BaseController
 
         $notifiedCount = 0;
         foreach ($dueReminders as $reminder) {
-            $this->notificationModel->insert([
-                'type' => 'reminder',
-                'title' => 'Reminder: ' . $reminder['title'],
-                'message' => $reminder['description'] ?? 'No description provided.',
-                'link' => 'calendar',
-                'reference_id' => $reminder['id'],
-                'is_read' => 0
-            ]);
-
             $this->reminderModel->update($reminder['id'], ['is_notified' => 1]);
             $notifiedCount++;
         }

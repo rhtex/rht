@@ -27,6 +27,16 @@ class WeaverController extends BaseController
         return view('production/weavers/index', $data);
     }
 
+    public function view($id)
+    {
+        $data['weaver'] = $this->weaverModel->find($id);
+        if (!$data['weaver']) {
+            return redirect()->to('production/weavers')->with('error', 'Weaver not found.');
+        }
+        $data['title'] = 'Weaver Details';
+        return view('production/weavers/view', $data);
+    }
+
     public function create()
     {
         $data['title'] = 'Add New Weaver';
@@ -40,6 +50,15 @@ class WeaverController extends BaseController
         }
 
         $data = $this->request->getPost();
+        
+        // Handle address proof upload
+        $file = $this->request->getFile('address_proof');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/weavers', $newName);
+            $data['address_proof'] = 'uploads/weavers/' . $newName;
+        }
+
         $data['created_by'] = session('user_id');
 
         $this->weaverModel->save($data);
@@ -58,11 +77,31 @@ class WeaverController extends BaseController
 
     public function update($id)
     {
-        if (!$this->validate($this->weaverModel->getValidationRules())) {
+        $rules = $this->weaverModel->getValidationRules();
+        if (isset($rules['code'])) {
+            $rules['code'] = str_replace('{id}', $id, $rules['code']);
+        }
+
+        if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $data = $this->request->getPost();
+        
+        // Handle address proof upload
+        $file = $this->request->getFile('address_proof');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            // Delete old file if exists
+            $weaver = $this->weaverModel->find($id);
+            if (!empty($weaver['address_proof']) && file_exists(FCPATH . $weaver['address_proof'])) {
+                @unlink(FCPATH . $weaver['address_proof']);
+            }
+            
+            $newName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/weavers', $newName);
+            $data['address_proof'] = 'uploads/weavers/' . $newName;
+        }
+
         $data['updated_by'] = session('user_id');
 
         $this->weaverModel->update($id, $data);

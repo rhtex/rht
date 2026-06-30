@@ -4,16 +4,16 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class WeaverModel extends Model
+class ProductionAgreementModel extends Model
 {
-    protected $table            = 'weavers';
+    protected $table            = 'production_agreements';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'name', 'code', 'phone', 'address', 'address_proof', 'location', 'status', 'created_by', 'updated_by'
+        'title', 'party_name', 'description', 'start_date', 'end_date', 'agreement_file', 'status', 'created_by', 'updated_by'
     ];
 
     protected $useTimestamps = true;
@@ -23,27 +23,28 @@ class WeaverModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'name'   => 'required|min_length[3]|max_length[100]',
-        'code'   => 'permit_empty|is_unique[weavers.code,id,{id}]',
-        'phone'  => 'permit_empty|min_length[10]',
-        'status' => 'in_list[active,inactive]',
+        'title'      => 'required|min_length[3]|max_length[255]',
+        'party_name' => 'required|min_length[3]|max_length[255]',
+        'status'     => 'in_list[active,expired,terminated]',
+        'start_date' => 'permit_empty|valid_date',
+        'end_date'   => 'permit_empty|valid_date',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
     /**
-     * Get weavers with filters
+     * Get agreements with filters
      */
-    public function getWeaversWithFilters($filters = [])
+    public function getAgreementsWithFilters($filters = [])
     {
         $builder = $this->builder();
 
         if (!empty($filters['search'])) {
             $builder->groupStart()
-                    ->like('name', $filters['search'])
-                    ->orLike('code', $filters['search'])
-                    ->orLike('phone', $filters['search'])
+                    ->like('title', $filters['search'])
+                    ->orLike('party_name', $filters['search'])
+                    ->orLike('description', $filters['search'])
                     ->groupEnd();
         }
 
@@ -51,6 +52,6 @@ class WeaverModel extends Model
             $builder->where('status', $filters['status']);
         }
 
-        return $builder->orderBy('name', 'ASC')->get()->getResultArray();
+        return $builder->orderBy('title', 'ASC')->get()->getResultArray();
     }
 }

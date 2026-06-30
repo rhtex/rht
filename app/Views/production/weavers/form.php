@@ -15,7 +15,7 @@
 
 <?= $this->section('content') ?>
 <div class="card card-outline card-primary">
-    <form action="<?= isset($weaver) ? site_url('production/weavers/update/'.$weaver['id']) : site_url('production/weavers/store') ?>" method="post">
+    <form action="<?= isset($weaver) ? site_url('production/weavers/update/'.$weaver['id']) : site_url('production/weavers/store') ?>" method="post" enctype="multipart/form-data">
         <?= csrf_field() ?>
         <div class="card-body">
             <?php if (session()->has('errors')) : ?>
@@ -47,6 +47,19 @@
                         <option value="active" <?= (old('status', $weaver['status'] ?? '') === 'active') ? 'selected' : '' ?>>Active</option>
                         <option value="inactive" <?= (old('status', $weaver['status'] ?? '') === 'inactive') ? 'selected' : '' ?>>Inactive</option>
                     </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Location (Optional)</label>
+                    <input type="text" name="location" class="form-control" value="<?= old('location', $weaver['location'] ?? '') ?>">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Address Proof</label>
+                    <input type="file" name="address_proof" class="form-control">
+                    <?php if (!empty($weaver['address_proof'])) : ?>
+                        <div class="mt-2">
+                            <a href="<?= base_url($weaver['address_proof']) ?>" target="_blank" class="btn btn-xs btn-outline-info"><i class="fas fa-eye"></i> View Current Proof</a>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div class="col-md-12 mb-3">
                     <label class="form-label">Address</label>

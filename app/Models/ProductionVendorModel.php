@@ -4,16 +4,16 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class WeaverModel extends Model
+class ProductionVendorModel extends Model
 {
-    protected $table            = 'weavers';
+    protected $table            = 'production_vendors';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'name', 'code', 'phone', 'address', 'address_proof', 'location', 'status', 'created_by', 'updated_by'
+        'name', 'business_type', 'gst_number', 'pan_number', 'phone', 'address', 'location', 'status', 'created_by', 'updated_by'
     ];
 
     protected $useTimestamps = true;
@@ -23,26 +23,29 @@ class WeaverModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'name'   => 'required|min_length[3]|max_length[100]',
-        'code'   => 'permit_empty|is_unique[weavers.code,id,{id}]',
-        'phone'  => 'permit_empty|min_length[10]',
-        'status' => 'in_list[active,inactive]',
+        'name'          => 'required|min_length[3]|max_length[100]',
+        'business_type' => 'permit_empty|max_length[100]',
+        'gst_number'    => 'permit_empty|min_length[15]|max_length[15]|is_unique[production_vendors.gst_number,id,{id}]',
+        'pan_number'    => 'permit_empty|min_length[10]|max_length[10]',
+        'phone'         => 'permit_empty',
+        'status'        => 'in_list[active,inactive]',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
     /**
-     * Get weavers with filters
+     * Get vendors with filters
      */
-    public function getWeaversWithFilters($filters = [])
+    public function getVendorsWithFilters($filters = [])
     {
         $builder = $this->builder();
 
         if (!empty($filters['search'])) {
             $builder->groupStart()
                     ->like('name', $filters['search'])
-                    ->orLike('code', $filters['search'])
+                    ->orLike('gst_number', $filters['search'])
+                    ->orLike('pan_number', $filters['search'])
                     ->orLike('phone', $filters['search'])
                     ->groupEnd();
         }

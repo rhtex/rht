@@ -4,16 +4,16 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class WeaverModel extends Model
+class ProductionYarnModel extends Model
 {
-    protected $table            = 'weavers';
+    protected $table            = 'production_yarns';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'name', 'code', 'phone', 'address', 'address_proof', 'location', 'status', 'created_by', 'updated_by'
+        'name', 'yarn_count', 'yarn_type', 'color', 'brand', 'stock_kg', 'status', 'created_by', 'updated_by'
     ];
 
     protected $useTimestamps = true;
@@ -23,28 +23,36 @@ class WeaverModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'name'   => 'required|min_length[3]|max_length[100]',
-        'code'   => 'permit_empty|is_unique[weavers.code,id,{id}]',
-        'phone'  => 'permit_empty|min_length[10]',
-        'status' => 'in_list[active,inactive]',
+        'name'       => 'required|min_length[3]|max_length[255]',
+        'yarn_count' => 'required|max_length[50]',
+        'yarn_type'  => 'required|in_list[Dyed,Raw]',
+        'color'      => 'permit_empty|max_length[100]',
+        'brand'      => 'permit_empty|max_length[100]',
+        'stock_kg'   => 'required|numeric|greater_than_equal_to[0]',
+        'status'     => 'in_list[active,inactive]',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
     /**
-     * Get weavers with filters
+     * Get yarns with filters
      */
-    public function getWeaversWithFilters($filters = [])
+    public function getYarnsWithFilters($filters = [])
     {
         $builder = $this->builder();
 
         if (!empty($filters['search'])) {
             $builder->groupStart()
                     ->like('name', $filters['search'])
-                    ->orLike('code', $filters['search'])
-                    ->orLike('phone', $filters['search'])
+                    ->orLike('yarn_count', $filters['search'])
+                    ->orLike('color', $filters['search'])
+                    ->orLike('brand', $filters['search'])
                     ->groupEnd();
+        }
+
+        if (!empty($filters['yarn_type'])) {
+            $builder->where('yarn_type', $filters['yarn_type']);
         }
 
         if (!empty($filters['status'])) {

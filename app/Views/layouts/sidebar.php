@@ -282,6 +282,80 @@
                                 <p>Weavers</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="<?= site_url('production/vendors') ?>" class="nav-link">
+                                <i class="nav-icon fas fa-truck-loading text-success"></i>
+                                <p>Job Work Vendors</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= site_url('production/agreements') ?>" class="nav-link">
+                                <i class="nav-icon fas fa-file-signature text-warning"></i>
+                                <p>Agreements</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= site_url('production/yarn-purchases') ?>" class="nav-link">
+                                <i class="nav-icon fas fa-shopping-cart text-info"></i>
+                                <p>Yarn Purchases</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= site_url('production/yarn-inventory') ?>" class="nav-link">
+                                <i class="nav-icon fas fa-warehouse text-info"></i>
+                                <p>Yarn Inventory</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= site_url('production/yarn-beams') ?>" class="nav-link <?= strpos(current_url(), 'production/yarn-beams') !== false ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-ring text-info"></i>
+                                <p>Beam Tracker</p>
+                            </a>
+                        </li>
+                        <?php
+                            $isYarnJobWorkActive = in_array($segment2, ['yarn-job-work', 'yarn-dyeing', 'yarn-warping-sizing', 'yarn-twisting', 'yarn-weaving']);
+                        ?>
+                        <li class="nav-item <?= $isYarnJobWorkActive ? 'menu-open' : '' ?>">
+                            <a href="#" class="nav-link <?= $isYarnJobWorkActive ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-tasks text-info"></i>
+                                <p>
+                                    Yarn Job Work
+                                    <i class="nav-arrow fas fa-angle-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview" style="padding-left: 15px;">
+                                <li class="nav-item">
+                                    <a href="<?= site_url('production/yarn-dyeing') ?>" class="nav-link <?= $segment2 === 'yarn-dyeing' ? 'active' : '' ?>">
+                                        <i class="far fa-circle text-primary nav-icon"></i>
+                                        <p>Dyeing Challans</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="<?= site_url('production/yarn-warping-sizing') ?>" class="nav-link <?= $segment2 === 'yarn-warping-sizing' ? 'active' : '' ?>">
+                                        <i class="far fa-circle text-info nav-icon"></i>
+                                        <p>Warping & Sizing</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="<?= site_url('production/yarn-twisting') ?>" class="nav-link <?= $segment2 === 'yarn-twisting' ? 'active' : '' ?>">
+                                        <i class="far fa-circle text-warning nav-icon"></i>
+                                        <p>Twisting Challans</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="<?= site_url('production/yarn-weaving') ?>" class="nav-link <?= $segment2 === 'yarn-weaving' ? 'active' : '' ?>">
+                                        <i class="far fa-circle text-danger nav-icon"></i>
+                                        <p>Weaving Challans</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= site_url('production/yarn-reports') ?>" class="nav-link">
+                                <i class="nav-icon fas fa-chart-line text-info"></i>
+                                <p>Yarn Reports</p>
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 <?php endif; ?>

@@ -436,11 +436,131 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 
     // Production (Weavers)
     $routes->get('production/weavers', 'WeaverController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/weavers/view/(:num)', 'WeaverController::view/$1', ['filter' => 'permission:weaver.view']);
     $routes->get('production/weavers/create', 'WeaverController::create', ['filter' => 'permission:weaver.create']);
     $routes->post('production/weavers/store', 'WeaverController::store', ['filter' => 'permission:weaver.create']);
     $routes->get('production/weavers/edit/(:num)', 'WeaverController::edit/$1', ['filter' => 'permission:weaver.edit']);
     $routes->post('production/weavers/update/(:num)', 'WeaverController::update/$1', ['filter' => 'permission:weaver.edit']);
     $routes->get('production/weavers/delete/(:num)', 'WeaverController::delete/$1', ['filter' => 'permission:weaver.delete']);
+
+    // Production (Job Work Vendors)
+    $routes->get('production/vendors', 'ProductionVendorController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/vendors/view/(:num)', 'ProductionVendorController::view/$1', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/vendors/create', 'ProductionVendorController::create', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/vendors/store', 'ProductionVendorController::store', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/vendors/edit/(:num)', 'ProductionVendorController::edit/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/vendors/update/(:num)', 'ProductionVendorController::update/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->get('production/vendors/delete/(:num)', 'ProductionVendorController::delete/$1', ['filter' => 'permission:weaver.delete']);
+
+    // Production (Agreements)
+    $routes->get('production/agreements', 'ProductionAgreementController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/agreements/view/(:num)', 'ProductionAgreementController::view/$1', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/agreements/create', 'ProductionAgreementController::create', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/agreements/store', 'ProductionAgreementController::store', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/agreements/edit/(:num)', 'ProductionAgreementController::edit/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/agreements/update/(:num)', 'ProductionAgreementController::update/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->get('production/agreements/delete/(:num)', 'ProductionAgreementController::delete/$1', ['filter' => 'permission:weaver.delete']);
+
+    // Production (Yarn Master)
+    $routes->get('production/yarns/master', 'ProductionYarnController::masterIndex', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarns/master/create', 'ProductionYarnController::masterCreate', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarns/master/store', 'ProductionYarnController::masterStore', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarns/master/edit/(:num)', 'ProductionYarnController::masterEdit/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/yarns/master/update/(:num)', 'ProductionYarnController::masterUpdate/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->get('production/yarns/master/delete/(:num)', 'ProductionYarnController::masterDelete/$1', ['filter' => 'permission:weaver.delete']);
+
+    // Production (Yarns)
+    $routes->get('production/yarns', 'ProductionYarnController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarns/view/(:num)', 'ProductionYarnController::view/$1', ['filter' => 'permission:weaver.view']);
+
+    // Production (Yarn Purchases)
+    $routes->get('production/yarn-purchases', 'YarnPurchaseController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-purchases/view/(:num)', 'YarnPurchaseController::view/$1', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-purchases/create', 'YarnPurchaseController::create', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-purchases/store', 'YarnPurchaseController::store', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-purchases/edit/(:num)', 'YarnPurchaseController::edit/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-purchases/update/(:num)', 'YarnPurchaseController::update/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-purchases/delete/(:num)', 'YarnPurchaseController::delete/$1', ['filter' => 'permission:weaver.delete']);
+
+    // Production (Yarn Inventory)
+    $routes->get('production/yarn-inventory', 'YarnInventoryController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-inventory/history', 'YarnInventoryController::history', ['filter' => 'permission:weaver.view']);
+
+    // Production (Yarn Job Work)
+    $routes->get('production/yarn-job-work', 'YarnJobWorkController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-job-work/create', 'YarnJobWorkController::create', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-job-work/store', 'YarnJobWorkController::store', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-job-work/view/(:num)', 'YarnJobWorkController::view/$1', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-job-work/edit/(:num)', 'YarnJobWorkController::edit/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-job-work/update/(:num)', 'YarnJobWorkController::update/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-job-work/delete/(:num)', 'YarnJobWorkController::delete/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-job-work/receipt/(:num)', 'YarnJobWorkController::receiptCreate/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-job-work/receipt-store/(:num)', 'YarnJobWorkController::receiptStore/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-job-work/receipt-delete/(:num)', 'YarnJobWorkController::receiptDelete/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-job-work/receipt-edit/(:num)', 'YarnJobWorkController::receiptEdit/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-job-work/receipt-update/(:num)', 'YarnJobWorkController::receiptUpdate/$1', ['filter' => 'permission:weaver.create']);
+
+    // Production (Yarn Dyeing)
+    $routes->get('production/yarn-dyeing', 'YarnDyeingController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-dyeing/create', 'YarnDyeingController::create', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-dyeing/store', 'YarnDyeingController::store', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-dyeing/view/(:num)', 'YarnDyeingController::view/$1', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-dyeing/edit/(:num)', 'YarnDyeingController::edit/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-dyeing/update/(:num)', 'YarnDyeingController::update/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-dyeing/delete/(:num)', 'YarnDyeingController::delete/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-dyeing/receipt-create/(:num)', 'YarnDyeingController::receiptCreate/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-dyeing/receipt-store/(:num)', 'YarnDyeingController::receiptStore/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-dyeing/receipt-delete/(:num)', 'YarnDyeingController::receiptDelete/$1', ['filter' => 'permission:weaver.create']);
+
+    // Production (Yarn Warping & Sizing)
+    $routes->get('production/yarn-warping-sizing', 'YarnWarpingSizingController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-warping-sizing/create', 'YarnWarpingSizingController::create', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-warping-sizing/store', 'YarnWarpingSizingController::store', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-warping-sizing/view/(:num)', 'YarnWarpingSizingController::view/$1', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-warping-sizing/edit/(:num)', 'YarnWarpingSizingController::edit/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-warping-sizing/update/(:num)', 'YarnWarpingSizingController::update/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-warping-sizing/delete/(:num)', 'YarnWarpingSizingController::delete/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-warping-sizing/receipt-create/(:num)', 'YarnWarpingSizingController::receiptCreate/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-warping-sizing/receipt-store/(:num)', 'YarnWarpingSizingController::receiptStore/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-warping-sizing/receipt-delete/(:num)', 'YarnWarpingSizingController::receiptDelete/$1', ['filter' => 'permission:weaver.create']);
+
+    // Production (Yarn Twisting)
+    $routes->get('production/yarn-twisting', 'YarnTwistingController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-twisting/create', 'YarnTwistingController::create', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-twisting/store', 'YarnTwistingController::store', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-twisting/view/(:num)', 'YarnTwistingController::view/$1', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-twisting/edit/(:num)', 'YarnTwistingController::edit/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-twisting/update/(:num)', 'YarnTwistingController::update/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-twisting/delete/(:num)', 'YarnTwistingController::delete/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-twisting/receipt-create/(:num)', 'YarnTwistingController::receiptCreate/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-twisting/receipt-store/(:num)', 'YarnTwistingController::receiptStore/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-twisting/receipt-delete/(:num)', 'YarnTwistingController::receiptDelete/$1', ['filter' => 'permission:weaver.create']);
+
+    // Production (Yarn Weaving)
+    $routes->get('production/yarn-weaving', 'YarnWeavingController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-weaving/create', 'YarnWeavingController::create', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-weaving/store', 'YarnWeavingController::store', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-weaving/view/(:num)', 'YarnWeavingController::view/$1', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarn-weaving/edit/(:num)', 'YarnWeavingController::edit/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-weaving/update/(:num)', 'YarnWeavingController::update/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-weaving/delete/(:num)', 'YarnWeavingController::delete/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-weaving/receipt-create/(:num)', 'YarnWeavingController::receiptCreate/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-weaving/receipt-store/(:num)', 'YarnWeavingController::receiptStore/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-weaving/receipt-delete/(:num)', 'YarnWeavingController::receiptDelete/$1', ['filter' => 'permission:weaver.create']);
+
+    // Production (Yarn Beams)
+    $routes->get('production/yarn-beams', 'YarnBeamController::index', ['filter' => 'permission:weaver.view']);
+    $routes->post('production/yarn-beams/store', 'YarnBeamController::store', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-beams/ledger/(:num)', 'YarnBeamController::ledger/$1', ['filter' => 'permission:weaver.view']);
+    $routes->post('production/yarn-beams/update-condition/(:num)', 'YarnBeamController::updateCondition/$1', ['filter' => 'permission:weaver.create']);
+
+    // Production (Yarn Reports)
+    $routes->get('production/yarn-reports', 'YarnReportController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/yarns/create', 'ProductionYarnController::create', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarns/store', 'ProductionYarnController::store', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarns/edit/(:num)', 'ProductionYarnController::edit/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/yarns/update/(:num)', 'ProductionYarnController::update/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->get('production/yarns/delete/(:num)', 'ProductionYarnController::delete/$1', ['filter' => 'permission:weaver.delete']);
 
     // Bills
     $routes->get('bills', 'BillController::index', ['filter' => 'permission:bill.view']);

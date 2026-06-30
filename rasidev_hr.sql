@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 26, 2026 at 03:00 PM
+-- Generation Time: Jun 30, 2026 at 03:41 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -975,6 +975,15 @@ CREATE TABLE `bills` (
   `updated_at` datetime DEFAULT NULL,
   `is_inter_state` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `bills`
+--
+
+INSERT INTO `bills` (`id`, `vendor_id`, `bill_number`, `zoho_bill_id`, `zoho_sync_status`, `bill_date`, `due_date`, `reference_number`, `status`, `subtotal`, `discount_amount`, `discount_type`, `shipping_charge`, `roundoff_amount`, `cgst_amount`, `sgst_amount`, `igst_amount`, `tax_amount`, `total_amount`, `paid_amount`, `balance`, `notes`, `terms`, `created_by`, `updated_by`, `zoho_sync_at`, `created_at`, `updated_at`, `is_inter_state`) VALUES
+(2, 10, '27', '698964000007121125', 'Synced', '2026-06-25', '2026-06-25', '', 'Overdue', 0.00, 0.00, 'Amount', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 37275.00, 0.00, 37275.00, NULL, NULL, NULL, NULL, '2026-06-30 03:09:46', '2026-06-30 03:09:46', '2026-06-30 03:09:46', 0),
+(3, 54, '26', '698964000007121108', 'Synced', '2026-06-17', '2026-06-17', '', 'Paid', 0.00, 0.00, 'Amount', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 52605.00, 0.00, 0.00, NULL, NULL, NULL, NULL, '2026-06-30 03:09:46', '2026-06-30 03:09:46', '2026-06-30 03:09:46', 0),
+(4, 22, '28', '698964000007121090', 'Synced', '2026-06-19', '2026-06-19', '', 'Overdue', 0.00, 0.00, 'Amount', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 95351.00, 0.00, 95351.00, NULL, NULL, NULL, NULL, '2026-06-30 03:09:46', '2026-06-30 03:09:46', '2026-06-30 03:09:46', 0);
 
 -- --------------------------------------------------------
 
@@ -2127,6 +2136,852 @@ INSERT INTO `permissions` (`id`, `permission_key`, `permission_name`, `module_id
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `production_agreements`
+--
+
+CREATE TABLE `production_agreements` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `party_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `agreement_file` varchar(255) DEFAULT NULL,
+  `status` enum('active','expired','terminated') DEFAULT 'active',
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_agreements`
+--
+
+INSERT INTO `production_agreements` (`id`, `title`, `party_name`, `description`, `start_date`, `end_date`, `agreement_file`, `status`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(1, 'Weaver Contract', 'Rasi Handloom Textiles Rasipuram', 'sdfgasdfgvasd', '2026-06-19', '2026-06-30', 'uploads/agreements/1782788806_1835a7f0fd3f27a61e65.pdf', 'active', 1, 1, '2026-06-30 03:05:29', '2026-06-30 03:06:46');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_beams`
+--
+
+CREATE TABLE `production_beams` (
+  `id` int(11) NOT NULL,
+  `beam_number` varchar(100) NOT NULL,
+  `status` enum('Empty','Loaded') NOT NULL DEFAULT 'Empty',
+  `condition_status` enum('Active','Damaged') NOT NULL DEFAULT 'Active',
+  `damaged_date` date DEFAULT NULL,
+  `location` enum('In-House','At Job Work','At Weaving') NOT NULL DEFAULT 'In-House',
+  `current_holder` varchar(255) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `production_beams`
+--
+
+INSERT INTO `production_beams` (`id`, `beam_number`, `status`, `condition_status`, `damaged_date`, `location`, `current_holder`, `remarks`, `created_at`, `updated_at`) VALUES
+(1, 'BM-101', 'Empty', 'Active', NULL, 'At Job Work', 'Jhanvi', NULL, '2026-06-30 12:11:43', '2026-06-30 07:29:36'),
+(2, 'BM-102', 'Empty', 'Active', NULL, 'At Job Work', 'VR SIZING', NULL, '2026-06-30 12:11:43', '2026-06-30 07:27:56'),
+(3, 'BM-103', 'Empty', 'Active', NULL, 'In-House', NULL, NULL, '2026-06-30 12:11:43', '2026-06-30 12:11:43'),
+(4, 'BM-104', 'Empty', 'Active', NULL, 'In-House', NULL, NULL, '2026-06-30 12:11:43', '2026-06-30 12:11:43'),
+(5, 'BM-105', 'Empty', 'Active', NULL, 'In-House', NULL, NULL, '2026-06-30 12:11:43', '2026-06-30 12:11:43'),
+(6, 'BM-106', 'Empty', 'Active', NULL, 'In-House', NULL, NULL, '2026-06-30 12:11:43', '2026-06-30 12:11:43'),
+(7, 'BM-107', 'Empty', 'Active', NULL, 'In-House', NULL, NULL, '2026-06-30 12:11:43', '2026-06-30 12:11:43'),
+(8, 'BM-108', 'Empty', 'Active', NULL, 'In-House', NULL, NULL, '2026-06-30 12:11:43', '2026-06-30 12:11:43'),
+(9, 'BM-109', 'Empty', 'Active', NULL, 'In-House', NULL, NULL, '2026-06-30 12:11:43', '2026-06-30 12:11:43'),
+(10, 'BM-110', 'Empty', 'Active', NULL, 'At Job Work', 'VR SIZING', NULL, '2026-06-30 12:11:43', '2026-06-30 07:27:56');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_beam_ledger`
+--
+
+CREATE TABLE `production_beam_ledger` (
+  `id` int(11) NOT NULL,
+  `beam_id` int(11) NOT NULL,
+  `transaction_date` date NOT NULL,
+  `transaction_type` enum('Issue_Warping_Sizing','Receipt_Warping_Sizing','Issue_Weaving','Receipt_Weaving','Manual_Adjustment') NOT NULL,
+  `reference_id` int(11) DEFAULT NULL,
+  `from_location` varchar(255) NOT NULL,
+  `to_location` varchar(255) NOT NULL,
+  `status_from` enum('Empty','Loaded') NOT NULL,
+  `status_to` enum('Empty','Loaded') NOT NULL,
+  `yarn_details` varchar(255) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `production_beam_ledger`
+--
+
+INSERT INTO `production_beam_ledger` (`id`, `beam_id`, `transaction_date`, `transaction_type`, `reference_id`, `from_location`, `to_location`, `status_from`, `status_to`, `yarn_details`, `remarks`, `created_by`, `created_at`) VALUES
+(6, 10, '2026-06-30', 'Issue_Warping_Sizing', 5, 'In-House', 'VR SIZING', 'Empty', 'Empty', NULL, 'Sent empty for warping & sizing on DC DC-YARN-1002', 1, '2026-06-30 12:57:56'),
+(7, 2, '2026-06-30', 'Issue_Warping_Sizing', 5, 'In-House', 'VR SIZING', 'Empty', 'Empty', NULL, 'Sent empty for warping & sizing on DC DC-YARN-1002', 1, '2026-06-30 12:57:56'),
+(8, 1, '2026-06-30', 'Issue_Warping_Sizing', 6, 'In-House', 'Jhanvi', 'Empty', 'Empty', NULL, 'Sent empty for warping & sizing on DC DC-YARN-1003', 1, '2026-06-30 12:59:36');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_vendors`
+--
+
+CREATE TABLE `production_vendors` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `business_type` varchar(100) DEFAULT NULL,
+  `gst_number` varchar(15) DEFAULT NULL,
+  `pan_number` varchar(10) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_vendors`
+--
+
+INSERT INTO `production_vendors` (`id`, `name`, `business_type`, `gst_number`, `pan_number`, `phone`, `address`, `location`, `status`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(1, 'Rasi Handloom Textiles Rasipuram', 'Proprietorship', '33FOPPS7926B1ZK', 'FOPPS7926B', '09865073006', '2/9, KUNDUKALLAR THOTTAM', 'https://maps.google.com', 'active', 1, NULL, '2026-06-30 02:55:26', '2026-06-30 02:55:26');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarns`
+--
+
+CREATE TABLE `production_yarns` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `yarn_count` varchar(50) NOT NULL,
+  `yarn_type` enum('Dyed','Raw') NOT NULL,
+  `color` varchar(100) DEFAULT NULL,
+  `brand` varchar(100) DEFAULT NULL,
+  `stock_kg` decimal(12,2) DEFAULT 0.00,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_dyeing_dcs`
+--
+
+CREATE TABLE `production_yarn_dyeing_dcs` (
+  `id` int(11) NOT NULL,
+  `dc_number` varchar(50) NOT NULL,
+  `dc_date` date NOT NULL,
+  `vendor_name` varchar(255) NOT NULL,
+  `expected_return_date` date DEFAULT NULL,
+  `vehicle_details` varchar(255) DEFAULT NULL,
+  `status` enum('Open','Partially Received','Completed','Cancelled') DEFAULT 'Open',
+  `remarks` text DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_dyeing_dcs`
+--
+
+INSERT INTO `production_yarn_dyeing_dcs` (`id`, `dc_number`, `dc_date`, `vendor_name`, `expected_return_date`, `vehicle_details`, `status`, `remarks`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(1, 'DC-YARN-1001', '2026-06-30', 'Jhanvi', '2026-06-30', '', 'Completed', '0', 1, 1, '2026-06-30 11:08:26', '2026-06-30 11:56:32');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_dyeing_dc_items`
+--
+
+CREATE TABLE `production_yarn_dyeing_dc_items` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `mill_name` varchar(255) NOT NULL,
+  `yarn_count` varchar(50) NOT NULL,
+  `warp_weft` varchar(50) NOT NULL,
+  `csp` varchar(50) DEFAULT NULL,
+  `lot_number` varchar(50) DEFAULT NULL,
+  `yarn_type` varchar(50) NOT NULL,
+  `current_color` varchar(50) NOT NULL,
+  `required_color` varchar(50) DEFAULT NULL,
+  `quantity_issued_kg` decimal(10,2) NOT NULL,
+  `quantity_received_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `quantity_wastage_kg` decimal(10,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_dyeing_dc_items`
+--
+
+INSERT INTO `production_yarn_dyeing_dc_items` (`id`, `dc_id`, `mill_name`, `yarn_count`, `warp_weft`, `csp`, `lot_number`, `yarn_type`, `current_color`, `required_color`, `quantity_issued_kg`, `quantity_received_kg`, `quantity_wastage_kg`) VALUES
+(2, 1, 'SAMBANDAM', '80', 'Warp', '3200', 'LOT50', 'Raw', 'Raw', '0', 50.00, 40.00, 10.00),
+(3, 1, 'SAMBANDAM', '80', 'Warp', '3200', 'LOT50', 'Raw', 'Raw', '0', 45.00, 35.00, 10.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_dyeing_receipts`
+--
+
+CREATE TABLE `production_yarn_dyeing_receipts` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `receipt_number` varchar(50) NOT NULL,
+  `receipt_date` date NOT NULL,
+  `transport_charges` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `loading_charges` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `packing_charges` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `other_expenses` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `remarks` text DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_dyeing_receipts`
+--
+
+INSERT INTO `production_yarn_dyeing_receipts` (`id`, `dc_id`, `receipt_number`, `receipt_date`, `transport_charges`, `loading_charges`, `packing_charges`, `other_expenses`, `remarks`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(10, 1, 'REC-YARN-1001', '2026-06-30', 150.00, 100.00, 10.00, 10.00, '', 1, NULL, NULL, NULL),
+(11, 1, 'REC-YARN-1002', '2026-06-30', 0.00, 0.00, 0.00, 0.00, '', 1, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_dyeing_receipt_items`
+--
+
+CREATE TABLE `production_yarn_dyeing_receipt_items` (
+  `id` int(11) NOT NULL,
+  `receipt_id` int(11) NOT NULL,
+  `dc_item_id` int(11) NOT NULL,
+  `received_color` varchar(50) NOT NULL,
+  `quantity_received_kg` decimal(10,2) NOT NULL,
+  `quantity_wastage_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `quantity_shortage_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `quantity_excess_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `job_work_charges` decimal(10,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_dyeing_receipt_items`
+--
+
+INSERT INTO `production_yarn_dyeing_receipt_items` (`id`, `receipt_id`, `dc_item_id`, `received_color`, `quantity_received_kg`, `quantity_wastage_kg`, `quantity_shortage_kg`, `quantity_excess_kg`, `job_work_charges`) VALUES
+(24, 11, 2, '0', 30.00, 0.00, 0.00, 0.00, 160.00),
+(25, 11, 3, '0', 25.00, 0.00, 0.00, 0.00, 140.00),
+(26, 10, 2, '0', 10.00, 10.00, 0.00, 0.00, 150.00),
+(27, 10, 3, '0', 10.00, 10.00, 0.00, 0.00, 100.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_job_work_dcs`
+--
+
+CREATE TABLE `production_yarn_job_work_dcs` (
+  `id` int(11) NOT NULL,
+  `dc_number` varchar(50) NOT NULL,
+  `dc_date` date NOT NULL,
+  `vendor_name` varchar(255) NOT NULL,
+  `job_work_type` enum('Dyeing','Warping & Sizing','Warping','Sizing','Twisting','Weaving') NOT NULL,
+  `expected_return_date` date DEFAULT NULL,
+  `vehicle_details` varchar(255) DEFAULT NULL,
+  `status` enum('Open','Partially Received','Completed','Cancelled') DEFAULT 'Open',
+  `remarks` text DEFAULT NULL,
+  `design_pattern` varchar(255) DEFAULT NULL,
+  `total_ends` int(11) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_job_work_dcs`
+--
+
+INSERT INTO `production_yarn_job_work_dcs` (`id`, `dc_number`, `dc_date`, `vendor_name`, `job_work_type`, `expected_return_date`, `vehicle_details`, `status`, `remarks`, `design_pattern`, `total_ends`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(1, 'DC-YARN-1001', '2026-06-30', 'Jhanvi', 'Dyeing', '2026-06-30', '', 'Completed', '', NULL, NULL, 1, 1, '2026-06-30 11:08:26', '2026-06-30 11:56:32'),
+(5, 'DC-YARN-1002', '2026-06-30', 'VR SIZING', 'Warping & Sizing', '2026-06-18', 'TN28BY9140', 'Open', '', NULL, 3700, 1, NULL, '2026-06-30 12:57:56', '2026-06-30 12:57:56'),
+(6, 'DC-YARN-1003', '2026-06-30', 'Jhanvi', 'Warping & Sizing', NULL, 'TN28BY9140', 'Open', '', '3inch Border ', 3700, 1, NULL, '2026-06-30 12:59:36', '2026-06-30 12:59:36');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_job_work_dc_beams`
+--
+
+CREATE TABLE `production_yarn_job_work_dc_beams` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `receipt_id` int(11) DEFAULT NULL,
+  `returned_status` enum('Loaded','Empty','Not Returned') DEFAULT NULL,
+  `meters` decimal(10,2) DEFAULT NULL,
+  `sizing_no` varchar(100) DEFAULT NULL,
+  `color` varchar(100) DEFAULT NULL,
+  `return_date` date DEFAULT NULL,
+  `beam_number` varchar(100) NOT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `production_yarn_job_work_dc_beams`
+--
+
+INSERT INTO `production_yarn_job_work_dc_beams` (`id`, `dc_id`, `receipt_id`, `returned_status`, `meters`, `sizing_no`, `color`, `return_date`, `beam_number`, `remarks`, `created_at`) VALUES
+(6, 5, NULL, NULL, NULL, NULL, NULL, NULL, 'BM-110', '', '2026-06-30 12:57:56'),
+(7, 5, NULL, NULL, NULL, NULL, NULL, NULL, 'BM-102', '', '2026-06-30 12:57:56'),
+(8, 6, NULL, NULL, NULL, NULL, NULL, NULL, 'BM-101', '', '2026-06-30 12:59:36');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_job_work_dc_color_ends`
+--
+
+CREATE TABLE `production_yarn_job_work_dc_color_ends` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `color` varchar(100) NOT NULL,
+  `ends_count` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `production_yarn_job_work_dc_color_ends`
+--
+
+INSERT INTO `production_yarn_job_work_dc_color_ends` (`id`, `dc_id`, `color`, `ends_count`, `created_at`) VALUES
+(7, 5, 'Green', 450, '2026-06-30 12:57:56'),
+(8, 5, 'Royal Blue', 2800, '2026-06-30 12:57:56'),
+(9, 5, 'Green', 450, '2026-06-30 12:57:56'),
+(10, 6, 'Raw', 3700, '2026-06-30 12:59:36');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_job_work_dc_items`
+--
+
+CREATE TABLE `production_yarn_job_work_dc_items` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `mill_name` varchar(255) NOT NULL,
+  `yarn_count` varchar(50) NOT NULL,
+  `warp_weft` enum('Warp','Weft') NOT NULL,
+  `csp` varchar(50) DEFAULT NULL,
+  `lot_number` varchar(100) DEFAULT NULL,
+  `yarn_type` enum('Raw','Dyed') NOT NULL,
+  `current_color` varchar(100) DEFAULT NULL,
+  `required_color` varchar(100) DEFAULT NULL,
+  `quantity_issued_kg` decimal(12,2) NOT NULL,
+  `quantity_received_kg` decimal(12,2) DEFAULT 0.00,
+  `quantity_wastage_kg` decimal(12,2) DEFAULT 0.00,
+  `quantity_returned_kg` decimal(10,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_job_work_dc_items`
+--
+
+INSERT INTO `production_yarn_job_work_dc_items` (`id`, `dc_id`, `mill_name`, `yarn_count`, `warp_weft`, `csp`, `lot_number`, `yarn_type`, `current_color`, `required_color`, `quantity_issued_kg`, `quantity_received_kg`, `quantity_wastage_kg`, `quantity_returned_kg`) VALUES
+(2, 1, 'SAMBANDAM', '80', 'Warp', '3200', 'LOT50', 'Raw', 'Raw', 'Royal Blue', 50.00, 40.00, 10.00, 0.00),
+(3, 1, 'SAMBANDAM', '80', 'Warp', '3200', 'LOT50', 'Raw', 'Raw', 'Green', 45.00, 35.00, 10.00, 0.00),
+(5, 5, 'SAMBANDAM', '80', 'Warp', '3200', 'GJ1230', 'Dyed', 'Green', NULL, 15.00, 0.00, 0.00, 0.00),
+(6, 5, 'SAMBANDAM', '80', 'Warp', '3200', 'HJ2331', 'Dyed', 'Royal Blue', NULL, 20.00, 0.00, 0.00, 0.00),
+(7, 6, 'SAMBANDAM', '80', 'Warp', '3200', 'LOT50', 'Raw', 'Raw', NULL, 15.00, 0.00, 0.00, 0.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_job_work_receipts`
+--
+
+CREATE TABLE `production_yarn_job_work_receipts` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `receipt_number` varchar(50) NOT NULL,
+  `receipt_date` date NOT NULL,
+  `transport_charges` decimal(12,2) DEFAULT 0.00,
+  `loading_charges` decimal(12,2) DEFAULT 0.00,
+  `packing_charges` decimal(12,2) DEFAULT 0.00,
+  `other_expenses` decimal(12,2) DEFAULT 0.00,
+  `remarks` text DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_job_work_receipts`
+--
+
+INSERT INTO `production_yarn_job_work_receipts` (`id`, `dc_id`, `receipt_number`, `receipt_date`, `transport_charges`, `loading_charges`, `packing_charges`, `other_expenses`, `remarks`, `created_by`, `created_at`) VALUES
+(10, 1, 'REC-YARN-1001', '2026-06-30', 150.00, 100.00, 10.00, 10.00, '', 1, NULL),
+(11, 1, 'REC-YARN-1002', '2026-06-30', 0.00, 0.00, 0.00, 0.00, '', 1, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_job_work_receipt_items`
+--
+
+CREATE TABLE `production_yarn_job_work_receipt_items` (
+  `id` int(11) NOT NULL,
+  `receipt_id` int(11) NOT NULL,
+  `dc_item_id` int(11) NOT NULL,
+  `received_color` varchar(100) DEFAULT NULL,
+  `quantity_received_kg` decimal(12,2) NOT NULL,
+  `quantity_wastage_kg` decimal(12,2) DEFAULT 0.00,
+  `quantity_returned_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `quantity_shortage_kg` decimal(12,2) DEFAULT 0.00,
+  `quantity_excess_kg` decimal(12,2) DEFAULT 0.00,
+  `job_work_charges` decimal(12,2) DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_job_work_receipt_items`
+--
+
+INSERT INTO `production_yarn_job_work_receipt_items` (`id`, `receipt_id`, `dc_item_id`, `received_color`, `quantity_received_kg`, `quantity_wastage_kg`, `quantity_returned_kg`, `quantity_shortage_kg`, `quantity_excess_kg`, `job_work_charges`) VALUES
+(24, 11, 2, 'Royal Blue', 30.00, 0.00, 0.00, 0.00, 0.00, 160.00),
+(25, 11, 3, 'Green', 25.00, 0.00, 0.00, 0.00, 0.00, 140.00),
+(26, 10, 2, 'Royal Blue', 10.00, 10.00, 0.00, 0.00, 0.00, 150.00),
+(27, 10, 3, 'Green', 10.00, 10.00, 0.00, 0.00, 0.00, 100.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_master`
+--
+
+CREATE TABLE `production_yarn_master` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `yarn_type` enum('Dyed','Raw') NOT NULL,
+  `yarn_count` varchar(50) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_master`
+--
+
+INSERT INTO `production_yarn_master` (`id`, `name`, `yarn_type`, `yarn_count`, `created_at`, `updated_at`) VALUES
+(2, 'Cotton 60s', 'Raw', '60s', '2026-06-30 08:47:19', NULL),
+(3, 'Cotton 80s', 'Raw', '80s', '2026-06-30 08:47:19', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_purchases`
+--
+
+CREATE TABLE `production_yarn_purchases` (
+  `id` int(11) NOT NULL,
+  `purchase_date` date NOT NULL,
+  `supplier` varchar(255) NOT NULL,
+  `invoice_number` varchar(100) NOT NULL,
+  `mill_name` varchar(255) NOT NULL,
+  `yarn_count` varchar(50) NOT NULL,
+  `material_type` varchar(100) NOT NULL,
+  `warp_weft` enum('Warp','Weft') NOT NULL,
+  `csp` varchar(50) DEFAULT NULL,
+  `lot_number` varchar(100) DEFAULT NULL,
+  `number_bags` int(11) DEFAULT 0,
+  `total_weight_kg` decimal(12,2) DEFAULT 0.00,
+  `rate_per_kg` decimal(12,2) DEFAULT 0.00,
+  `gst_percent` decimal(5,2) DEFAULT 0.00,
+  `transport_charges` decimal(12,2) DEFAULT 0.00,
+  `other_charges` decimal(12,2) DEFAULT 0.00,
+  `warehouse_location` varchar(255) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_purchases`
+--
+
+INSERT INTO `production_yarn_purchases` (`id`, `purchase_date`, `supplier`, `invoice_number`, `mill_name`, `yarn_count`, `material_type`, `warp_weft`, `csp`, `lot_number`, `number_bags`, `total_weight_kg`, `rate_per_kg`, `gst_percent`, `transport_charges`, `other_charges`, `warehouse_location`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(1, '2026-06-30', 'Gowtham', '1234', 'SAMBANDAM', '80', 'Cotton Yarn', 'Warp', '3200', 'LOT50', 3, 150.00, 430.00, 5.00, 1500.00, 150.00, 'Main Warehouse', 1, 1, '2026-06-30 10:50:12', '2026-06-30 10:55:58');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_stock_movements`
+--
+
+CREATE TABLE `production_yarn_stock_movements` (
+  `id` int(11) NOT NULL,
+  `yarn_name` varchar(255) NOT NULL,
+  `yarn_count` varchar(50) NOT NULL,
+  `yarn_type` enum('Raw','Dyed') NOT NULL,
+  `color` varchar(100) DEFAULT NULL,
+  `brand_mill` varchar(255) DEFAULT NULL,
+  `lot_number` varchar(100) DEFAULT NULL,
+  `csp` varchar(50) DEFAULT NULL,
+  `warp_weft` enum('Warp','Weft') NOT NULL,
+  `quantity_kg` decimal(12,2) NOT NULL,
+  `cost_per_kg` decimal(12,2) NOT NULL,
+  `warehouse` varchar(255) DEFAULT NULL,
+  `movement_type` enum('Purchase','Issue_Job_Work','Receipt_Job_Work','Adjustment','Return') NOT NULL,
+  `reference_id` int(11) DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_stock_movements`
+--
+
+INSERT INTO `production_yarn_stock_movements` (`id`, `yarn_name`, `yarn_count`, `yarn_type`, `color`, `brand_mill`, `lot_number`, `csp`, `warp_weft`, `quantity_kg`, `cost_per_kg`, `warehouse`, `movement_type`, `reference_id`, `remarks`, `created_by`, `created_at`) VALUES
+(3, 'Cotton Yarn', '80', 'Raw', 'Raw', 'SAMBANDAM', 'LOT50', '3200', 'Warp', 150.00, 441.00, 'Main Warehouse', 'Purchase', 1, 'Updated Yarn purchase. Supplier: Gowtham, Invoice: 1234', 1, '2026-06-30 10:55:58'),
+(6, 'Yarn (80)', '80', 'Raw', 'Raw', 'SAMBANDAM', 'LOT50', '3200', 'Warp', -50.00, 441.00, 'Main Warehouse', 'Issue_Job_Work', 1, 'Issued for Dyeing to Jhanvi (DC: DC-YARN-1001)', 1, '2026-06-30 11:27:27'),
+(7, 'Yarn (80)', '80', 'Raw', 'Raw', 'SAMBANDAM', 'LOT50', '3200', 'Warp', -45.00, 441.00, 'Main Warehouse', 'Issue_Job_Work', 1, 'Issued for Dyeing to Jhanvi (DC: DC-YARN-1001)', 1, '2026-06-30 11:27:27'),
+(30, 'Yarn (80)', '80', 'Dyed', 'Royal Blue', 'SAMBANDAM', 'HJ2331', '3200', 'Warp', 30.00, 601.00, 'Main Warehouse', 'Receipt_Job_Work', 11, 'Received from Jhanvi against DC-YARN-1001 (Color: Royal Blue, Receipt: REC-YARN-1002)', 1, '2026-06-30 11:56:10'),
+(31, 'Yarn (80)', '80', 'Dyed', 'Green', 'SAMBANDAM', 'GJ1230', '3200', 'Warp', 25.00, 581.00, 'Main Warehouse', 'Receipt_Job_Work', 11, 'Received from Jhanvi against DC-YARN-1001 (Color: Green, Receipt: REC-YARN-1002)', 1, '2026-06-30 11:56:10'),
+(32, 'Yarn (80)', '80', 'Dyed', 'Royal Blue', 'SAMBANDAM', 'HJ2331q', '3200', 'Warp', 10.00, 604.50, 'Main Warehouse', 'Receipt_Job_Work', 10, 'Received from Jhanvi against DC-YARN-1001 (Color: Royal Blue, Receipt: REC-YARN-1001) [Updated]', 1, '2026-06-30 11:56:32'),
+(33, 'Yarn (80)', '80', 'Dyed', 'Green', 'SAMBANDAM', 'GJ12301', '3200', 'Warp', 10.00, 554.50, 'Main Warehouse', 'Receipt_Job_Work', 10, 'Received from Jhanvi against DC-YARN-1001 (Color: Green, Receipt: REC-YARN-1001) [Updated]', 1, '2026-06-30 11:56:32'),
+(35, 'Yarn (80)', '80', 'Dyed', 'Green', 'SAMBANDAM', 'GJ1230', '3200', 'Warp', -15.00, 581.00, 'Main Warehouse', 'Issue_Job_Work', 5, 'Issued for Warping & Sizing to VR SIZING (DC: DC-YARN-1002)', 1, '2026-06-30 12:57:56'),
+(36, 'Yarn (80)', '80', 'Dyed', 'Royal Blue', 'SAMBANDAM', 'HJ2331', '3200', 'Warp', -20.00, 601.00, 'Main Warehouse', 'Issue_Job_Work', 5, 'Issued for Warping & Sizing to VR SIZING (DC: DC-YARN-1002)', 1, '2026-06-30 12:57:56'),
+(37, 'Yarn (80)', '80', 'Raw', 'Raw', 'SAMBANDAM', 'LOT50', '3200', 'Warp', -15.00, 441.00, 'Main Warehouse', 'Issue_Job_Work', 6, 'Issued for Warping & Sizing to Jhanvi (DC: DC-YARN-1003)', 1, '2026-06-30 12:59:36');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_twisting_dcs`
+--
+
+CREATE TABLE `production_yarn_twisting_dcs` (
+  `id` int(11) NOT NULL,
+  `dc_number` varchar(50) NOT NULL,
+  `dc_date` date NOT NULL,
+  `vendor_name` varchar(255) NOT NULL,
+  `expected_return_date` date DEFAULT NULL,
+  `vehicle_details` varchar(255) DEFAULT NULL,
+  `status` enum('Open','Partially Received','Completed','Cancelled') DEFAULT 'Open',
+  `remarks` text DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_twisting_dc_items`
+--
+
+CREATE TABLE `production_yarn_twisting_dc_items` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `mill_name` varchar(255) NOT NULL,
+  `yarn_count` varchar(50) NOT NULL,
+  `warp_weft` varchar(50) NOT NULL,
+  `csp` varchar(50) DEFAULT NULL,
+  `lot_number` varchar(50) DEFAULT NULL,
+  `yarn_type` varchar(50) NOT NULL,
+  `current_color` varchar(50) NOT NULL,
+  `quantity_issued_kg` decimal(10,2) NOT NULL,
+  `quantity_received_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `quantity_wastage_kg` decimal(10,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_twisting_receipts`
+--
+
+CREATE TABLE `production_yarn_twisting_receipts` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `receipt_number` varchar(50) NOT NULL,
+  `receipt_date` date NOT NULL,
+  `transport_charges` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `loading_charges` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `packing_charges` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `other_expenses` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `remarks` text DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_twisting_receipt_items`
+--
+
+CREATE TABLE `production_yarn_twisting_receipt_items` (
+  `id` int(11) NOT NULL,
+  `receipt_id` int(11) NOT NULL,
+  `dc_item_id` int(11) NOT NULL,
+  `quantity_received_kg` decimal(10,2) NOT NULL,
+  `quantity_wastage_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `job_work_charges` decimal(10,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_warping_sizing_dcs`
+--
+
+CREATE TABLE `production_yarn_warping_sizing_dcs` (
+  `id` int(11) NOT NULL,
+  `dc_number` varchar(50) NOT NULL,
+  `dc_date` date NOT NULL,
+  `vendor_name` varchar(255) NOT NULL,
+  `expected_return_date` date DEFAULT NULL,
+  `vehicle_details` varchar(255) DEFAULT NULL,
+  `status` enum('Open','Partially Received','Completed','Cancelled') DEFAULT 'Open',
+  `remarks` text DEFAULT NULL,
+  `design_pattern` varchar(255) DEFAULT NULL,
+  `total_ends` int(11) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_warping_sizing_dcs`
+--
+
+INSERT INTO `production_yarn_warping_sizing_dcs` (`id`, `dc_number`, `dc_date`, `vendor_name`, `expected_return_date`, `vehicle_details`, `status`, `remarks`, `design_pattern`, `total_ends`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(5, 'DC-YARN-1002', '2026-06-30', 'VR SIZING', '2026-06-18', 'TN28BY9140', 'Open', '0', NULL, 3700, 1, NULL, '2026-06-30 12:57:56', '2026-06-30 12:57:56'),
+(6, 'DC-YARN-1003', '2026-06-30', 'Jhanvi', NULL, 'TN28BY9140', 'Open', '0', '3inch Border ', 3700, 1, NULL, '2026-06-30 12:59:36', '2026-06-30 12:59:36');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_warping_sizing_dc_beams`
+--
+
+CREATE TABLE `production_yarn_warping_sizing_dc_beams` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `receipt_id` int(11) DEFAULT NULL,
+  `returned_status` enum('Loaded','Empty','Not Returned') DEFAULT NULL,
+  `meters` decimal(10,2) DEFAULT NULL,
+  `sizing_no` varchar(100) DEFAULT NULL,
+  `color` varchar(100) DEFAULT NULL,
+  `return_date` date DEFAULT NULL,
+  `beam_number` varchar(100) NOT NULL,
+  `remarks` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_warping_sizing_dc_beams`
+--
+
+INSERT INTO `production_yarn_warping_sizing_dc_beams` (`id`, `dc_id`, `receipt_id`, `returned_status`, `meters`, `sizing_no`, `color`, `return_date`, `beam_number`, `remarks`) VALUES
+(1, 5, NULL, NULL, NULL, NULL, NULL, NULL, 'BM-110', ''),
+(2, 5, NULL, NULL, NULL, NULL, NULL, NULL, 'BM-102', ''),
+(4, 6, NULL, NULL, NULL, NULL, NULL, NULL, 'BM-101', '');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_warping_sizing_dc_color_ends`
+--
+
+CREATE TABLE `production_yarn_warping_sizing_dc_color_ends` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `color` varchar(100) NOT NULL,
+  `ends_count` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_warping_sizing_dc_color_ends`
+--
+
+INSERT INTO `production_yarn_warping_sizing_dc_color_ends` (`id`, `dc_id`, `color`, `ends_count`) VALUES
+(1, 5, 'Green', 450),
+(2, 5, 'Royal Blue', 2800),
+(3, 5, 'Green', 450),
+(4, 6, 'Raw', 3700);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_warping_sizing_dc_items`
+--
+
+CREATE TABLE `production_yarn_warping_sizing_dc_items` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `mill_name` varchar(255) NOT NULL,
+  `yarn_count` varchar(50) NOT NULL,
+  `warp_weft` varchar(50) NOT NULL,
+  `csp` varchar(50) DEFAULT NULL,
+  `lot_number` varchar(50) DEFAULT NULL,
+  `yarn_type` varchar(50) NOT NULL,
+  `current_color` varchar(50) NOT NULL,
+  `quantity_issued_kg` decimal(10,2) NOT NULL,
+  `quantity_received_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `quantity_wastage_kg` decimal(10,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_warping_sizing_dc_items`
+--
+
+INSERT INTO `production_yarn_warping_sizing_dc_items` (`id`, `dc_id`, `mill_name`, `yarn_count`, `warp_weft`, `csp`, `lot_number`, `yarn_type`, `current_color`, `quantity_issued_kg`, `quantity_received_kg`, `quantity_wastage_kg`) VALUES
+(5, 5, 'SAMBANDAM', '80', 'Warp', '3200', 'GJ1230', 'Dyed', 'Green', 15.00, 0.00, 0.00),
+(6, 5, 'SAMBANDAM', '80', 'Warp', '3200', 'HJ2331', 'Dyed', 'Royal Blue', 20.00, 0.00, 0.00),
+(7, 6, 'SAMBANDAM', '80', 'Warp', '3200', 'LOT50', 'Raw', 'Raw', 15.00, 0.00, 0.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_warping_sizing_receipts`
+--
+
+CREATE TABLE `production_yarn_warping_sizing_receipts` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `receipt_number` varchar(50) NOT NULL,
+  `receipt_date` date NOT NULL,
+  `transport_charges` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `loading_charges` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `packing_charges` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `other_expenses` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `remarks` text DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_warping_sizing_receipt_items`
+--
+
+CREATE TABLE `production_yarn_warping_sizing_receipt_items` (
+  `id` int(11) NOT NULL,
+  `receipt_id` int(11) NOT NULL,
+  `dc_item_id` int(11) NOT NULL,
+  `quantity_received_kg` decimal(10,2) NOT NULL,
+  `quantity_wastage_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `job_work_charges` decimal(10,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_weaving_dcs`
+--
+
+CREATE TABLE `production_yarn_weaving_dcs` (
+  `id` int(11) NOT NULL,
+  `dc_number` varchar(50) NOT NULL,
+  `dc_date` date NOT NULL,
+  `vendor_name` varchar(255) NOT NULL,
+  `expected_return_date` date DEFAULT NULL,
+  `vehicle_details` varchar(255) DEFAULT NULL,
+  `status` enum('Open','Partially Received','Completed','Cancelled') DEFAULT 'Open',
+  `remarks` text DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_weaving_dc_items`
+--
+
+CREATE TABLE `production_yarn_weaving_dc_items` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `mill_name` varchar(255) NOT NULL,
+  `yarn_count` varchar(50) NOT NULL,
+  `warp_weft` varchar(50) NOT NULL,
+  `csp` varchar(50) DEFAULT NULL,
+  `lot_number` varchar(50) DEFAULT NULL,
+  `yarn_type` varchar(50) NOT NULL,
+  `current_color` varchar(50) NOT NULL,
+  `quantity_issued_kg` decimal(10,2) NOT NULL,
+  `quantity_received_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `quantity_wastage_kg` decimal(10,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_weaving_receipts`
+--
+
+CREATE TABLE `production_yarn_weaving_receipts` (
+  `id` int(11) NOT NULL,
+  `dc_id` int(11) NOT NULL,
+  `receipt_number` varchar(50) NOT NULL,
+  `receipt_date` date NOT NULL,
+  `transport_charges` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `loading_charges` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `packing_charges` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `other_expenses` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `remarks` text DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_yarn_weaving_receipt_items`
+--
+
+CREATE TABLE `production_yarn_weaving_receipt_items` (
+  `id` int(11) NOT NULL,
+  `receipt_id` int(11) NOT NULL,
+  `dc_item_id` int(11) NOT NULL,
+  `quantity_received_kg` decimal(10,2) NOT NULL,
+  `quantity_wastage_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `job_work_charges` decimal(10,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `products`
 --
 
@@ -2978,12 +3833,21 @@ CREATE TABLE `weavers` (
   `code` varchar(50) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `address` text DEFAULT NULL,
+  `address_proof` varchar(255) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
   `status` enum('active','inactive') DEFAULT 'active',
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_by` int(11) DEFAULT NULL,
   `updated_by` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `weavers`
+--
+
+INSERT INTO `weavers` (`id`, `name`, `code`, `phone`, `address`, `address_proof`, `location`, `status`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+(1, 'Rasi Handloom Textiles Rasipuram', '', '09865073006', '2/9, KUNDUKALLAR THOTTAM', NULL, 'rtsdrfgsh', 'active', '2026-06-30 02:42:26', '2026-06-30 03:06:23', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -3009,7 +3873,7 @@ CREATE TABLE `zoho_settings` (
 --
 
 INSERT INTO `zoho_settings` (`id`, `client_id`, `client_secret`, `refresh_token`, `organization_id`, `access_token`, `token_expires_at`, `api_base_url`, `accounts_url`, `updated_at`) VALUES
-(1, '1000.NN5YO26HD1FNEAVGWDJPZ6URDWD56P', '336cd1abbe33ba652a86269a2fbd70abb159a0951c', '1000.636a7d3566eb7ab7ea4dcb1c07687cf0.224cae4ce87e06ed53270d05a847445a', '648833159', '1000.b10af30ffd0aec781385553398623871.306e9328809bba5bd6a1b7f78af323f1', '2026-05-26 13:05:59', 'https://www.zohoapis.com/books/v3', 'https://accounts.zoho.com/oauth/v2/token', '2026-05-26 12:05:59');
+(1, '1000.NN5YO26HD1FNEAVGWDJPZ6URDWD56P', '336cd1abbe33ba652a86269a2fbd70abb159a0951c', '1000.636a7d3566eb7ab7ea4dcb1c07687cf0.224cae4ce87e06ed53270d05a847445a', '648833159', '1000.2ebe19b1cebc54f96ae57bc18446c37b.4c5a5c3292a34999c9d9b89ee20eff6c', '2026-06-30 03:59:43', 'https://www.zohoapis.com/books/v3', 'https://accounts.zoho.com/oauth/v2/token', '2026-06-30 02:59:43');
 
 --
 -- Indexes for dumped tables
@@ -3221,6 +4085,234 @@ ALTER TABLE `payments`
 ALTER TABLE `permissions`
   ADD PRIMARY KEY (`id`),
   ADD KEY `permissions_module_id_foreign` (`module_id`);
+
+--
+-- Indexes for table `production_agreements`
+--
+ALTER TABLE `production_agreements`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `production_beams`
+--
+ALTER TABLE `production_beams`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `beam_number` (`beam_number`);
+
+--
+-- Indexes for table `production_beam_ledger`
+--
+ALTER TABLE `production_beam_ledger`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `beam_id` (`beam_id`);
+
+--
+-- Indexes for table `production_vendors`
+--
+ALTER TABLE `production_vendors`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `production_yarns`
+--
+ALTER TABLE `production_yarns`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `production_yarn_dyeing_dcs`
+--
+ALTER TABLE `production_yarn_dyeing_dcs`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `dc_number` (`dc_number`);
+
+--
+-- Indexes for table `production_yarn_dyeing_dc_items`
+--
+ALTER TABLE `production_yarn_dyeing_dc_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_dyeing_receipts`
+--
+ALTER TABLE `production_yarn_dyeing_receipts`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `receipt_number` (`receipt_number`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_dyeing_receipt_items`
+--
+ALTER TABLE `production_yarn_dyeing_receipt_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `receipt_id` (`receipt_id`),
+  ADD KEY `dc_item_id` (`dc_item_id`);
+
+--
+-- Indexes for table `production_yarn_job_work_dcs`
+--
+ALTER TABLE `production_yarn_job_work_dcs`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `dc_number` (`dc_number`);
+
+--
+-- Indexes for table `production_yarn_job_work_dc_beams`
+--
+ALTER TABLE `production_yarn_job_work_dc_beams`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_job_work_dc_color_ends`
+--
+ALTER TABLE `production_yarn_job_work_dc_color_ends`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_job_work_dc_items`
+--
+ALTER TABLE `production_yarn_job_work_dc_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_job_work_receipts`
+--
+ALTER TABLE `production_yarn_job_work_receipts`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `receipt_number` (`receipt_number`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_job_work_receipt_items`
+--
+ALTER TABLE `production_yarn_job_work_receipt_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `receipt_id` (`receipt_id`),
+  ADD KEY `dc_item_id` (`dc_item_id`);
+
+--
+-- Indexes for table `production_yarn_master`
+--
+ALTER TABLE `production_yarn_master`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `production_yarn_purchases`
+--
+ALTER TABLE `production_yarn_purchases`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `production_yarn_stock_movements`
+--
+ALTER TABLE `production_yarn_stock_movements`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `production_yarn_twisting_dcs`
+--
+ALTER TABLE `production_yarn_twisting_dcs`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `dc_number` (`dc_number`);
+
+--
+-- Indexes for table `production_yarn_twisting_dc_items`
+--
+ALTER TABLE `production_yarn_twisting_dc_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_twisting_receipts`
+--
+ALTER TABLE `production_yarn_twisting_receipts`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `receipt_number` (`receipt_number`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_twisting_receipt_items`
+--
+ALTER TABLE `production_yarn_twisting_receipt_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `receipt_id` (`receipt_id`),
+  ADD KEY `dc_item_id` (`dc_item_id`);
+
+--
+-- Indexes for table `production_yarn_warping_sizing_dcs`
+--
+ALTER TABLE `production_yarn_warping_sizing_dcs`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `dc_number` (`dc_number`);
+
+--
+-- Indexes for table `production_yarn_warping_sizing_dc_beams`
+--
+ALTER TABLE `production_yarn_warping_sizing_dc_beams`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_warping_sizing_dc_color_ends`
+--
+ALTER TABLE `production_yarn_warping_sizing_dc_color_ends`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_warping_sizing_dc_items`
+--
+ALTER TABLE `production_yarn_warping_sizing_dc_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_warping_sizing_receipts`
+--
+ALTER TABLE `production_yarn_warping_sizing_receipts`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `receipt_number` (`receipt_number`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_warping_sizing_receipt_items`
+--
+ALTER TABLE `production_yarn_warping_sizing_receipt_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `receipt_id` (`receipt_id`),
+  ADD KEY `dc_item_id` (`dc_item_id`);
+
+--
+-- Indexes for table `production_yarn_weaving_dcs`
+--
+ALTER TABLE `production_yarn_weaving_dcs`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `dc_number` (`dc_number`);
+
+--
+-- Indexes for table `production_yarn_weaving_dc_items`
+--
+ALTER TABLE `production_yarn_weaving_dc_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_weaving_receipts`
+--
+ALTER TABLE `production_yarn_weaving_receipts`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `receipt_number` (`receipt_number`),
+  ADD KEY `dc_id` (`dc_id`);
+
+--
+-- Indexes for table `production_yarn_weaving_receipt_items`
+--
+ALTER TABLE `production_yarn_weaving_receipt_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `receipt_id` (`receipt_id`),
+  ADD KEY `dc_item_id` (`dc_item_id`);
 
 --
 -- Indexes for table `products`
@@ -3453,7 +4545,7 @@ ALTER TABLE `bank_transactions`
 -- AUTO_INCREMENT for table `bills`
 --
 ALTER TABLE `bills`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `bill_items`
@@ -3562,6 +4654,198 @@ ALTER TABLE `payments`
 --
 ALTER TABLE `permissions`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=149;
+
+--
+-- AUTO_INCREMENT for table `production_agreements`
+--
+ALTER TABLE `production_agreements`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `production_beams`
+--
+ALTER TABLE `production_beams`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `production_beam_ledger`
+--
+ALTER TABLE `production_beam_ledger`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `production_vendors`
+--
+ALTER TABLE `production_vendors`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `production_yarns`
+--
+ALTER TABLE `production_yarns`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_dyeing_dcs`
+--
+ALTER TABLE `production_yarn_dyeing_dcs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_dyeing_dc_items`
+--
+ALTER TABLE `production_yarn_dyeing_dc_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_dyeing_receipts`
+--
+ALTER TABLE `production_yarn_dyeing_receipts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_dyeing_receipt_items`
+--
+ALTER TABLE `production_yarn_dyeing_receipt_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_job_work_dcs`
+--
+ALTER TABLE `production_yarn_job_work_dcs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_job_work_dc_beams`
+--
+ALTER TABLE `production_yarn_job_work_dc_beams`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_job_work_dc_color_ends`
+--
+ALTER TABLE `production_yarn_job_work_dc_color_ends`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_job_work_dc_items`
+--
+ALTER TABLE `production_yarn_job_work_dc_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_job_work_receipts`
+--
+ALTER TABLE `production_yarn_job_work_receipts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_job_work_receipt_items`
+--
+ALTER TABLE `production_yarn_job_work_receipt_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_master`
+--
+ALTER TABLE `production_yarn_master`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_purchases`
+--
+ALTER TABLE `production_yarn_purchases`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_stock_movements`
+--
+ALTER TABLE `production_yarn_stock_movements`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_twisting_dcs`
+--
+ALTER TABLE `production_yarn_twisting_dcs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_twisting_dc_items`
+--
+ALTER TABLE `production_yarn_twisting_dc_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_twisting_receipts`
+--
+ALTER TABLE `production_yarn_twisting_receipts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_twisting_receipt_items`
+--
+ALTER TABLE `production_yarn_twisting_receipt_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_warping_sizing_dcs`
+--
+ALTER TABLE `production_yarn_warping_sizing_dcs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_warping_sizing_dc_beams`
+--
+ALTER TABLE `production_yarn_warping_sizing_dc_beams`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_warping_sizing_dc_color_ends`
+--
+ALTER TABLE `production_yarn_warping_sizing_dc_color_ends`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_warping_sizing_dc_items`
+--
+ALTER TABLE `production_yarn_warping_sizing_dc_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_warping_sizing_receipts`
+--
+ALTER TABLE `production_yarn_warping_sizing_receipts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_warping_sizing_receipt_items`
+--
+ALTER TABLE `production_yarn_warping_sizing_receipt_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_weaving_dcs`
+--
+ALTER TABLE `production_yarn_weaving_dcs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_weaving_dc_items`
+--
+ALTER TABLE `production_yarn_weaving_dc_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_weaving_receipts`
+--
+ALTER TABLE `production_yarn_weaving_receipts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `production_yarn_weaving_receipt_items`
+--
+ALTER TABLE `production_yarn_weaving_receipt_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -3693,7 +4977,7 @@ ALTER TABLE `vendor_credits`
 -- AUTO_INCREMENT for table `weavers`
 --
 ALTER TABLE `weavers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `zoho_settings`
@@ -3820,6 +5104,131 @@ ALTER TABLE `payments`
 --
 ALTER TABLE `permissions`
   ADD CONSTRAINT `permissions_module_id_foreign` FOREIGN KEY (`module_id`) REFERENCES `modules` (`id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `production_beam_ledger`
+--
+ALTER TABLE `production_beam_ledger`
+  ADD CONSTRAINT `production_beam_ledger_ibfk_1` FOREIGN KEY (`beam_id`) REFERENCES `production_beams` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_dyeing_dc_items`
+--
+ALTER TABLE `production_yarn_dyeing_dc_items`
+  ADD CONSTRAINT `production_yarn_dyeing_dc_items_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_dyeing_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_dyeing_receipts`
+--
+ALTER TABLE `production_yarn_dyeing_receipts`
+  ADD CONSTRAINT `production_yarn_dyeing_receipts_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_dyeing_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_dyeing_receipt_items`
+--
+ALTER TABLE `production_yarn_dyeing_receipt_items`
+  ADD CONSTRAINT `production_yarn_dyeing_receipt_items_ibfk_1` FOREIGN KEY (`receipt_id`) REFERENCES `production_yarn_dyeing_receipts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `production_yarn_dyeing_receipt_items_ibfk_2` FOREIGN KEY (`dc_item_id`) REFERENCES `production_yarn_dyeing_dc_items` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_job_work_dc_beams`
+--
+ALTER TABLE `production_yarn_job_work_dc_beams`
+  ADD CONSTRAINT `production_yarn_job_work_dc_beams_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_job_work_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_job_work_dc_color_ends`
+--
+ALTER TABLE `production_yarn_job_work_dc_color_ends`
+  ADD CONSTRAINT `production_yarn_job_work_dc_color_ends_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_job_work_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_job_work_dc_items`
+--
+ALTER TABLE `production_yarn_job_work_dc_items`
+  ADD CONSTRAINT `production_yarn_job_work_dc_items_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_job_work_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_job_work_receipts`
+--
+ALTER TABLE `production_yarn_job_work_receipts`
+  ADD CONSTRAINT `production_yarn_job_work_receipts_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_job_work_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_job_work_receipt_items`
+--
+ALTER TABLE `production_yarn_job_work_receipt_items`
+  ADD CONSTRAINT `production_yarn_job_work_receipt_items_ibfk_1` FOREIGN KEY (`receipt_id`) REFERENCES `production_yarn_job_work_receipts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `production_yarn_job_work_receipt_items_ibfk_2` FOREIGN KEY (`dc_item_id`) REFERENCES `production_yarn_job_work_dc_items` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_twisting_dc_items`
+--
+ALTER TABLE `production_yarn_twisting_dc_items`
+  ADD CONSTRAINT `production_yarn_twisting_dc_items_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_twisting_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_twisting_receipts`
+--
+ALTER TABLE `production_yarn_twisting_receipts`
+  ADD CONSTRAINT `production_yarn_twisting_receipts_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_twisting_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_twisting_receipt_items`
+--
+ALTER TABLE `production_yarn_twisting_receipt_items`
+  ADD CONSTRAINT `production_yarn_twisting_receipt_items_ibfk_1` FOREIGN KEY (`receipt_id`) REFERENCES `production_yarn_twisting_receipts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `production_yarn_twisting_receipt_items_ibfk_2` FOREIGN KEY (`dc_item_id`) REFERENCES `production_yarn_twisting_dc_items` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_warping_sizing_dc_beams`
+--
+ALTER TABLE `production_yarn_warping_sizing_dc_beams`
+  ADD CONSTRAINT `production_yarn_warping_sizing_dc_beams_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_warping_sizing_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_warping_sizing_dc_color_ends`
+--
+ALTER TABLE `production_yarn_warping_sizing_dc_color_ends`
+  ADD CONSTRAINT `production_yarn_warping_sizing_dc_color_ends_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_warping_sizing_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_warping_sizing_dc_items`
+--
+ALTER TABLE `production_yarn_warping_sizing_dc_items`
+  ADD CONSTRAINT `production_yarn_warping_sizing_dc_items_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_warping_sizing_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_warping_sizing_receipts`
+--
+ALTER TABLE `production_yarn_warping_sizing_receipts`
+  ADD CONSTRAINT `production_yarn_warping_sizing_receipts_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_warping_sizing_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_warping_sizing_receipt_items`
+--
+ALTER TABLE `production_yarn_warping_sizing_receipt_items`
+  ADD CONSTRAINT `production_yarn_warping_sizing_receipt_items_ibfk_1` FOREIGN KEY (`receipt_id`) REFERENCES `production_yarn_warping_sizing_receipts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `production_yarn_warping_sizing_receipt_items_ibfk_2` FOREIGN KEY (`dc_item_id`) REFERENCES `production_yarn_warping_sizing_dc_items` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_weaving_dc_items`
+--
+ALTER TABLE `production_yarn_weaving_dc_items`
+  ADD CONSTRAINT `production_yarn_weaving_dc_items_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_weaving_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_weaving_receipts`
+--
+ALTER TABLE `production_yarn_weaving_receipts`
+  ADD CONSTRAINT `production_yarn_weaving_receipts_ibfk_1` FOREIGN KEY (`dc_id`) REFERENCES `production_yarn_weaving_dcs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `production_yarn_weaving_receipt_items`
+--
+ALTER TABLE `production_yarn_weaving_receipt_items`
+  ADD CONSTRAINT `production_yarn_weaving_receipt_items_ibfk_1` FOREIGN KEY (`receipt_id`) REFERENCES `production_yarn_weaving_receipts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `production_yarn_weaving_receipt_items_ibfk_2` FOREIGN KEY (`dc_item_id`) REFERENCES `production_yarn_weaving_dc_items` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `quotations`

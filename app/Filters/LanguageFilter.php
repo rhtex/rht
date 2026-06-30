@@ -12,7 +12,9 @@ class LanguageFilter implements FilterInterface
     {
         $session = session();
         $locale = $session->get('lang') ?? config('App')->defaultLocale;
-        $request->setLocale($locale);
+        if ($request instanceof \CodeIgniter\HTTP\IncomingRequest) {
+            $request->setLocale($locale);
+        }
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)

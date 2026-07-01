@@ -135,13 +135,21 @@
                                         </td>
                                         <td>
                                             <?php if($entry['reference_id']): ?>
-                                                <?php if(in_array($entry['transaction_type'], ['Issue_Warping_Sizing', 'Issue_Weaving'])): ?>
-                                                    <a href="<?= site_url('production/yarn-job-work/view/' . $entry['reference_id']) ?>" class="btn btn-xs btn-outline-info">
+                                                <?php if($entry['transaction_type'] === 'Issue_Warping_Sizing'): ?>
+                                                    <a href="<?= site_url('production/yarn-warping-sizing/view/' . $entry['reference_id']) ?>" class="btn btn-xs btn-outline-info">
                                                         <i class="fas fa-file-alt"></i> View DC (ID: <?= $entry['reference_id'] ?>)
                                                     </a>
+                                                <?php elseif($entry['transaction_type'] === 'Receipt_Warping_Sizing'): ?>
+                                                    <a href="<?= site_url('production/yarn-warping-sizing/view/' . $entry['reference_id']) ?>" class="btn btn-xs btn-outline-success">
+                                                        <i class="fas fa-file-invoice"></i> View Receipt
+                                                    </a>
+                                                <?php elseif($entry['transaction_type'] === 'Issue_Weaving' || $entry['transaction_type'] === 'Receipt_Weaving'): ?>
+                                                    <a href="<?= site_url('production/yarn-weaving/view/' . $entry['reference_id']) ?>" class="btn btn-xs btn-outline-info">
+                                                        <i class="fas fa-file-alt"></i> View Weaving
+                                                    </a>
                                                 <?php else: ?>
-                                                    <a href="<?= site_url('production/yarn-job-work/view/' . ($entry['reference_id'])) ?>#receipts-section" class="btn btn-xs btn-outline-success">
-                                                        <i class="fas fa-file-invoice"></i> View Receipt (ID: <?= $entry['reference_id'] ?>)
+                                                    <a href="<?= site_url('production/yarn-warping-sizing/view/' . $entry['reference_id']) ?>" class="btn btn-xs btn-outline-info">
+                                                        <i class="fas fa-file-alt"></i> View DC (ID: <?= $entry['reference_id'] ?>)
                                                     </a>
                                                 <?php endif; ?>
                                             <?php else: ?>

@@ -12,9 +12,9 @@ class YarnDyeingReceiptItemModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['receipt_id', 'dc_item_id', 'received_color', 'quantity_received_kg', 'quantity_wastage_kg', 'quantity_shortage_kg', 'quantity_excess_kg', 'job_work_charges'];
+    protected $allowedFields    = ['receipt_id', 'dc_item_id', 'received_color', 'quantity_received_kg', 'quantity_wastage_kg', 'quantity_shortage_kg', 'quantity_excess_kg', 'job_work_charges', 'cones_received', 'cones_wastage'];
 
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';

@@ -12,7 +12,7 @@ class YarnWarpingSizingReceiptItemModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['receipt_id', 'dc_item_id', 'quantity_received_kg', 'quantity_wastage_kg', 'job_work_charges'];
+    protected $allowedFields    = ['receipt_id', 'dc_item_id', 'quantity_received_kg', 'quantity_wastage_kg', 'job_work_charges', 'cones_received', 'cones_used'];
 
     protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';

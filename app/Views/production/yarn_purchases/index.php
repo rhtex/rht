@@ -32,6 +32,7 @@
                         <th width="8%" class="text-center">Count</th>
                         <th width="10%" class="text-center">Lot No</th>
                         <th width="10%" class="text-end">Weight (Kg)</th>
+                        <th width="8%" class="text-center">Cones</th>
                         <th width="10%" class="text-end">Rate/Kg</th>
                         <th width="10%" class="text-end">Transport/Kg</th>
                         <th width="10%" class="text-end">Other/Kg</th>
@@ -66,6 +67,7 @@
                             <td class="text-center"><span class="badge bg-secondary"><?= esc($p['yarn_count']) ?></span></td>
                             <td class="text-center"><?= esc($p['lot_number'] ?: '-') ?></td>
                             <td class="text-end"><strong><?= number_format($weight, 2) ?> Kg</strong></td>
+                            <td class="text-center"><strong><?= (int)($p['number_cones'] ?? 0) ?></strong></td>
                             <td class="text-end">₹<?= number_format($rate, 2) ?></td>
                             <td class="text-end">₹<?= number_format($transportPerKg, 2) ?></td>
                             <td class="text-end">₹<?= number_format($otherPerKg, 2) ?></td>

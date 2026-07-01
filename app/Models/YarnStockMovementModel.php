@@ -14,7 +14,7 @@ class YarnStockMovementModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'yarn_name', 'yarn_count', 'yarn_type', 'color', 'brand_mill', 'lot_number', 'csp', 'warp_weft', 
-        'quantity_kg', 'cost_per_kg', 'warehouse', 'movement_type', 'reference_id', 'remarks', 'created_by', 'created_at'
+        'quantity_kg', 'quantity_cones', 'cost_per_kg', 'warehouse', 'movement_type', 'reference_id', 'remarks', 'created_by', 'created_at'
     ];
 
     protected $useTimestamps = false;
@@ -35,6 +35,7 @@ class YarnStockMovementModel extends Model
             csp, 
             warp_weft, 
             SUM(quantity_kg) as quantity_available,
+            SUM(quantity_cones) as cones_available,
             CASE 
                 WHEN SUM(quantity_kg) > 0 THEN SUM(quantity_kg * cost_per_kg) / SUM(quantity_kg)
                 ELSE 0 
@@ -43,7 +44,11 @@ class YarnStockMovementModel extends Model
         ');
         $builder->groupBy('yarn_count, yarn_type, color, brand_mill, lot_number, csp, warp_weft, warehouse');
         
-        $builder->having('SUM(quantity_kg) > 0');
+        if (isset($filters['show_unavailable']) && $filters['show_unavailable'] === 'yes') {
+            // Show all stock levels including 0 and negative
+        } else {
+            $builder->having('SUM(quantity_kg) > 0');
+        }
 
         if (!empty($filters['yarn_type'])) {
             $builder->where('yarn_type', $filters['yarn_type']);

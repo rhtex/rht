@@ -32,7 +32,9 @@ class AddReconciliationFieldsToBankTransactions extends Migration
             ],
         ];
         
-        $this->forge->addColumn('bank_transactions', $fields);
+        if (!$this->db->fieldExists('is_reconciled', 'bank_transactions')) {
+            $this->forge->addColumn('bank_transactions', $fields);
+        }
         
         // Add index for better query performance
         $this->forge->addKey(['reference_type', 'reference_id']);

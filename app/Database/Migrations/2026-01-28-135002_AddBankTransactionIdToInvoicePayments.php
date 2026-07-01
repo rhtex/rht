@@ -19,10 +19,12 @@ class AddBankTransactionIdToInvoicePayments extends Migration
             ],
         ];
         
-        $this->forge->addColumn('invoice_payments', $fields);
-        
-        // Add foreign key constraint
-        $this->forge->addForeignKey('bank_transaction_id', 'bank_transactions', 'id', 'SET NULL', 'CASCADE', 'invoice_payments');
+        if (!$this->db->fieldExists('bank_transaction_id', 'invoice_payments')) {
+            $this->forge->addColumn('invoice_payments', $fields);
+            
+            // Add foreign key constraint
+            $this->forge->addForeignKey('bank_transaction_id', 'bank_transactions', 'id', 'SET NULL', 'CASCADE', 'invoice_payments');
+        }
     }
 
     public function down()

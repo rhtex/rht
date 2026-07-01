@@ -24,7 +24,11 @@ class YarnInventoryController extends BaseController
             'csp'        => $this->request->getGet('csp'),
             'lot_number' => $this->request->getGet('lot_number'),
             'warp_weft'  => $this->request->getGet('warp_weft'),
+            'show_unavailable' => $this->request->getGet('show_unavailable') ?: 'no',
         ];
+
+        $colorModel = new \App\Models\ColorModel();
+        $data['colorsList'] = $colorModel->where('status', 'Active')->orderBy('name', 'ASC')->findAll();
 
         $data['inventory'] = $this->movementModel->getInventory($filters);
         $data['title'] = 'Yarn Inventory';

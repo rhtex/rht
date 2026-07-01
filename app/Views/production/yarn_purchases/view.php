@@ -93,6 +93,10 @@
                                     <td><?= esc($purchase['number_bags']) ?></td>
                                 </tr>
                                 <tr>
+                                    <th>Number of Cones</th>
+                                    <td><?= esc($purchase['number_cones'] ?? '0') ?></td>
+                                </tr>
+                                <tr>
                                     <th>Total Weight (Kg)</th>
                                     <td><strong><?= number_format($purchase['total_weight_kg'], 2) ?> Kg</strong></td>
                                 </tr>

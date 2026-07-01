@@ -8,15 +8,17 @@ class AddAgentIdToCustomers extends Migration
 {
     public function up()
     {
-        $this->forge->addColumn('customers', [
-            'agent_id' => [
-                'type' => 'INT',
-                'constraint' => 11,
-                'unsigned' => true,
-                'null' => true,
-                'after' => 'status' // Place it somewhere reasonable
-            ],
-        ]);
+        if (!$this->db->fieldExists('agent_id', 'customers')) {
+            $this->forge->addColumn('customers', [
+                'agent_id' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'unsigned' => true,
+                    'null' => true,
+                    'after' => 'status' // Place it somewhere reasonable
+                ],
+            ]);
+        }
         
         // Optional: Add Foreign Key
         // $this->forge->addForeignKey('agent_id', 'agents', 'id', 'SET NULL', 'CASCADE');

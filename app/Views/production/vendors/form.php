@@ -57,6 +57,14 @@
                     <input type="text" name="phone" class="form-control" value="<?= old('phone', $vendor['phone'] ?? '') ?>">
                 </div>
                 <div class="col-md-6 mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" value="<?= old('email', $vendor['email'] ?? '') ?>">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">WhatsApp No</label>
+                    <input type="text" name="whatsapp_number" class="form-control" value="<?= old('whatsapp_number', $vendor['whatsapp_number'] ?? '') ?>">
+                </div>
+                <div class="col-md-6 mb-3">
                     <label class="form-label">Status</label>
                     <select name="status" class="form-select">
                         <option value="active" <?= (old('status', $vendor['status'] ?? '') === 'active') ? 'selected' : '' ?>>Active</option>
@@ -66,6 +74,25 @@
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Location (Optional)</label>
                     <input type="text" name="location" class="form-control" value="<?= old('location', $vendor['location'] ?? '') ?>">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Type of Job Work</label>
+                    <div class="card p-2" style="max-height: 150px; overflow-y: auto;">
+                        <?php 
+                        $selected_types = isset($vendor['job_work_type']) ? explode(',', $vendor['job_work_type']) : [];
+                        $selected_types = array_map('trim', $selected_types);
+                        $job_types = ['Warping', 'Sizing', 'Dyeing', 'Twisting', 'Weaving'];
+                        foreach ($job_types as $type): 
+                            $checked = in_array($type, $selected_types) ? 'checked' : '';
+                        ?>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="job_work_types[]" value="<?= $type ?>" id="job_type_<?= strtolower($type) ?>" <?= $checked ?>>
+                                <label class="form-check-label" for="job_type_<?= strtolower($type) ?>">
+                                    <?= $type ?>
+                                </label>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
                 <div class="col-md-12 mb-3">
                     <label class="form-label">Address</label>

@@ -9,14 +9,14 @@ class RegisterAgentPaymentsModule extends Migration
     public function up()
     {
         // Check if module already exists
-        $existing = $this->db->table('modules')->where('module_key', 'agent_payments')->get()->getRow();
+        $existing = $this->db->table('modules')->where('module_slug', 'agent_payments')->get()->getRow();
         if ($existing) {
             $moduleId = $existing->id;
         } else {
             // Insert module
             $this->db->table('modules')->insert([
                 'module_name' => 'Agent Payments',
-                'module_key'  => 'agent_payments',
+                'module_slug'  => 'agent_payments',
                 'description' => 'Manage agent commission payments',
                 'icon'        => 'fas fa-hand-holding-usd',
                 'parent_id'   => null,
@@ -99,7 +99,7 @@ class RegisterAgentPaymentsModule extends Migration
     {
         // Get module ID
         $module = $this->db->table('modules')
-            ->where('module_key', 'agent_payments')
+            ->where('module_slug', 'agent_payments')
             ->get()
             ->getRowArray();
 

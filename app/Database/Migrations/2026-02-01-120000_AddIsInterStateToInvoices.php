@@ -8,14 +8,16 @@ class AddIsInterStateToInvoices extends Migration
 {
     public function up()
     {
-        $this->forge->addColumn('invoices', [
-            'is_inter_state' => [
-                'type' => 'TINYINT',
-                'constraint' => 1,
-                'default' => 0,
-                'after' => 'customer_id'
-            ],
-        ]);
+        if (!$this->db->fieldExists('is_inter_state', 'invoices')) {
+            $this->forge->addColumn('invoices', [
+                'is_inter_state' => [
+                    'type' => 'TINYINT',
+                    'constraint' => 1,
+                    'default' => 0,
+                    'after' => 'customer_id'
+                ],
+            ]);
+        }
     }
 
     public function down()

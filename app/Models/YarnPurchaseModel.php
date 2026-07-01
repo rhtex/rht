@@ -14,7 +14,7 @@ class YarnPurchaseModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'purchase_date', 'supplier', 'invoice_number', 'mill_name', 'yarn_count', 'material_type', 'warp_weft', 
-        'csp', 'lot_number', 'number_bags', 'total_weight_kg', 'rate_per_kg', 'gst_percent', 
+        'csp', 'lot_number', 'number_bags', 'number_cones', 'total_weight_kg', 'rate_per_kg', 'gst_percent', 
         'transport_charges', 'other_charges', 'warehouse_location', 'created_by', 'updated_by'
     ];
 

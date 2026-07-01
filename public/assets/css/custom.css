@@ -114,3 +114,153 @@ h4,
 .btn {
     font-size: 15px;
 }
+
+/* ==========================================================================
+   Global Premium Table Styles (Compact, Stylish, Hover Lifting Animations)
+   ========================================================================== */
+.table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    width: 100% !important;
+}
+
+.table thead th {
+    background-color: #2c3e50 !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.5px;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border-top: 1px solid #34495e !important;
+    border-bottom: 2px solid #34495e !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+.table thead th:first-child {
+    border-top-left-radius: 6px;
+    border-left: 1px solid #34495e !important;
+}
+
+.table thead th:last-child {
+    border-top-right-radius: 6px;
+    border-right: 1px solid #34495e !important;
+}
+
+/* Secondary/Nested Tables Header Style (Light Concept) */
+.table.table-sm thead th {
+    background-color: #f8f9fa !important;
+    color: #5a6a85 !important;
+    border-top: 1px solid #eef1f6 !important;
+    border-bottom: 2px solid #eef1f6 !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+}
+
+.table.table-sm thead th:first-child {
+    border-left: 1px solid #eef1f6 !important;
+}
+
+.table.table-sm thead th:last-child {
+    border-right: 1px solid #eef1f6 !important;
+}
+
+.table tbody tr {
+    transition: all 0.2s ease !important;
+}
+
+.table tbody tr td {
+    border-bottom: 1px solid #f1f3f7 !important;
+    border-left: none !important;
+    border-right: none !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+.table tbody tr td:first-child {
+    border-left: 1px solid #f1f3f7 !important;
+}
+
+.table tbody tr td:last-child {
+    border-right: 1px solid #f1f3f7 !important;
+}
+
+.table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 6px;
+}
+
+.table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 6px;
+}
+
+.table tbody tr:hover {
+    background-color: #f8fbff !important;
+    cursor: pointer;
+}
+
+.table tbody tr:hover td {
+    background-color: #f8fbff !important;
+    border-color: #e0eeff !important;
+}
+
+.transition-all {
+    transition: all 0.15s ease-in-out;
+}
+
+/* ==========================================================================
+   Global Card Outline Enhancements (Modern, Soft Border & Shadows)
+   ========================================================================== */
+.card, .card.card-outline {
+    border-radius: 8px !important;
+    border: 1px solid #eef1f6 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+    overflow: hidden !important;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%) !important;
+    border-bottom: 1px solid #1a252f !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+}
+
+.card-title {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.badge {
+    font-weight: 600 !important;
+    padding: 6px 12px !important;
+    border-radius: 50px !important;
+}
+
+.transition-all:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Received Receipts Card Header Styling Override (Dark Concept background with Light Text) */
+.card-header.bg-success-subtle {
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%) !important;
+    border-bottom: 1px solid #2c3e50 !important;
+}
+
+.card-header.bg-success-subtle .text-success {
+    color: #ffffff !important;
+}
+
+.card-header.bg-success-subtle .text-muted {
+    color: #cbd5e1 !important;
+}
+
+/* Delete Button styling for Received Receipts card */
+.btn-outline-danger.btn-danger-bg {
+    background-color: #dc3545 !important;
+    color: #ffffff !important;
+    border-color: #dc3545 !important;
+}
+
+.btn-outline-danger.btn-danger-bg:hover {
+    background-color: #bb2d3b !important;
+    border-color: #b02a37 !important;
+}

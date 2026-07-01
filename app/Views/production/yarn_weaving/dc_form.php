@@ -11,7 +11,6 @@
     <form action="<?= isset($dc) ? site_url('production/yarn-weaving/update/'.$dc['id']) : site_url('production/yarn-weaving/store') ?>" method="post" id="dcForm">
         <?= csrf_field() ?>
         <div class="card-body">
-            <?php if(session()->has('error')): ?><div class="alert alert-danger"><?= session('error') ?></div><?php endif; ?>
             <div class="row">
                 <div class="col-md-3 mb-3">
                     <label class="form-label">DC Number <span class="text-danger">*</span></label>
@@ -50,7 +49,7 @@
                                 <option value="">-- Choose Yarn --</option>
                                 <?php foreach($availableYarns as $y): ?>
                                     <option value="<?= htmlspecialchars(json_encode($y)) ?>">
-                                        <?= esc($y['brand_mill']) ?> - <?= esc($y['yarn_count']) ?> (Lot: <?= esc($y['lot_number'] ?: '-') ?>, Qty: <?= number_format($y['available_qty'], 2) ?> Kg, Color: <?= esc($y['color']) ?>)
+                                        <?= esc($y['brand_mill']) ?> - <?= esc($y['yarn_count']) ?> (Lot: <?= esc($y['lot_number'] ?: '-') ?>, Qty: <?= number_format($y['quantity_available'], 2) ?> Kg, Color: <?= esc($y['color']) ?>)
                                     </option>
                                 <?php endforeach; ?>
                             </select>
@@ -83,8 +82,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (isset($dcItems)): ?>
-                            <?php foreach ($dcItems as $index => $item): ?>
+                        <?php 
+                        $renderedItems = isset($dcItems) ? $dcItems : (old('items') ?: []);
+                        if (!empty($renderedItems)): 
+                            foreach ($renderedItems as $index => $item): 
+                        ?>
                                 <tr class="item-row">
                                     <td><input type="hidden" name="items[<?= $index ?>][mill_name]" value="<?= esc($item['mill_name']) ?>"><?= esc($item['mill_name']) ?></td>
                                     <td><input type="hidden" name="items[<?= $index ?>][yarn_count]" value="<?= esc($item['yarn_count']) ?>"><?= esc($item['yarn_count']) ?></td>
@@ -92,7 +94,7 @@
                                     <td><input type="hidden" name="items[<?= $index ?>][lot_number]" value="<?= esc($item['lot_number']) ?>"><?= esc($item['lot_number'] ?: '-') ?></td>
                                     <td><input type="hidden" name="items[<?= $index ?>][csp]" value="<?= esc($item['csp']) ?>"><?= esc($item['csp'] ?: '-') ?></td>
                                     <td><input type="hidden" name="items[<?= $index ?>][yarn_type]" value="<?= esc($item['yarn_type']) ?>"><input type="hidden" name="items[<?= $index ?>][current_color]" value="<?= esc($item['current_color']) ?>"><?= esc($item['current_color']) ?></td>
-                                    <td><input type="text" name="items[<?= $index ?>][required_color]" class="form-control form-control-sm" value="<?= esc($item['') ?>" required></td>
+                                    <td><input type="text" name="items[<?= $index ?>][required_color]" class="form-control form-control-sm" value="<?= esc($item['required_color'] ?? '') ?>" required></td>
                                     <td><input type="hidden" name="items[<?= $index ?>][quantity_issued_kg]" value="<?= esc($item['quantity_issued_kg']) ?>"><strong><?= number_format($item['quantity_issued_kg'], 2) ?> Kg</strong></td>
                                     <td><button type="button" class="btn btn-sm btn-danger btn-remove-item"><i class="fas fa-trash"></i></button></td>
                                 </tr>
@@ -121,8 +123,8 @@ $(document).ready(function() {
         if (qty <= 0) { alert('Please enter a valid quantity.'); return; }
         
         var y = JSON.parse(rawJson);
-        if (qty > parseFloat(y.available_qty)) {
-            alert('Cannot issue more than available stock (' + y.available_qty + ' Kg)');
+        if (qty > parseFloat(y.quantity_available)) {
+            alert('Cannot issue more than available stock (' + y.quantity_available + ' Kg)');
             return;
         }
 

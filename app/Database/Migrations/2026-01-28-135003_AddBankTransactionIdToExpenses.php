@@ -19,10 +19,12 @@ class AddBankTransactionIdToExpenses extends Migration
             ],
         ];
         
-        $this->forge->addColumn('expenses', $fields);
-        
-        // Add foreign key constraint
-        $this->forge->addForeignKey('bank_transaction_id', 'bank_transactions', 'id', 'SET NULL', 'CASCADE', 'expenses');
+        if (!$this->db->fieldExists('bank_transaction_id', 'expenses')) {
+            $this->forge->addColumn('expenses', $fields);
+            
+            // Add foreign key constraint
+            $this->forge->addForeignKey('bank_transaction_id', 'bank_transactions', 'id', 'SET NULL', 'CASCADE', 'expenses');
+        }
     }
 
     public function down()

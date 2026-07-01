@@ -12,12 +12,21 @@
 
 <?= $this->section('content') ?>
 <!-- Filters -->
+<?php
+    $hasActiveFilters = !empty($filters['search']) || !empty($filters['yarn_type']) || !empty($filters['warp_weft']) || !empty($filters['yarn_count']) || !empty($filters['brand_mill']) || !empty($filters['color']) || !empty($filters['csp']) || !empty($filters['lot_number']) || ($filters['show_unavailable'] ?? 'no') === 'yes';
+?>
 <div class="card card-outline card-primary mb-3">
-    <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-filter me-1"></i> Advanced Filters</h3>
+    <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="<?= $hasActiveFilters ? 'true' : 'false' ?>">
+        <h3 class="card-title mb-0"><i class="fas fa-filter me-1 text-primary"></i> Advanced Filters</h3>
+        <div class="card-tools ms-auto">
+            <button type="button" class="btn btn-tool" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                <i class="fas <?= $hasActiveFilters ? 'fa-minus' : 'fa-plus' ?>" id="filterToggleIcon"></i>
+            </button>
+        </div>
     </div>
-    <div class="card-body">
-        <form action="<?= site_url('production/yarn-inventory') ?>" method="get" class="row g-3">
+    <div id="filterCollapse" class="collapse <?= $hasActiveFilters ? 'show' : '' ?>">
+        <div class="card-body">
+            <form action="<?= site_url('production/yarn-inventory') ?>" method="get" class="row g-3">
             <div class="col-md-3">
                 <label class="form-label">Search</label>
                 <input type="text" name="search" class="form-control" placeholder="Search name, mill, color..." value="<?= esc($filters['search'] ?? '') ?>">
@@ -48,7 +57,15 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label">Color</label>
-                <input type="text" name="color" class="form-control" placeholder="e.g. Blue" value="<?= esc($filters['color'] ?? '') ?>">
+                <select name="color" class="form-select select2-color" data-placeholder="Choose color...">
+                    <option value="">All Colors</option>
+                    <option value="Raw" <?= ($filters['color'] ?? '') === 'Raw' ? 'selected' : '' ?> data-palette="">Raw (Uncolored)</option>
+                    <?php if(!empty($colorsList)): ?>
+                        <?php foreach($colorsList as $c): ?>
+                            <option value="<?= esc($c['name']) ?>" <?= ($filters['color'] ?? '') === $c['name'] ? 'selected' : '' ?> data-palette="<?= esc($c['color_palette'] ?: '') ?>"><?= esc($c['name']) ?></option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
             </div>
             <div class="col-md-3">
                 <label class="form-label">CSP</label>
@@ -58,6 +75,13 @@
                 <label class="form-label">Lot Number</label>
                 <input type="text" name="lot_number" class="form-control" placeholder="e.g. LOT-10" value="<?= esc($filters['lot_number'] ?? '') ?>">
             </div>
+            <div class="col-md-3">
+                <label class="form-label">Show Unavailable Stock?</label>
+                <select name="show_unavailable" class="form-select">
+                    <option value="no" <?= ($filters['show_unavailable'] ?? 'no') === 'no' ? 'selected' : '' ?>>No (Available Only)</option>
+                    <option value="yes" <?= ($filters['show_unavailable'] ?? 'no') === 'yes' ? 'selected' : '' ?>>Yes (Show Zero & Out-of-Stock)</option>
+                </select>
+            </div>
             <div class="col-md-3 d-flex align-items-end">
                 <div class="btn-group w-100">
                     <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Filter</button>
@@ -66,6 +90,7 @@
             </div>
         </form>
     </div>
+</div>
 </div>
 
 <!-- Stock List -->
@@ -132,6 +157,9 @@
                 </tbody>
             </table>
         </div>
+        <div class="text-center mt-3" id="loadMoreContainer" style="display: none;">
+            <button type="button" class="btn btn-outline-primary px-4 rounded-pill fw-bold" id="btnLoadMore"><i class="fas fa-arrow-down me-1"></i> Load More Stock Items</button>
+        </div>
     </div>
 </div>
 <?= $this->endSection() ?>
@@ -139,8 +167,72 @@
 <?= $this->section('scripts') ?>
 <script>
     $(document).ready(function() {
-        $('#inventoryTable').DataTable({
-            "order": [[8, "desc"]]
+        var table = $('#inventoryTable').DataTable({
+            "order": [[8, "desc"]],
+            "pageLength": -1, // Retrieve all records
+            "dom": 'lfrtip',
+            "paging": false, // Disable default pagination to allow custom load more
+            "info": false
+        });
+
+        var showCount = 25;
+        var totalRows = $('#inventoryTable tbody tr').length;
+
+        function updateRowsVisibility() {
+            var visibleCount = 0;
+            $('#inventoryTable tbody tr').each(function(index) {
+                if (index < showCount) {
+                    $(this).show();
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            if (showCount >= totalRows) {
+                $('#loadMoreContainer').hide();
+            } else {
+                $('#loadMoreContainer').show();
+            }
+        }
+
+        updateRowsVisibility();
+
+        $('#btnLoadMore').on('click', function() {
+            showCount += 25;
+            updateRowsVisibility();
+        });
+
+        // Toggle filter icon
+        $('#filterCollapse').on('shown.bs.collapse', function () {
+            $('#filterToggleIcon').removeClass('fa-plus').addClass('fa-minus');
+        });
+        $('#filterCollapse').on('hidden.bs.collapse', function () {
+            $('#filterToggleIcon').removeClass('fa-minus').addClass('fa-plus');
+        });
+
+        // Initialize Select2 for Color Search Dropdown
+        function formatColorOption(state) {
+            if (!state.id) {
+                return state.text;
+            }
+            var palette = $(state.element).data('palette');
+            if (palette) {
+                var $state = $(
+                    '<span><span class="d-inline-block rounded-circle me-2 border border-light-subtle shadow-sm" style="width: 18px; height: 18px; background-color: ' + palette + '; vertical-align: middle;"></span>' + state.text + '</span>'
+                );
+                return $state;
+            }
+            return state.text;
+        }
+
+        $('.select2-color').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            allowClear: true,
+            placeholder: 'Choose color...',
+            templateResult: formatColorOption,
+            templateSelection: formatColorOption
         });
     });
 </script>

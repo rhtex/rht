@@ -18,7 +18,7 @@
                 $isSales = in_array($segment1, ['customers', 'quotations', 'sales_orders', 'invoices', 'sales_returns', 'invoice_payments', 'agents', 'agent-payments']);
                 $isPurchases = in_array($segment1, ['vendors', 'bills', 'payments', 'expenses', 'expense_categories']);
                 $isInventory = in_array($segment1, ['products', 'product_categories']);
-                $isProduction = in_array($segment1, ['production', 'weavers']);
+                $isProduction = in_array($segment1, ['production', 'weavers']) || ($segment1 === 'production' && $segment2 === 'colors');
                 $isOperations = in_array($segment1, ['transports']);
                 $isFinance = in_array($segment1, ['bank_accounts', 'reconciliation']);
                 $isHR = in_array($segment1, ['employees', 'attendance', 'loans', 'salaries']);
@@ -292,6 +292,12 @@
                             <a href="<?= site_url('production/agreements') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-file-signature text-warning"></i>
                                 <p>Agreements</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= site_url('production/colors') ?>" class="nav-link <?= $segment2 === 'colors' ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-palette text-primary"></i>
+                                <p>Colors</p>
                             </a>
                         </li>
                         <li class="nav-item">

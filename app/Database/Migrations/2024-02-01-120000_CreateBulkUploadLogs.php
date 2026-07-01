@@ -12,7 +12,7 @@ class CreateBulkUploadLogs extends Migration
             'upload_type' => ['type' => 'VARCHAR', 'constraint' => 20], // customer|vendor
             'filename'    => ['type' => 'VARCHAR', 'constraint' => 255],
             'uploaded_by' => ['type' => 'INT'],
-            'uploaded_at' => ['type' => 'DATETIME', 'default' => 'CURRENT_TIMESTAMP'],
+            'uploaded_at' => ['type' => 'TIMESTAMP', 'default' => new \CodeIgniter\Database\RawSql('CURRENT_TIMESTAMP')],
             'total_rows'  => ['type' => 'INT'],
             'inserted_rows'=> ['type' => 'INT'],
             'failed_rows' => ['type' => 'INT', 'null' => true],

@@ -18,7 +18,9 @@ class AddAccountTypeToBankAccounts extends Migration
             ],
         ];
         
-        $this->forge->addColumn('bank_accounts', $fields);
+        if (!$this->db->fieldExists('account_type', 'bank_accounts')) {
+            $this->forge->addColumn('bank_accounts', $fields);
+        }
     }
 
     public function down()

@@ -87,7 +87,7 @@
                         value="<?= old('other_expenses', isset($isEdit) ? number_format($receipt['other_expenses'], 2, '.', '') : '0.00') ?>">
                 </div>
                 <div class="col-md-3 mb-3">
-                    <label class="form-label text-primary fw-bold">Job Work Charges (₹/Kg) <span
+                    <label class="form-label text-primary fw-bold">Job Work Charges (₹) <span
                             class="text-danger">*</span></label>
                     <?php
                     $defaultJobCharges = '0.00';
@@ -121,6 +121,7 @@
                                 $allBeamsToShow[] = [
                                     'beam_number' => $b['beam_number'],
                                     'status' => $b['returned_status'] ?: 'Loaded',
+                                    'ends' => $b['ends'] ?? '',
                                     'meters' => $b['meters'],
                                     'sizing_no' => $b['sizing_no'],
                                     'color' => $b['color'],
@@ -131,6 +132,7 @@
                                 $allBeamsToShow[] = [
                                     'beam_number' => $b['beam_number'],
                                     'status' => 'Not Returned',
+                                    'ends' => '',
                                     'meters' => '',
                                     'sizing_no' => '',
                                     'color' => '',
@@ -142,6 +144,7 @@
                                 $allBeamsToShow[] = [
                                     'beam_number' => $b['beam_number'],
                                     'status' => 'Loaded',
+                                    'ends' => $b['ends'] ?? '',
                                     'meters' => '',
                                     'sizing_no' => '',
                                     'color' => '',
@@ -174,6 +177,13 @@
                                         <div class="beam-specs-fields" id="specs_<?= esc($beam['beam_number']) ?>"
                                             style="<?= $beam['status'] === 'Loaded' ? '' : 'display: none;' ?>">
                                             <div class="mb-2">
+                                                <label class="small fw-bold">Ends <span class="text-danger">*</span></label>
+                                                <input type="number"
+                                                    name="beams_return[<?= esc($beam['beam_number']) ?>][ends]"
+                                                    class="form-control form-control-sm input-beam-ends"
+                                                    value="<?= esc(!empty($beam['ends']) ? $beam['ends'] : (isset($dc['total_ends']) ? $dc['total_ends'] : '')) ?>" placeholder="Total Ends count" required>
+                                            </div>
+                                            <div class="mb-2">
                                                 <label class="small fw-bold">Meters <span class="text-danger">*</span></label>
                                                 <input type="number" step="0.01"
                                                     name="beams_return[<?= esc($beam['beam_number']) ?>][meters]"
@@ -192,11 +202,15 @@
                                             $yarnColors = [];
                                             foreach ($items as $it) {
                                                 if (!empty($it['current_color'])) {
-                                                    $yarnColors[] = $it['current_color'];
+                                                    $colorLabel = $it['current_color'];
+                                                    if ($it['warp_weft'] === 'Warp' && !empty($it['warp_yarn_type'])) {
+                                                        $colorLabel .= ' (' . $it['warp_yarn_type'] . ')';
+                                                    }
+                                                    $yarnColors[] = $colorLabel;
                                                 }
                                             }
                                             $yarnColors = array_unique($yarnColors);
-                                            $defaultBeamColor = !empty($yarnColors) ? reset($yarnColors) : 'Raw';
+                                            $defaultBeamColor = !empty($yarnColors) ? implode(', ', $yarnColors) : 'Raw';
                                             ?>
                                             <div class="mb-2">
                                                 <label class="small fw-bold">Color <span class="text-danger">*</span></label>
@@ -242,12 +256,16 @@
                             <thead>
                                 <tr class="text-sm" style="background: #f5f5f5;">
                                     <th class="py-3">Yarn Description</th>
-                                    <th class="py-3 text-center" width="10%">Issued Qty (Kg)</th>
-                                    <th class="py-3 text-end" width="12%">Issued Qty Cost (₹)</th>
-                                    <th class="py-3 text-center" width="15%">Recd Qty (Loaded) (Kg) <span class="text-danger">*</span></th>
-                                    <th class="py-3 text-center" width="15%">Used Qty (Kg) <span class="text-danger">*</span></th>
-                                    <th class="py-3 text-end" width="13%">Used Yarn Cost (₹)</th>
-                                    <th class="py-3 text-end" width="15%">Received Yarn Cost (Landed) (₹)</th>
+                                    <th class="py-3 text-center" width="8%">Issued Qty</th>
+                                    <th class="py-3 text-center" width="8%">Issued Cones</th>
+                                    <th class="py-3 text-center" width="10%">Recd Qty (Loaded) <span class="text-danger">*</span></th>
+                                    <th class="py-3 text-center" width="10%">Recd Cones <span class="text-danger">*</span></th>
+                                    <th class="py-3 text-center" width="10%">Used Qty (Kg) <span class="text-danger">*</span></th>
+                                    <th class="py-3 text-center" width="10%">Used Cones <span class="text-danger">*</span></th>
+                                    <th class="py-3 text-center" width="10%">Pending Qty</th>
+                                    <th class="py-3 text-center" width="10%">Pending Cones</th>
+                                    <th class="py-3 text-end" width="12%">Used Yarn Cost (₹)</th>
+                                    <th class="py-3 text-end" width="12%">Received Yarn Cost (Landed) (₹)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -286,8 +304,17 @@
 
                                     $issuedQtyCost = $issued * $rawCost;
                                     ?>
+                                    <?php
+                                    $conesIssued = (int)$item['cones_issued'];
+                                    $conesRecdExcludingCurrent = (int)$item['cones_received'] - ($ri ? (int)$ri['cones_received'] : 0);
+                                    $conesUsedExcludingCurrent = (int)$item['cones_used'] - ($ri ? (int)$ri['cones_used'] : 0);
+                                    $pendingCones = $conesIssued - ($conesRecdExcludingCurrent + $conesUsedExcludingCurrent);
+
+                                    $conesReceivedVal = $ri ? (int)$ri['cones_received'] : 0;
+                                    $conesUsedVal = $ri ? (int)$ri['cones_used'] : 0;
+                                    ?>
                                     <tr class="item-row" data-item-id="<?= $item['id'] ?>" data-issued="<?= $issued ?>"
-                                        data-pending="<?= $pending ?>" data-raw-cost="<?= $rawCost ?>">
+                                        data-pending="<?= $pending ?>" data-pending-cones="<?= $pendingCones ?>" data-raw-cost="<?= $rawCost ?>">
                                         <td class="py-3">
                                             <strong><?= esc($item['mill_name']) ?> - <?= esc($item['yarn_count']) ?></strong><br>
                                             <small class="text-muted">
@@ -298,9 +325,7 @@
                                             <input type="hidden" name="items[<?= $item['id'] ?>][received_color]" value="<?= esc($item['current_color']) ?>">
                                         </td>
                                         <td class="text-center fw-semibold"><?= number_format($issued, 2) ?> Kg</td>
-                                        <td class="text-end">
-                                            <strong class="text-secondary">₹<?= number_format($issuedQtyCost, 2) ?></strong>
-                                        </td>
+                                        <td class="text-center fw-semibold"><?= $conesIssued ?></td>
                                         <td>
                                             <input type="number" step="0.01" name="items[<?= $item['id'] ?>][quantity_received_kg]"
                                                 class="form-control form-control-sm input-recd text-center"
@@ -308,9 +333,25 @@
                                             <small class="text-danger qty-error-msg" style="display:none; font-weight:bold;"></small>
                                         </td>
                                         <td>
+                                            <input type="number" name="items[<?= $item['id'] ?>][cones_received]"
+                                                class="form-control form-control-sm input-recd-cones text-center"
+                                                value="<?= $conesReceivedVal ?>" min="0" required>
+                                        </td>
+                                        <td>
                                             <input type="number" step="0.01" name="items[<?= $item['id'] ?>][quantity_used_kg]"
                                                 class="form-control form-control-sm input-used-qty text-center"
                                                 value="<?= number_format($qtyUsedVal, 2, '.', '') ?>" min="0" required>
+                                        </td>
+                                        <td>
+                                            <input type="number" name="items[<?= $item['id'] ?>][cones_used]"
+                                                class="form-control form-control-sm input-used-cones text-center"
+                                                value="<?= $conesUsedVal ?>" min="0" required>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="fw-bold text-primary lbl-pending-kgs"><?= number_format($pending, 2) ?></span> Kg
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="fw-bold text-primary lbl-pending-cones"><?= $pendingCones ?></span>
                                         </td>
                                         <td class="text-end">
                                             <span class="fw-bold lbl-used-yarn-cost" id="lbl-used-yarn-cost-<?= $item['id'] ?>">₹0.00</span>
@@ -456,9 +497,10 @@
         });
 
         // Auto-calculate used qty for warping/sizing
-        $(document).on('input', '.input-recd, .input-used-qty', function () {
+        $(document).on('input', '.input-recd, .input-used-qty, .input-recd-cones, .input-used-cones', function () {
             var $row = $(this).closest('tr');
             var pending = parseFloat($row.data('pending')) || 0;
+            var pendingCones = parseInt($row.data('pending-cones')) || 0;
             var recd = parseFloat($row.find('.input-recd').val()) || 0;
 
             // If the trigger was the received qty input, auto-populate the used qty as Issued Qty - Received Qty
@@ -467,9 +509,18 @@
                 var recdVal = parseFloat($(this).val()) || 0;
                 $row.find('.input-used-qty').val(Math.max(0, issued - recdVal).toFixed(2));
             }
+            if ($(this).hasClass('input-recd-cones')) {
+                var issuedCones = parseInt($row.data('pending-cones')) || 0;
+                var recdConesVal = parseInt($(this).val()) || 0;
+                $row.find('.input-used-cones').val(Math.max(0, issuedCones - recdConesVal));
+            }
 
             var used = parseFloat($row.find('.input-used-qty').val()) || 0;
             var totalAccounted = recd + used;
+
+            var recdCones = parseInt($row.find('.input-recd-cones').val()) || 0;
+            var usedCones = parseInt($row.find('.input-used-cones').val()) || 0;
+            var totalConesAccounted = recdCones + usedCones;
 
             // Server-side / Client-side validation: Total (Recd + Used) cannot exceed pending
             if (totalAccounted > pending) {
@@ -484,8 +535,10 @@
 
             // Remaining Pending = Pending - Total Accounted
             var remainingPending = Math.max(0, pending - totalAccounted);
+            var remainingPendingCones = Math.max(0, pendingCones - totalConesAccounted);
 
             $row.find('.lbl-pending-kgs').text(remainingPending.toFixed(2));
+            $row.find('.lbl-pending-cones').text(remainingPendingCones);
 
             calculateLandedCosts();
             validateSubmitButton();
@@ -508,7 +561,7 @@
         }
 
         // Recalculate on input change
-        $(document).on('input', '.input-job-charges, .expense-input, .input-beam-meters', function () {
+        $(document).on('input change', '.input-job-charges, .expense-input, .input-beam-meters, .input-recd-cones, .input-used-cones', function () {
             calculateLandedCosts();
         });
 
@@ -521,7 +574,7 @@
             var totalExpenses = transport + loading + packing + other;
             var jobRate = parseFloat($('#job_work_charges').val()) || 0;
 
-            // Calculate total received weight across all rows to pro-rate expenses
+            // Calculate total received weight across all rows to pro-rate expenses and flat job charges
             var totalReceivedWeight = 0;
             $('.item-row').each(function () {
                 var recd = parseFloat($(this).find('.input-recd').val()) || 0;
@@ -531,7 +584,7 @@
             var grandTotalLandedCost = 0;
             var totalReceivedYarnCost = 0;
             var totalUsedYarnCost = 0;
-            var totalJobWorkCost = 0;
+            var totalJobWorkCost = jobRate;
 
             // Calculate for each row
             $('.item-row').each(function () {
@@ -541,6 +594,7 @@
 
                 var recd = parseFloat($row.find('.input-recd').val()) || 0;
                 var shareOfExpense = totalReceivedWeight > 0 ? ((recd / totalReceivedWeight) * totalExpenses) : 0;
+                var shareOfJobWork = totalReceivedWeight > 0 ? ((recd / totalReceivedWeight) * jobRate) : 0;
 
                 var used = parseFloat($row.find('.input-used-qty').val()) || 0;
 
@@ -549,16 +603,12 @@
                 $('#lbl-used-yarn-cost-' + itemId).text('₹' + usedYarnCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
                 totalUsedYarnCost += usedYarnCost;
 
-                // Row-level job work cost (based on used qty - actual yarn processed)
-                var rowJobWorkCost = used * jobRate;
-                totalJobWorkCost += rowJobWorkCost;
-
                 // Received Yarn Cost (Landed) = Received Qty * Actual Yarn Cost (cost at time of sending to sizing)
                 var recdRawCost = recd * rawCost;
                 totalReceivedYarnCost += recdRawCost;
                 $row.find('.lbl-landed-cost').text('₹' + recdRawCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 
-                grandTotalLandedCost += recdRawCost + rowJobWorkCost + shareOfExpense;
+                grandTotalLandedCost += recdRawCost + shareOfJobWork + shareOfExpense;
             });
 
             // Calculate overall per meter

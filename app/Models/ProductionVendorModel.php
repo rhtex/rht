@@ -13,7 +13,7 @@ class ProductionVendorModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'name', 'business_type', 'gst_number', 'pan_number', 'phone', 'address', 'location', 'status', 'created_by', 'updated_by'
+        'name', 'business_type', 'gst_number', 'pan_number', 'phone', 'email', 'whatsapp_number', 'job_work_type', 'address', 'location', 'status', 'created_by', 'updated_by'
     ];
 
     protected $useTimestamps = true;
@@ -28,6 +28,9 @@ class ProductionVendorModel extends Model
         'gst_number'    => 'permit_empty|min_length[15]|max_length[15]|is_unique[production_vendors.gst_number,id,{id}]',
         'pan_number'    => 'permit_empty|min_length[10]|max_length[10]',
         'phone'         => 'permit_empty',
+        'email'         => 'permit_empty|valid_email|max_length[100]',
+        'whatsapp_number' => 'permit_empty|max_length[20]',
+        'job_work_type' => 'permit_empty',
         'status'        => 'in_list[active,inactive]',
     ];
     protected $validationMessages   = [];

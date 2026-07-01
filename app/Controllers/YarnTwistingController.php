@@ -94,6 +94,9 @@ class YarnTwistingController extends BaseController
                 'quantity_issued_kg' => (float)$item['quantity_issued_kg'],
             ];
 
+            $conesIssued = (int)($item['cones_issued'] ?? 0);
+            $itemData['cones_issued'] = $conesIssued;
+
             $this->dcItemModel->skipValidation(true);
             $this->dcItemModel->save($itemData);
 
@@ -119,6 +122,7 @@ class YarnTwistingController extends BaseController
                 'csp'           => $item['csp'] ?: null,
                 'warp_weft'     => $item['warp_weft'],
                 'quantity_kg'   => -((float)$item['quantity_issued_kg']),
+                'quantity_cones'=> -$conesIssued,
                 'cost_per_kg'   => $costPerKg,
                 'warehouse'     => 'Main Warehouse',
                 'movement_type' => 'Issue_Job_Work',

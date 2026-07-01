@@ -19,10 +19,12 @@ class AddBankTransactionIdToAgentPayments extends Migration
             ],
         ];
         
-        $this->forge->addColumn('agent_payments', $fields);
-        
-        // Add foreign key constraint
-        $this->forge->addForeignKey('bank_transaction_id', 'bank_transactions', 'id', 'SET NULL', 'CASCADE', 'agent_payments');
+        if (!$this->db->fieldExists('bank_transaction_id', 'agent_payments')) {
+            $this->forge->addColumn('agent_payments', $fields);
+            
+            // Add foreign key constraint
+            $this->forge->addForeignKey('bank_transaction_id', 'bank_transactions', 'id', 'SET NULL', 'CASCADE', 'agent_payments');
+        }
     }
 
     public function down()

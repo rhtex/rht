@@ -8,14 +8,16 @@ class AddDeliveryStatusToInvoices extends Migration
 {
     public function up()
     {
-        $this->forge->addColumn('invoices', [
-            'delivery_status' => [
-                'type' => 'ENUM',
-                'constraint' => ['Pending', 'In Transit', 'Delivered', 'Cancelled'],
-                'default' => 'Pending',
-                'after' => 'waybill_image'
-            ],
-        ]);
+        if (!$this->db->fieldExists('delivery_status', 'invoices')) {
+            $this->forge->addColumn('invoices', [
+                'delivery_status' => [
+                    'type' => 'ENUM',
+                    'constraint' => ['Pending', 'In Transit', 'Delivered', 'Cancelled'],
+                    'default' => 'Pending',
+                    'after' => 'waybill_image'
+                ],
+            ]);
+        }
     }
 
     public function down()

@@ -76,7 +76,7 @@
                                     <option value="<?= htmlspecialchars(json_encode($y)) ?>">
                                         <?= esc($y['brand_mill']) ?> - <?= esc($y['yarn_count']) ?> (Lot:
                                         <?= esc($y['lot_number'] ?: '-') ?>, Color: <?= esc($y['color']) ?>) [Stock:
-                                        <?= number_format($y['quantity_available'], 2) ?> Kg]
+                                        <?= number_format($y['quantity_available'], 2) ?> Kg | Cones: <?= (int)($y['cones_available'] ?? 0) ?>]
                                     </option>
                                 <?php endforeach; ?>
                             </select>
@@ -93,7 +93,11 @@
                             <label class="form-label">Quantity to Issue (Kg)</label>
                             <input type="number" step="0.01" id="input-issue-qty" class="form-control" min="0.01">
                         </div>
-                        <div class="col-md-3 mb-2">
+                        <div class="col-md-2 mb-2">
+                            <label class="form-label">Cones to Issue</label>
+                            <input type="number" id="input-issue-cones" class="form-control" min="0">
+                        </div>
+                        <div class="col-md-2 mb-2">
                             <button type="button" id="btn-add-item" class="btn btn-dark w-100"><i
                                     class="fas fa-plus"></i> Add Item</button>
                         </div>
@@ -113,12 +117,16 @@
                             <th>CSP</th>
                             <th>Color</th>
                             <th>Qty to Issue (Kg)</th>
+                            <th>Cones Issued</th>
                             <th width="80">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (isset($dcItems)): ?>
-                            <?php foreach ($dcItems as $index => $item): ?>
+                        <?php 
+                        $renderedItems = isset($dcItems) ? $dcItems : (old('items') ?: []);
+                        if (!empty($renderedItems)): 
+                            foreach ($renderedItems as $index => $item): 
+                        ?>
                                 <tr class="item-row">
                                     <td><input type="hidden" name="items[<?= $index ?>][mill_name]"
                                             value="<?= esc($item['mill_name']) ?>"><?= esc($item['mill_name']) ?></td>
@@ -128,7 +136,7 @@
                                         <input type="hidden" name="items[<?= $index ?>][warp_weft]" value="<?= esc($item['warp_weft']) ?>">
                                         <?php if ($item['warp_weft'] === 'Warp'): ?>
                                             Warp - 
-                                            <select name="items[<?= $index ?>][warp_yarn_type]" class="form-select form-select-sm d-inline-block w-auto py-0 px-1" style="font-size: 0.8rem; height: auto;">
+                                            <select name="items[<?= $index ?>][warp_yarn_type]" class="form-select form-select-sm d-inline-block w-auto py-0 pe-4 ps-2" style="font-size: 0.8rem; height: auto; display: inline-block;">
                                                 <option value="body" <?= ($item['warp_yarn_type'] ?? '') === 'body' ? 'selected' : '' ?>>body</option>
                                                 <option value="border" <?= ($item['warp_yarn_type'] ?? '') === 'border' ? 'selected' : '' ?>>border</option>
                                                 <option value="kattam" <?= ($item['warp_yarn_type'] ?? '') === 'kattam' ? 'selected' : '' ?>>kattam</option>
@@ -149,7 +157,8 @@
                                             class="row-yarn-color"><?= esc($item['current_color']) ?></td>
                                     <td><input type="hidden" name="items[<?= $index ?>][quantity_issued_kg]"
                                             value="<?= esc($item['quantity_issued_kg']) ?>"><strong><?= number_format($item['quantity_issued_kg'], 2) ?>
-                                            Kg</strong></td>
+                                             Kg</strong></td>
+                                    <td><input type="number" name="items[<?= $index ?>][cones_issued]" class="form-control form-control-sm" value="<?= (int)($item['cones_issued'] ?? 0) ?>" min="0"></td>
                                     <td><button type="button" class="btn btn-sm btn-danger btn-remove-item"><i
                                                 class="fas fa-trash"></i></button></td>
                                 </tr>
@@ -178,8 +187,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if (isset($colorEnds)): ?>
-                                        <?php foreach ($colorEnds as $index => $ce): ?>
+                                    <?php 
+                                    $renderedEnds = isset($colorEnds) ? $colorEnds : (old('ends_breakdown') ?: []);
+                                    if (!empty($renderedEnds)): 
+                                        foreach ($renderedEnds as $index => $ce): 
+                                    ?>
                                             <tr class="ends-row">
                                                 <td>
                                                     <select name="ends_breakdown[<?= $index ?>][color]"
@@ -226,11 +238,21 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (isset($beams)): ?>
-                                            <?php foreach ($beams as $b): ?>
+                                        <?php 
+                                        $renderedBeams = [];
+                                        if (isset($beams)) {
+                                            foreach ($beams as $b) {
+                                                $renderedBeams[] = $b['beam_number'];
+                                            }
+                                        } else if (old('beams')) {
+                                            $renderedBeams = old('beams');
+                                        }
+                                        if (!empty($renderedBeams)):
+                                            foreach ($renderedBeams as $beamNumber):
+                                        ?>
                                                 <tr class="beam-row">
                                                     <td><input type="hidden" name="beams[]"
-                                                            value="<?= esc($b['beam_number']) ?>"><?= esc($b['beam_number']) ?>
+                                                            value="<?= esc($beamNumber) ?>"><?= esc($beamNumber) ?>
                                                     </td>
                                                     <td><button type="button"
                                                             class="btn btn-sm btn-danger btn-remove-beam-row"><i
@@ -263,6 +285,7 @@
         $('#btn-add-item').click(function () {
             var rawJson = $('#select-yarn-inventory').val();
             var qty = parseFloat($('#input-issue-qty').val()) || 0;
+            var cones = parseInt($('#input-issue-cones').val()) || 0;
 
             if (!rawJson) { alert('Please select a yarn.'); return; }
             if (qty <= 0) { alert('Please enter a valid quantity.'); return; }
@@ -273,13 +296,17 @@
                 alert('Cannot issue ' + qty.toFixed(2) + ' Kg. Only ' + available.toFixed(2) + ' Kg is available in stock.');
                 return;
             }
+            var availCones = parseInt(y.cones_available) || 0;
+            if (cones > availCones) {
+                alert('Warning: Issuing ' + cones + ' cones exceeds available stock (' + availCones + ' Cones).');
+            }
 
             var warpYarnType = '';
             var warpWeftCell = '';
 
             if (y.warp_weft === 'Warp') {
                 warpYarnType = $('#select-warp-type').val();
-                warpWeftCell = 'Warp - <select name="items[' + itemIndex + '][warp_yarn_type]" class="form-select form-select-sm d-inline-block w-auto py-0 px-1" style="font-size: 0.8rem; height: auto;">' +
+                warpWeftCell = 'Warp - <select name="items[' + itemIndex + '][warp_yarn_type]" class="form-select form-select-sm d-inline-block w-auto py-0 pe-4 ps-2" style="font-size: 0.8rem; height: auto;">' +
                     '<option value="body"' + (warpYarnType === 'body' ? ' selected' : '') + '>body</option>' +
                     '<option value="border"' + (warpYarnType === 'border' ? ' selected' : '') + '>border</option>' +
                     '<option value="kattam"' + (warpYarnType === 'kattam' ? ' selected' : '') + '>kattam</option>' +
@@ -299,6 +326,7 @@
                 '<td><input type="hidden" name="items[' + itemIndex + '][csp]" value="' + (y.csp || '') + '">' + (y.csp || '-') + '</td>' +
                 '<td><input type="hidden" name="items[' + itemIndex + '][yarn_type]" value="' + y.yarn_type + '"><input type="hidden" name="items[' + itemIndex + '][current_color]" value="' + y.color + '" class="row-yarn-color">' + y.color + '</td>' +
                 '<td><input type="hidden" name="items[' + itemIndex + '][quantity_issued_kg]" value="' + qty + '"><strong>' + qty.toFixed(2) + ' Kg</strong></td>' +
+                '<td><input type="number" name="items[' + itemIndex + '][cones_issued]" class="form-control form-control-sm" value="' + cones + '" min="0"></td>' +
                 '<td><button type="button" class="btn btn-sm btn-danger btn-remove-item"><i class="fas fa-trash"></i></button></td>' +
                 '</tr>';
 
@@ -307,6 +335,7 @@
 
             $('#select-yarn-inventory').val('');
             $('#input-issue-qty').val('');
+            $('#input-issue-cones').val('');
             $('#select-warp-type').val('body');
             $('#warp-type-container').hide();
             $('#available-stock-lbl').hide();

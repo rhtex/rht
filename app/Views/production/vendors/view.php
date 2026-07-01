@@ -55,6 +55,29 @@
                             <td><?= esc($vendor['phone'] ?: '-') ?></td>
                         </tr>
                         <tr>
+                            <th>Email</th>
+                            <td><?= esc($vendor['email'] ?: '-') ?></td>
+                        </tr>
+                        <tr>
+                            <th>WhatsApp No</th>
+                            <td><?= esc($vendor['whatsapp_number'] ?: '-') ?></td>
+                        </tr>
+                        <tr>
+                            <th>Type of Job Work</th>
+                            <td>
+                                <?php if (!empty($vendor['job_work_type'])): ?>
+                                    <?php 
+                                    $types = explode(',', $vendor['job_work_type']);
+                                    foreach ($types as $type):
+                                    ?>
+                                        <span class="badge bg-info text-dark"><?= esc(trim($type)) ?></span>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <span class="text-muted">-</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
                             <th>Location</th>
                             <td>
                                 <?php if (!empty($vendor['location'])) : ?>

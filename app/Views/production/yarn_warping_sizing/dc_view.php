@@ -3,35 +3,55 @@
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1>Warping & Sizing DC Details</h1>
+        <h1 class="fw-bold text-dark"><i class="fas fa-file-invoice text-primary me-2"></i>Warping & Sizing DC Details</h1>
     </div>
     <div class="col-sm-6 text-end">
-        <a href="<?= site_url('production/yarn-warping-sizing') ?>" class="btn btn-secondary"><i
-                class="fas fa-list"></i> List</a>
+        <a href="<?= site_url('production/yarn-warping-sizing') ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-none"><i class="fas fa-list me-1"></i> List</a>
         <?php if ($dc['status'] !== 'Completed' && $dc['status'] !== 'Cancelled'): ?>
-            <a href="<?= site_url('production/yarn-warping-sizing/receipt-create/' . $dc['id']) ?>" class="btn btn-success"><i
-                    class="fas fa-download"></i> Receive Beams</a>
+            <a href="<?= site_url('production/yarn-warping-sizing/receipt-create/' . $dc['id']) ?>" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i class="fas fa-download me-1"></i> Receive Beams</a>
         <?php endif; ?>
     </div>
 </div>
 <?= $this->endSection() ?>
 <?= $this->section('content') ?>
-<div class="card card-outline card-info">
-    <div class="card-body">
-
-        <div class="row mb-4">
-            <div class="col-sm-4">
-                <h5>Vendor (Sizer)</h5>
-                <strong><?= esc($dc['vendor_name']) ?></strong>
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4" style="border-radius: 12px;">
+    <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);">
+        <h5 class="card-title text-white mb-0 fw-bold"><i class="fas fa-receipt me-2"></i>DC: <?= esc($dc['dc_number']) ?></h5>
+    </div>
+    <div class="card-body p-4 bg-white">
+        <!-- Info Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="p-3 bg-light rounded-3 border border-light-subtle h-100">
+                    <span class="text-uppercase text-xs text-muted fw-bold d-block mb-1"><i class="fas fa-user-tie me-1"></i> Vendor (Sizer)</span>
+                    <strong class="text-dark" style="font-size: 1rem;"><?= esc($dc['vendor_name']) ?></strong>
+                </div>
             </div>
-            <div class="col-sm-4">
-                <b>DC No:</b> <?= esc($dc['dc_number']) ?><br>
-                <b>Date:</b> <?= date('d-m-Y', strtotime($dc['dc_date'])) ?><br>
-                <b>Status:</b> <span class="badge bg-primary"><?= esc($dc['status']) ?></span>
+            <div class="col-md-3">
+                <div class="p-3 bg-light rounded-3 border border-light-subtle h-100">
+                    <span class="text-uppercase text-xs text-muted fw-bold d-block mb-1"><i class="far fa-calendar-alt me-1"></i> DC Date</span>
+                    <strong class="text-secondary" style="font-size: 0.95rem;"><?= date('d-M-Y', strtotime($dc['dc_date'])) ?></strong>
+                </div>
             </div>
-            <div class="col-sm-4">
-                <b>Design Pattern:</b> <?= esc($dc['design_pattern'] ?: '-') ?><br>
-                <b>Total Ends:</b> <strong><?= esc($dc['total_ends'] ?: '0') ?></strong>
+            <div class="col-md-3">
+                <div class="p-3 bg-light rounded-3 border border-light-subtle h-100">
+                    <span class="text-uppercase text-xs text-muted fw-bold d-block mb-1"><i class="fas fa-info-circle me-1"></i> Status</span>
+                    <?php 
+                    $statusClass = 'secondary';
+                    if ($dc['status'] === 'Open') $statusClass = 'info';
+                    if ($dc['status'] === 'Partially Received') $statusClass = 'warning text-dark';
+                    if ($dc['status'] === 'Completed') $statusClass = 'success';
+                    if ($dc['status'] === 'Cancelled') $statusClass = 'danger';
+                    ?>
+                    <span class="badge rounded-pill bg-<?= $statusClass ?> text-uppercase mt-1" style="font-size: 0.75rem;"><?= esc($dc['status']) ?></span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-light rounded-3 border border-light-subtle h-100">
+                    <span class="text-uppercase text-xs text-muted fw-bold d-block mb-1"><i class="fas fa-fingerprint me-1"></i> Design Pattern / Ends</span>
+                    <strong class="text-dark" style="font-size: 0.9rem;"><?= esc($dc['design_pattern'] ?: '-') ?></strong>
+                    <span class="text-muted small d-block">Ends: <?= esc($dc['total_ends'] ?: '0') ?></span>
+                </div>
             </div>
         </div>
 
@@ -44,15 +64,20 @@
                     <th>Warp/Weft</th>
                     <th>Color</th>
                     <th>Qty Issued (Kg)</th>
+                    <th>Cones Issued</th>
                     <th>Qty Received (Kg)</th>
-                    <th>Qty Wastage (Kg)</th>
-                    <th>Pending (Kg)</th>
+                    <th>Cones Received</th>
+                    <th>Qty Used (Wastage) (Kg)</th>
+                    <th>Cones Used</th>
+                    <th>Pending Qty (Kg)</th>
+                    <th>Pending Cones</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($items as $item): ?>
                     <?php
                     $pending = $item['quantity_issued_kg'] - ($item['quantity_received_kg'] + $item['quantity_wastage_kg']);
+                    $pendingCones = $item['cones_issued'] - ($item['cones_received'] + $item['cones_used']);
                     ?>
                     <tr>
                         <td><?= esc($item['mill_name']) ?></td>
@@ -60,9 +85,13 @@
                         <td><?= esc($item['warp_weft']) ?><?= !empty($item['warp_yarn_type']) ? ' (' . esc($item['warp_yarn_type']) . ')' : '' ?></td>
                         <td><?= esc($item['current_color']) ?><?= !empty($item['warp_yarn_type']) ? ' (' . esc($item['warp_yarn_type']) . ')' : '' ?></td>
                         <td><?= number_format($item['quantity_issued_kg'], 2) ?> Kg</td>
+                        <td><strong><?= (int)$item['cones_issued'] ?></strong></td>
                         <td class="text-success"><?= number_format($item['quantity_received_kg'], 2) ?> Kg</td>
+                        <td class="text-success"><strong><?= (int)$item['cones_received'] ?></strong></td>
                         <td class="text-warning"><?= number_format($item['quantity_wastage_kg'], 2) ?> Kg</td>
-                        <td><strong><?= number_format(max(0, $pending), 2) ?> Kg</strong></td>
+                        <td class="text-warning"><strong><?= (int)$item['cones_used'] ?></strong></td>
+                        <td><strong class="<?= $pending > 0 ? 'text-danger' : 'text-success' ?>"><?= number_format(max(0, $pending), 2) ?> Kg</strong></td>
+                        <td><strong class="<?= $pendingCones > 0 ? 'text-danger' : 'text-success' ?>"><?= max(0, $pendingCones) ?></strong></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -126,23 +155,22 @@
                 $totalJobWorkCost = 0;
                 $totalRawYarnCost = 0;
                 ?>
-                <div class="card card-outline card-success mb-4 shadow-sm">
-                    <div class="card-header bg-light">
+                <div class="card border border-success-subtle mb-4 shadow-sm overflow-hidden">
+                    <div class="card-header bg-success-subtle border-bottom border-success-subtle py-2">
                         <div class="row align-items-center">
                             <div class="col-md-6 col-sm-12">
-                                <h5 class="mb-0 text-success fw-bold">
-                                    <i class="fas fa-file-invoice me-2"></i>Receipt No: <?= esc($r['receipt_number']) ?>
-                                </h5>
-                                <small class="text-muted"><i class="far fa-calendar-alt me-1"></i>Date: <?= date('d-m-Y', strtotime($r['receipt_date'])) ?></small>
+                                <span class="fw-bold text-success">
+                                    <i class="fas fa-check-double me-1"></i> Receipt No: <?= esc($r['receipt_number']) ?>
+                                </span>
+                                <span class="text-muted ms-2">| Date: <?= date('d-M-Y', strtotime($r['receipt_date'])) ?></span>
                             </div>
                             <div class="col-md-6 col-sm-12 text-md-end mt-2 mt-md-0">
                                 <a href="<?= site_url('production/yarn-warping-sizing/receipt-view/' . $r['id']) ?>"
-                                    class="btn btn-xs btn-info"><i class="fas fa-eye"></i> View</a>
+                                    class="btn btn-xs btn-outline-info rounded-pill px-3"><i class="fas fa-eye me-1"></i> View Details</a>
                                 <a href="<?= site_url('production/yarn-warping-sizing/receipt-edit/' . $r['id']) ?>"
-                                    class="btn btn-xs btn-warning"><i class="fas fa-edit"></i> Edit</a>
+                                    class="btn btn-xs btn-outline-warning rounded-pill px-3"><i class="fas fa-edit me-1"></i> Edit</a>
                                 <a href="<?= site_url('production/yarn-warping-sizing/receipt-delete/' . $r['id']) ?>"
-                                    class="btn btn-xs btn-danger" onclick="return confirm('Revert and delete this receipt?')"><i
-                                        class="fas fa-trash"></i> Delete</a>
+                                    class="btn btn-xs btn-outline-danger btn-danger-bg rounded-pill px-3" onclick="return confirm('Revert and delete this receipt?')"><i class="fas fa-trash me-1"></i> Delete</a>
                             </div>
                         </div>
                     </div>
@@ -188,7 +216,9 @@
                                     <tr style="background: #f8f9fa;">
                                         <th>Yarn Description</th>
                                         <th class="text-center">Recd Qty (Loaded) (Kg)</th>
+                                        <th class="text-center">Recd Cones</th>
                                         <th class="text-center">Used Qty (Kg)</th>
+                                        <th class="text-center">Used Cones</th>
                                         <th class="text-end">Raw Cost (₹/Kg)</th>
                                         <th class="text-end">Raw Yarn Cost (₹)</th>
                                         <th class="text-end">Job Charges (₹/Kg)</th>
@@ -200,17 +230,19 @@
                                     <?php foreach ($r['items'] as $ri): ?>
                                         <?php
                                         $recd = (float)$ri['quantity_received_kg'];
+                                        $recdCones = (int)($ri['cones_received'] ?? 0);
                                         $used = (float)$ri['quantity_wastage_kg']; // Form's Used Qty
+                                        $usedCones = (int)($ri['cones_used'] ?? 0);
                                         $rawCost = (float)$ri['raw_cost'];
-                                        $jobRate = (float)$ri['job_work_charges'];
+                                        $jobRate = (float)$ri['job_work_charges']; // Flat total charges
 
                                         $rawYarnCost = $recd * $rawCost;
-                                        $jobWorkCost = $used * $jobRate;
+                                        $shareOfJobWork = $totalReceivedWeight > 0 ? (($recd / $totalReceivedWeight) * $jobRate) : 0;
                                         $shareOfExpense = $totalReceivedWeight > 0 ? (($recd / $totalReceivedWeight) * $totalExpenses) : 0;
-                                        $itemLandedCost = $rawYarnCost + $jobWorkCost + $shareOfExpense;
+                                        $itemLandedCost = $rawYarnCost + $shareOfJobWork + $shareOfExpense;
 
                                         $totalRawYarnCost += $rawYarnCost;
-                                        $totalJobWorkCost += $jobWorkCost;
+                                        $totalJobWorkCost = $jobRate; // Flat total charges
                                         $grandTotalLandedCost += $itemLandedCost;
                                         ?>
                                         <tr>
@@ -219,11 +251,12 @@
                                                 <small class="text-muted"><?= esc($ri['yarn_type']) ?> | <?= esc($ri['warp_weft']) ?> | <?= esc($ri['current_color']) ?><?= !empty($ri['warp_yarn_type']) ? ' (' . esc($ri['warp_yarn_type']) . ')' : '' ?></small>
                                             </td>
                                             <td class="text-center fw-semibold"><?= number_format($recd, 2) ?> Kg</td>
+                                            <td class="text-center"><?= $recdCones ?></td>
                                             <td class="text-center"><?= number_format($used, 2) ?> Kg</td>
+                                            <td class="text-center"><?= $usedCones ?></td>
                                             <td class="text-end">₹<?= number_format($rawCost, 2) ?></td>
                                             <td class="text-end">₹<?= number_format($rawYarnCost, 2) ?></td>
-                                            <td class="text-end">₹<?= number_format($jobRate, 2) ?></td>
-                                            <td class="text-end">₹<?= number_format($jobWorkCost, 2) ?></td>
+                                            <td class="text-end" colspan="2">₹<?= number_format($shareOfJobWork, 2) ?> (Pro-rated)</td>
                                             <td class="text-end fw-bold text-success">₹<?= number_format($itemLandedCost, 2) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -242,6 +275,7 @@
                                                 <tr class="bg-light text-muted">
                                                     <th>Beam No</th>
                                                     <th>Status</th>
+                                                    <th>Ends</th>
                                                     <th>Sizing No</th>
                                                     <th>Color</th>
                                                     <th>Sizing Date</th>
@@ -257,6 +291,7 @@
                                                                 <?= esc($rb['returned_status']) ?>
                                                             </span>
                                                         </td>
+                                                        <td class="fw-semibold"><?= esc($rb['ends'] ?: '-') ?></td>
                                                         <td><?= esc($rb['sizing_no'] ?: '-') ?></td>
                                                         <td><?= esc($rb['color'] ?: '-') ?></td>
                                                         <td><?= $rb['return_date'] ? date('d-m-Y', strtotime($rb['return_date'])) : '-' ?></td>

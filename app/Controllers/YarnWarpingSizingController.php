@@ -145,6 +145,9 @@ class YarnWarpingSizingController extends BaseController
                 'quantity_issued_kg' => (float)$item['quantity_issued_kg'],
             ];
 
+            $conesIssued = (int)($item['cones_issued'] ?? 0);
+            $itemData['cones_issued'] = $conesIssued;
+
             $this->dcItemModel->skipValidation(true);
             $this->dcItemModel->save($itemData);
 
@@ -170,6 +173,7 @@ class YarnWarpingSizingController extends BaseController
                 'csp'           => $item['csp'] ?: null,
                 'warp_weft'     => $item['warp_weft'],
                 'quantity_kg'   => -((float)$item['quantity_issued_kg']),
+                'quantity_cones'=> -$conesIssued,
                 'cost_per_kg'   => $costPerKg,
                 'warehouse'     => 'Main Warehouse',
                 'movement_type' => 'Issue_Job_Work',
@@ -392,8 +396,8 @@ class YarnWarpingSizingController extends BaseController
                 'lot_number'         => $item['lot_number'] ?: null,
                 'yarn_type'          => $item['yarn_type'],
                 'current_color'      => $item['current_color'] ?: 'Raw',
-                'quantity_issued_kg' => (float)$item['quantity_issued_kg'],
-            ];
+            $conesIssued = (int)($item['cones_issued'] ?? 0);
+            $itemData['cones_issued'] = $conesIssued;
 
             $this->dcItemModel->skipValidation(true);
             $this->dcItemModel->save($itemData);
@@ -420,6 +424,7 @@ class YarnWarpingSizingController extends BaseController
                 'csp'           => $item['csp'] ?: null,
                 'warp_weft'     => $item['warp_weft'],
                 'quantity_kg'   => -((float)$item['quantity_issued_kg']),
+                'quantity_cones'=> -$conesIssued,
                 'cost_per_kg'   => $costPerKg,
                 'warehouse'     => 'Main Warehouse',
                 'movement_type' => 'Issue_Job_Work',
@@ -603,22 +608,31 @@ class YarnWarpingSizingController extends BaseController
                 return redirect()->back()->withInput()->with('error', 'Error: Total cannot exceed pending.');
             }
 
+            $conesReceived = (int)($item['cones_received'] ?? 0);
+            $conesUsed = (int)($item['cones_used'] ?? 0);
+
             $this->receiptItemModel->skipValidation(true);
             $this->receiptItemModel->save([
                 'receipt_id'           => $receiptId,
                 'dc_item_id'           => $dcItemId,
                 'quantity_received_kg' => $qtyReceived,
                 'quantity_wastage_kg'  => $qtyWastage,
+                'cones_received'       => $conesReceived,
+                'cones_used'           => $conesUsed,
                 'job_work_charges'     => $jobCharges,
             ]);
 
             $newReceived = (float)$dcItem['quantity_received_kg'] + $qtyReceived;
             $newWastage = (float)$dcItem['quantity_wastage_kg'] + $qtyWastage;
+            $newConesReceived = (int)$dcItem['cones_received'] + $conesReceived;
+            $newConesUsed = (int)$dcItem['cones_used'] + $conesUsed;
             
             $this->dcItemModel->skipValidation(true);
             $this->dcItemModel->update($dcItemId, [
                 'quantity_received_kg' => $newReceived,
-                'quantity_wastage_kg'  => $newWastage
+                'quantity_wastage_kg'  => $newWastage,
+                'cones_received'       => $newConesReceived,
+                'cones_used'           => $newConesUsed
             ]);
 
             $issuanceQuery = $this->movementModel->where('movement_type', 'Issue_Job_Work')
@@ -638,9 +652,10 @@ class YarnWarpingSizingController extends BaseController
             $rawCostPerKg = $issuanceMovement ? abs((float)$issuanceMovement['cost_per_kg']) : 0;
 
             $itemSharedExpense = $totalReceivedWeight > 0 ? (($qtyReceived / $totalReceivedWeight) * $totalSharedExpenses) : 0;
+            $itemSharedJobWork = $totalReceivedWeight > 0 ? (($qtyReceived / $totalReceivedWeight) * $jobCharges) : 0;
 
             $proRatedRawCostConsumed = $qtyReceived * $rawCostPerKg;
-            $itemTotalLandedCost = $proRatedRawCostConsumed + ($qtyWastage * $jobCharges) + $itemSharedExpense;
+            $itemTotalLandedCost = $proRatedRawCostConsumed + $itemSharedJobWork + $itemSharedExpense;
             $finalLandedCostPerKg = $qtyReceived > 0 ? ($itemTotalLandedCost / $qtyReceived) : 0;
 
             if ($qtyReceived > 0) {
@@ -687,10 +702,12 @@ class YarnWarpingSizingController extends BaseController
                 $sizingNo = ($returnStatus === 'Loaded') ? ($beamData['sizing_no'] ?? null) : null;
                 $beamColor = ($returnStatus === 'Loaded') ? ($beamData['color'] ?? null) : null;
                 $returnDate = ($returnStatus === 'Loaded') ? ($beamData['return_date'] ?? null) : null;
+                $ends = ($returnStatus === 'Loaded') ? (int)($beamData['ends'] ?? 0) : null;
 
                 $this->dcBeamModel->where('dc_id', $dcId)->where('beam_number', $beamNum)->set([
                     'receipt_id'      => $receiptId,
                     'returned_status' => $returnStatus,
+                    'ends'            => $ends,
                     'meters'          => $meters,
                     'sizing_no'       => $sizingNo,
                     'color'           => $beamColor,
@@ -823,10 +840,14 @@ class YarnWarpingSizingController extends BaseController
             if ($dcItem) {
                 $newReceived = max(0, (float)$dcItem['quantity_received_kg'] - (float)$ri['quantity_received_kg']);
                 $newWastage = max(0, (float)$dcItem['quantity_wastage_kg'] - (float)$ri['quantity_wastage_kg']);
+                $newConesRecd = max(0, (int)$dcItem['cones_received'] - (int)($ri['cones_received'] ?? 0));
+                $newConesUsed = max(0, (int)$dcItem['cones_used'] - (int)($ri['cones_used'] ?? 0));
                 
                 $this->dcItemModel->update($ri['dc_item_id'], [
                     'quantity_received_kg' => $newReceived,
-                    'quantity_wastage_kg'  => $newWastage
+                    'quantity_wastage_kg'  => $newWastage,
+                    'cones_received'       => $newConesRecd,
+                    'cones_used'           => $newConesUsed
                 ]);
             }
         }
@@ -904,20 +925,29 @@ class YarnWarpingSizingController extends BaseController
                 return redirect()->back()->withInput()->with('error', 'Error: Total cannot exceed pending.');
             }
 
+            $conesReceived = (int)($item['cones_received'] ?? 0);
+            $conesUsed = (int)($item['cones_used'] ?? 0);
+
             $this->receiptItemModel->save([
                 'receipt_id'           => $id,
                 'dc_item_id'           => $dcItemId,
                 'quantity_received_kg' => $qtyReceived,
                 'quantity_wastage_kg'  => $qtyWastage,
+                'cones_received'       => $conesReceived,
+                'cones_used'           => $conesUsed,
                 'job_work_charges'     => $jobCharges,
             ]);
 
             $newReceived = (float)$dcItem['quantity_received_kg'] + $qtyReceived;
             $newWastage = (float)$dcItem['quantity_wastage_kg'] + $qtyWastage;
+            $newConesReceived = (int)$dcItem['cones_received'] + $conesReceived;
+            $newConesUsed = (int)$dcItem['cones_used'] + $conesUsed;
             
             $this->dcItemModel->update($dcItemId, [
                 'quantity_received_kg' => $newReceived,
-                'quantity_wastage_kg'  => $newWastage
+                'quantity_wastage_kg'  => $newWastage,
+                'cones_received'       => $newConesReceived,
+                'cones_used'           => $newConesUsed
             ]);
 
             $issuanceQuery = $this->movementModel->where('movement_type', 'Issue_Job_Work')
@@ -937,9 +967,10 @@ class YarnWarpingSizingController extends BaseController
             $rawCostPerKg = $issuanceMovement ? abs((float)$issuanceMovement['cost_per_kg']) : 0;
 
             $itemSharedExpense = $totalReceivedWeight > 0 ? (($qtyReceived / $totalReceivedWeight) * $totalSharedExpenses) : 0;
+            $itemSharedJobWork = $totalReceivedWeight > 0 ? (($qtyReceived / $totalReceivedWeight) * $jobCharges) : 0;
 
             $proRatedRawCostConsumed = $qtyReceived * $rawCostPerKg;
-            $itemTotalLandedCost = $proRatedRawCostConsumed + ($qtyWastage * $jobCharges) + $itemSharedExpense;
+            $itemTotalLandedCost = $proRatedRawCostConsumed + $itemSharedJobWork + $itemSharedExpense;
             $finalLandedCostPerKg = $qtyReceived > 0 ? ($itemTotalLandedCost / $qtyReceived) : 0;
 
             if ($qtyReceived > 0) {
@@ -986,10 +1017,12 @@ class YarnWarpingSizingController extends BaseController
                 $sizingNo = ($returnStatus === 'Loaded') ? ($beamData['sizing_no'] ?? null) : null;
                 $beamColor = ($returnStatus === 'Loaded') ? ($beamData['color'] ?? null) : null;
                 $returnDate = ($returnStatus === 'Loaded') ? ($beamData['return_date'] ?? null) : null;
+                $ends = ($returnStatus === 'Loaded') ? (int)($beamData['ends'] ?? 0) : null;
 
                 $this->dcBeamModel->where('dc_id', $dcId)->where('beam_number', $beamNum)->set([
                     'receipt_id'      => $id,
                     'returned_status' => $returnStatus,
+                    'ends'            => $ends,
                     'meters'          => $meters,
                     'sizing_no'       => $sizingNo,
                     'color'           => $beamColor,
@@ -1068,11 +1101,15 @@ class YarnWarpingSizingController extends BaseController
             if ($dcItem) {
                 $newReceived = max(0, (float)$dcItem['quantity_received_kg'] - (float)$ri['quantity_received_kg']);
                 $newWastage = max(0, (float)$dcItem['quantity_wastage_kg'] - (float)$ri['quantity_wastage_kg']);
+                $newConesRecd = max(0, (int)$dcItem['cones_received'] - (int)($ri['cones_received'] ?? 0));
+                $newConesUsed = max(0, (int)$dcItem['cones_used'] - (int)($ri['cones_used'] ?? 0));
                 
                 $this->dcItemModel->skipValidation(true);
                 $this->dcItemModel->update($ri['dc_item_id'], [
                     'quantity_received_kg' => $newReceived,
-                    'quantity_wastage_kg'  => $newWastage
+                    'quantity_wastage_kg'  => $newWastage,
+                    'cones_received'       => $newConesRecd,
+                    'cones_used'           => $newConesUsed
                 ]);
             }
         }

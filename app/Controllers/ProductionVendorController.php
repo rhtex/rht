@@ -52,6 +52,12 @@ class ProductionVendorController extends BaseController
         $data = $this->request->getPost();
         $data['created_by'] = session('user_id');
 
+        if (isset($data['job_work_types']) && is_array($data['job_work_types'])) {
+            $data['job_work_type'] = implode(', ', $data['job_work_types']);
+        } else {
+            $data['job_work_type'] = '';
+        }
+
         $this->vendorModel->save($data);
         return redirect()->to('production/vendors')->with('success', 'Vendor created successfully.');
     }
@@ -79,6 +85,12 @@ class ProductionVendorController extends BaseController
 
         $data = $this->request->getPost();
         $data['updated_by'] = session('user_id');
+
+        if (isset($data['job_work_types']) && is_array($data['job_work_types'])) {
+            $data['job_work_type'] = implode(', ', $data['job_work_types']);
+        } else {
+            $data['job_work_type'] = '';
+        }
 
         $this->vendorModel->update($id, $data);
         return redirect()->to('production/vendors')->with('success', 'Vendor updated successfully.');

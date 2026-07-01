@@ -79,11 +79,15 @@
                 <!-- Weight and Costing -->
                 <div class="col-md-12 mt-3 mb-2"><h5 class="text-primary"><i class="fas fa-coins"></i> Weight & Costing</h5><hr></div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2 mb-3">
                     <label class="form-label">Number of Bags</label>
                     <input type="number" name="number_bags" id="number_bags" class="form-control" value="<?= old('number_bags', $purchase['number_bags'] ?? '0') ?>">
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Number of Cones</label>
+                    <input type="number" name="number_cones" id="number_cones" class="form-control" value="<?= old('number_cones', $purchase['number_cones'] ?? '0') ?>">
+                </div>
+                <div class="col-md-2 mb-3">
                     <label class="form-label">Weight per Bag (Kg)</label>
                     <input type="number" step="0.01" id="weight_per_bag" class="form-control" value="<?= isset($purchase) && ($purchase['number_bags'] ?? 0) > 0 ? number_format($purchase['total_weight_kg'] / $purchase['number_bags'], 2, '.', '') : '' ?>" placeholder="Optional helper">
                 </div>

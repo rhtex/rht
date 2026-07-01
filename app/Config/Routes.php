@@ -522,6 +522,9 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('production/yarn-warping-sizing/delete/(:num)', 'YarnWarpingSizingController::delete/$1', ['filter' => 'permission:weaver.create']);
     $routes->get('production/yarn-warping-sizing/receipt-create/(:num)', 'YarnWarpingSizingController::receiptCreate/$1', ['filter' => 'permission:weaver.create']);
     $routes->post('production/yarn-warping-sizing/receipt-store/(:num)', 'YarnWarpingSizingController::receiptStore/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-warping-sizing/receipt-edit/(:num)', 'YarnWarpingSizingController::receiptEdit/$1', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/yarn-warping-sizing/receipt-update/(:num)', 'YarnWarpingSizingController::receiptUpdate/$1', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/yarn-warping-sizing/receipt-view/(:num)', 'YarnWarpingSizingController::receiptView/$1', ['filter' => 'permission:weaver.view']);
     $routes->get('production/yarn-warping-sizing/receipt-delete/(:num)', 'YarnWarpingSizingController::receiptDelete/$1', ['filter' => 'permission:weaver.create']);
 
     // Production (Yarn Twisting)

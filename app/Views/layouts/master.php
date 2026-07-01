@@ -24,6 +24,8 @@
     <link rel="stylesheet" href="<?= base_url('assets/css/custom.css') ?>">
     <!-- DataTables -->
     <link href="https://cdn.datatables.net/v/bs5/dt-1.13.8/datatables.min.css" rel="stylesheet">
+    <!-- Flatpickr (Datepicker) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 
     <style>
@@ -88,6 +90,8 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- DataTables -->
     <script src="https://cdn.datatables.net/v/bs5/dt-1.13.8/datatables.min.js"></script>
+    <!-- Flatpickr -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     
     <script>
         const SELECTOR_SIDEBAR_WRAPPER = ".sidebar-wrapper";
@@ -118,6 +122,14 @@
                     width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
                     placeholder: $(this).data('placeholder'),
                 });
+            });
+
+            // Initialize Flatpickr for all date inputs
+            flatpickr("input[type=date]", {
+                dateFormat: "Y-m-d", // Format for the backend
+                altInput: true,      // Create a visually distinct text input
+                altFormat: "d-m-Y",  // Display format (dd-mm-yyyy) for the user
+                allowInput: true
             });
         });
     </script>

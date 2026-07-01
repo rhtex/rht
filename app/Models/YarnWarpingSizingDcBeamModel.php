@@ -14,7 +14,7 @@ class YarnWarpingSizingDcBeamModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = ['dc_id', 'receipt_id', 'returned_status', 'meters', 'sizing_no', 'color', 'return_date', 'beam_number', 'remarks'];
 
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';

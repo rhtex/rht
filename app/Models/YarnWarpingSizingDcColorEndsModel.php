@@ -14,7 +14,7 @@ class YarnWarpingSizingDcColorEndsModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = ['dc_id', 'color', 'ends_count'];
 
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';

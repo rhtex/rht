@@ -14,7 +14,7 @@ class YarnWarpingSizingReceiptItemModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = ['receipt_id', 'dc_item_id', 'quantity_received_kg', 'quantity_wastage_kg', 'job_work_charges'];
 
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';

@@ -12,9 +12,9 @@ class YarnWarpingSizingDcItemModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['dc_id', 'mill_name', 'yarn_count', 'warp_weft', 'csp', 'lot_number', 'yarn_type', 'current_color', 'quantity_issued_kg', 'quantity_received_kg', 'quantity_wastage_kg'];
+    protected $allowedFields    = ['dc_id', 'mill_name', 'yarn_count', 'warp_weft', 'warp_yarn_type', 'csp', 'lot_number', 'yarn_type', 'current_color', 'quantity_issued_kg', 'quantity_received_kg', 'quantity_wastage_kg'];
 
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';

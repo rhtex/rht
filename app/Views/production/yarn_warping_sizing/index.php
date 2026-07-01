@@ -28,7 +28,7 @@
                 <?php foreach($dcs as $dc): ?>
                 <tr>
                     <td><strong><?= esc($dc['dc_number']) ?></strong></td>
-                    <td><?= esc($dc['dc_date']) ?></td>
+                    <td><?= date('d-m-Y', strtotime($dc['dc_date'])) ?></td>
                     <td><?= esc($dc['vendor_name']) ?></td>
                     <td><?= esc($dc['design_pattern'] ?: '-') ?></td>
                     <td><strong><?= esc($dc['total_ends'] ?: '0') ?></strong></td>

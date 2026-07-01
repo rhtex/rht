@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 30, 2026 at 03:41 PM
+-- Generation Time: Jul 01, 2026 at 04:38 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -2185,7 +2185,7 @@ CREATE TABLE `production_beams` (
 --
 
 INSERT INTO `production_beams` (`id`, `beam_number`, `status`, `condition_status`, `damaged_date`, `location`, `current_holder`, `remarks`, `created_at`, `updated_at`) VALUES
-(1, 'BM-101', 'Empty', 'Active', NULL, 'At Job Work', 'Jhanvi', NULL, '2026-06-30 12:11:43', '2026-06-30 07:29:36'),
+(1, 'BM-101', 'Empty', 'Active', NULL, '', 'Jhanvi', NULL, '2026-06-30 12:11:43', '2026-06-30 10:19:32'),
 (2, 'BM-102', 'Empty', 'Active', NULL, 'At Job Work', 'VR SIZING', NULL, '2026-06-30 12:11:43', '2026-06-30 07:27:56'),
 (3, 'BM-103', 'Empty', 'Active', NULL, 'In-House', NULL, NULL, '2026-06-30 12:11:43', '2026-06-30 12:11:43'),
 (4, 'BM-104', 'Empty', 'Active', NULL, 'In-House', NULL, NULL, '2026-06-30 12:11:43', '2026-06-30 12:11:43'),
@@ -2225,7 +2225,9 @@ CREATE TABLE `production_beam_ledger` (
 INSERT INTO `production_beam_ledger` (`id`, `beam_id`, `transaction_date`, `transaction_type`, `reference_id`, `from_location`, `to_location`, `status_from`, `status_to`, `yarn_details`, `remarks`, `created_by`, `created_at`) VALUES
 (6, 10, '2026-06-30', 'Issue_Warping_Sizing', 5, 'In-House', 'VR SIZING', 'Empty', 'Empty', NULL, 'Sent empty for warping & sizing on DC DC-YARN-1002', 1, '2026-06-30 12:57:56'),
 (7, 2, '2026-06-30', 'Issue_Warping_Sizing', 5, 'In-House', 'VR SIZING', 'Empty', 'Empty', NULL, 'Sent empty for warping & sizing on DC DC-YARN-1002', 1, '2026-06-30 12:57:56'),
-(8, 1, '2026-06-30', 'Issue_Warping_Sizing', 6, 'In-House', 'Jhanvi', 'Empty', 'Empty', NULL, 'Sent empty for warping & sizing on DC DC-YARN-1003', 1, '2026-06-30 12:59:36');
+(9, 1, '2026-06-30', 'Manual_Adjustment', NULL, 'At Job Work', 'At Job Work', 'Empty', 'Empty', NULL, 'Condition marked as Damaged on 2026-06-30', 1, '2026-06-30 14:59:26'),
+(10, 1, '2026-06-30', 'Manual_Adjustment', NULL, 'At Job Work', 'At Job Work', 'Empty', 'Empty', NULL, 'Condition marked as Active', 1, '2026-06-30 14:59:32'),
+(16, 1, '2026-06-30', 'Issue_Warping_Sizing', 6, 'In-House', 'Jhanvi', 'Empty', 'Empty', NULL, 'Sent empty for warping & sizing on DC DC-YARN-1003', 1, '2026-06-30 15:49:32');
 
 -- --------------------------------------------------------
 
@@ -2670,7 +2672,7 @@ INSERT INTO `production_yarn_stock_movements` (`id`, `yarn_name`, `yarn_count`, 
 (33, 'Yarn (80)', '80', 'Dyed', 'Green', 'SAMBANDAM', 'GJ12301', '3200', 'Warp', 10.00, 554.50, 'Main Warehouse', 'Receipt_Job_Work', 10, 'Received from Jhanvi against DC-YARN-1001 (Color: Green, Receipt: REC-YARN-1001) [Updated]', 1, '2026-06-30 11:56:32'),
 (35, 'Yarn (80)', '80', 'Dyed', 'Green', 'SAMBANDAM', 'GJ1230', '3200', 'Warp', -15.00, 581.00, 'Main Warehouse', 'Issue_Job_Work', 5, 'Issued for Warping & Sizing to VR SIZING (DC: DC-YARN-1002)', 1, '2026-06-30 12:57:56'),
 (36, 'Yarn (80)', '80', 'Dyed', 'Royal Blue', 'SAMBANDAM', 'HJ2331', '3200', 'Warp', -20.00, 601.00, 'Main Warehouse', 'Issue_Job_Work', 5, 'Issued for Warping & Sizing to VR SIZING (DC: DC-YARN-1002)', 1, '2026-06-30 12:57:56'),
-(37, 'Yarn (80)', '80', 'Raw', 'Raw', 'SAMBANDAM', 'LOT50', '3200', 'Warp', -15.00, 441.00, 'Main Warehouse', 'Issue_Job_Work', 6, 'Issued for Warping & Sizing to Jhanvi (DC: DC-YARN-1003)', 1, '2026-06-30 12:59:36');
+(43, 'Yarn (80)', '80', 'Raw', 'Raw', 'SAMBANDAM', 'LOT50', '3200', 'Warp', -15.00, 441.00, 'Main Warehouse', 'Issue_Job_Work', 6, 'Issued for Warping & Sizing to Jhanvi (DC: DC-YARN-1003)', 1, '2026-06-30 15:49:32');
 
 -- --------------------------------------------------------
 
@@ -2780,7 +2782,7 @@ CREATE TABLE `production_yarn_warping_sizing_dcs` (
 
 INSERT INTO `production_yarn_warping_sizing_dcs` (`id`, `dc_number`, `dc_date`, `vendor_name`, `expected_return_date`, `vehicle_details`, `status`, `remarks`, `design_pattern`, `total_ends`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
 (5, 'DC-YARN-1002', '2026-06-30', 'VR SIZING', '2026-06-18', 'TN28BY9140', 'Open', '0', NULL, 3700, 1, NULL, '2026-06-30 12:57:56', '2026-06-30 12:57:56'),
-(6, 'DC-YARN-1003', '2026-06-30', 'Jhanvi', NULL, 'TN28BY9140', 'Open', '0', '3inch Border ', 3700, 1, NULL, '2026-06-30 12:59:36', '2026-06-30 12:59:36');
+(6, 'DC-YARN-1003', '2026-06-30', 'Jhanvi', NULL, 'TN28BY9140', 'Open', NULL, '3inch Border ', 3700, 1, 1, '2026-06-30 12:59:36', '2026-06-30 15:49:32');
 
 -- --------------------------------------------------------
 
@@ -2808,7 +2810,7 @@ CREATE TABLE `production_yarn_warping_sizing_dc_beams` (
 INSERT INTO `production_yarn_warping_sizing_dc_beams` (`id`, `dc_id`, `receipt_id`, `returned_status`, `meters`, `sizing_no`, `color`, `return_date`, `beam_number`, `remarks`) VALUES
 (1, 5, NULL, NULL, NULL, NULL, NULL, NULL, 'BM-110', ''),
 (2, 5, NULL, NULL, NULL, NULL, NULL, NULL, 'BM-102', ''),
-(4, 6, NULL, NULL, NULL, NULL, NULL, NULL, 'BM-101', '');
+(6, 6, NULL, NULL, NULL, NULL, NULL, NULL, 'BM-101', 'Issued empty on DC DC-YARN-1003');
 
 -- --------------------------------------------------------
 
@@ -2831,7 +2833,7 @@ INSERT INTO `production_yarn_warping_sizing_dc_color_ends` (`id`, `dc_id`, `colo
 (1, 5, 'Green', 450),
 (2, 5, 'Royal Blue', 2800),
 (3, 5, 'Green', 450),
-(4, 6, 'Raw', 3700);
+(5, 6, 'Raw', 3700);
 
 -- --------------------------------------------------------
 
@@ -2845,6 +2847,7 @@ CREATE TABLE `production_yarn_warping_sizing_dc_items` (
   `mill_name` varchar(255) NOT NULL,
   `yarn_count` varchar(50) NOT NULL,
   `warp_weft` varchar(50) NOT NULL,
+  `warp_yarn_type` varchar(50) DEFAULT NULL,
   `csp` varchar(50) DEFAULT NULL,
   `lot_number` varchar(50) DEFAULT NULL,
   `yarn_type` varchar(50) NOT NULL,
@@ -2858,10 +2861,10 @@ CREATE TABLE `production_yarn_warping_sizing_dc_items` (
 -- Dumping data for table `production_yarn_warping_sizing_dc_items`
 --
 
-INSERT INTO `production_yarn_warping_sizing_dc_items` (`id`, `dc_id`, `mill_name`, `yarn_count`, `warp_weft`, `csp`, `lot_number`, `yarn_type`, `current_color`, `quantity_issued_kg`, `quantity_received_kg`, `quantity_wastage_kg`) VALUES
-(5, 5, 'SAMBANDAM', '80', 'Warp', '3200', 'GJ1230', 'Dyed', 'Green', 15.00, 0.00, 0.00),
-(6, 5, 'SAMBANDAM', '80', 'Warp', '3200', 'HJ2331', 'Dyed', 'Royal Blue', 20.00, 0.00, 0.00),
-(7, 6, 'SAMBANDAM', '80', 'Warp', '3200', 'LOT50', 'Raw', 'Raw', 15.00, 0.00, 0.00);
+INSERT INTO `production_yarn_warping_sizing_dc_items` (`id`, `dc_id`, `mill_name`, `yarn_count`, `warp_weft`, `warp_yarn_type`, `csp`, `lot_number`, `yarn_type`, `current_color`, `quantity_issued_kg`, `quantity_received_kg`, `quantity_wastage_kg`) VALUES
+(5, 5, 'SAMBANDAM', '80', 'Warp', NULL, '3200', 'GJ1230', 'Dyed', 'Green', 15.00, 0.00, 0.00),
+(6, 5, 'SAMBANDAM', '80', 'Warp', NULL, '3200', 'HJ2331', 'Dyed', 'Royal Blue', 20.00, 0.00, 0.00),
+(10, 6, 'SAMBANDAM', '80', 'Warp', NULL, '3200', 'LOT50', 'Raw', 'Raw', 15.00, 0.00, 0.00);
 
 -- --------------------------------------------------------
 
@@ -4671,7 +4674,7 @@ ALTER TABLE `production_beams`
 -- AUTO_INCREMENT for table `production_beam_ledger`
 --
 ALTER TABLE `production_beam_ledger`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `production_vendors`
@@ -4761,7 +4764,7 @@ ALTER TABLE `production_yarn_purchases`
 -- AUTO_INCREMENT for table `production_yarn_stock_movements`
 --
 ALTER TABLE `production_yarn_stock_movements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_twisting_dcs`
@@ -4797,31 +4800,31 @@ ALTER TABLE `production_yarn_warping_sizing_dcs`
 -- AUTO_INCREMENT for table `production_yarn_warping_sizing_dc_beams`
 --
 ALTER TABLE `production_yarn_warping_sizing_dc_beams`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_warping_sizing_dc_color_ends`
 --
 ALTER TABLE `production_yarn_warping_sizing_dc_color_ends`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_warping_sizing_dc_items`
 --
 ALTER TABLE `production_yarn_warping_sizing_dc_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_warping_sizing_receipts`
 --
 ALTER TABLE `production_yarn_warping_sizing_receipts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_warping_sizing_receipt_items`
 --
 ALTER TABLE `production_yarn_warping_sizing_receipt_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_weaving_dcs`

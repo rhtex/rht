@@ -112,6 +112,27 @@ class YarnWarpingSizingController extends BaseController
             return redirect()->back()->withInput()->with('error', 'At least one yarn item must be added.');
         }
 
+        // Validate cones issued does not exceed available stock
+        foreach ($items as $item) {
+            $conesIssued = (int)($item['cones_issued'] ?? 0);
+            if ($conesIssued > 0) {
+                $stockCheck = $this->movementModel->getInventory([
+                    'yarn_count' => $item['yarn_count'],
+                    'yarn_type'  => $item['yarn_type'],
+                    'color'      => $item['current_color'] ?: 'Raw',
+                    'brand_mill' => $item['mill_name'],
+                    'lot_number' => $item['lot_number'] ?: '',
+                    'csp'        => $item['csp'] ?: '',
+                    'warp_weft'  => $item['warp_weft'],
+                ]);
+                $availableCones = !empty($stockCheck) ? (int)$stockCheck[0]['cones_available'] : 0;
+                if ($conesIssued > $availableCones) {
+                    return redirect()->back()->withInput()->with('error',
+                        'Cannot issue ' . $conesIssued . ' cones for ' . $item['yarn_count'] . ' (' . $item['mill_name'] . '). Only ' . $availableCones . ' cones available in stock.');
+                }
+            }
+        }
+
         $db = \Config\Database::connect();
         $db->transStart();
 
@@ -234,7 +255,19 @@ class YarnWarpingSizingController extends BaseController
             return redirect()->to('production/yarn-warping-sizing')->with('error', 'Delivery Challan not found.');
         }
 
-        $data['items'] = $this->dcItemModel->where('dc_id', $id)->findAll();
+        $items = $this->dcItemModel->where('dc_id', $id)->findAll();
+        foreach ($items as &$item) {
+            $movement = $this->movementModel
+                ->where('movement_type', 'Issue_Job_Work')
+                ->where('reference_id', $id)
+                ->where('yarn_count', $item['yarn_count'])
+                ->where('brand_mill', $item['mill_name'])
+                ->where('color', $item['current_color'] ?: 'Raw')
+                ->where('warp_weft', $item['warp_weft'])
+                ->first();
+            $item['cost_per_kg'] = $movement ? abs((float)$movement['cost_per_kg']) : 0;
+        }
+        $data['items'] = $items;
         $data['title'] = 'Warping & Sizing Delivery Challan: ' . $data['dc']['dc_number'];
 
         $data['colorEnds'] = $this->colorEndsModel->where('dc_id', $id)->findAll();
@@ -280,7 +313,19 @@ class YarnWarpingSizingController extends BaseController
             return redirect()->to('production/yarn-warping-sizing')->with('error', 'Cannot edit because receipts exist.');
         }
 
-        $data['dcItems'] = $this->dcItemModel->where('dc_id', $id)->findAll();
+        $dcItems = $this->dcItemModel->where('dc_id', $id)->findAll();
+        foreach ($dcItems as &$item) {
+            $movement = $this->movementModel
+                ->where('movement_type', 'Issue_Job_Work')
+                ->where('reference_id', $id)
+                ->where('yarn_count', $item['yarn_count'])
+                ->where('brand_mill', $item['mill_name'])
+                ->where('color', $item['current_color'] ?: 'Raw')
+                ->where('warp_weft', $item['warp_weft'])
+                ->first();
+            $item['avg_cost_per_kg'] = $movement ? abs((float)$movement['cost_per_kg']) : 0;
+        }
+        $data['dcItems'] = $dcItems;
         $data['availableYarns'] = $this->movementModel->getInventory();
         
         $data['emptyBeams'] = $this->yBeamModel
@@ -348,6 +393,41 @@ class YarnWarpingSizingController extends BaseController
             return redirect()->back()->withInput()->with('error', 'At least one yarn item must be added.');
         }
 
+        // Validate cones issued does not exceed available stock
+        // Note: During update, old movements will be reverted first, so we check against current stock
+        // plus what will be returned from the old DC items
+        $oldItems = $this->dcItemModel->where('dc_id', $id)->findAll();
+        $oldConesByKey = [];
+        foreach ($oldItems as $oi) {
+            $key = ($oi['yarn_count'] ?? '') . '|' . ($oi['yarn_type'] ?? '') . '|' . ($oi['current_color'] ?: 'Raw') . '|' . ($oi['mill_name'] ?? '') . '|' . ($oi['lot_number'] ?? '') . '|' . ($oi['csp'] ?? '') . '|' . ($oi['warp_weft'] ?? '');
+            $oldConesByKey[$key] = ($oldConesByKey[$key] ?? 0) + (int)($oi['cones_issued'] ?? 0);
+        }
+
+        foreach ($items as $item) {
+            $conesIssued = (int)($item['cones_issued'] ?? 0);
+            if ($conesIssued > 0) {
+                $stockCheck = $this->movementModel->getInventory([
+                    'yarn_count' => $item['yarn_count'],
+                    'yarn_type'  => $item['yarn_type'],
+                    'color'      => $item['current_color'] ?: 'Raw',
+                    'brand_mill' => $item['mill_name'],
+                    'lot_number' => $item['lot_number'] ?: '',
+                    'csp'        => $item['csp'] ?: '',
+                    'warp_weft'  => $item['warp_weft'],
+                ]);
+                $availableCones = !empty($stockCheck) ? (int)$stockCheck[0]['cones_available'] : 0;
+
+                // Add back cones from the old DC that will be reverted
+                $key = ($item['yarn_count'] ?? '') . '|' . ($item['yarn_type'] ?? '') . '|' . ($item['current_color'] ?: 'Raw') . '|' . ($item['mill_name'] ?? '') . '|' . ($item['lot_number'] ?? '') . '|' . ($item['csp'] ?? '') . '|' . ($item['warp_weft'] ?? '');
+                $availableCones += ($oldConesByKey[$key] ?? 0);
+
+                if ($conesIssued > $availableCones) {
+                    return redirect()->back()->withInput()->with('error',
+                        'Cannot issue ' . $conesIssued . ' cones for ' . $item['yarn_count'] . ' (' . $item['mill_name'] . '). Only ' . $availableCones . ' cones available in stock.');
+                }
+            }
+        }
+
         $db = \Config\Database::connect();
         $db->transStart();
 
@@ -396,6 +476,7 @@ class YarnWarpingSizingController extends BaseController
                 'lot_number'         => $item['lot_number'] ?: null,
                 'yarn_type'          => $item['yarn_type'],
                 'current_color'      => $item['current_color'] ?: 'Raw',
+            ];
             $conesIssued = (int)($item['cones_issued'] ?? 0);
             $itemData['cones_issued'] = $conesIssued;
 
@@ -609,7 +690,11 @@ class YarnWarpingSizingController extends BaseController
             }
 
             $conesReceived = (int)($item['cones_received'] ?? 0);
-            $conesUsed = (int)($item['cones_used'] ?? 0);
+            $conesIssued = (int)$dcItem['cones_issued'];
+            $conesRecdExcludingCurrent = (int)$dcItem['cones_received'];
+            $conesUsedExcludingCurrent = (int)$dcItem['cones_used'];
+            $pendingCones = $conesIssued - ($conesRecdExcludingCurrent + $conesUsedExcludingCurrent);
+            $conesUsed = max(0, $pendingCones - $conesReceived);
 
             $this->receiptItemModel->skipValidation(true);
             $this->receiptItemModel->save([
@@ -654,7 +739,7 @@ class YarnWarpingSizingController extends BaseController
             $itemSharedExpense = $totalReceivedWeight > 0 ? (($qtyReceived / $totalReceivedWeight) * $totalSharedExpenses) : 0;
             $itemSharedJobWork = $totalReceivedWeight > 0 ? (($qtyReceived / $totalReceivedWeight) * $jobCharges) : 0;
 
-            $proRatedRawCostConsumed = $qtyReceived * $rawCostPerKg;
+            $proRatedRawCostConsumed = ($qtyReceived + $qtyWastage) * $rawCostPerKg;
             $itemTotalLandedCost = $proRatedRawCostConsumed + $itemSharedJobWork + $itemSharedExpense;
             $finalLandedCostPerKg = $qtyReceived > 0 ? ($itemTotalLandedCost / $qtyReceived) : 0;
 
@@ -926,7 +1011,11 @@ class YarnWarpingSizingController extends BaseController
             }
 
             $conesReceived = (int)($item['cones_received'] ?? 0);
-            $conesUsed = (int)($item['cones_used'] ?? 0);
+            $conesIssued = (int)$dcItem['cones_issued'];
+            $conesRecdExcludingCurrent = (int)$dcItem['cones_received'];
+            $conesUsedExcludingCurrent = (int)$dcItem['cones_used'];
+            $pendingCones = $conesIssued - ($conesRecdExcludingCurrent + $conesUsedExcludingCurrent);
+            $conesUsed = max(0, $pendingCones - $conesReceived);
 
             $this->receiptItemModel->save([
                 'receipt_id'           => $id,
@@ -969,7 +1058,7 @@ class YarnWarpingSizingController extends BaseController
             $itemSharedExpense = $totalReceivedWeight > 0 ? (($qtyReceived / $totalReceivedWeight) * $totalSharedExpenses) : 0;
             $itemSharedJobWork = $totalReceivedWeight > 0 ? (($qtyReceived / $totalReceivedWeight) * $jobCharges) : 0;
 
-            $proRatedRawCostConsumed = $qtyReceived * $rawCostPerKg;
+            $proRatedRawCostConsumed = ($qtyReceived + $qtyWastage) * $rawCostPerKg;
             $itemTotalLandedCost = $proRatedRawCostConsumed + $itemSharedJobWork + $itemSharedExpense;
             $finalLandedCostPerKg = $qtyReceived > 0 ? ($itemTotalLandedCost / $qtyReceived) : 0;
 

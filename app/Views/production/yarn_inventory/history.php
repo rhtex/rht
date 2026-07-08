@@ -81,6 +81,7 @@
                                 <th>Cost/Kg</th>
                                 <th>Running Bal</th>
                                 <th>Remarks</th>
+                                <th width="120" class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -92,6 +93,55 @@
                                 <?php 
                                     $qty = (float)$t['quantity_kg'];
                                     $runningBalance += $qty;
+
+                                    $viewUrl = null;
+                                    $editUrl = null;
+                                    $deleteUrl = null;
+
+                                    $refId = $t['reference_id'];
+                                    $remarksLower = strtolower($t['remarks']);
+
+                                    if ($t['movement_type'] === 'Purchase') {
+                                        $viewUrl = site_url("production/yarn-purchases/view/{$refId}");
+                                        $editUrl = site_url("production/yarn-purchases/edit/{$refId}");
+                                        $deleteUrl = site_url("production/yarn-purchases/delete/{$refId}");
+                                    } elseif ($t['movement_type'] === 'Issue_Job_Work') {
+                                        if (strpos($remarksLower, 'dyeing') !== false) {
+                                            $viewUrl = site_url("production/yarn-dyeing/view/{$refId}");
+                                            $editUrl = site_url("production/yarn-dyeing/edit/{$refId}");
+                                            $deleteUrl = site_url("production/yarn-dyeing/delete/{$refId}");
+                                        } elseif (strpos($remarksLower, 'warping') !== false || strpos($remarksLower, 'sizing') !== false) {
+                                            $viewUrl = site_url("production/yarn-warping-sizing/view/{$refId}");
+                                            $editUrl = site_url("production/yarn-warping-sizing/edit/{$refId}");
+                                            $deleteUrl = site_url("production/yarn-warping-sizing/delete/{$refId}");
+                                        } elseif (strpos($remarksLower, 'weaving') !== false) {
+                                            $viewUrl = site_url("production/yarn-weaving/view/{$refId}");
+                                            $editUrl = site_url("production/yarn-weaving/edit/{$refId}");
+                                            $deleteUrl = site_url("production/yarn-weaving/delete/{$refId}");
+                                        } elseif (strpos($remarksLower, 'twisting') !== false) {
+                                            $viewUrl = site_url("production/yarn-twisting/view/{$refId}");
+                                            $editUrl = site_url("production/yarn-twisting/edit/{$refId}");
+                                            $deleteUrl = site_url("production/yarn-twisting/delete/{$refId}");
+                                        }
+                                    } elseif ($t['movement_type'] === 'Receipt_Job_Work') {
+                                        if (strpos($remarksLower, 'dyeing') !== false) {
+                                            $viewUrl = site_url("production/yarn-dyeing/receipt-view/{$refId}");
+                                            $editUrl = site_url("production/yarn-dyeing/receipt-edit/{$refId}");
+                                            $deleteUrl = site_url("production/yarn-dyeing/receipt-delete/{$refId}");
+                                        } elseif (strpos($remarksLower, 'warping') !== false || strpos($remarksLower, 'sizing') !== false) {
+                                            $viewUrl = site_url("production/yarn-warping-sizing/receipt-view/{$refId}");
+                                            $editUrl = site_url("production/yarn-warping-sizing/receipt-edit/{$refId}");
+                                            $deleteUrl = site_url("production/yarn-warping-sizing/receipt-delete/{$refId}");
+                                        } elseif (strpos($remarksLower, 'weaving') !== false) {
+                                            $viewUrl = site_url("production/yarn-weaving/receipt-view/{$refId}");
+                                            $editUrl = site_url("production/yarn-weaving/receipt-edit/{$refId}");
+                                            $deleteUrl = site_url("production/yarn-weaving/receipt-delete/{$refId}");
+                                        } elseif (strpos($remarksLower, 'twisting') !== false) {
+                                            $viewUrl = site_url("production/yarn-twisting/receipt-view/{$refId}");
+                                            $editUrl = site_url("production/yarn-twisting/receipt-edit/{$refId}");
+                                            $deleteUrl = site_url("production/yarn-twisting/receipt-delete/{$refId}");
+                                        }
+                                    }
                                 ?>
                                 <tr>
                                     <td><?= esc($t['created_at']) ?></td>
@@ -115,11 +165,28 @@
                                     <td>₹<?= number_format($t['cost_per_kg'], 2) ?></td>
                                     <td><strong><?= number_format($runningBalance, 2) ?> Kg</strong></td>
                                     <td><?= esc($t['remarks']) ?></td>
+                                    <td class="text-center">
+                                         <?php if ($viewUrl || $editUrl || $deleteUrl): ?>
+                                             <div class="btn-group">
+                                                 <?php if ($viewUrl): ?>
+                                                     <a href="<?= $viewUrl ?>" class="btn btn-xs btn-outline-info" title="View Source"><i class="fas fa-eye"></i></a>
+                                                 <?php endif; ?>
+                                                 <?php if ($editUrl): ?>
+                                                     <a href="<?= $editUrl ?>" class="btn btn-xs btn-outline-primary mx-1" title="Edit Source"><i class="fas fa-edit"></i></a>
+                                                 <?php endif; ?>
+                                                 <?php if ($deleteUrl): ?>
+                                                     <a href="<?= $deleteUrl ?>" class="btn btn-xs btn-outline-danger" title="Delete Source" onclick="return confirm('Are you sure you want to delete this source document? This cannot be undone.');"><i class="fas fa-trash"></i></a>
+                                                 <?php endif; ?>
+                                             </div>
+                                         <?php else: ?>
+                                             <span class="text-muted">-</span>
+                                         <?php endif; ?>
+                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted">No transactions recorded.</td>
+                                    <td colspan="7" class="text-center text-muted">No transactions recorded.</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>

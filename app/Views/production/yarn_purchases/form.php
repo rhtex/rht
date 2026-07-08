@@ -96,13 +96,10 @@
                     <input type="number" step="0.01" name="total_weight_kg" id="total_weight_kg" class="form-control" value="<?= old('total_weight_kg', $purchase['total_weight_kg'] ?? '') ?>" required placeholder="0.00">
                 </div>
                 <div class="col-md-3 mb-3">
-                    <label class="form-label">Rate per Kg (Excl. Tax) <span class="text-danger">*</span></label>
+                    <label class="form-label">Rate per Kg <span class="text-danger">*</span></label>
                     <input type="number" step="0.01" name="rate_per_kg" id="rate_per_kg" class="form-control" value="<?= old('rate_per_kg', $purchase['rate_per_kg'] ?? '') ?>" required placeholder="₹ 0.00">
                 </div>
-                <div class="col-md-3 mb-3">
-                    <label class="form-label">GST Percent (%)</label>
-                    <input type="number" step="0.01" name="gst_percent" id="gst_percent" class="form-control" value="<?= old('gst_percent', $purchase['gst_percent'] ?? '5.00') ?>">
-                </div>
+                <input type="hidden" name="gst_percent" id="gst_percent" value="0">
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Transport Charges</label>
                     <input type="number" step="0.01" name="transport_charges" id="transport_charges" class="form-control" value="<?= old('transport_charges', $purchase['transport_charges'] ?? '0.00') ?>">
@@ -116,35 +113,26 @@
                     <input type="text" name="warehouse_location" class="form-control" value="<?= old('warehouse_location', $purchase['warehouse_location'] ?? 'Main Warehouse') ?>" placeholder="e.g. Warehouse A">
                 </div>
 
-                <!-- Live Costing Preview Card -->
                 <div class="col-md-12 mt-3">
                     <div class="card card-outline card-success bg-light">
                         <div class="card-body py-3">
                             <h6 class="text-success mb-3"><i class="fas fa-calculator"></i> Live Landed Cost Estimation</h6>
                             <div class="row g-3 text-center">
-                                <div class="col-md-4 mb-2">
-                                    <span class="text-muted d-block text-sm">Base Value (Excl. Tax)</span>
+                                <div class="col-md-3 mb-2">
+                                    <span class="text-muted d-block text-sm">Base Value</span>
                                     <h5 id="lbl_base_value" class="mb-0 font-weight-bold">₹0.00</h5>
                                 </div>
-                                <div class="col-md-4 mb-2">
-                                    <span class="text-muted d-block text-sm">Tax Amount (GST)</span>
-                                    <h5 id="lbl_tax_amount" class="mb-0 text-danger font-weight-bold">₹0.00</h5>
-                                </div>
-                                <div class="col-md-4 mb-2">
-                                    <span class="text-muted d-block text-sm">Landed / Kg (Excl. Tax)</span>
-                                    <h5 id="lbl_landed_excl_tax" class="mb-0 text-primary font-weight-bold">₹0.00</h5>
-                                </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3 mb-2">
                                     <span class="text-muted d-block text-sm">Transport per Kg</span>
                                     <h5 id="lbl_transport_per_kg" class="mb-0 font-weight-bold">₹0.00</h5>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3 mb-2">
                                     <span class="text-muted d-block text-sm">Other Charges per Kg</span>
                                     <h5 id="lbl_other_per_kg" class="mb-0 font-weight-bold">₹0.00</h5>
                                 </div>
-                                <div class="col-md-4">
-                                    <span class="text-muted d-block text-sm">Landed / Kg (Incl. Tax)</span>
-                                    <h5 id="lbl_landed_incl_tax" class="mb-0 text-success font-weight-bold">₹0.00</h5>
+                                <div class="col-md-3 mb-2">
+                                    <span class="text-muted d-block text-sm">Landed Cost / Kg</span>
+                                    <h5 id="lbl_landed_excl_tax" class="mb-0 text-primary font-weight-bold">₹0.00</h5>
                                 </div>
                             </div>
                         </div>
@@ -166,7 +154,6 @@
         var $weightPerBag = $('#weight_per_bag');
         var $totalWeight = $('#total_weight_kg');
         var $rate = $('#rate_per_kg');
-        var $gst = $('#gst_percent');
         var $transport = $('#transport_charges');
         var $other = $('#other_charges');
 
@@ -184,7 +171,6 @@
         $weightPerBag.on('input', calculateTotalWeight);
         $totalWeight.on('input', calculateLandedCost);
         $rate.on('input', calculateLandedCost);
-        $gst.on('input', calculateLandedCost);
         $transport.on('input', calculateLandedCost);
         $other.on('input', calculateLandedCost);
 
@@ -192,27 +178,20 @@
         function calculateLandedCost() {
             var weight = parseFloat($totalWeight.val()) || 0;
             var rateVal = parseFloat($rate.val()) || 0;
-            var gstVal = parseFloat($gst.val()) || 0;
             var transportVal = parseFloat($transport.val()) || 0;
             var otherVal = parseFloat($other.val()) || 0;
 
             var baseValue = weight * rateVal;
-            var gstCost = baseValue * (gstVal / 100);
-            
             var totalExclTax = baseValue + transportVal + otherVal;
-            var totalInclTax = baseValue + gstCost + transportVal + otherVal;
 
             var transportPerKg = weight > 0 ? (transportVal / weight) : 0;
             var otherPerKg = weight > 0 ? (otherVal / weight) : 0;
             var landedExclTaxPerKg = weight > 0 ? (totalExclTax / weight) : 0;
-            var landedInclTaxPerKg = weight > 0 ? (totalInclTax / weight) : 0;
 
             $('#lbl_base_value').text('₹' + baseValue.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
-            $('#lbl_tax_amount').text('₹' + gstCost.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
             $('#lbl_transport_per_kg').text('₹' + transportPerKg.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
             $('#lbl_other_per_kg').text('₹' + otherPerKg.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
             $('#lbl_landed_excl_tax').text('₹' + landedExclTaxPerKg.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
-            $('#lbl_landed_incl_tax').text('₹' + landedInclTaxPerKg.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
         }
 
         // Initial calculation

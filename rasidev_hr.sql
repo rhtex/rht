@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 01, 2026 at 03:45 PM
+-- Generation Time: Jul 08, 2026 at 03:12 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -2284,15 +2284,15 @@ CREATE TABLE `production_beams` (
 --
 
 INSERT INTO `production_beams` (`id`, `beam_number`, `status`, `condition_status`, `damaged_date`, `location`, `current_holder`, `remarks`, `created_at`, `updated_at`) VALUES
-(1, 'BM-101', 'Empty', 'Active', NULL, '', 'Main Office', NULL, '2026-06-30 12:11:43', '2026-07-01 11:06:44'),
-(2, 'BM-102', 'Empty', 'Active', NULL, '', 'Main Office', NULL, '2026-06-30 12:11:43', '2026-07-01 11:06:44'),
-(3, 'BM-103', 'Empty', 'Active', NULL, '', 'Main Office', NULL, '2026-06-30 12:11:43', '2026-07-01 11:06:44'),
+(1, 'BM-101', 'Loaded', 'Active', NULL, 'In-House', 'In-House', NULL, '2026-06-30 12:11:43', '2026-07-08 07:22:00'),
+(2, 'BM-102', 'Loaded', 'Active', NULL, 'In-House', 'In-House', NULL, '2026-06-30 12:11:43', '2026-07-08 07:22:00'),
+(3, 'BM-103', 'Empty', 'Active', NULL, 'In-House', 'In-House', NULL, '2026-06-30 12:11:43', '2026-07-08 07:22:00'),
 (4, 'BM-104', 'Empty', 'Active', NULL, '', 'Main Office', NULL, '2026-06-30 12:11:43', '2026-07-01 11:06:44'),
 (5, 'BM-105', 'Empty', 'Active', NULL, '', 'Main Office', NULL, '2026-06-30 12:11:43', '2026-07-01 11:06:44'),
 (6, 'BM-106', 'Empty', 'Active', NULL, '', 'Main Office', NULL, '2026-06-30 12:11:43', '2026-07-01 11:06:44'),
 (7, 'BM-107', 'Empty', 'Active', NULL, '', 'Main Office', NULL, '2026-06-30 12:11:43', '2026-07-01 11:06:44'),
 (8, 'BM-108', 'Empty', 'Active', NULL, '', 'Main Office', NULL, '2026-06-30 12:11:43', '2026-07-01 11:06:44'),
-(9, 'BM-109', 'Empty', 'Active', NULL, '', 'Main Office', NULL, '2026-06-30 12:11:43', '2026-07-01 11:06:44'),
+(9, 'BM-109', 'Empty', 'Active', NULL, 'In-House', 'In-House', NULL, '2026-06-30 12:11:43', '2026-07-08 06:28:43'),
 (10, 'BM-110', 'Empty', 'Active', NULL, '', 'Main Office', NULL, '2026-06-30 12:11:43', '2026-07-01 11:06:44');
 
 -- --------------------------------------------------------
@@ -2328,7 +2328,13 @@ INSERT INTO `production_beam_ledger` (`id`, `beam_id`, `transaction_date`, `tran
 (17, 10, '2026-06-30', 'Issue_Warping_Sizing', 5, 'In-House', 'VR SIZING', 'Empty', 'Empty', NULL, 'Sent empty for warping & sizing on DC DC-YARN-1002', 1, '2026-07-01 06:52:38'),
 (18, 2, '2026-06-30', 'Issue_Warping_Sizing', 5, 'In-House', 'VR SIZING', 'Empty', 'Empty', NULL, 'Sent empty for warping & sizing on DC DC-YARN-1002', 1, '2026-07-01 06:52:38'),
 (19, 10, '2026-07-01', 'Receipt_Warping_Sizing', 5, 'VR SIZING', 'In-House', 'Empty', 'Loaded', '80 (Green), 80 (Royal Blue)', 'Received loaded from warping & sizing on Receipt REC-WS-1001. Sizing No: fgshf, Color: Green (body), Royal Blue (border), Length: 100 M', 1, '2026-07-01 07:00:16'),
-(20, 2, '2026-07-01', 'Receipt_Warping_Sizing', 5, 'VR SIZING', 'In-House', 'Empty', 'Loaded', '80 (Green), 80 (Royal Blue)', 'Received loaded from warping & sizing on Receipt REC-WS-1001. Sizing No: sdhsd, Color: Green (body), Royal Blue (border), Length: 100 M', 1, '2026-07-01 07:00:16');
+(20, 2, '2026-07-01', 'Receipt_Warping_Sizing', 5, 'VR SIZING', 'In-House', 'Empty', 'Loaded', '80 (Green), 80 (Royal Blue)', 'Received loaded from warping & sizing on Receipt REC-WS-1001. Sizing No: sdhsd, Color: Green (body), Royal Blue (border), Length: 100 M', 1, '2026-07-01 07:00:16'),
+(31, 2, '2026-07-08', 'Issue_Warping_Sizing', 4, 'In-House', 'VR SIZING', 'Empty', 'Empty', NULL, 'Sent empty for warping & sizing on DC DC-WS-1001', 1, '2026-07-08 12:51:04'),
+(32, 1, '2026-07-08', 'Issue_Warping_Sizing', 4, 'In-House', 'VR SIZING', 'Empty', 'Empty', NULL, 'Sent empty for warping & sizing on DC DC-WS-1001', 1, '2026-07-08 12:51:04'),
+(33, 3, '2026-07-08', 'Issue_Warping_Sizing', 4, 'In-House', 'VR SIZING', 'Empty', 'Empty', NULL, 'Sent empty for warping & sizing on DC DC-WS-1001', 1, '2026-07-08 12:51:04'),
+(34, 2, '2026-07-08', 'Receipt_Warping_Sizing', 2, 'VR SIZING', 'In-House', 'Empty', 'Loaded', '80 (Crimson), 80 (Royal Blue)', 'Received loaded from warping & sizing on Receipt REC-WS-1001. Sizing No: 44, Color: Crimson (body), Royal Blue (border), Length: 1000 M', 1, '2026-07-08 12:52:00'),
+(35, 1, '2026-07-08', 'Receipt_Warping_Sizing', 2, 'VR SIZING', 'In-House', 'Empty', 'Loaded', '80 (Crimson), 80 (Royal Blue)', 'Received loaded from warping & sizing on Receipt REC-WS-1001. Sizing No: 4545, Color: Crimson (body), Royal Blue (border), Length: 1000 M', 1, '2026-07-08 12:52:00'),
+(36, 3, '2026-07-08', 'Receipt_Warping_Sizing', 2, 'VR SIZING', 'In-House', 'Empty', 'Empty', '', 'Received empty from warping & sizing on Receipt REC-WS-1001', 1, '2026-07-08 12:52:00');
 
 -- --------------------------------------------------------
 
@@ -2433,7 +2439,7 @@ CREATE TABLE `production_yarn_dyeing_dcs` (
 --
 
 INSERT INTO `production_yarn_dyeing_dcs` (`id`, `dc_number`, `dc_date`, `vendor_name`, `expected_return_date`, `vehicle_details`, `status`, `remarks`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
-(4, 'DC-DYE-1001', '2026-07-01', 'JHANVI', '2026-07-17', '', 'Completed', '', 1, NULL, '2026-07-01 13:05:21', '2026-07-01 13:32:55');
+(7, 'DC-DYE-1001', '2026-07-08', 'Jhanvi Colors', '2026-07-09', 'TN28by9140', 'Completed', '', 1, NULL, '2026-07-08 12:48:29', '2026-07-08 12:49:29');
 
 -- --------------------------------------------------------
 
@@ -2465,7 +2471,8 @@ CREATE TABLE `production_yarn_dyeing_dc_items` (
 --
 
 INSERT INTO `production_yarn_dyeing_dc_items` (`id`, `dc_id`, `mill_name`, `yarn_count`, `warp_weft`, `csp`, `lot_number`, `yarn_type`, `current_color`, `required_color`, `quantity_issued_kg`, `cones_issued`, `quantity_received_kg`, `cones_received`, `quantity_wastage_kg`, `cones_wastage`) VALUES
-(5, 4, 'SAMBANDAM', '80', 'Warp', '3200', 'LOT50', 'Raw', 'Raw', 'Crimson', 1.00, 1, 1.00, 1, 0.00, 0);
+(13, 7, 'SAMBANDAM', '80', 'Warp', '3200', 'LOT50', 'Raw', 'Raw', 'Crimson', 70.00, 70, 66.60, 65, 3.40, 0),
+(14, 7, 'SAMBANDAM', '80', 'Warp', '3200', 'LOT50', 'Raw', 'Raw', 'Royal Blue', 70.00, 70, 67.00, 67, 3.00, 0);
 
 -- --------------------------------------------------------
 
@@ -2494,7 +2501,7 @@ CREATE TABLE `production_yarn_dyeing_receipts` (
 --
 
 INSERT INTO `production_yarn_dyeing_receipts` (`id`, `dc_id`, `receipt_number`, `receipt_date`, `transport_charges`, `loading_charges`, `packing_charges`, `other_expenses`, `remarks`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
-(5, 4, 'REC-DYE-1001', '2026-07-01', 1.00, 1.00, 1.00, 1.00, NULL, 1, NULL, '2026-07-01 13:32:55', '2026-07-01 13:32:55');
+(8, 7, 'REC-DYE-1001', '2026-07-08', 0.00, 0.00, 0.00, 0.00, NULL, 1, NULL, '2026-07-08 12:49:13', '2026-07-08 12:49:29');
 
 -- --------------------------------------------------------
 
@@ -2521,7 +2528,8 @@ CREATE TABLE `production_yarn_dyeing_receipt_items` (
 --
 
 INSERT INTO `production_yarn_dyeing_receipt_items` (`id`, `receipt_id`, `dc_item_id`, `received_color`, `quantity_received_kg`, `cones_received`, `quantity_wastage_kg`, `cones_wastage`, `quantity_shortage_kg`, `quantity_excess_kg`, `job_work_charges`) VALUES
-(4, 5, 5, 'Crimson', 1.00, 1, 0.00, 0, 0.00, 0.00, 120.00);
+(13, 8, 13, 'Crimson', 66.60, 65, 3.40, 0, 0.00, 0.00, 120.00),
+(14, 8, 14, 'Royal Blue', 67.00, 67, 3.00, 0, 0.00, 0.00, 140.00);
 
 -- --------------------------------------------------------
 
@@ -2759,7 +2767,7 @@ CREATE TABLE `production_yarn_purchases` (
 --
 
 INSERT INTO `production_yarn_purchases` (`id`, `purchase_date`, `supplier`, `invoice_number`, `mill_name`, `yarn_count`, `material_type`, `warp_weft`, `csp`, `lot_number`, `number_bags`, `number_cones`, `total_weight_kg`, `rate_per_kg`, `gst_percent`, `transport_charges`, `other_charges`, `warehouse_location`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
-(1, '2026-06-30', 'Gowtham', '1234', 'SAMBANDAM', '80', 'Cotton Yarn', 'Warp', '3200', 'LOT50', 3, 150, 150.00, 430.00, 5.00, 1500.00, 150.00, 'Main Warehouse', 1, 1, '2026-06-30 10:50:12', '2026-07-01 11:11:47');
+(1, '2026-06-30', 'Gowtham', '1234', 'SAMBANDAM', '80', 'Cotton Yarn', 'Warp', '3200', 'LOT50', 3, 150, 150.00, 400.00, 0.00, 1500.00, 150.00, 'Main Warehouse', 1, 1, '2026-06-30 10:50:12', '2026-07-08 12:36:55');
 
 -- --------------------------------------------------------
 
@@ -2793,9 +2801,15 @@ CREATE TABLE `production_yarn_stock_movements` (
 --
 
 INSERT INTO `production_yarn_stock_movements` (`id`, `yarn_name`, `yarn_count`, `yarn_type`, `color`, `brand_mill`, `lot_number`, `csp`, `warp_weft`, `quantity_kg`, `quantity_cones`, `cost_per_kg`, `warehouse`, `movement_type`, `reference_id`, `remarks`, `created_by`, `created_at`) VALUES
-(50, 'Cotton Yarn', '80', 'Raw', 'Raw', 'SAMBANDAM', 'LOT50', '3200', 'Warp', 150.00, 150, 441.00, 'Main Warehouse', 'Purchase', 1, 'Updated Yarn purchase. Supplier: Gowtham, Invoice: 1234', 1, '2026-07-01 11:11:47'),
-(58, 'Yarn (80)', '80', 'Raw', 'Raw', 'SAMBANDAM', 'LOT50', '3200', 'Warp', -1.00, -1, 441.00, 'Main Warehouse', 'Issue_Job_Work', 4, 'Issued for Dyeing to JHANVI (DC: DC-DYE-1001)', 1, '2026-07-01 13:05:21'),
-(62, 'Yarn (80)', '80', 'Dyed', 'Crimson', 'SAMBANDAM', '123', '3200', 'Warp', 1.00, 0, 565.00, 'Main Warehouse', 'Receipt_Job_Work', 5, 'Received Dyed from JHANVI against DC-DYE-1001 (Color: Crimson)', 1, '2026-07-01 13:32:55');
+(79, 'Cotton Yarn', '80', 'Raw', 'Raw', 'SAMBANDAM', 'LOT50', '3200', 'Warp', 150.00, 150, 411.00, 'Main Warehouse', 'Purchase', 1, 'Updated Yarn purchase. Supplier: Gowtham, Invoice: 1234', 1, '2026-07-08 12:36:55'),
+(84, 'Yarn (80)', '80', 'Raw', 'Raw', 'SAMBANDAM', 'LOT50', '3200', 'Warp', -70.00, -70, 411.00, 'Main Warehouse', 'Issue_Job_Work', 7, 'Issued for Dyeing to Jhanvi Colors (DC: DC-DYE-1001)', 1, '2026-07-08 12:48:29'),
+(85, 'Yarn (80)', '80', 'Raw', 'Raw', 'SAMBANDAM', 'LOT50', '3200', 'Warp', -70.00, -70, 411.00, 'Main Warehouse', 'Issue_Job_Work', 7, 'Issued for Dyeing to Jhanvi Colors (DC: DC-DYE-1001)', 1, '2026-07-08 12:48:29'),
+(88, 'Yarn (80)', '80', 'Dyed', 'Crimson', 'SAMBANDAM', '454', '3200', 'Warp', 66.60, 65, 558.11, 'Main Warehouse', 'Receipt_Job_Work', 8, 'Received Dyed from Jhanvi Colors against DC-DYE-1001 (Color: Crimson)', 1, '2026-07-08 12:49:29'),
+(89, 'Yarn (80)', '80', 'Dyed', 'Royal Blue', 'SAMBANDAM', '454', '3200', 'Warp', 67.00, 67, 575.67, 'Main Warehouse', 'Receipt_Job_Work', 8, 'Received Dyed from Jhanvi Colors against DC-DYE-1001 (Color: Royal Blue)', 1, '2026-07-08 12:49:29'),
+(90, 'Yarn (80)', '80', 'Dyed', 'Crimson', 'SAMBANDAM', '454', '3200', 'Warp', -66.60, -65, 558.11, 'Main Warehouse', 'Issue_Job_Work', 4, 'Issued for Warping & Sizing to VR SIZING (DC: DC-WS-1001)', 1, '2026-07-08 12:51:04'),
+(91, 'Yarn (80)', '80', 'Dyed', 'Royal Blue', 'SAMBANDAM', '454', '3200', 'Warp', -20.00, -20, 575.67, 'Main Warehouse', 'Issue_Job_Work', 4, 'Issued for Warping & Sizing to VR SIZING (DC: DC-WS-1001)', 1, '2026-07-08 12:51:04'),
+(92, 'Yarn (80)', '80', 'Dyed', 'Crimson', 'SAMBANDAM', '454', '3200', 'Warp', 4.00, 0, 9649.67, 'Main Warehouse', 'Receipt_Job_Work', 2, 'Received from VR SIZING against DC-WS-1001', 1, '2026-07-08 12:52:00'),
+(93, 'Yarn (80)', '80', 'Dyed', 'Royal Blue', 'SAMBANDAM', '454', '3200', 'Warp', 3.00, 0, 4194.94, 'Main Warehouse', 'Receipt_Job_Work', 2, 'Received from VR SIZING against DC-WS-1001', 1, '2026-07-08 12:52:00');
 
 -- --------------------------------------------------------
 
@@ -2899,6 +2913,13 @@ CREATE TABLE `production_yarn_warping_sizing_dcs` (
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `production_yarn_warping_sizing_dcs`
+--
+
+INSERT INTO `production_yarn_warping_sizing_dcs` (`id`, `dc_number`, `dc_date`, `vendor_name`, `expected_return_date`, `vehicle_details`, `status`, `remarks`, `design_pattern`, `total_ends`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(4, 'DC-WS-1001', '2026-07-08', 'VR SIZING', '2026-07-09', 'TN28by9140', 'Completed', NULL, 'vfdvb', 3600, 1, NULL, '2026-07-08 12:51:04', '2026-07-08 12:52:00');
+
 -- --------------------------------------------------------
 
 --
@@ -2918,6 +2939,15 @@ CREATE TABLE `production_yarn_warping_sizing_dc_beams` (
   `ends` int(11) DEFAULT NULL,
   `remarks` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_warping_sizing_dc_beams`
+--
+
+INSERT INTO `production_yarn_warping_sizing_dc_beams` (`id`, `dc_id`, `receipt_id`, `returned_status`, `meters`, `sizing_no`, `color`, `return_date`, `beam_number`, `ends`, `remarks`) VALUES
+(9, 4, 2, 'Loaded', 1000.00, '44', 'Crimson (body), Royal Blue (border)', '2026-07-09', 'BM-102', 3600, 'Issued empty on DC DC-WS-1001'),
+(10, 4, 2, 'Loaded', 1000.00, '4545', 'Crimson (body), Royal Blue (border)', '2026-07-09', 'BM-101', 3600, 'Issued empty on DC DC-WS-1001'),
+(11, 4, 2, 'Empty', NULL, NULL, NULL, NULL, 'BM-103', NULL, 'Issued empty on DC DC-WS-1001');
 
 -- --------------------------------------------------------
 
@@ -2940,7 +2970,9 @@ INSERT INTO `production_yarn_warping_sizing_dc_color_ends` (`id`, `dc_id`, `colo
 (5, 6, 'Raw', 3700),
 (6, 5, 'Green', 450),
 (7, 5, 'Royal Blue', 2800),
-(8, 5, 'Green', 450);
+(8, 5, 'Green', 450),
+(14, 4, 'Crimson', 2800),
+(15, 4, 'Royal Blue', 800);
 
 -- --------------------------------------------------------
 
@@ -2967,6 +2999,14 @@ CREATE TABLE `production_yarn_warping_sizing_dc_items` (
   `cones_used` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `production_yarn_warping_sizing_dc_items`
+--
+
+INSERT INTO `production_yarn_warping_sizing_dc_items` (`id`, `dc_id`, `mill_name`, `yarn_count`, `warp_weft`, `warp_yarn_type`, `csp`, `lot_number`, `yarn_type`, `current_color`, `quantity_issued_kg`, `cones_issued`, `quantity_received_kg`, `cones_received`, `quantity_wastage_kg`, `cones_used`) VALUES
+(6, 4, 'SAMBANDAM', '80', 'Warp', 'body', '3200', '454', 'Dyed', 'Crimson', 66.60, 65, 4.00, 4, 62.60, 61),
+(7, 4, 'SAMBANDAM', '80', 'Warp', 'border', '3200', '454', 'Dyed', 'Royal Blue', 20.00, 20, 3.00, 2, 17.00, 18);
+
 -- --------------------------------------------------------
 
 --
@@ -2989,6 +3029,13 @@ CREATE TABLE `production_yarn_warping_sizing_receipts` (
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `production_yarn_warping_sizing_receipts`
+--
+
+INSERT INTO `production_yarn_warping_sizing_receipts` (`id`, `dc_id`, `receipt_number`, `receipt_date`, `transport_charges`, `loading_charges`, `packing_charges`, `other_expenses`, `remarks`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(2, 4, 'REC-WS-1001', '2026-07-08', 1500.00, 0.00, 0.00, 0.00, '', 1, NULL, '2026-07-08 12:52:00', '2026-07-08 12:52:00');
+
 -- --------------------------------------------------------
 
 --
@@ -3005,6 +3052,14 @@ CREATE TABLE `production_yarn_warping_sizing_receipt_items` (
   `cones_used` int(11) DEFAULT 0,
   `job_work_charges` decimal(10,2) NOT NULL DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_yarn_warping_sizing_receipt_items`
+--
+
+INSERT INTO `production_yarn_warping_sizing_receipt_items` (`id`, `receipt_id`, `dc_item_id`, `quantity_received_kg`, `cones_received`, `quantity_wastage_kg`, `cones_used`, `job_work_charges`) VALUES
+(2, 2, 6, 4.00, 4, 62.60, 61, 1000.00),
+(3, 2, 7, 3.00, 2, 17.00, 18, 1000.00);
 
 -- --------------------------------------------------------
 
@@ -4839,7 +4894,7 @@ ALTER TABLE `production_beams`
 -- AUTO_INCREMENT for table `production_beam_ledger`
 --
 ALTER TABLE `production_beam_ledger`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `production_colors`
@@ -4863,25 +4918,25 @@ ALTER TABLE `production_yarns`
 -- AUTO_INCREMENT for table `production_yarn_dyeing_dcs`
 --
 ALTER TABLE `production_yarn_dyeing_dcs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_dyeing_dc_items`
 --
 ALTER TABLE `production_yarn_dyeing_dc_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_dyeing_receipts`
 --
 ALTER TABLE `production_yarn_dyeing_receipts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_dyeing_receipt_items`
 --
 ALTER TABLE `production_yarn_dyeing_receipt_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_job_work_dcs`
@@ -4935,7 +4990,7 @@ ALTER TABLE `production_yarn_purchases`
 -- AUTO_INCREMENT for table `production_yarn_stock_movements`
 --
 ALTER TABLE `production_yarn_stock_movements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=94;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_twisting_dcs`
@@ -4965,37 +5020,37 @@ ALTER TABLE `production_yarn_twisting_receipt_items`
 -- AUTO_INCREMENT for table `production_yarn_warping_sizing_dcs`
 --
 ALTER TABLE `production_yarn_warping_sizing_dcs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_warping_sizing_dc_beams`
 --
 ALTER TABLE `production_yarn_warping_sizing_dc_beams`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_warping_sizing_dc_color_ends`
 --
 ALTER TABLE `production_yarn_warping_sizing_dc_color_ends`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_warping_sizing_dc_items`
 --
 ALTER TABLE `production_yarn_warping_sizing_dc_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_warping_sizing_receipts`
 --
 ALTER TABLE `production_yarn_warping_sizing_receipts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_warping_sizing_receipt_items`
 --
 ALTER TABLE `production_yarn_warping_sizing_receipt_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `production_yarn_weaving_dcs`

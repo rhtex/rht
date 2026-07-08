@@ -101,12 +101,8 @@
                                     <td><strong><?= number_format($purchase['total_weight_kg'], 2) ?> Kg</strong></td>
                                 </tr>
                                 <tr>
-                                    <th>Rate per Kg (Excl. Tax)</th>
+                                    <th>Rate per Kg</th>
                                     <td>₹<?= number_format($purchase['rate_per_kg'], 2) ?></td>
-                                </tr>
-                                <tr>
-                                    <th>GST Percent (%)</th>
-                                    <td><?= number_format($purchase['gst_percent'], 2) ?>%</td>
                                 </tr>
                             </table>
                         </div>
@@ -114,19 +110,15 @@
                             <?php 
                                 $weight = (float)$purchase['total_weight_kg'];
                                 $rate = (float)$purchase['rate_per_kg'];
-                                $gstPercent = (float)($purchase['gst_percent'] ?? 0);
                                 $transport = (float)($purchase['transport_charges'] ?? 0);
                                 $other = (float)($purchase['other_charges'] ?? 0);
 
                                 $baseCost = $weight * $rate;
-                                $gstAmount = $baseCost * ($gstPercent / 100);
                                 $totalExclTax = $baseCost + $transport + $other;
-                                $totalInclTax = $baseCost + $gstAmount + $transport + $other;
 
                                 $transportPerKg = $weight > 0 ? ($transport / $weight) : 0;
                                 $otherPerKg = $weight > 0 ? ($other / $weight) : 0;
-                                $landedCostPerKgExcl = $weight > 0 ? ($totalExclTax / $weight) : 0;
-                                $landedCostPerKgIncl = $weight > 0 ? ($totalInclTax / $weight) : 0;
+                                $landedCostPerKg = $weight > 0 ? ($totalExclTax / $weight) : 0;
                             ?>
                             <table class="table table-bordered">
                                 <tr>
@@ -138,16 +130,8 @@
                                     <td>₹<?= number_format($other, 2) ?> <small class="text-muted">(₹<?= number_format($otherPerKg, 2) ?> / Kg)</small></td>
                                 </tr>
                                 <tr>
-                                    <th>Total Value (Excl. Tax)</th>
+                                    <th>Total Landed Value</th>
                                     <td><strong>₹<?= number_format($totalExclTax, 2) ?></strong></td>
-                                </tr>
-                                <tr>
-                                    <th>GST Tax Amount (₹)</th>
-                                    <td>₹<?= number_format($gstAmount, 2) ?></td>
-                                </tr>
-                                <tr>
-                                    <th>Total Landed Value (Incl. Tax)</th>
-                                    <td><strong class="text-success">₹<?= number_format($totalInclTax, 2) ?></strong></td>
                                 </tr>
                             </table>
                         </div>
@@ -156,16 +140,11 @@
 
                 <!-- Final Landed Costs -->
                 <div class="col-md-12 mt-3">
-                    <div class="alert alert-info d-flex align-items-center justify-content-around">
-                        <div>
-                            <strong>Landed Cost per Kg (Excl. Tax):</strong>
-                            <span class="h4 ml-2 text-primary font-weight-bold">₹<?= number_format($landedCostPerKgExcl, 2) ?></span>
-                        </div>
-                        <div style="border-left: 1px solid rgba(0,0,0,0.1); height: 30px;"></div>
-                        <div>
-                            <strong>Landed Cost per Kg (Incl. Tax):</strong>
-                            <span class="h4 ml-2 text-success font-weight-bold">₹<?= number_format($landedCostPerKgIncl, 2) ?></span>
-                        </div>
+                    <div class="alert alert-info text-center py-3">
+                        <span class="h5">
+                            <strong>Landed Cost per Kg:</strong>
+                            <span class="h4 ml-2 text-primary font-weight-bold">₹<?= number_format($landedCostPerKg, 2) ?></span>
+                        </span>
                     </div>
                 </div>
             </div>

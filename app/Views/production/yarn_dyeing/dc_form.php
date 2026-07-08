@@ -66,10 +66,12 @@
                         <div class="col-md-3 mb-2">
                             <label class="form-label">Quantity to Issue (Kg)</label>
                             <input type="number" step="0.01" id="input-issue-qty" class="form-control" min="0.01" placeholder="0.00">
+                            <div class="invalid-feedback" id="error-issue-qty"></div>
                         </div>
                         <div class="col-md-2 mb-2">
                             <label class="form-label">Cones to Issue</label>
                             <input type="number" id="input-issue-cones" class="form-control" min="0" placeholder="0">
+                            <div class="invalid-feedback" id="error-issue-cones"></div>
                         </div>
                         <div class="col-md-2 mb-2">
                             <button type="button" id="btn-add-item" class="btn btn-dark w-100"><i class="fas fa-plus"></i> Add Item</button>
@@ -101,7 +103,7 @@
                         if (!empty($renderedItems)): 
                             foreach ($renderedItems as $index => $item): 
                         ?>
-                                <tr class="item-row">
+                                <tr class="item-row" data-mill-name="<?= esc($item['mill_name']) ?>" data-yarn-count="<?= esc($item['yarn_count']) ?>" data-warp-weft="<?= esc($item['warp_weft']) ?>" data-lot-number="<?= esc($item['lot_number']) ?>" data-csp="<?= esc($item['csp']) ?>" data-yarn-type="<?= esc($item['yarn_type']) ?>" data-current-color="<?= esc($item['current_color']) ?>">
                                     <td><input type="hidden" name="items[<?= $index ?>][mill_name]" value="<?= esc($item['mill_name']) ?>"><?= esc($item['mill_name']) ?></td>
                                     <td><input type="hidden" name="items[<?= $index ?>][yarn_count]" value="<?= esc($item['yarn_count']) ?>"><?= esc($item['yarn_count']) ?></td>
                                     <td><input type="hidden" name="items[<?= $index ?>][warp_weft]" value="<?= esc($item['warp_weft']) ?>"><?= esc($item['warp_weft']) ?></td>
@@ -119,7 +121,7 @@
                                         </select>
                                     </td>
                                     <td><input type="hidden" name="items[<?= $index ?>][quantity_issued_kg]" value="<?= esc($item['quantity_issued_kg']) ?>"><strong><?= number_format($item['quantity_issued_kg'], 2) ?> Kg</strong></td>
-                                    <td><input type="number" name="items[<?= $index ?>][cones_issued]" class="form-control form-control-sm" value="<?= esc($item['cones_issued']) ?>" min="0"></td>
+                                    <td><input type="hidden" name="items[<?= $index ?>][cones_issued]" value="<?= esc($item['cones_issued']) ?>"><strong><?= esc($item['cones_issued']) ?></strong></td>
                                     <td><button type="button" class="btn btn-sm btn-danger btn-remove-item"><i class="fas fa-trash"></i></button></td>
                                 </tr>
                             <?php endforeach; ?>
@@ -140,22 +142,40 @@ $(document).ready(function() {
     var itemIndex = <?= isset($dcItems) ? count($dcItems) : 0 ?>;
     
     $('#btn-add-item').click(function() {
+        // Clear previous errors
+        clearFieldError('#input-issue-qty', '#error-issue-qty');
+        clearFieldError('#input-issue-cones', '#error-issue-cones');
+
         var rawJson = $('#select-yarn-inventory').val();
         var qty = parseFloat($('#input-issue-qty').val()) || 0;
         var cones = parseInt($('#input-issue-cones').val()) || 0;
         
         if (!rawJson) { alert('Please select a yarn.'); return; }
-        if (qty <= 0) { alert('Please enter a valid quantity.'); return; }
         
+        var hasError = false;
         var y = JSON.parse(rawJson);
-        if (qty > parseFloat(y.quantity_available)) {
-            alert('Cannot issue more than available stock (' + y.quantity_available + ' Kg)');
-            return;
+        if (qty <= 0) {
+            showFieldError('#input-issue-qty', '#error-issue-qty', 'Please enter a valid quantity.');
+            hasError = true;
+        } else if (qty > parseFloat(y.quantity_available)) {
+            showFieldError('#input-issue-qty', '#error-issue-qty', 'Cannot issue more than available stock (' + y.quantity_available + ' Kg)');
+            hasError = true;
         }
         var availCones = parseInt(y.cones_available) || 0;
         if (cones > availCones) {
-            alert('Warning: Issuing ' + cones + ' cones exceeds available stock (' + availCones + ' Cones).');
+            showFieldError('#input-issue-cones', '#error-issue-cones', 'Cannot issue more than available cones (' + availCones + ' Cones)');
+            hasError = true;
         }
+
+        if (hasError) return;
+
+        // Subtract from selected option in dropdown
+        var $selectedOption = $('#select-yarn-inventory option:selected');
+        y.quantity_available = (parseFloat(y.quantity_available) || 0) - qty;
+        y.cones_available = (parseInt(y.cones_available) || 0) - cones;
+        $selectedOption.val(JSON.stringify(y));
+        var updatedLabel = y.brand_mill + ' - ' + y.yarn_count + ' (Lot: ' + (y.lot_number || '-') + ', Qty: ' + y.quantity_available.toFixed(2) + ' Kg, Cones: ' + y.cones_available + ', Color: ' + y.color + ')';
+        $selectedOption.text(updatedLabel);
 
         var colorSelectHtml = '<select name="items[' + itemIndex + '][required_color]" class="form-select form-select-sm select2-target-color" required>' +
             '<option value="">-- Select Color --</option>';
@@ -166,7 +186,7 @@ $(document).ready(function() {
         <?php endif; ?>
         colorSelectHtml += '</select>';
 
-        var row = '<tr class="item-row">' +
+        var row = '<tr class="item-row" data-mill-name="' + y.brand_mill + '" data-yarn-count="' + y.yarn_count + '" data-warp-weft="' + y.warp_weft + '" data-lot-number="' + (y.lot_number || '') + '" data-csp="' + (y.csp || '') + '" data-yarn-type="' + y.yarn_type + '" data-current-color="' + y.color + '">' +
             '<td><input type="hidden" name="items[' + itemIndex + '][mill_name]" value="' + y.brand_mill + '">' + y.brand_mill + '</td>' +
             '<td><input type="hidden" name="items[' + itemIndex + '][yarn_count]" value="' + y.yarn_count + '">' + y.yarn_count + '</td>' +
             '<td><input type="hidden" name="items[' + itemIndex + '][warp_weft]" value="' + y.warp_weft + '">' + y.warp_weft + '</td>' +
@@ -175,7 +195,7 @@ $(document).ready(function() {
             '<td><input type="hidden" name="items[' + itemIndex + '][yarn_type]" value="' + y.yarn_type + '"><input type="hidden" name="items[' + itemIndex + '][current_color]" value="' + y.color + '">' + y.color + '</td>' +
             '<td>' + colorSelectHtml + '</td>' +
             '<td><input type="hidden" name="items[' + itemIndex + '][quantity_issued_kg]" value="' + qty + '"><strong>' + qty.toFixed(2) + ' Kg</strong></td>' +
-            '<td><input type="number" name="items[' + itemIndex + '][cones_issued]" class="form-control form-control-sm" value="' + cones + '" min="0"></td>' +
+            '<td><input type="hidden" name="items[' + itemIndex + '][cones_issued]" value="' + cones + '"><strong>' + cones + '</strong></td>' +
             '<td><button type="button" class="btn btn-sm btn-danger btn-remove-item"><i class="fas fa-trash"></i></button></td>' +
             '</tr>';
             
@@ -193,14 +213,121 @@ $(document).ready(function() {
 
         itemIndex++;
         
-        // Reset
+        // Reset and trigger refresh
+        $('#select-yarn-inventory').select2('destroy');
+        $('#select-yarn-inventory').select2({
+            theme: 'bootstrap-5',
+            width: '100%'
+        });
         $('#select-yarn-inventory').val('').trigger('change');
         $('#input-issue-qty').val('');
         $('#input-issue-cones').val('');
     });
 
     $(document).on('click', '.btn-remove-item', function() {
-        $(this).closest('tr').remove();
+        var $row = $(this).closest('tr');
+        var millName = $row.data('mill-name') || $row.find('input[name*="[mill_name]"]').val();
+        var count = $row.data('yarn-count') || $row.find('input[name*="[yarn_count]"]').val();
+        var warpWeft = $row.data('warp-weft') || $row.find('input[name*="[warp_weft]"]').val();
+        var lot = $row.data('lot-number') || $row.find('input[name*="[lot_number]"]').val() || '';
+        var csp = $row.data('csp') || $row.find('input[name*="[csp]"]').val() || '';
+        var yarnType = $row.data('yarn-type') || $row.find('input[name*="[yarn_type]"]').val();
+        var color = $row.data('current-color') || $row.find('input[name*="[current_color]"]').val();
+        var qty = parseFloat($row.find('input[name*="[quantity_issued_kg]"]').val()) || 0;
+        var cones = parseInt($row.find('input[name*="[cones_issued]"]').val()) || 0;
+
+        console.log("Removing row:", { millName, count, warpWeft, lot, csp, yarnType, color, qty, cones });
+        
+        // Add back to select options
+        $('#select-yarn-inventory option').each(function() {
+            var val = $(this).val();
+            if (!val) return;
+            var y = JSON.parse(val);
+
+            console.log("Comparing option:", {
+                brand_mill: y.brand_mill, match_mill: y.brand_mill === millName,
+                yarn_count: y.yarn_count, match_count: y.yarn_count == count,
+                warp_weft: y.warp_weft, match_weft: y.warp_weft === warpWeft,
+                lot_number: y.lot_number, match_lot: (y.lot_number || '') == lot,
+                csp: y.csp, match_csp: (y.csp || '') == csp,
+                yarn_type: y.yarn_type, match_type: y.yarn_type === yarnType,
+                color: y.color, match_color: y.color === color
+            });
+
+            if (y.brand_mill === millName && 
+                y.yarn_count == count && 
+                y.warp_weft === warpWeft && 
+                (y.lot_number || '') == lot && 
+                (y.csp || '') == csp && 
+                y.yarn_type === yarnType && 
+                y.color === color) {
+                
+                // Add back
+                y.quantity_available = (parseFloat(y.quantity_available) || 0) + qty;
+                y.cones_available = (parseInt(y.cones_available) || 0) + cones;
+
+                // Update option value
+                $(this).val(JSON.stringify(y));
+
+                // Update text
+                var label = y.brand_mill + ' - ' + y.yarn_count + ' (Lot: ' + (y.lot_number || '-') + ', Qty: ' + y.quantity_available.toFixed(2) + ' Kg, Cones: ' + y.cones_available + ', Color: ' + y.color + ')';
+                $(this).text(label);
+                return false; // break loop
+            }
+        });
+
+        // Re-initialize select2 to pick up text changes
+        $('#select-yarn-inventory').select2('destroy');
+        $('#select-yarn-inventory').select2({
+            theme: 'bootstrap-5',
+            width: '100%'
+        });
+
+        $row.remove();
+    });
+
+    // Helper functions for inline field validation
+    function showFieldError(inputSel, errorSel, message) {
+        $(inputSel).addClass('is-invalid');
+        $(errorSel).text(message).show();
+    }
+
+    function clearFieldError(inputSel, errorSel) {
+        $(inputSel).removeClass('is-invalid');
+        $(errorSel).text('').hide();
+    }
+
+    // Real-time validation on Qty and Cones input
+    $('#input-issue-qty, #input-issue-cones').on('input change', function () {
+        var rawJson = $('#select-yarn-inventory').val();
+        if (!rawJson) return;
+
+        var y = JSON.parse(rawJson);
+        var available = parseFloat(y.quantity_available) || 0;
+        var availCones = parseInt(y.cones_available) || 0;
+
+        var qty = parseFloat($('#input-issue-qty').val()) || 0;
+        var cones = parseInt($('#input-issue-cones').val()) || 0;
+
+        // Validate Qty
+        if (qty > available) {
+            showFieldError('#input-issue-qty', '#error-issue-qty', 'Exceeds stock. Available: ' + available.toFixed(2) + ' Kg');
+        } else {
+            clearFieldError('#input-issue-qty', '#error-issue-qty');
+        }
+
+        // Validate Cones
+        if (cones > availCones) {
+            showFieldError('#input-issue-cones', '#error-issue-cones', 'Exceeds stock. Available: ' + availCones + ' cones');
+        } else {
+            clearFieldError('#input-issue-cones', '#error-issue-cones');
+        }
+    });
+
+    // Clear errors on change of yarn selection
+    $('#select-yarn-inventory').change(function() {
+        clearFieldError('#input-issue-qty', '#error-issue-qty');
+        clearFieldError('#input-issue-cones', '#error-issue-cones');
     });
 
     // Format option template with color swatch
@@ -226,6 +353,11 @@ $(document).ready(function() {
         templateSelection: formatColorOption
     });
     
+    // Prevent double submission to avoid CSRF token reuse issues
+    $('#dcForm').on('submit', function () {
+        $('#btnSubmit').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
+    });
+
     $('#select-yarn-inventory').select2({
         theme: 'bootstrap-5',
         width: '100%'

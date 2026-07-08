@@ -191,7 +191,41 @@ class YarnDyeingController extends BaseController
         }
 
         $data['dcItems'] = $this->dcItemModel->where('dc_id', $id)->findAll();
-        $data['availableYarns'] = $this->movementModel->getInventory(['yarn_type' => 'Raw']);
+        $availableYarns = $this->movementModel->getInventory(['yarn_type' => 'Raw']);
+
+        // Ensure currently issued items are present in the dropdown list (even with 0 stock if depleted)
+        foreach ($data['dcItems'] as $item) {
+            $found = false;
+            foreach ($availableYarns as $ay) {
+                if ($ay['brand_mill'] === $item['mill_name'] &&
+                    $ay['yarn_count'] == $item['yarn_count'] &&
+                    $ay['warp_weft'] === $item['warp_weft'] &&
+                    ($ay['lot_number'] ?? '') == ($item['lot_number'] ?? '') &&
+                    ($ay['csp'] ?? '') == ($item['csp'] ?? '') &&
+                    $ay['yarn_type'] === $item['yarn_type'] &&
+                    ($ay['color'] ?? 'Raw') === ($item['current_color'] ?? 'Raw')) {
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $availableYarns[] = [
+                    'yarn_name'          => 'Yarn (' . $item['yarn_count'] . ')',
+                    'yarn_count'         => $item['yarn_count'],
+                    'yarn_type'          => $item['yarn_type'],
+                    'color'              => $item['current_color'] ?: 'Raw',
+                    'brand_mill'         => $item['mill_name'],
+                    'lot_number'         => $item['lot_number'],
+                    'csp'                => $item['csp'],
+                    'warp_weft'          => $item['warp_weft'],
+                    'quantity_available' => 0.00,
+                    'cones_available'    => 0,
+                    'avg_cost_per_kg'    => 0.00,
+                    'warehouse'          => 'Main Warehouse'
+                ];
+            }
+        }
+        $data['availableYarns'] = $availableYarns;
 
         $colorModel = new \App\Models\ColorModel();
         $data['colorsList'] = $colorModel->where('status', 'Active')->orderBy('name', 'ASC')->findAll();
@@ -474,6 +508,7 @@ class YarnDyeingController extends BaseController
                     'csp'           => $dcItem['csp'],
                     'warp_weft'     => $dcItem['warp_weft'],
                     'quantity_kg'   => $qtyReceived,
+                    'quantity_cones'=> $conesReceived,
                     'cost_per_kg'   => $finalLandedCostPerKg,
                     'warehouse'     => 'Main Warehouse',
                     'movement_type' => 'Receipt_Job_Work',
@@ -780,6 +815,7 @@ class YarnDyeingController extends BaseController
                     'csp'           => $dcItem['csp'],
                     'warp_weft'     => $dcItem['warp_weft'],
                     'quantity_kg'   => $qtyReceived,
+                    'quantity_cones'=> $conesReceived,
                     'cost_per_kg'   => $finalLandedCostPerKg,
                     'warehouse'     => 'Main Warehouse',
                     'movement_type' => 'Receipt_Job_Work',

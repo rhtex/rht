@@ -260,10 +260,8 @@
                                     <th class="py-3 text-center" width="8%">Issued Cones</th>
                                     <th class="py-3 text-center" width="10%">Recd Qty (Loaded) <span class="text-danger">*</span></th>
                                     <th class="py-3 text-center" width="10%">Recd Cones <span class="text-danger">*</span></th>
-                                    <th class="py-3 text-center" width="10%">Used Qty (Kg) <span class="text-danger">*</span></th>
-                                    <th class="py-3 text-center" width="10%">Used Cones <span class="text-danger">*</span></th>
-                                    <th class="py-3 text-center" width="10%">Pending Qty</th>
-                                    <th class="py-3 text-center" width="10%">Pending Cones</th>
+                                    <th class="py-3 text-center" width="10%">Used Qty (Kg)</th>
+                                    <th class="py-3 text-end" width="12%">Total Yarn Cost Given (₹)</th>
                                     <th class="py-3 text-end" width="12%">Used Yarn Cost (₹)</th>
                                     <th class="py-3 text-end" width="12%">Received Yarn Cost (Landed) (₹)</th>
                                 </tr>
@@ -338,20 +336,13 @@
                                                 value="<?= $conesReceivedVal ?>" min="0" required>
                                         </td>
                                         <td>
-                                            <input type="number" step="0.01" name="items[<?= $item['id'] ?>][quantity_used_kg]"
-                                                class="form-control form-control-sm input-used-qty text-center"
-                                                value="<?= number_format($qtyUsedVal, 2, '.', '') ?>" min="0" required>
+                                            <input type="hidden" name="items[<?= $item['id'] ?>][quantity_used_kg]"
+                                                class="input-used-qty"
+                                                value="<?= number_format($qtyUsedVal, 2, '.', '') ?>">
+                                            <span class="fw-bold lbl-used-qty"><?= number_format($qtyUsedVal, 2) ?> Kg</span>
                                         </td>
-                                        <td>
-                                            <input type="number" name="items[<?= $item['id'] ?>][cones_used]"
-                                                class="form-control form-control-sm input-used-cones text-center"
-                                                value="<?= $conesUsedVal ?>" min="0" required>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="fw-bold text-primary lbl-pending-kgs"><?= number_format($pending, 2) ?></span> Kg
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="fw-bold text-primary lbl-pending-cones"><?= $pendingCones ?></span>
+                                        <td class="text-end fw-bold text-secondary">
+                                            ₹<?= number_format($issuedQtyCost, 2) ?>
                                         </td>
                                         <td class="text-end">
                                             <span class="fw-bold lbl-used-yarn-cost" id="lbl-used-yarn-cost-<?= $item['id'] ?>">₹0.00</span>
@@ -497,7 +488,7 @@
         });
 
         // Auto-calculate used qty for warping/sizing
-        $(document).on('input', '.input-recd, .input-used-qty, .input-recd-cones, .input-used-cones', function () {
+        $(document).on('input', '.input-recd, .input-recd-cones', function () {
             var $row = $(this).closest('tr');
             var pending = parseFloat($row.data('pending')) || 0;
             var pendingCones = parseInt($row.data('pending-cones')) || 0;
@@ -507,38 +498,30 @@
             if ($(this).hasClass('input-recd')) {
                 var issued = parseFloat($row.data('issued')) || 0;
                 var recdVal = parseFloat($(this).val()) || 0;
-                $row.find('.input-used-qty').val(Math.max(0, issued - recdVal).toFixed(2));
-            }
-            if ($(this).hasClass('input-recd-cones')) {
-                var issuedCones = parseInt($row.data('pending-cones')) || 0;
-                var recdConesVal = parseInt($(this).val()) || 0;
-                $row.find('.input-used-cones').val(Math.max(0, issuedCones - recdConesVal));
+                var calculatedUsed = Math.max(0, issued - recdVal);
+                $row.find('.input-used-qty').val(calculatedUsed.toFixed(2));
+                $row.find('.lbl-used-qty').text(calculatedUsed.toFixed(2) + ' Kg');
             }
 
             var used = parseFloat($row.find('.input-used-qty').val()) || 0;
             var totalAccounted = recd + used;
 
             var recdCones = parseInt($row.find('.input-recd-cones').val()) || 0;
-            var usedCones = parseInt($row.find('.input-used-cones').val()) || 0;
-            var totalConesAccounted = recdCones + usedCones;
 
             // Server-side / Client-side validation: Total (Recd + Used) cannot exceed pending
             if (totalAccounted > pending) {
                 $row.find('.qty-error-msg').text('Total (Recd + Used) exceeds pending (' + pending.toFixed(2) + ' Kg)').show();
                 $row.addClass('table-danger');
-                $row.find('.input-recd, .input-used-qty').addClass('is-invalid border-danger');
+                $row.find('.input-recd').addClass('is-invalid border-danger');
             } else {
                 $row.find('.qty-error-msg').hide();
                 $row.removeClass('table-danger');
-                $row.find('.input-recd, .input-used-qty').removeClass('is-invalid border-danger');
+                $row.find('.input-recd').removeClass('is-invalid border-danger');
             }
 
             // Remaining Pending = Pending - Total Accounted
             var remainingPending = Math.max(0, pending - totalAccounted);
-            var remainingPendingCones = Math.max(0, pendingCones - totalConesAccounted);
-
-            $row.find('.lbl-pending-kgs').text(remainingPending.toFixed(2));
-            $row.find('.lbl-pending-cones').text(remainingPendingCones);
+            var remainingPendingCones = Math.max(0, pendingCones - recdCones);
 
             calculateLandedCosts();
             validateSubmitButton();
@@ -561,7 +544,7 @@
         }
 
         // Recalculate on input change
-        $(document).on('input change', '.input-job-charges, .expense-input, .input-beam-meters, .input-recd-cones, .input-used-cones', function () {
+        $(document).on('input change', '.input-job-charges, .expense-input, .input-beam-meters, .input-recd-cones', function () {
             calculateLandedCosts();
         });
 
@@ -603,12 +586,13 @@
                 $('#lbl-used-yarn-cost-' + itemId).text('₹' + usedYarnCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
                 totalUsedYarnCost += usedYarnCost;
 
-                // Received Yarn Cost (Landed) = Received Qty * Actual Yarn Cost (cost at time of sending to sizing)
+                // Received Yarn Cost (Landed) = Received Raw Cost + share of Sizing Job Work + share of Sizing Expenses
                 var recdRawCost = recd * rawCost;
-                totalReceivedYarnCost += recdRawCost;
-                $row.find('.lbl-landed-cost').text('₹' + recdRawCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                var rowLandedCost = recdRawCost + shareOfJobWork + shareOfExpense;
+                totalReceivedYarnCost += recdRawCost; // Keep as raw received cost in summary card component
+                $row.find('.lbl-landed-cost').text('₹' + rowLandedCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 
-                grandTotalLandedCost += recdRawCost + shareOfJobWork + shareOfExpense;
+                grandTotalLandedCost += rowLandedCost + usedYarnCost;
             });
 
             // Calculate overall per meter

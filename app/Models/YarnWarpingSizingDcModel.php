@@ -20,9 +20,11 @@ class YarnWarpingSizingDcModel extends Model
     protected $updatedField  = 'updated_at';
 
     protected $validationRules      = [
-        'dc_number'     => 'required|is_unique[production_yarn_warping_sizing_dcs.dc_number,id,{id}]',
-        'dc_date'       => 'required|valid_date[Y-m-d]',
-        'vendor_name'   => 'required|min_length[3]|max_length[255]',
-        'status'        => 'in_list[Open,Partially Received,Completed,Cancelled]',
+        'dc_number'            => 'required|is_unique[production_yarn_warping_sizing_dcs.dc_number,id,{id}]',
+        'dc_date'              => 'required|valid_date[Y-m-d]',
+        'vendor_name'          => 'required|min_length[3]|max_length[255]',
+        'expected_return_date' => 'required|valid_date[Y-m-d]',
+        'vehicle_details'      => 'required|min_length[3]|max_length[100]',
+        'status'               => 'in_list[Open,Partially Received,Completed,Cancelled]',
     ];
 }

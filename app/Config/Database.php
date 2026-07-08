@@ -27,9 +27,9 @@ class Database extends Config
     public array $default = [
         'DSN'          => '',
         'hostname'     => 'localhost',
-        'username'     => 'rhtexin_prodrht',
+        'username'     => 'rhtexin_testrht',
         'password'     => 'Mirage@WL2024',
-        'database'     => 'rhtexin_prodrht',
+        'database'     => 'rhtexin_testrht',
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
         'pConnect'     => false,

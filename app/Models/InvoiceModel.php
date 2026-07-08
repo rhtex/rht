@@ -20,8 +20,6 @@ class InvoiceModel extends Model
         'agent_commission_status',
         'agent_commission_paid_at',
         'invoice_number',
-        'zoho_invoice_id',
-        'zoho_sync_status',
         'invoice_date',
         'due_date',
         'reference_number',
@@ -59,8 +57,7 @@ class InvoiceModel extends Model
         'notes',
         'terms',
         'created_by',
-        'updated_by',
-        'zoho_sync_at'
+        'updated_by'
     ];
 
     protected $useTimestamps = true;

@@ -50,15 +50,6 @@
                             <tr><th>Agent:</th><td><?= esc($order['agent_name']) ?></td></tr>
                         <?php endif; ?>
                         <tr><th>Expected Shipment:</th><td><?= $order['shipment_date'] ? date('d/m/Y', strtotime($order['shipment_date'])) : '-' ?></td></tr>
-                        <tr><th>Zoho Sync:</th>
-                            <td>
-                                <?php if ($order['zoho_sync_status'] == 'Synced'): ?>
-                                    <span class="badge text-bg-success"><i class="fas fa-check"></i> Synced</span>
-                                <?php else: ?>
-                                    <span class="badge text-bg-warning"><?= $order['zoho_sync_status'] ?></span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
                     </table>
                 </div>
             </div>

@@ -8,7 +8,6 @@
         <h1>Sales Returns (Credit Notes)</h1>
     </div>
     <div class="col-sm-6 text-end">
-        <a href="<?= site_url('sales_returns/sync-zoho') ?>" class="btn btn-info me-2"><i class="fas fa-sync"></i> Sync from Zoho</a>
         <a href="<?= site_url('sales_returns/create') ?>" class="btn btn-primary"><i class="fas fa-plus"></i> Record Return</a>
     </div>
 </div>
@@ -69,7 +68,6 @@
                         <th>Invoice #</th>
                         <th class="text-end">Amount</th>
                         <th class="text-center">Status</th>
-                        <th class="text-center">Zoho Sync</th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -86,13 +84,6 @@
                                 <span class="badge bg-<?= $ret['status'] == 'Open' ? 'info' : ($ret['status'] == 'Void' ? 'danger' : 'success') ?>">
                                     <?= esc($ret['status']) ?>
                                 </span>
-                            </td>
-                            <td class="text-center">
-                                <?php if($ret['zoho_credit_note_id']): ?>
-                                    <span class="badge bg-success" title="Synced at <?= $ret['zoho_sync_at'] ?>"><i class="fas fa-check"></i> Synced</span>
-                                <?php else: ?>
-                                    <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Not Synced</span>
-                                <?php endif; ?>
                             </td>
                             <td class="text-center">
                                 <a href="<?= site_url('sales_returns/view/'.$ret['id']) ?>" class="btn btn-sm btn-info" title="View"><i class="fas fa-eye"></i></a>

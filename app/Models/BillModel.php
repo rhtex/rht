@@ -15,8 +15,6 @@ class BillModel extends Model
     protected $allowedFields = [
         'vendor_id',
         'bill_number',
-        'zoho_bill_id',
-        'zoho_sync_status',
         'bill_date',
         'due_date',
         'reference_number',
@@ -37,8 +35,7 @@ class BillModel extends Model
         'notes',
         'terms',
         'created_by',
-        'updated_by',
-        'zoho_sync_at'
+        'updated_by'
     ];
 
     protected $useTimestamps = true;

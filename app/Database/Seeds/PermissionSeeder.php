@@ -138,9 +138,6 @@ class PermissionSeeder extends Seeder
             // Settings
             ['key' => 'setting.view', 'name' => 'View Settings', 'module' => 'settings'],
             ['key' => 'setting.edit', 'name' => 'Edit Settings', 'module' => 'settings'],
-            ['key' => 'zoho.view', 'name' => 'View Zoho Settings', 'module' => 'settings'],
-            ['key' => 'zoho.edit', 'name' => 'Edit Zoho Settings', 'module' => 'settings'],
-            ['key' => 'zoho.sync', 'name' => 'Sync With Zoho', 'module' => 'settings'],
 
             // Tax Permissions
             ['key' => 'tax.view', 'name' => 'View Taxes', 'module' => 'tax'],

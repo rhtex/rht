@@ -7,7 +7,6 @@ use App\Models\SalesReturnItemModel;
 use App\Models\InvoiceModel;
 use App\Models\CustomerModel;
 use App\Models\ProductModel;
-use App\Services\ZohoBooksService;
 
 class SalesReturnController extends BaseController
 {
@@ -16,7 +15,6 @@ class SalesReturnController extends BaseController
     protected $invoiceModel;
     protected $customerModel;
     protected $productModel;
-    protected $zohoService;
 
     public function __construct()
     {
@@ -25,7 +23,6 @@ class SalesReturnController extends BaseController
         $this->invoiceModel = new InvoiceModel();
         $this->customerModel = new CustomerModel();
         $this->productModel = new ProductModel();
-        $this->zohoService = new ZohoBooksService();
     }
 
     public function index()
@@ -111,8 +108,6 @@ class SalesReturnController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to save return.');
         }
 
-        // Push to Zoho
-        $this->pushToZoho($returnId);
 
         return redirect()->to('sales_returns')->with('success', 'Sales return recorded successfully.');
     }
@@ -134,94 +129,5 @@ class SalesReturnController extends BaseController
         return view('sales_returns/view', $data);
     }
 
-    public function pushToZoho($id)
-    {
-        $return = $this->returnModel->find($id);
-        if (!$return)
-            return;
-
-        $customer = $this->customerModel->find($return['customer_id']);
-        if (!$customer || !$customer['zoho_contact_id'])
-            return;
-
-        $items = $this->itemModel->where('sales_return_id', $id)->findAll();
-
-        $lineItems = [];
-        foreach ($items as $item) {
-            $lineItems[] = [
-                'description' => $item['description'],
-                'quantity' => $item['quantity'],
-                'rate' => $item['rate'],
-                // Add tax info if needed, simplified for now
-            ];
-        }
-
-        $data = [
-            'customer_id' => $customer['zoho_contact_id'],
-            'creditnote_number' => $return['return_number'],
-            'date' => $return['return_date'],
-            'line_items' => $lineItems,
-            'reason' => $return['reason']
-        ];
-
-        $response = $this->zohoService->createCreditNote($data);
-
-        if ($response['success']) {
-            $zohoId = $response['data']['creditnote']['creditnote_id'];
-            $this->returnModel->update($id, [
-                'zoho_credit_note_id' => $zohoId,
-                'zoho_sync_status' => 'Synced',
-                'zoho_sync_at' => date('Y-m-d H:i:s')
-            ]);
-        } else {
-            log_message('error', 'Zoho Push Error for Credit Note ' . $id . ': ' . $response['message']);
-        }
-    }
-
-    public function syncFromZoho()
-    {
-        $page = 1;
-        $syncedCount = 0;
-
-        while (true) {
-            $response = $this->zohoService->getCreditNotes($page);
-            if (!$response['success'] || empty($response['data']['creditnotes']))
-                break;
-
-            foreach ($response['data']['creditnotes'] as $cn) {
-                $existing = $this->returnModel->where('zoho_credit_note_id', $cn['creditnote_id'])->first();
-
-                $customer = $this->customerModel->where('zoho_contact_id', $cn['customer_id'])->first();
-                if (!$customer)
-                    continue;
-
-                $returnId = null;
-                $data = [
-                    'customer_id' => $customer['id'],
-                    'return_number' => $cn['creditnote_number'],
-                    'return_date' => $cn['date'],
-                    'total_amount' => $cn['total'],
-                    'status' => $cn['status'],
-                    'zoho_credit_note_id' => $cn['creditnote_id'],
-                    'zoho_sync_status' => 'Synced',
-                    'zoho_sync_at' => date('Y-m-d H:i:s')
-                ];
-
-                if ($existing) {
-                    $this->returnModel->update($existing['id'], $data);
-                    $returnId = $existing['id'];
-                } else {
-                    $this->returnModel->insert($data);
-                    $returnId = $this->returnModel->getInsertID();
-                }
-                $syncedCount++;
-            }
-            if (!$response['data']['page_context']['has_more_page'])
-                break;
-            $page++;
-        }
-
-        return redirect()->to('sales_returns')->with('success', "Synced $syncedCount credit notes from Zoho.");
-    }
 
 }

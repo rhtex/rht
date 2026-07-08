@@ -15,8 +15,8 @@ class InvoicePaymentModel extends Model
     protected $allowedFields    = [
         'invoice_id', 'customer_id', 'bank_account_id', 'bank_transaction_id', 'payment_number',
         'payment_date', 'payment_mode', 'amount', 'discount_amount', 'mahimai_amount',
-        'postal_charges', 'reference_number', 'zoho_payment_id',
-        'zoho_sync_status', 'notes', 'created_by', 'updated_by', 'zoho_sync_at'
+        'postal_charges', 'reference_number',
+        'notes', 'created_by', 'updated_by'
     ];
 
     protected $useTimestamps = true;

@@ -7,7 +7,6 @@ use App\Models\StateModel;
 use App\Models\AddressModel;
 use App\Models\ProductItemModel;
 use App\Models\VendorCreditModel;
-use App\Services\ZohoBooksService;
 
 class VendorController extends BaseController
 {
@@ -16,7 +15,6 @@ class VendorController extends BaseController
     protected $addressModel;
     protected $itemModel;
     protected $creditModel;
-    protected $zohoService;
 
     public function __construct()
     {
@@ -25,7 +23,6 @@ class VendorController extends BaseController
         $this->addressModel = new AddressModel();
         $this->itemModel = new ProductItemModel();
         $this->creditModel = new VendorCreditModel();
-        $this->zohoService = new ZohoBooksService();
     }
 
     public function index()
@@ -86,8 +83,6 @@ class VendorController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to save vendor data.');
         }
 
-        // Push to Zoho
-        $this->pushToZoho($vendorId);
 
         return redirect()->to('vendors')->with('success', 'Vendor added successfully.');
     }
@@ -126,8 +121,6 @@ class VendorController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update vendor data.');
         }
 
-        // Push to Zoho
-        $this->pushToZoho($id);
 
         return redirect()->to('vendors')->with('success', 'Vendor updated successfully.');
     }
@@ -377,254 +370,6 @@ class VendorController extends BaseController
         return view('vendors/statement', $data);
     }
 
-    private function pushToZoho($id)
-    {
-        $vendor = $this->vendorModel->find($id);
-        if (!$vendor)
-            return;
-
-        $billing = $this->addressModel->getActiveAddress('vendor', $id, 'billing');
-        $billingState = $billing ? $this->stateModel->find($billing['state_id']) : null;
-
-        $data = [
-            'contact_name' => $vendor['name'],
-            'company_name' => $vendor['name'], // Vendor name is the company name
-            'contact_type' => 'vendor',
-            'email' => $vendor['email'],
-            'phone' => $vendor['phone'],
-            'mobile' => $vendor['whatsapp_number'] ?? $vendor['phone'],
-            'website' => $vendor['website'],
-            'gst_no' => $vendor['gstin'],
-            'pan' => $vendor['pan_number'],
-            'billing_address' => [
-                'address' => $billing['address_line1'] ?? '',
-                'street2' => $billing['address_line2'] ?? '',
-                'city' => $billing['city'] ?? '',
-                'state' => $billingState['name'] ?? '',
-                'zip' => $billing['pincode'] ?? '',
-                'country' => 'India'
-            ]
-        ];
-
-        $response = $this->zohoService->pushContact($data, $vendor['zoho_contact_id']);
-
-        if ($response['success']) {
-            $zohoId = $response['data']['contact']['contact_id'];
-            $this->vendorModel->update($id, [
-                'zoho_contact_id' => $zohoId,
-                'zoho_sync_at' => date('Y-m-d H:i:s')
-            ]);
-        } else {
-            log_message('error', 'Zoho Push Error for Vendor ' . $id . ': ' . $response['message']);
-        }
-    }
-
-    public function syncZoho()
-    {
-        $page = 1;
-        $hasMore = true;
-        $syncedCount = 0;
-        $maxContactsPerRun = 100; // Limit to prevent timeout
-        $startTime = time();
-        $maxExecutionTime = 100; // Leave 20 seconds buffer before PHP timeout
-
-        try {
-            while ($hasMore && $syncedCount < $maxContactsPerRun) {
-                // Check if we're approaching timeout
-                if ((time() - $startTime) > $maxExecutionTime) {
-                    log_message('warning', "Zoho Vendor Sync: Stopping due to time limit. Synced $syncedCount vendors.");
-                    return redirect()->to('vendors')->with('warning', "Partially synced $syncedCount vendors. Please run sync again to continue.");
-                }
-
-                $response = $this->zohoService->getContacts('vendor', $page);
-
-                if (!$response['success']) {
-                    if ($syncedCount > 0)
-                        break;
-                    return redirect()->to('vendors')->with('error', 'Failed to fetch from Zoho: ' . $response['message']);
-                }
-
-                $contacts = $response['data']['contacts'] ?? [];
-                if (empty($contacts))
-                    break;
-
-                foreach ($contacts as $contact) {
-                    if ($syncedCount >= $maxContactsPerRun) {
-                        break;
-                    }
-
-                    $existing = $this->vendorModel->where('zoho_contact_id', $contact['contact_id'])->first();
-
-                    // Skip if synced in the last 5 minutes (to avoid re-processing same contacts)
-                    if ($existing && !empty($existing['zoho_sync_at'])) {
-                        $lastSyncTime = strtotime($existing['zoho_sync_at']);
-                        $fiveMinutesAgo = time() - (5 * 60);
-                        if ($lastSyncTime > $fiveMinutesAgo) {
-                            continue; // Skip recently synced contact
-                        }
-                    }
-
-                    // Get phone number from Zoho (prioritize mobile, then phone)
-                    $rawPhone = ($contact['mobile'] ?? '') ?: ($contact['phone'] ?? '') ?: '';
-                    $phoneNumbers = preg_split('/[,\\s\\/]+/', $rawPhone);
-                    $phone = trim($phoneNumbers[0] ?? '');
-                    $phone = preg_replace('/[^0-9+]/', '', $phone);
-                    if (strlen($phone) > 15) {
-                        $phone = substr($phone, 0, 15);
-                    }
-
-                    $vendorData = [
-                        'zoho_contact_id' => $contact['contact_id'],
-                        'name' => $contact['company_name'] ?: $contact['contact_name'],
-                        'email' => $contact['email'] ?? '',
-                        'phone' => $phone,
-                        'website' => $contact['website'] ?? '',
-                        'gst_type' => !empty($contact['gst_no']) ? 'Regular' : 'Unregistered',
-                        'gstin' => $contact['gst_no'] ?? '',
-                        'balance_type' => 'Cr',
-                        'opening_balance' => 0,
-                        'zoho_sync_at' => date('Y-m-d H:i:s'),
-                        'status' => 'active'
-                    ];
-
-                    if ($existing) {
-                        if (!$this->vendorModel->update($existing['id'], $vendorData)) {
-                            log_message('error', 'Zoho Sync: Failed to update vendor ID ' . $existing['id']);
-                            continue;
-                        }
-                        $vendorId = $existing['id'];
-                    } else {
-                        if (!$this->vendorModel->insert($vendorData)) {
-                            log_message('error', 'Zoho Sync: Failed to insert vendor (Zoho ID: ' . $contact['contact_id'] . ')');
-                            continue;
-                        }
-                        $vendorId = $this->vendorModel->getInsertID();
-                    }
-
-                    // Check if addresses exist in list endpoint data
-                    $hasAddressesInList = !empty($contact['billing_address']) || !empty($contact['shipping_address']);
-
-                    if ($hasAddressesInList) {
-                        // Use addresses from list endpoint directly (faster)
-                        if (!empty($contact['billing_address'])) {
-                            $this->syncAddress($vendorId, 'vendor', 'billing', $contact['billing_address']);
-                        }
-                        if (!empty($contact['shipping_address'])) {
-                            $this->syncAddress($vendorId, 'vendor', 'shipping', $contact['shipping_address']);
-                        }
-                    } else {
-                        // Fetch individual contact details only if addresses missing
-                        $detailResponse = $this->zohoService->getContactById($contact['contact_id']);
-                        if ($detailResponse['success'] && isset($detailResponse['data']['contact'])) {
-                            $detailedContact = $detailResponse['data']['contact'];
-
-                            if (isset($detailedContact['billing_address'])) {
-                                $this->syncAddress($vendorId, 'vendor', 'billing', $detailedContact['billing_address']);
-                            }
-                            if (isset($detailedContact['shipping_address'])) {
-                                $this->syncAddress($vendorId, 'vendor', 'shipping', $detailedContact['shipping_address']);
-                            }
-                        }
-                    }
-
-                    $syncedCount++;
-                }
-
-                $hasMore = $response['data']['page_context']['has_more_page'] ?? false;
-                $page++;
-            }
-
-            $message = "Successfully synced $syncedCount vendors from Zoho.";
-            if ($syncedCount >= $maxContactsPerRun) {
-                $message .= " Maximum limit reached. Run sync again to continue.";
-            }
-
-            return redirect()->to('vendors')->with('success', $message);
-
-        } catch (\Exception $e) {
-            log_message('error', 'Zoho Vendor Sync Exception: ' . $e->getMessage());
-            if ($syncedCount > 0) {
-                return redirect()->to('vendors')->with('warning', "Partially synced $syncedCount vendors. Error: " . $e->getMessage());
-            }
-            return redirect()->to('vendors')->with('error', 'Sync failed: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Sync address for a single vendor from Zoho Books
-     */
-    public function syncAddressFromZoho($vendorId)
-    {
-        $vendor = $this->vendorModel->find($vendorId);
-
-        if (!$vendor || empty($vendor['zoho_contact_id'])) {
-            return redirect()->back()->with('error', 'Vendor not found or not linked to Zoho.');
-        }
-
-        try {
-            $detailResponse = $this->zohoService->getContactById($vendor['zoho_contact_id']);
-
-            if ($detailResponse['success'] && isset($detailResponse['data']['contact'])) {
-                $detailedContact = $detailResponse['data']['contact'];
-
-                if (isset($detailedContact['billing_address'])) {
-                    $this->syncAddress($vendorId, 'vendor', 'billing', $detailedContact['billing_address']);
-                }
-                if (isset($detailedContact['shipping_address'])) {
-                    $this->syncAddress($vendorId, 'vendor', 'shipping', $detailedContact['shipping_address']);
-                }
-
-                return redirect()->back()->with('success', 'Address synced successfully from Zoho Books.');
-            }
-
-            return redirect()->back()->with('error', 'Could not fetch address from Zoho Books.');
-
-        } catch (\Exception $e) {
-            log_message('error', 'Zoho Address Sync Exception: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Address sync failed: ' . $e->getMessage());
-        }
-    }
-
-    private function syncAddress($ownerId, $ownerType, $addressType, $zohoAddr)
-    {
-        if (empty($zohoAddr['address']) && empty($zohoAddr['city']))
-            return;
-
-        $stateName = $zohoAddr['state'] ?? '';
-        $state = $this->stateModel->where('name', $stateName)->first();
-
-        $newData = [
-            'owner_type' => $ownerType,
-            'owner_id' => $ownerId,
-            'address_type' => $addressType,
-            'address_line1' => $zohoAddr['address'] ?? '',
-            'address_line2' => $zohoAddr['street2'] ?? '',
-            'city' => $zohoAddr['city'] ?? '',
-            'pincode' => $zohoAddr['zip'] ?? '',
-            'state_id' => $state['id'] ?? null,
-            'country_id' => 1,
-            'is_active' => 1
-        ];
-
-        $existing = $this->addressModel->getActiveAddress($ownerType, $ownerId, $addressType);
-
-        if ($existing) {
-            $isChanged = false;
-            foreach (['address_line1', 'city', 'pincode', 'state_id'] as $field) {
-                if (($existing[$field] ?? '') != ($newData[$field] ?? '')) {
-                    $isChanged = true;
-                    break;
-                }
-            }
-
-            if ($isChanged) {
-                $this->addressModel->deactivateOthers($ownerType, $ownerId, $addressType);
-                $this->addressModel->insert($newData);
-            }
-        } else {
-            $this->addressModel->insert($newData);
-        }
-    }
 
     public function getDetails($id)
     {
@@ -933,136 +678,6 @@ class VendorController extends BaseController
         }
 
         return view('vendors/return_list', $data);
-    }
-
-    /**
-     * Show manual mapping page for Zoho contacts
-     */
-    public function mapZohoContacts()
-    {
-        // Get all vendors
-        $data['vendors'] = $this->vendorModel
-            ->select('vendors.*')
-            ->orderBy('vendors.name', 'ASC')
-            ->findAll();
-
-        $data['title'] = 'Map Zoho Contacts - Vendors';
-        return view('vendors/map_zoho', $data);
-    }
-
-    /**
-     * Get Zoho vendor contacts list via AJAX
-     */
-    public function getZohoContacts()
-    {
-        try {
-            $search = $this->request->getGet('search') ?? '';
-
-            $response = $this->zohoService->getVendors($search);
-
-            if ($response['success']) {
-                return $this->response->setJSON([
-                    'success' => true,
-                    'contacts' => $response['data']['contacts'] ?? []
-                ]);
-            }
-
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Failed to fetch Zoho vendors'
-            ]);
-
-        } catch (\Exception $e) {
-            log_message('error', 'Zoho Vendors Fetch Error: ' . $e->getMessage());
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ]);
-        }
-    }
-
-    /**
-     * Save manual mapping between vendor and Zoho contact
-     */
-    public function saveMapping()
-    {
-        $vendorId = $this->request->getPost('vendor_id');
-        $zohoContactId = $this->request->getPost('zoho_contact_id');
-
-        if (!$vendorId || !$zohoContactId) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Invalid data provided'
-            ]);
-        }
-
-        try {
-            // Update vendor with Zoho contact ID
-            $updated = $this->vendorModel->update($vendorId, [
-                'zoho_contact_id' => $zohoContactId,
-                'zoho_sync_at' => date('Y-m-d H:i:s')
-            ]);
-
-            if ($updated) {
-                return $this->response->setJSON([
-                    'success' => true,
-                    'message' => 'Mapping saved successfully'
-                ]);
-            }
-
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Failed to save mapping'
-            ]);
-
-        } catch (\Exception $e) {
-            log_message('error', 'Save Mapping Error: ' . $e->getMessage());
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ]);
-        }
-    }
-
-    /**
-     * Remove Zoho mapping from vendor
-     */
-    public function removeMapping()
-    {
-        $vendorId = $this->request->getPost('vendor_id');
-
-        if (!$vendorId) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Invalid vendor ID'
-            ]);
-        }
-
-        try {
-            $updated = $this->vendorModel->update($vendorId, [
-                'zoho_contact_id' => null,
-                'zoho_sync_at' => null
-            ]);
-
-            if ($updated) {
-                return $this->response->setJSON([
-                    'success' => true,
-                    'message' => 'Mapping removed successfully'
-                ]);
-            }
-
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Failed to remove mapping'
-            ]);
-
-        } catch (\Exception $e) {
-            log_message('error', 'Remove Mapping Error: ' . $e->getMessage());
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ]);
-        }
     }
 
     public function updateShipment($id)

@@ -6,7 +6,6 @@ use App\Models\InvoicePaymentModel;
 use App\Models\InvoiceModel;
 use App\Models\CustomerModel;
 use App\Models\BankAccountModel;
-use App\Services\ZohoBooksService;
 
 class InvoicePaymentController extends BaseController
 {
@@ -14,7 +13,6 @@ class InvoicePaymentController extends BaseController
     protected $invoiceModel;
     protected $customerModel;
     protected $bankAccountModel;
-    protected $zohoService;
 
     public function __construct()
     {
@@ -22,7 +20,6 @@ class InvoicePaymentController extends BaseController
         $this->invoiceModel = new InvoiceModel();
         $this->customerModel = new CustomerModel();
         $this->bankAccountModel = new BankAccountModel();
-        $this->zohoService = new ZohoBooksService();
     }
 
     public function index()
@@ -122,12 +119,6 @@ class InvoicePaymentController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update receipt.');
         }
 
-        // Note: Zoho update for payments is complex (usually requires delete and re-create in Books API)
-        // For now we'll mark it as pending if it was synced
-        if ($payment['zoho_payment_id']) {
-            $this->paymentModel->update($id, ['zoho_sync_status' => 'Pending']);
-        }
-
         return redirect()->to('invoice_payments/view/' . $id)->with('success', 'Receipt updated successfully.');
     }
 
@@ -156,50 +147,6 @@ class InvoicePaymentController extends BaseController
             return redirect()->back()->with('error', 'Failed to delete receipt.');
         }
 
-        // Note: Zoho payment deletion could be added here if needed
-
         return redirect()->to('invoice_payments')->with('success', 'Receipt deleted successfully.');
-    }
-
-    public function pushToZoho($id)
-    {
-        $payment = $this->paymentModel->find($id);
-        if (!$payment)
-            return;
-
-        $invoice = $this->invoiceModel->find($payment['invoice_id']);
-        if (!$invoice || !$invoice['zoho_invoice_id'])
-            return;
-
-        $customer = $this->customerModel->find($payment['customer_id']);
-        if (!$customer || !$customer['zoho_contact_id'])
-            return;
-
-        $data = [
-            'customer_id' => $customer['zoho_contact_id'],
-            'payment_mode' => $payment['payment_mode'],
-            'amount' => $payment['amount'],
-            'date' => $payment['payment_date'],
-            'reference_number' => $payment['reference_number'],
-            'invoices' => [
-                [
-                    'invoice_id' => $invoice['zoho_invoice_id'],
-                    'amount_applied' => $payment['amount']
-                ]
-            ]
-        ];
-
-        $response = $this->zohoService->createCustomerPayment($data);
-
-        if ($response['success']) {
-            $zohoId = $response['data']['payment']['payment_id'];
-            $this->paymentModel->update($id, [
-                'zoho_payment_id' => $zohoId,
-                'zoho_sync_status' => 'Synced',
-                'zoho_sync_at' => date('Y-m-d H:i:s')
-            ]);
-        } else {
-            log_message('error', 'Zoho Push Error for Customer Payment ' . $id . ': ' . $response['message']);
-        }
     }
 }

@@ -13,7 +13,7 @@ class CustomerModel extends Model
     protected $allowedFields    = [
         'name', 'contact_person', 'email', 'website', 'phone', 'whatsapp_number', 'gst_type', 
         'gstin', 'pan_number', 'opening_balance', 'balance_type', 'credit_limit', 'credit_period_days',
-        'notes', 'status', 'agent_id', 'zoho_contact_id', 'zoho_sync_at'
+        'notes', 'status', 'agent_id'
     ];
 
     protected $useTimestamps = true;

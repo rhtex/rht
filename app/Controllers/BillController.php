@@ -8,7 +8,6 @@ use App\Models\PaymentModel;
 use App\Models\VendorModel;
 use App\Models\ProductModel;
 use App\Models\BankAccountModel;
-use App\Services\ZohoBooksService;
 
 class BillController extends BaseController
 {
@@ -19,8 +18,6 @@ class BillController extends BaseController
     protected $productModel;
     protected $bankAccountModel;
     protected $taxModel;
-    protected $zohoService;
-
     protected $accountingModel;
 
     public function __construct()
@@ -32,7 +29,6 @@ class BillController extends BaseController
         $this->productModel = new ProductModel();
         $this->bankAccountModel = new BankAccountModel();
         $this->taxModel = new \App\Models\TaxModel();
-        $this->zohoService = new ZohoBooksService();
         $this->accountingModel = new \App\Models\AccountingModel();
     }
 
@@ -175,9 +171,6 @@ class BillController extends BaseController
         $this->accountingModel->postEntry('Accounts Payable', $billDate, 0, $finalBill['total_amount'], $billRef, 'bill', $billId);
         // ------------------------
 
-        // Auto-push to Zoho Books
-        $this->pushToZoho($billId);
-
         return redirect()->to('bills')->with('success', 'Bill created successfully.');
     }
 
@@ -282,9 +275,6 @@ class BillController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update bill.');
         }
 
-        // Push to Zoho
-        $this->pushToZoho($id);
-
         return redirect()->to('bills/view/' . $id)->with('success', 'Bill updated successfully.');
     }
 
@@ -300,11 +290,6 @@ class BillController extends BaseController
             'status' => 'Void',
             'updated_by' => session('user_id')
         ]);
-
-        // Void in Zoho if synced
-        if ($bill['zoho_bill_id']) {
-            $this->zohoService->voidBill($bill['zoho_bill_id']);
-        }
 
         return redirect()->to('bills')->with('success', 'Bill voided successfully.');
     }
@@ -422,161 +407,7 @@ class BillController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to record payment.');
         }
 
-        // Push payment to Zoho
-        $this->pushPaymentToZoho($paymentId);
-
         return redirect()->to('bills/view/' . $billId)->with('success', 'Payment recorded successfully.');
-    }
-
-    /**
-     * Push bill to Zoho Books
-     */
-    private function pushToZoho($billId)
-    {
-        $bill = $this->billModel->getBillById($billId);
-        if (!$bill)
-            return;
-
-        // Prepare Zoho data
-        $zohoData = [
-            'vendor_id' => $bill['vendor']['zoho_contact_id'] ?? null,
-            'bill_number' => $bill['bill_number'],
-            'date' => $bill['bill_date'],
-            'due_date' => $bill['due_date'],
-            'reference_number' => $bill['reference_number'],
-            'notes' => $bill['notes'],
-            'terms' => $bill['terms'],
-            'line_items' => []
-        ];
-
-        // Add line items
-        foreach ($bill['items'] as $item) {
-            $zohoData['line_items'][] = [
-                'description' => $item['description'],
-                'quantity' => $item['quantity'],
-                'rate' => $item['rate'],
-                'tax_id' => null, // Map to Zoho tax ID if needed
-            ];
-        }
-
-        // Push to Zoho
-        if ($bill['zoho_bill_id']) {
-            $response = $this->zohoService->updateBill($bill['zoho_bill_id'], $zohoData);
-        } else {
-            $response = $this->zohoService->createBill($zohoData);
-        }
-
-        // Update sync status
-        if ($response['success']) {
-            $zohoBillId = $response['data']['bill']['bill_id'] ?? $bill['zoho_bill_id'];
-            $this->billModel->update($billId, [
-                'zoho_bill_id' => $zohoBillId,
-                'zoho_sync_status' => 'Synced',
-                'zoho_sync_at' => date('Y-m-d H:i:s')
-            ]);
-        } else {
-            $this->billModel->update($billId, ['zoho_sync_status' => 'Failed']);
-            log_message('error', 'Zoho Bill Sync Failed: ' . $response['message']);
-        }
-    }
-
-    /**
-     * Push payment to Zoho Books
-     */
-    private function pushPaymentToZoho($paymentId)
-    {
-        $payment = $this->paymentModel->find($paymentId);
-        $bill = $this->billModel->find($payment['bill_id']);
-
-        if (!$bill['zoho_bill_id']) {
-            log_message('error', 'Cannot sync payment: Bill not synced to Zoho');
-            return;
-        }
-
-        $zohoData = [
-            'vendor_id' => $bill['zoho_contact_id'] ?? null,
-            'payment_mode' => $payment['payment_mode'],
-            'amount' => $payment['amount'],
-            'date' => $payment['payment_date'],
-            'reference_number' => $payment['reference_number'],
-            'bills' => [
-                [
-                    'bill_id' => $bill['zoho_bill_id'],
-                    'amount_applied' => $payment['amount']
-                ]
-            ]
-        ];
-
-        $response = $this->zohoService->createVendorPayment($zohoData);
-
-        if ($response['success']) {
-            $zohoPaymentId = $response['data']['vendorpayment']['payment_id'] ?? null;
-            $this->paymentModel->update($paymentId, [
-                'zoho_payment_id' => $zohoPaymentId,
-                'zoho_sync_status' => 'Synced',
-                'zoho_sync_at' => date('Y-m-d H:i:s')
-            ]);
-        } else {
-            $this->paymentModel->update($paymentId, ['zoho_sync_status' => 'Failed']);
-            log_message('error', 'Zoho Payment Sync Failed: ' . $response['message']);
-        }
-    }
-
-    /**
-     * Sync bills from Zoho Books
-     */
-    public function syncFromZoho()
-    {
-        $page = 1;
-        $syncedCount = 0;
-
-        while (true) {
-            $response = $this->zohoService->getBills($page);
-
-            if (!$response['success']) {
-                return redirect()->to('bills')->with('error', 'Failed to sync from Zoho: ' . $response['message']);
-            }
-
-            $bills = $response['data']['bills'] ?? [];
-            if (empty($bills))
-                break;
-
-            foreach ($bills as $zohoBill) {
-                // Check if bill exists
-                $existing = $this->billModel->where('zoho_bill_id', $zohoBill['bill_id'])->first();
-
-                // Map Zoho data to local structure
-                $billData = [
-                    'zoho_bill_id' => $zohoBill['bill_id'],
-                    'bill_number' => $zohoBill['bill_number'],
-                    'bill_date' => $zohoBill['date'],
-                    'due_date' => $zohoBill['due_date'],
-                    'reference_number' => $zohoBill['reference_number'] ?? null,
-                    'status' => $zohoBill['status'],
-                    'total_amount' => $zohoBill['total'],
-                    'balance' => $zohoBill['balance'],
-                    'zoho_sync_status' => 'Synced',
-                    'zoho_sync_at' => date('Y-m-d H:i:s')
-                ];
-
-                if ($existing) {
-                    $this->billModel->update($existing['id'], $billData);
-                } else {
-                    // Find vendor by Zoho contact ID
-                    $vendor = $this->vendorModel->where('zoho_contact_id', $zohoBill['vendor_id'])->first();
-                    if ($vendor) {
-                        $billData['vendor_id'] = $vendor['id'];
-                        $this->billModel->insert($billData);
-                    }
-                }
-
-                $syncedCount++;
-            }
-
-            $page++;
-        }
-
-        return redirect()->to('bills')->with('success', "Synced $syncedCount bills from Zoho Books.");
     }
 
     /**

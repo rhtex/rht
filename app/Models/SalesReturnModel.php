@@ -23,9 +23,6 @@ class SalesReturnModel extends Model
         'reason',
         'status',
         'is_inter_state',
-        'zoho_credit_note_id',
-        'zoho_sync_status',
-        'zoho_sync_at',
         'created_by',
         'updated_by'
     ];

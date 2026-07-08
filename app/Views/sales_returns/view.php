@@ -15,7 +15,7 @@
 
 <?= $this->section('content') ?>
 <div class="row">
-    <div class="col-md-9">
+    <div class="col-md-12">
         <div class="card card-outline card-primary shadow-sm mb-4">
             <div class="card-header bg-white">
                 <h3 class="card-title fw-bold">Return Information</h3>
@@ -87,40 +87,5 @@
                 <?php endif; ?>
             </div>
         </div>
-    </div>
-
-    <div class="col-md-3">
-        <!-- Zoho Status Card -->
-        <div class="card card-outline card-info shadow-sm">
-            <div class="card-header">
-                <h3 class="card-title fw-bold"><i class="fas fa-sync me-2"></i> Zoho Status</h3>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="text-muted small text-uppercase d-block">Sync Status</label>
-                    <?php if($return['zoho_credit_note_id']): ?>
-                        <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Synced</span>
-                    <?php else: ?>
-                        <span class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i> Not Synced</span>
-                    <?php endif; ?>
-                </div>
-                
-                <?php if($return['zoho_credit_note_id']): ?>
-                    <div class="mb-3">
-                        <label class="text-muted small text-uppercase d-block">Zoho ID</label>
-                        <code><?= esc($return['zoho_credit_note_id']) ?></code>
-                    </div>
-                    <div class="mb-0">
-                        <label class="text-muted small text-uppercase d-block">Synced At</label>
-                        <p class="mb-0 small text-muted"><?= date('d M Y, h:i A', strtotime($return['zoho_sync_at'])) ?></p>
-                    </div>
-                <?php else: ?>
-                    <button type="button" class="btn btn-sm btn-primary w-100 mt-2">
-                        <i class="fas fa-cloud-upload-alt me-1"></i> Push to Zoho
-                    </button>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
 </div>
 <?= $this->endSection() ?>

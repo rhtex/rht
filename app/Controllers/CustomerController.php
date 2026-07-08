@@ -6,7 +6,6 @@ use App\Models\CustomerModel;
 use App\Models\AgentModel;
 use App\Models\StateModel;
 use App\Models\AddressModel;
-use App\Services\ZohoBooksService;
 
 class CustomerController extends BaseController
 {
@@ -14,7 +13,6 @@ class CustomerController extends BaseController
     protected $stateModel;
     protected $countryModel;
     protected $addressModel;
-    protected $zohoService;
     protected $agentModel;
 
     public function __construct()
@@ -23,7 +21,6 @@ class CustomerController extends BaseController
         $this->stateModel = new StateModel();
         $this->countryModel = new \App\Models\CountryModel();
         $this->addressModel = new AddressModel();
-        $this->zohoService = new ZohoBooksService();
         $this->agentModel = new AgentModel();
     }
 
@@ -97,8 +94,6 @@ class CustomerController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to save customer data.');
         }
 
-        // Push to Zoho
-        $this->pushToZoho($customerId);
 
         return redirect()->to('customers')->with('success', 'Customer added successfully.');
     }
@@ -199,8 +194,6 @@ class CustomerController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update customer data.');
         }
 
-        // Push to Zoho
-        $this->pushToZoho($id);
 
         return redirect()->to('customers')->with('success', 'Customer updated successfully.');
     }
@@ -410,286 +403,6 @@ class CustomerController extends BaseController
         return redirect()->to('customers')->with('success', 'Customer deleted successfully.');
     }
 
-    private function pushToZoho($id)
-    {
-        $customer = $this->customerModel->find($id);
-        if (!$customer)
-            return;
-
-        $billing = $this->addressModel->getActiveAddress('customer', $id, 'billing');
-        $shipping = $this->addressModel->getActiveAddress('customer', $id, 'shipping');
-
-        $billingState = $billing ? $this->stateModel->find($billing['state_id']) : null;
-        $shippingState = $shipping ? $this->stateModel->find($shipping['state_id']) : null;
-
-        $data = [
-            'contact_name' => $customer['name'],
-            'company_name' => $customer['name'], // Use customer name as company name
-            'contact_type' => 'customer',
-            'email' => $customer['email'],
-            'phone' => $customer['phone'],
-            'mobile' => $customer['whatsapp_number'] ?? $customer['phone'],
-            'website' => $customer['website'],
-            'gst_no' => $customer['gstin'],
-            'pan' => $customer['pan_number'],
-            'billing_address' => [
-                'address' => $billing['address_line1'] ?? '',
-                'street2' => $billing['address_line2'] ?? '',
-                'city' => $billing['city'] ?? '',
-                'state' => $billingState['name'] ?? '',
-                'zip' => $billing['pincode'] ?? '',
-                'country' => 'India' // Still hardcoded for Zoho push per simplified requirement? Or should I change this too? Use logic.
-            ],
-            'shipping_address' => [
-                'address' => $shipping['address_line1'] ?? '',
-                'street2' => $shipping['address_line2'] ?? '',
-                'city' => $shipping['city'] ?? '',
-                'state' => $shippingState['name'] ?? '',
-                'zip' => $shipping['pincode'] ?? '',
-                'country' => 'India'
-            ]
-        ];
-
-        // Update country for Zoho push
-        if ($billing && isset($billing['country_id'])) {
-            $c = $this->countryModel->find($billing['country_id']);
-            if ($c)
-                $data['billing_address']['country'] = $c['name'];
-        }
-        if ($shipping && isset($shipping['country_id'])) {
-            $c = $this->countryModel->find($shipping['country_id']);
-            if ($c)
-                $data['shipping_address']['country'] = $c['name'];
-        }
-
-        $response = $this->zohoService->pushContact($data, $customer['zoho_contact_id']);
-
-        if ($response['success']) {
-            $zohoId = $response['data']['contact']['contact_id'];
-            $this->customerModel->update($id, [
-                'zoho_contact_id' => $zohoId,
-                'zoho_sync_at' => date('Y-m-d H:i:s')
-            ]);
-        } else {
-            log_message('error', 'Zoho Push Error for Customer ' . $id . ': ' . $response['message']);
-        }
-    }
-
-    public function syncZoho()
-    {
-        $page = 1;
-        $hasMore = true;
-        $syncedCount = 0;
-        $maxContactsPerRun = 100; // Limit to prevent timeout
-        $startTime = time();
-        $maxExecutionTime = 100; // Leave 20 seconds buffer before PHP timeout
-
-        try {
-            while ($hasMore && $syncedCount < $maxContactsPerRun) {
-                // Check if we're approaching timeout
-                if ((time() - $startTime) > $maxExecutionTime) {
-                    log_message('warning', "Zoho Customer Sync: Stopping due to time limit. Synced $syncedCount customers.");
-                    return redirect()->to('customers')->with('warning', "Partially synced $syncedCount customers. Please run sync again to continue.");
-                }
-
-                $response = $this->zohoService->getContacts('customer', $page);
-
-                if (!$response['success']) {
-                    if ($syncedCount > 0)
-                        break; // If we already synced some, don't show error
-                    return redirect()->to('customers')->with('error', 'Failed to fetch from Zoho: ' . $response['message']);
-                }
-
-                $contacts = $response['data']['contacts'] ?? [];
-                if (empty($contacts))
-                    break;
-
-                foreach ($contacts as $contact) {
-                    if ($syncedCount >= $maxContactsPerRun) {
-                        break;
-                    }
-
-                    // Check if already exists by zoho_id
-                    $existing = $this->customerModel->where('zoho_contact_id', $contact['contact_id'])->first();
-
-                    // Skip if synced in the last 5 minutes (to avoid re-processing same contacts)
-                    if ($existing && !empty($existing['zoho_sync_at'])) {
-                        $lastSyncTime = strtotime($existing['zoho_sync_at']);
-                        $fiveMinutesAgo = time() - (5 * 60);
-                        if ($lastSyncTime > $fiveMinutesAgo) {
-                            continue; // Skip recently synced contact
-                        }
-                    }
-
-                    // Get phone number from Zoho (prioritize mobile, then phone)
-                    $rawPhone = ($contact['mobile'] ?? '') ?: ($contact['phone'] ?? '') ?: '';
-                    // Remove spaces, dashes, slashes and extract first number if multiple
-                    $phoneNumbers = preg_split('/[,\\s\\/]+/', $rawPhone);
-                    $phone = trim($phoneNumbers[0] ?? '');
-                    // Remove non-numeric characters except +
-                    $phone = preg_replace('/[^0-9+]/', '', $phone);
-                    // Truncate if too long (max 15 for database)
-                    if (strlen($phone) > 15) {
-                        $phone = substr($phone, 0, 15);
-                    }
-
-                    $customerData = [
-                        'zoho_contact_id' => $contact['contact_id'],
-                        'name' => $contact['company_name'] ?: $contact['contact_name'],
-                        'email' => $contact['email'] ?? '',
-                        'phone' => $phone,
-                        'website' => $contact['website'] ?? '',
-                        'gst_type' => !empty($contact['gst_no']) ? 'Regular' : 'Unregistered',
-                        'gstin' => $contact['gst_no'] ?? '',
-                        'balance_type' => 'Dr',
-                        'opening_balance' => 0,
-                        'zoho_sync_at' => date('Y-m-d H:i:s'),
-                        'status' => 'active'
-                    ];
-
-                    if ($existing) {
-                        if (!$this->customerModel->update($existing['id'], $customerData)) {
-                            log_message('error', 'Zoho Sync: Failed to update customer ID ' . $existing['id']);
-                            continue;
-                        }
-                        $customerId = $existing['id'];
-                    } else {
-                        if (!$this->customerModel->insert($customerData)) {
-                            log_message('error', 'Zoho Sync: Failed to insert customer (Zoho ID: ' . $contact['contact_id'] . ')');
-                            continue;
-                        }
-                        $customerId = $this->customerModel->getInsertID();
-                    }
-
-                    // Check if addresses exist in list endpoint data
-                    $hasAddressesInList = !empty($contact['billing_address']) || !empty($contact['shipping_address']);
-
-                    if ($hasAddressesInList) {
-                        // Use addresses from list endpoint directly (faster)
-                        if (!empty($contact['billing_address'])) {
-                            $this->syncAddress($customerId, 'customer', 'billing', $contact['billing_address']);
-                        }
-                        if (!empty($contact['shipping_address'])) {
-                            $this->syncAddress($customerId, 'customer', 'shipping', $contact['shipping_address']);
-                        }
-                    } else {
-                        // Fetch individual contact details only if addresses missing
-                        $detailResponse = $this->zohoService->getContactById($contact['contact_id']);
-                        if ($detailResponse['success'] && isset($detailResponse['data']['contact'])) {
-                            $detailedContact = $detailResponse['data']['contact'];
-
-                            if (isset($detailedContact['billing_address'])) {
-                                $this->syncAddress($customerId, 'customer', 'billing', $detailedContact['billing_address']);
-                            }
-                            if (isset($detailedContact['shipping_address'])) {
-                                $this->syncAddress($customerId, 'customer', 'shipping', $detailedContact['shipping_address']);
-                            }
-                        }
-                    }
-
-                    $syncedCount++;
-                }
-
-                // Check if there are more pages
-                $hasMore = $response['data']['page_context']['has_more_page'] ?? false;
-                $page++;
-            }
-
-            $message = "Successfully synced $syncedCount customers from Zoho.";
-            if ($syncedCount >= $maxContactsPerRun) {
-                $message .= " Maximum limit reached. Run sync again to continue.";
-            }
-
-            return redirect()->to('customers')->with('success', $message);
-
-        } catch (\Exception $e) {
-            log_message('error', 'Zoho Customer Sync Exception: ' . $e->getMessage());
-            if ($syncedCount > 0) {
-                return redirect()->to('customers')->with('warning', "Partially synced $syncedCount customers. Error: " . $e->getMessage());
-            }
-            return redirect()->to('customers')->with('error', 'Sync failed: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Sync address for a single customer from Zoho Books
-     */
-    public function syncAddressFromZoho($customerId)
-    {
-        $customer = $this->customerModel->find($customerId);
-
-        if (!$customer || empty($customer['zoho_contact_id'])) {
-            return redirect()->back()->with('error', 'Customer not found or not linked to Zoho.');
-        }
-
-        try {
-            $detailResponse = $this->zohoService->getContactById($customer['zoho_contact_id']);
-
-            if ($detailResponse['success'] && isset($detailResponse['data']['contact'])) {
-                $detailedContact = $detailResponse['data']['contact'];
-
-                if (isset($detailedContact['billing_address'])) {
-                    $this->syncAddress($customerId, 'customer', 'billing', $detailedContact['billing_address']);
-                }
-                if (isset($detailedContact['shipping_address'])) {
-                    $this->syncAddress($customerId, 'customer', 'shipping', $detailedContact['shipping_address']);
-                }
-
-                return redirect()->back()->with('success', 'Address synced successfully from Zoho Books.');
-            }
-
-            return redirect()->back()->with('error', 'Could not fetch address from Zoho Books.');
-
-        } catch (\Exception $e) {
-            log_message('error', 'Zoho Address Sync Exception: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Address sync failed: ' . $e->getMessage());
-        }
-    }
-
-    private function syncAddress($ownerId, $ownerType, $addressType, $zohoAddr)
-    {
-        if (empty($zohoAddr['address']) && empty($zohoAddr['city']))
-            return;
-
-        $stateName = $zohoAddr['state'] ?? '';
-        $state = $this->stateModel->where('name', $stateName)->first();
-
-        $countryName = $zohoAddr['country'] ?? 'India'; // Default to India if not provided?
-        $country = $this->countryModel->where('name', $countryName)->first();
-        $countryId = $country ? $country['id'] : 1; // Default to 1 (India) if not found
-
-        $newData = [
-            'owner_type' => $ownerType,
-            'owner_id' => $ownerId,
-            'address_type' => $addressType,
-            'address_line1' => $zohoAddr['address'] ?? '',
-            'address_line2' => $zohoAddr['street2'] ?? '',
-            'city' => $zohoAddr['city'] ?? '',
-            'pincode' => $zohoAddr['zip'] ?? '',
-            'state_id' => $state['id'] ?? null,
-            'country_id' => $countryId,
-            'is_active' => 1
-        ];
-
-        $existing = $this->addressModel->getActiveAddress($ownerType, $ownerId, $addressType);
-
-        if ($existing) {
-            $isChanged = false;
-            foreach (['address_line1', 'city', 'pincode', 'state_id', 'country_id'] as $field) {
-                if (($existing[$field] ?? '') != ($newData[$field] ?? '')) {
-                    $isChanged = true;
-                    break;
-                }
-            }
-
-            if ($isChanged) {
-                $this->addressModel->deactivateOthers($ownerType, $ownerId, $addressType);
-                $this->addressModel->insert($newData);
-            }
-        } else {
-            $this->addressModel->insert($newData);
-        }
-    }
     public function getDetails($id)
     {
         $customer = $this->customerModel->find($id);

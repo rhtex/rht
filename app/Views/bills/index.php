@@ -22,9 +22,6 @@
                 <a href="<?= site_url('bills/create') ?>" class="btn btn-sm btn-success">
                     <i class="fas fa-plus"></i> New Bill
                 </a>
-                <a href="<?= site_url('bills/sync-zoho') ?>" class="btn btn-sm btn-info">
-                    <i class="fas fa-sync"></i> Sync from Zoho
-                </a>
             </div>
         </div>
         <div class="card-body">
@@ -82,14 +79,13 @@
                             <th>Paid</th>
                             <th>Balance</th>
                             <th>Status</th>
-                            <th>Zoho</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($bills)): ?>
                             <tr>
-                                <td colspan="10" class="text-center py-4">No bills found.</td>
+                                <td colspan="9" class="text-center py-4">No bills found.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($bills as $bill): ?>
@@ -114,17 +110,6 @@
                                         $color = $statusColors[$bill['status']] ?? 'secondary';
                                         ?>
                                         <span class="badge text-bg-<?= $color ?>"><?= $bill['status'] ?></span>
-                                    </td>
-                                    <td>
-                                        <?php if ($bill['zoho_sync_status'] == 'Synced'): ?>
-                                            <span class="badge text-bg-success" title="Synced at <?= $bill['zoho_sync_at'] ?>">
-                                                <i class="fas fa-check"></i> Synced
-                                            </span>
-                                        <?php elseif ($bill['zoho_sync_status'] == 'Failed'): ?>
-                                            <span class="badge text-bg-danger"><i class="fas fa-times"></i> Failed</span>
-                                        <?php else: ?>
-                                            <span class="badge text-bg-warning"><i class="fas fa-clock"></i> Pending</span>
-                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">

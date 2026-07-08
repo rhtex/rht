@@ -194,7 +194,6 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('sales_returns/create', 'SalesReturnController::create', ['filter' => 'permission:invoice.edit']);
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
     $routes->get('sales_returns/view/(:num)', 'SalesReturnController::view/$1', ['filter' => 'permission:invoice.view']);
-    $routes->get('sales_returns/sync-zoho', 'SalesReturnController::syncFromZoho', ['filter' => 'permission:zoho.sync']);
 
     // Purchase (Vendors) Management
     $routes->get('vendors', 'VendorController::index', ['filter' => 'permission:vendor.view']);
@@ -258,7 +257,6 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('bills/void/(:num)', 'BillController::delete/$1', ['filter' => 'permission:bill.delete']);
     $routes->get('bills/payment/(:num)', 'BillController::recordPayment/$1', ['filter' => 'permission:bill.edit']);
     $routes->post('bills/payment/(:num)', 'BillController::storePayment/$1', ['filter' => 'permission:bill.edit']);
-    $routes->get('bills/sync-zoho', 'BillController::syncFromZoho', ['filter' => 'permission:zoho.sync']);
     $routes->get('bills/print/(:num)', 'BillController::print/$1', ['filter' => 'permission:bill.view']);
 
     // Quotations
@@ -337,14 +335,12 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->get('customers', 'ApiController::getCustomers');
         $routes->get('customers/(:num)', 'ApiController::getCustomer/$1');
         $routes->put('customers/(:num)', 'ApiController::updateCustomer/$1');
-        $routes->post('customers/(:num)/zoho-link', 'ApiController::linkCustomerToZoho/$1');
         $routes->post('customers/(:num)/address/sync', 'ApiController::syncCustomerAddress/$1');
 
         // Vendor APIs
         $routes->get('vendors', 'ApiController::getVendors');
         $routes->get('vendors/(:num)', 'ApiController::getVendor/$1');
         $routes->put('vendors/(:num)', 'ApiController::updateVendor/$1');
-        $routes->post('vendors/(:num)/zoho-link', 'ApiController::linkVendorToZoho/$1');
         $routes->post('vendors/(:num)/address/sync', 'ApiController::syncVendorAddress/$1');
     });
 
@@ -389,7 +385,6 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('sales_returns/create', 'SalesReturnController::create', ['filter' => 'permission:invoice.edit']);
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
     $routes->get('sales_returns/view/(:num)', 'SalesReturnController::view/$1', ['filter' => 'permission:invoice.view']);
-    $routes->get('sales_returns/sync-zoho', 'SalesReturnController::syncFromZoho', ['filter' => 'permission:zoho.sync']);
 
     // Purchase (Vendors) Management
     $routes->get('vendors', 'VendorController::index', ['filter' => 'permission:vendor.view']);
@@ -577,7 +572,6 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('bills/void/(:num)', 'BillController::delete/$1', ['filter' => 'permission:bill.delete']);
     $routes->get('bills/payment/(:num)', 'BillController::recordPayment/$1', ['filter' => 'permission:bill.edit']);
     $routes->post('bills/payment/(:num)', 'BillController::storePayment/$1', ['filter' => 'permission:bill.edit']);
-    $routes->get('bills/sync-zoho', 'BillController::syncFromZoho', ['filter' => 'permission:zoho.sync']);
     $routes->get('bills/print/(:num)', 'BillController::print/$1', ['filter' => 'permission:bill.view']);
 
     // Quotations
@@ -656,14 +650,12 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->get('customers', 'ApiController::getCustomers');
         $routes->get('customers/(:num)', 'ApiController::getCustomer/$1');
         $routes->put('customers/(:num)', 'ApiController::updateCustomer/$1');
-        $routes->post('customers/(:num)/zoho-link', 'ApiController::linkCustomerToZoho/$1');
         $routes->post('customers/(:num)/address/sync', 'ApiController::syncCustomerAddress/$1');
 
         // Vendor APIs
         $routes->get('vendors', 'ApiController::getVendors');
         $routes->get('vendors/(:num)', 'ApiController::getVendor/$1');
         $routes->put('vendors/(:num)', 'ApiController::updateVendor/$1');
-        $routes->post('vendors/(:num)/zoho-link', 'ApiController::linkVendorToZoho/$1');
         $routes->post('vendors/(:num)/address/sync', 'ApiController::syncVendorAddress/$1');
     });
 

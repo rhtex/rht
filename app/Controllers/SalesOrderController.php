@@ -7,7 +7,6 @@ use App\Models\SalesOrderItemModel;
 use App\Models\CustomerModel;
 use App\Models\ProductModel;
 use App\Models\TransportModel;
-use App\Services\ZohoBooksService;
 
 class SalesOrderController extends BaseController
 {
@@ -18,7 +17,6 @@ class SalesOrderController extends BaseController
     protected $taxModel;
     protected $agentModel;
     protected $transportModel;
-    protected $zohoService;
 
     public function __construct()
     {
@@ -29,7 +27,6 @@ class SalesOrderController extends BaseController
         $this->taxModel = new \App\Models\TaxModel();
         $this->agentModel = new \App\Models\AgentModel();
         $this->transportModel = new TransportModel();
-        $this->zohoService = new ZohoBooksService();
     }
 
     public function index()
@@ -129,7 +126,6 @@ class SalesOrderController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to create sales order.');
         }
 
-        $this->pushToZoho($orderId);
 
         return redirect()->to('sales_orders/view/' . $orderId)->with('success', 'Sales Order created successfully.');
     }
@@ -226,7 +222,6 @@ class SalesOrderController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update sales order.');
         }
 
-        $this->pushToZoho($id);
 
         return redirect()->to('sales_orders/view/' . $id)->with('success', 'Sales Order updated successfully.');
     }
@@ -248,63 +243,10 @@ class SalesOrderController extends BaseController
             return redirect()->to('sales_orders')->with('error', 'Failed to delete order.');
         }
 
-        if ($order['zoho_salesorder_id']) {
-            $this->zohoService->voidSalesOrder($order['zoho_salesorder_id']);
-        }
 
         return redirect()->to('sales_orders')->with('success', 'Sales Order deleted successfully.');
     }
 
-    private function pushToZoho($id)
-    {
-        $order = $this->orderModel->getOrderById($id);
-        $customer = $this->customerModel->find($order['customer_id']);
-
-        if (!$customer['zoho_contact_id'])
-            return false;
-
-        $zohoData = [
-            'customer_id' => $customer['zoho_contact_id'],
-            'salesorder_number' => $order['sales_order_number'],
-            'date' => $order['order_date'],
-            'shipment_date' => $order['shipment_date'],
-            'reference_number' => $order['reference_number'],
-            'discount' => $order['discount_amount'],
-            'discount_type' => strtolower($order['discount_type']),
-            'shipping_charge' => $order['shipping_charge'],
-            'notes' => $order['notes'],
-            'terms' => $order['terms'],
-            'line_items' => []
-        ];
-
-        foreach ($order['items'] as $item) {
-            $zohoData['line_items'][] = [
-                'name' => $item['description'],
-                'rate' => $item['rate'],
-                'quantity' => $item['quantity'],
-                'hsn_or_sac' => $item['hsn_code'],
-                'tax_percentage' => $item['tax_percentage']
-            ];
-        }
-
-        if ($order['zoho_salesorder_id']) {
-            $response = $this->zohoService->updateSalesOrder($order['zoho_salesorder_id'], $zohoData);
-        } else {
-            $response = $this->zohoService->createSalesOrder($zohoData);
-        }
-
-        if ($response['success']) {
-            $this->orderModel->update($id, [
-                'zoho_salesorder_id' => $response['data']['salesorder']['salesorder_id'],
-                'zoho_sync_status' => 'Synced',
-                'zoho_sync_at' => date('Y-m-d H:i:s')
-            ]);
-            return true;
-        }
-
-        $this->orderModel->update($id, ['zoho_sync_status' => 'Failed']);
-        return false;
-    }
 
     public function print($id)
     {

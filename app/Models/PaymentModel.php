@@ -13,10 +13,10 @@ class PaymentModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'bill_id', 'vendor_id', 'zoho_payment_id', 'bank_transaction_id', 'payment_number',
+        'bill_id', 'vendor_id', 'bank_transaction_id', 'payment_number',
         'payment_date', 'payment_mode', 'amount', 'discount_amount', 'mahimai_amount',
         'postal_charges', 'reference_number', 'bank_account_id',
-        'zoho_sync_status', 'notes', 'created_by', 'updated_by', 'zoho_sync_at'
+        'notes', 'created_by', 'updated_by'
     ];
 
     protected $useTimestamps = true;

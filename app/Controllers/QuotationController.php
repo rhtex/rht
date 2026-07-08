@@ -7,7 +7,6 @@ use App\Models\QuotationItemModel;
 use App\Models\CustomerModel;
 use App\Models\ProductModel;
 use App\Models\TransportModel;
-use App\Services\ZohoBooksService;
 
 class QuotationController extends BaseController
 {
@@ -18,7 +17,6 @@ class QuotationController extends BaseController
     protected $taxModel;
     protected $agentModel;
     protected $transportModel;
-    protected $zohoService;
 
     public function __construct()
     {
@@ -29,7 +27,6 @@ class QuotationController extends BaseController
         $this->taxModel = new \App\Models\TaxModel();
         $this->agentModel = new \App\Models\AgentModel();
         $this->transportModel = new TransportModel();
-        $this->zohoService = new ZohoBooksService();
     }
 
     public function index()
@@ -130,7 +127,6 @@ class QuotationController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to create quotation.');
         }
 
-        $this->pushToZoho($quotationId);
 
         return redirect()->to('quotations/view/' . $quotationId)->with('success', 'Quotation created successfully.');
     }
@@ -227,7 +223,6 @@ class QuotationController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update quotation.');
         }
 
-        $this->pushToZoho($id);
 
         return redirect()->to('quotations/view/' . $id)->with('success', 'Quotation updated successfully.');
     }
@@ -249,63 +244,10 @@ class QuotationController extends BaseController
             return redirect()->to('quotations')->with('error', 'Failed to delete quotation.');
         }
 
-        if ($quotation['zoho_estimate_id']) {
-            $this->zohoService->voidEstimate($quotation['zoho_estimate_id']);
-        }
 
         return redirect()->to('quotations')->with('success', 'Quotation deleted successfully.');
     }
 
-    private function pushToZoho($id)
-    {
-        $quotation = $this->quotationModel->getQuotationById($id);
-        $customer = $this->customerModel->find($quotation['customer_id']);
-
-        if (!$customer['zoho_contact_id'])
-            return false;
-
-        $zohoData = [
-            'customer_id' => $customer['zoho_contact_id'],
-            'estimate_number' => $quotation['quotation_number'],
-            'date' => $quotation['quotation_date'],
-            'expiry_date' => $quotation['expiry_date'],
-            'reference_number' => $quotation['reference_number'],
-            'discount' => $quotation['discount_amount'],
-            'discount_type' => strtolower($quotation['discount_type']),
-            'shipping_charge' => $quotation['shipping_charge'],
-            'notes' => $quotation['notes'],
-            'terms' => $quotation['terms'],
-            'line_items' => []
-        ];
-
-        foreach ($quotation['items'] as $item) {
-            $zohoData['line_items'][] = [
-                'name' => $item['description'],
-                'rate' => $item['rate'],
-                'quantity' => $item['quantity'],
-                'hsn_or_sac' => $item['hsn_code'],
-                'tax_percentage' => $item['tax_percentage']
-            ];
-        }
-
-        if ($quotation['zoho_estimate_id']) {
-            $response = $this->zohoService->updateEstimate($quotation['zoho_estimate_id'], $zohoData);
-        } else {
-            $response = $this->zohoService->createEstimate($zohoData);
-        }
-
-        if ($response['success']) {
-            $this->quotationModel->update($id, [
-                'zoho_estimate_id' => $response['data']['estimate']['estimate_id'],
-                'zoho_sync_status' => 'Synced',
-                'zoho_sync_at' => date('Y-m-d H:i:s')
-            ]);
-            return true;
-        }
-
-        $this->quotationModel->update($id, ['zoho_sync_status' => 'Failed']);
-        return false;
-    }
 
     public function print($id)
     {

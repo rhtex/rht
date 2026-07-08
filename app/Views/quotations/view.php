@@ -49,15 +49,6 @@
                             <tr><th>Agent:</th><td><?= esc($quotation['agent_name']) ?></td></tr>
                         <?php endif; ?>
                         <tr><th>Expiry Date:</th><td><?= $quotation['expiry_date'] ? date('d/m/Y', strtotime($quotation['expiry_date'])) : '-' ?></td></tr>
-                        <tr><th>Zoho Sync:</th>
-                            <td>
-                                <?php if ($quotation['zoho_sync_status'] == 'Synced'): ?>
-                                    <span class="badge text-bg-success"><i class="fas fa-check"></i> Synced</span>
-                                <?php else: ?>
-                                    <span class="badge text-bg-warning"><?= $quotation['zoho_sync_status'] ?></span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
                     </table>
                 </div>
             </div>

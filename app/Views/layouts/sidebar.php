@@ -23,7 +23,7 @@
                 $isFinance = in_array($segment1, ['bank_accounts', 'reconciliation']);
                 $isHR = in_array($segment1, ['employees', 'attendance', 'loans', 'salaries']);
                 $isCalendar = in_array($segment1, ['calendar']);
-                $isAdmin = in_array($segment1, ['users', 'roles', 'modules', 'permissions', 'settings', 'countries', 'states', 'zoho-settings']);
+                $isAdmin = in_array($segment1, ['users', 'roles', 'modules', 'permissions', 'settings', 'countries', 'states']);
             ?>
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
                 
@@ -578,14 +578,7 @@
                                 </li>
                                 <?php endif; ?>
                                 
-                                <?php if(in_array('zoho.view', session('permissions') ?? [])): ?>
-                                <li class="nav-item">
-                                    <a href="<?= site_url('zoho-settings') ?>" class="nav-link">
-                                        <i class="fas fa-sync nav-icon text-warning"></i>
-                                        <p>Zoho Integration</p>
-                                    </a>
-                                </li>
-                                <?php endif; ?>
+
                                 
                                 <?php if(in_array('tax.view', session('permissions') ?? [])): ?>
                                 <li class="nav-item">

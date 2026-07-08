@@ -20,8 +20,6 @@ class QuotationModel extends Model
         'agent_commission_status',
         'agent_commission_paid_at',
         'quotation_number',
-        'zoho_estimate_id',
-        'zoho_sync_status',
         'quotation_date',
         'expiry_date',
         'reference_number',
@@ -40,7 +38,7 @@ class QuotationModel extends Model
         'terms',
         'created_by',
         'updated_by',
-        'zoho_sync_at'
+        'created_by'
     ];
 
     protected $useTimestamps = true;

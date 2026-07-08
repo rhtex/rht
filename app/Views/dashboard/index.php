@@ -51,10 +51,6 @@
         cursor: pointer;
     }
 
-    .text-zoho {
-        color: white;
-    }
-
     .stat-card-v2:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
@@ -449,11 +445,6 @@
                         </div>
                     </div>
 
-                    <div class="mt-4 text-center">
-                        <div class="badge-soft bg-success text-zoho d-inline-block">
-                            <i class="fas fa-shield-alt me-1"></i> Zoho Synchronized
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

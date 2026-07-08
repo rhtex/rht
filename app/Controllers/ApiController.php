@@ -28,39 +28,6 @@ class ApiController extends ResourceController
     }
 
     /**
-     * Link customer to Zoho contact
-     * POST /api/customers/:id/zoho-link
-     */
-    public function linkCustomerToZoho($id)
-    {
-        $customer = $this->customerModel->find($id);
-        if (!$customer) {
-            return $this->failNotFound('Customer not found');
-        }
-
-        $zohoContactId = $this->request->getJSON()->zoho_contact_id ?? $this->request->getPost('zoho_contact_id');
-
-        if (!$zohoContactId) {
-            return $this->fail('zoho_contact_id is required');
-        }
-
-        $updated = $this->customerModel->update($id, [
-            'zoho_contact_id' => $zohoContactId,
-            'zoho_sync_at' => date('Y-m-d H:i:s')
-        ]);
-
-        if ($updated) {
-            return $this->respondUpdated([
-                'success' => true,
-                'message' => 'Customer linked to Zoho successfully',
-                'data' => $this->customerModel->find($id)
-            ]);
-        }
-
-        return $this->fail('Failed to link customer to Zoho');
-    }
-
-    /**
      * Sync customer address
      * POST /api/customers/:id/address/sync
      */
@@ -165,39 +132,6 @@ class ApiController extends ResourceController
         }
 
         return $this->fail('Failed to update customer', 400, null, $this->customerModel->errors());
-    }
-
-    /**
-     * Link vendor to Zoho contact
-     * POST /api/vendors/:id/zoho-link
-     */
-    public function linkVendorToZoho($id)
-    {
-        $vendor = $this->vendorModel->find($id);
-        if (!$vendor) {
-            return $this->failNotFound('Vendor not found');
-        }
-
-        $zohoContactId = $this->request->getJSON()->zoho_contact_id ?? $this->request->getPost('zoho_contact_id');
-
-        if (!$zohoContactId) {
-            return $this->fail('zoho_contact_id is required');
-        }
-
-        $updated = $this->vendorModel->update($id, [
-            'zoho_contact_id' => $zohoContactId,
-            'zoho_sync_at' => date('Y-m-d H:i:s')
-        ]);
-
-        if ($updated) {
-            return $this->respondUpdated([
-                'success' => true,
-                'message' => 'Vendor linked to Zoho successfully',
-                'data' => $this->vendorModel->find($id)
-            ]);
-        }
-
-        return $this->fail('Failed to link vendor to Zoho');
     }
 
     /**

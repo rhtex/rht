@@ -77,14 +77,13 @@
                             <th>Balance</th>
                             <th>Status</th>
                             <th>Commission</th>
-                            <th>Zoho</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($invoices)): ?>
                             <tr>
-                                <td colspan="9" class="text-center py-4">No invoices found.</td>
+                                <td colspan="8" class="text-center py-4">No invoices found.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($invoices as $invoice): ?>
@@ -121,17 +120,6 @@
                                             <?php endif; ?>
                                         <?php else: ?>
                                             <span class="text-muted small">N/A</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?php if ($invoice['zoho_sync_status'] == 'Synced'): ?>
-                                            <span class="badge text-bg-success" title="Synced at <?= $invoice['zoho_sync_at'] ?>">
-                                                <i class="fas fa-check"></i> Synced
-                                            </span>
-                                        <?php elseif ($invoice['zoho_sync_status'] == 'Failed'): ?>
-                                            <span class="badge text-bg-danger"><i class="fas fa-times"></i> Failed</span>
-                                        <?php else: ?>
-                                            <span class="badge text-bg-warning"><i class="fas fa-clock"></i> Pending</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>

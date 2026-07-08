@@ -80,16 +80,6 @@
                                     <p class="text-muted"><?= nl2br(esc($payment['notes'])) ?></p>
                                 </div>
                             <?php endif; ?>
-                            
-                            <div class="mt-4">
-                                <strong>Zoho Status:</strong>
-                                <?php if ($payment['zoho_sync_status'] == 'Synced'): ?>
-                                    <span class="badge text-bg-success"><i class="fas fa-check"></i> Synced</span>
-                                    <small class="d-block text-muted">Zoho ID: <?= $payment['zoho_payment_id'] ?></small>
-                                <?php else: ?>
-                                    <span class="badge text-bg-warning"><?= $payment['zoho_sync_status'] ?></span>
-                                <?php endif; ?>
-                            </div>
                         </div>
                     </div>
                 </div>

@@ -54,15 +54,6 @@
                     <table class="table table-sm">
                         <tr><th width="40%">Bill Date:</th><td><?= date('d/m/Y', strtotime($bill['bill_date'])) ?></td></tr>
                         <tr><th>Due Date:</th><td><?= date('d/m/Y', strtotime($bill['due_date'])) ?></td></tr>
-                        <tr><th>Zoho Sync:</th>
-                            <td>
-                                <?php if ($bill['zoho_sync_status'] == 'Synced'): ?>
-                                    <span class="badge text-bg-success"><i class="fas fa-check"></i> Synced</span>
-                                <?php else: ?>
-                                    <span class="badge text-bg-warning"><i class="fas fa-clock"></i> <?= $bill['zoho_sync_status'] ?></span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
                     </table>
                 </div>
             </div>
@@ -171,7 +162,6 @@
                         <th>Deductions</th>
                         <th>Total Settlement</th>
                         <th>Reference</th>
-                        <th>Zoho Sync</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -198,13 +188,6 @@
                             </td>
                             <td class="fw-bold">₹<?= number_format($payment['amount'] + ($deductions ?? 0), 2) ?></td>
                             <td><?= esc($payment['reference_number']) ?: '-' ?></td>
-                            <td>
-                                <?php if ($payment['zoho_sync_status'] == 'Synced'): ?>
-                                    <span class="badge text-bg-success"><i class="fas fa-check"></i></span>
-                                <?php else: ?>
-                                    <span class="badge text-bg-warning"><?= $payment['zoho_sync_status'] ?></span>
-                                <?php endif; ?>
-                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

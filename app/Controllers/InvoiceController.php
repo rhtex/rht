@@ -10,7 +10,6 @@ use App\Models\ProductModel;
 use App\Models\BankAccountModel;
 use App\Models\AgentModel;
 use App\Models\TransportModel;
-use App\Services\ZohoBooksService;
 
 class InvoiceController extends BaseController
 {
@@ -23,7 +22,6 @@ class InvoiceController extends BaseController
     protected $agentModel;
     protected $transportModel;
     protected $taxModel;
-    protected $zohoService;
     protected $accountingModel;
     protected $historyModel;
     protected $expenseModel;
@@ -39,7 +37,6 @@ class InvoiceController extends BaseController
         $this->agentModel = new AgentModel();
         $this->transportModel = new TransportModel();
         $this->taxModel = new \App\Models\TaxModel();
-        $this->zohoService = new ZohoBooksService();
         $this->accountingModel = new \App\Models\AccountingModel();
         $this->historyModel = new \App\Models\InvoiceStatusHistoryModel();
         $this->expenseModel = new \App\Models\ExpenseModel();
@@ -208,9 +205,6 @@ class InvoiceController extends BaseController
         }
         // ------------------------
 
-        // Push to Zoho
-        $this->pushToZoho($invoiceId);
-
         return redirect()->to('invoices/view/' . $invoiceId)->with('success', 'Invoice created successfully.');
     }
 
@@ -345,9 +339,6 @@ class InvoiceController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update invoice.');
         }
 
-        // Push to Zoho
-        $this->pushToZoho($id);
-
         return redirect()->to('invoices/view/' . $id)->with('success', 'Invoice updated successfully.');
     }
 
@@ -371,11 +362,6 @@ class InvoiceController extends BaseController
 
         if ($db->transStatus() === false) {
             return redirect()->to('invoices')->with('error', 'Failed to delete invoice.');
-        }
-
-        // Void in Zoho if synced
-        if ($invoice['zoho_invoice_id']) {
-            $this->zohoService->voidInvoice($invoice['zoho_invoice_id']);
         }
 
         return redirect()->to('invoices')->with('success', 'Invoice deleted successfully.');
@@ -430,8 +416,7 @@ class InvoiceController extends BaseController
             'bank_account_id' => $this->request->getPost('bank_account_id') ?: null,
             'notes' => $this->request->getPost('notes'),
             'created_by' => session('user_id'),
-            'updated_by' => session('user_id'),
-            'zoho_sync_status' => 'Pending'
+            'updated_by' => session('user_id')
         ];
 
         $this->paymentModel->insert($paymentData);
@@ -475,102 +460,7 @@ class InvoiceController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to record payment.');
         }
 
-        // Push payment to Zoho
-        $this->pushPaymentToZoho($paymentId);
-
         return redirect()->to('invoices/view/' . $invoiceId)->with('success', 'Payment recorded successfully.');
-    }
-
-    private function pushToZoho($invoiceId)
-    {
-        $invoice = $this->invoiceModel->getInvoiceById($invoiceId);
-        $customer = $this->customerModel->find($invoice['customer_id']);
-
-        if (!$customer['zoho_contact_id']) {
-            return ['success' => false, 'message' => 'Customer is not synced with Zoho.'];
-        }
-
-        $zohoData = [
-            'customer_id' => $customer['zoho_contact_id'],
-            'invoice_number' => $invoice['invoice_number'],
-            'date' => $invoice['invoice_date'],
-            'due_date' => $invoice['due_date'],
-            'reference_number' => $invoice['reference_number'],
-            'discount' => $invoice['discount_amount'],
-            'discount_type' => strtolower($invoice['discount_type']),
-            'shipping_charge' => $invoice['shipping_charge'],
-            'notes' => $invoice['notes'],
-            'terms' => $invoice['terms'],
-            'line_items' => []
-        ];
-
-        foreach ($invoice['items'] as $item) {
-            $zohoData['line_items'][] = [
-                'name' => $item['description'],
-                'description' => $item['description'],
-                'rate' => $item['rate'],
-                'quantity' => $item['quantity'],
-                'hsn_or_sac' => $item['hsn_code'],
-                'tax_percentage' => $item['tax_percentage']
-            ];
-        }
-        if ($invoice['zoho_invoice_id']) {
-            $response = $this->zohoService->updateInvoice($invoice['zoho_invoice_id'], $zohoData);
-        } else {
-            $response = $this->zohoService->createInvoice($zohoData);
-        }
-
-        if ($response['success']) {
-            $this->invoiceModel->update($invoiceId, [
-                'zoho_invoice_id' => $response['data']['invoice']['invoice_id'],
-                'zoho_sync_status' => 'Synced',
-                'zoho_sync_at' => date('Y-m-d H:i:s')
-            ]);
-            return true;
-        }
-
-        $this->invoiceModel->update($invoiceId, ['zoho_sync_status' => 'Failed']);
-        return false;
-    }
-
-    private function pushPaymentToZoho($paymentId)
-    {
-        $payment = $this->paymentModel->find($paymentId);
-        $invoice = $this->invoiceModel->find($payment['invoice_id']);
-        $customer = $this->customerModel->find($payment['customer_id']);
-
-        if (!$invoice['zoho_invoice_id'] || !$customer['zoho_contact_id']) {
-            return false;
-        }
-
-        $zohoData = [
-            'customer_id' => $customer['zoho_contact_id'],
-            'payment_mode' => $payment['payment_mode'],
-            'amount' => $payment['amount'] + $payment['discount_amount'] + $payment['mahimai_amount'] + $payment['postal_charges'],
-            'date' => $payment['payment_date'],
-            'reference_number' => $payment['reference_number'],
-            'description' => $payment['notes'],
-            'invoices' => [
-                [
-                    'invoice_id' => $invoice['zoho_invoice_id'],
-                    'amount_applied' => $payment['amount'] + $payment['discount_amount'] + $payment['mahimai_amount'] + $payment['postal_charges']
-                ]
-            ]
-        ];
-
-        $response = $this->zohoService->createCustomerPayment($zohoData);
-
-        if ($response['success']) {
-            $this->paymentModel->update($paymentId, [
-                'zoho_payment_id' => $response['data']['payment']['payment_id'],
-                'zoho_sync_status' => 'Synced',
-                'zoho_sync_at' => date('Y-m-d H:i:s')
-            ]);
-            return true;
-        }
-
-        $this->paymentModel->update($paymentId, ['zoho_sync_status' => 'Failed']);
-        return false;
     }
 
     public function print($id)

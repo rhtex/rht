@@ -67,7 +67,6 @@
                             <th>Expiry</th>
                             <th>Total</th>
                             <th>Status</th>
-                            <th>Zoho</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -90,13 +89,6 @@
                                         $color = $colors[$qnt['status']] ?? 'secondary';
                                         ?>
                                         <span class="badge text-bg-<?= $color ?>"><?= $qnt['status'] ?></span>
-                                    </td>
-                                    <td>
-                                        <?php if ($qnt['zoho_sync_status'] == 'Synced'): ?>
-                                            <span class="badge text-bg-success"><i class="fas fa-check"></i></span>
-                                        <?php else: ?>
-                                            <span class="badge text-bg-warning"><?= $qnt['zoho_sync_status'] ?></span>
-                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">

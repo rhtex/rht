@@ -21,8 +21,6 @@ class SalesOrderModel extends Model
         'agent_commission_paid_at',
         'quotation_id',
         'sales_order_number',
-        'zoho_salesorder_id',
-        'zoho_sync_status',
         'order_date',
         'shipment_date',
         'reference_number',
@@ -41,7 +39,7 @@ class SalesOrderModel extends Model
         'terms',
         'created_by',
         'updated_by',
-        'zoho_sync_at'
+        'created_by'
     ];
 
     protected $useTimestamps = true;

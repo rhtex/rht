@@ -318,6 +318,18 @@
                                 <p>Beam Tracker</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="<?= site_url('production/warp-allocations') ?>" class="nav-link <?= strpos(uri_string(), 'production/warp-allocations') !== false ? 'active' : '' ?>">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Warp & Weft Allocations</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= site_url('production/receipts') ?>" class="nav-link <?= strpos(current_url(), 'production/receipts') !== false ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-boxes text-success"></i>
+                                <p>Production Receipts</p>
+                            </a>
+                        </li>
                         <?php
                             $isYarnJobWorkActive = in_array($segment2, ['yarn-job-work', 'yarn-dyeing', 'yarn-warping-sizing', 'yarn-twisting', 'yarn-weaving']);
                         ?>

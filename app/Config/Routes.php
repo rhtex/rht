@@ -668,7 +668,45 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->post('update/(:num)', 'TaxController::update/$1', ['filter' => 'permission:tax.edit']);
         $routes->get('delete/(:num)', 'TaxController::delete/$1', ['filter' => 'permission:tax.delete']);
     });
-        $routes->group('bulk-upload', ['filter' => 'auth', 'permission' => 'customer.bulk_upload|vendor.bulk_upload'], function($routes){
+        // Production (Weavers)
+    $routes->get('production/weavers', 'WeaverController::index', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/weavers/view/(:num)', 'WeaverController::view/$1', ['filter' => 'permission:weaver.view']);
+    $routes->get('production/weavers/create', 'WeaverController::create', ['filter' => 'permission:weaver.create']);
+    $routes->post('production/weavers/store', 'WeaverController::store', ['filter' => 'permission:weaver.create']);
+    $routes->get('production/weavers/edit/(:num)', 'WeaverController::edit/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/weavers/update/(:num)', 'WeaverController::update/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->get('production/weavers/delete/(:num)', 'WeaverController::delete/$1', ['filter' => 'permission:weaver.delete']);
+
+    // Production (Looms)
+    $routes->post('production/looms/store', 'LoomController::store', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/looms/update/(:num)', 'LoomController::update/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/looms/delete/(:num)', 'LoomController::delete/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->get('production/looms/by-weaver/(:num)', 'LoomController::getLoomsByWeaver/$1', ['filter' => 'permission:weaver.view']);
+
+    // Warp & Weft Allocation
+    $routes->get('production/warp-allocations', 'WarpAllocationController::index', ['filter' => 'permission:warp_allocation.view']);
+    $routes->get('production/warp-allocations/create', 'WarpAllocationController::create', ['filter' => 'permission:warp_allocation.create']);
+    $routes->post('production/warp-allocations/store', 'WarpAllocationController::store', ['filter' => 'permission:warp_allocation.create']);
+    $routes->get('production/warp-allocations/view/(:num)', 'WarpAllocationController::view/$1', ['filter' => 'permission:warp_allocation.view']);
+    $routes->get('production/warp-allocations/delete/(:num)', 'WarpAllocationController::delete/$1', ['filter' => 'permission:warp_allocation.delete']);
+
+    // Production Receipts
+    $routes->get('production/receipts', 'ProductionReceiptController::index', ['filter' => 'permission:production_receipt.view']);
+    $routes->get('production/receipts/create/(:num)', 'ProductionReceiptController::create/$1', ['filter' => 'permission:production_receipt.create']);
+    $routes->post('production/receipts/store/(:num)', 'ProductionReceiptController::store/$1', ['filter' => 'permission:production_receipt.create']);
+    $routes->get('production/receipts/view/(:num)', 'ProductionReceiptController::view/$1', ['filter' => 'permission:production_receipt.view']);
+    $routes->get('production/receipts/delete/(:num)', 'ProductionReceiptController::delete/$1', ['filter' => 'permission:production_receipt.delete']);
+
+    // Production (Yarn Beams)
+    $routes->get('production/yarn-beams', 'YarnBeamController::index', ['filter' => 'permission:yarn_beam.view']);
+    $routes->get('production/yarn-beams/create', 'YarnBeamController::create', ['filter' => 'permission:yarn_beam.create']);
+    $routes->post('production/yarn-beams/store', 'YarnBeamController::store', ['filter' => 'permission:yarn_beam.create']);
+    $routes->get('production/yarn-beams/delete/(:num)', 'YarnBeamController::delete/$1', ['filter' => 'permission:yarn_beam.delete']);
+    
+    // Yarn Inventory (Just assuming basic ones for now based on previous)
+    $routes->get('production/yarn-inventory', 'YarnInventoryController::index', ['filter' => 'permission:yarn_inventory.view']);
+
+    $routes->group('bulk-upload', ['filter' => 'auth', 'permission' => 'customer.bulk_upload|vendor.bulk_upload'], function($routes){
         $routes->get('form', 'BulkUploadController::showForm');
         $routes->post('process', 'BulkUploadController::process');
     });

@@ -29,9 +29,7 @@ class AssignSuperAdminPermissions extends Seeder
             if ($exists == 0) {
                 $rolePermsModel->insert([
                     'role_id'       => $roleId,
-                    'permission_id' => $perm['id'],
-                    'created_at'    => date('Y-m-d H:i:s'),
-                    'updated_at'    => date('Y-m-d H:i:s')
+                    'permission_id' => $perm['id']
                 ]);
                 $added++;
             }

@@ -21,6 +21,7 @@ class PermissionSeeder extends Seeder
             ['module_name' => 'Master Data', 'module_slug' => 'master_data'],
             ['module_name' => 'System Settings', 'module_slug' => 'settings'],
             ['module_name' => 'Tax Management', 'module_slug' => 'tax'],
+            ['module_name' => 'Production Management', 'module_slug' => 'production'],
         ];
 
         $moduleModel = $this->db->table('modules');
@@ -144,6 +145,28 @@ class PermissionSeeder extends Seeder
             ['key' => 'tax.create', 'name' => 'Create Tax', 'module' => 'tax'],
             ['key' => 'tax.edit', 'name' => 'Edit Tax', 'module' => 'tax'],
             ['key' => 'tax.delete', 'name' => 'Delete Tax', 'module' => 'tax'],
+
+            // Production Permissions
+            ['key' => 'weaver.view', 'name' => 'View Weavers', 'module' => 'production'],
+            ['key' => 'weaver.create', 'name' => 'Create Weaver', 'module' => 'production'],
+            ['key' => 'weaver.edit', 'name' => 'Edit Weaver/Loom', 'module' => 'production'],
+            ['key' => 'weaver.delete', 'name' => 'Delete Weaver/Loom', 'module' => 'production'],
+            
+            ['key' => 'warp_allocation.view', 'name' => 'View Warp & Weft Allocations', 'module' => 'production'],
+            ['key' => 'warp_allocation.create', 'name' => 'Create Warp & Weft Allocation', 'module' => 'production'],
+            ['key' => 'warp_allocation.edit', 'name' => 'Edit Warp & Weft Allocation', 'module' => 'production'],
+            ['key' => 'warp_allocation.delete', 'name' => 'Delete Warp & Weft Allocation', 'module' => 'production'],
+            
+            ['key' => 'production_receipt.view', 'name' => 'View Production Receipts', 'module' => 'production'],
+            ['key' => 'production_receipt.create', 'name' => 'Create Production Receipt', 'module' => 'production'],
+            ['key' => 'production_receipt.edit', 'name' => 'Edit Production Receipt', 'module' => 'production'],
+            ['key' => 'production_receipt.delete', 'name' => 'Delete Production Receipt', 'module' => 'production'],
+            
+            ['key' => 'yarn_beam.view', 'name' => 'View Yarn Beams', 'module' => 'production'],
+            ['key' => 'yarn_beam.create', 'name' => 'Create Yarn Beam', 'module' => 'production'],
+            ['key' => 'yarn_beam.delete', 'name' => 'Delete Yarn Beam', 'module' => 'production'],
+            
+            ['key' => 'yarn_inventory.view', 'name' => 'View Yarn Inventory', 'module' => 'production'],
         ];
 
         $permModel = $this->db->table('permissions');

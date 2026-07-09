@@ -38,8 +38,7 @@ class SalesOrderModel extends Model
         'notes',
         'terms',
         'created_by',
-        'updated_by',
-        'created_by'
+        'updated_by'
     ];
 
     protected $useTimestamps = true;

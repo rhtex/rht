@@ -13,7 +13,7 @@ class WeaverModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'name', 'code', 'phone', 'address', 'address_proof', 'location', 'status', 'created_by', 'updated_by'
+        'name', 'code', 'phone', 'address', 'address_proof', 'location', 'status', 'created_by', 'updated_by', 'customer_id', 'vendor_id'
     ];
 
     protected $useTimestamps = true;

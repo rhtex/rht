@@ -5,7 +5,7 @@
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1>Add New Product</h1>
+        <h1><?= lang("App.add_new") ?> Product</h1>
     </div>
 </div>
 <?= $this->endSection() ?>
@@ -92,8 +92,8 @@
             </div>
         </div>
         <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Save Product</button>
-            <a href="<?= site_url('products') ?>" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Product</button>
+            <a href="<?= site_url('products') ?>" class="btn btn-secondary"><?= lang("App.cancel") ?></a>
         </div>
     </form>
 </div>

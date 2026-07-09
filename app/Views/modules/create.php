@@ -6,7 +6,7 @@
         <h1>Add Module</h1>
     </div>
     <div class="col-sm-6">
-        <a href="<?= site_url('modules') ?>" class="btn btn-secondary float-sm-end">Back</a>
+        <a href="<?= site_url('modules') ?>" class="btn btn-secondary float-sm-end"><?= lang("App.back") ?></a>
     </div>
 </div>
 <?= $this->endSection() ?>
@@ -43,7 +43,7 @@
             </div>
         </div>
         <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Save Module</button>
+            <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Module</button>
         </div>
     </form>
 </div>

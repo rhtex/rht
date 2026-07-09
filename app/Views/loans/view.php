@@ -9,7 +9,7 @@
     </div>
     <div class="col-sm-6">
         <a href="<?= site_url('loans') ?>" class="btn btn-secondary float-sm-end">Back to List</a>
-        <a href="<?= site_url('loans/edit/'.$loan['id']) ?>" class="btn btn-warning float-sm-end me-2">Edit Loan</a>
+        <a href="<?= site_url('loans/edit/'.$loan['id']) ?>" class="btn btn-warning float-sm-end me-2"><?= lang("App.edit") ?> Loan</a>
     </div>
 </div>
 <?= $this->endSection() ?>

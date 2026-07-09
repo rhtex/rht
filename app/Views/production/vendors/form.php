@@ -1,14 +1,14 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($vendor) ? 'Edit Job Work Vendor' : 'Add New Job Work Vendor' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($vendor) ? '<?= lang("App.edit") ?> Job Work Vendor' : '<?= lang("App.add_new") ?> Job Work Vendor' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1><?= isset($vendor) ? 'Edit Job Work Vendor' : 'Add New Job Work Vendor' ?></h1>
+        <h1><?= isset($vendor) ? '<?= lang("App.edit") ?> Job Work Vendor' : '<?= lang("App.add_new") ?> Job Work Vendor' ?></h1>
     </div>
     <div class="col-sm-6">
-        <a href="<?= site_url('production/vendors') ?>" class="btn btn-secondary float-sm-end">Back</a>
+        <a href="<?= site_url('production/vendors') ?>" class="btn btn-secondary float-sm-end"><?= lang("App.back") ?></a>
     </div>
 </div>
 <?= $this->endSection() ?>

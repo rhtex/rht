@@ -1,11 +1,11 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?>Edit User<?= $this->endSection() ?>
+<?= $this->section('title') ?><?= lang("App.edit") ?> User<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1>Edit User</h1>
+        <h1><?= lang("App.edit") ?> User</h1>
     </div>
     <div class="col-sm-6">
         <a href="<?= site_url('users') ?>" class="btn btn-secondary float-sm-end">Back to List</a>

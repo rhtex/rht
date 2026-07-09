@@ -1,11 +1,11 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?>Edit Role<?= $this->endSection() ?>
+<?= $this->section('title') ?><?= lang("App.edit") ?> Role<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1>Edit Role</h1>
+        <h1><?= lang("App.edit") ?> Role</h1>
     </div>
     <div class="col-sm-6">
         <a href="<?= site_url('roles') ?>" class="btn btn-secondary float-sm-end">Back to List</a>

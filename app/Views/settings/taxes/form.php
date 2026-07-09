@@ -17,7 +17,7 @@
 
     <div class="card card-primary">
         <div class="card-header">
-            <h3 class="card-title"><?= isset($tax) ? 'Edit Tax' : 'New Tax' ?></h3>
+            <h3 class="card-title"><?= isset($tax) ? '<?= lang("App.edit") ?> Tax' : 'New Tax' ?></h3>
         </div>
         
         <?php $action = isset($tax) ? base_url('settings/taxes/update/' . $tax['id']) : base_url('settings/taxes/create'); ?>
@@ -45,8 +45,8 @@
             <!-- /.card-body -->
 
             <div class="card-footer">
-                <button type="submit" class="btn btn-primary">Save</button>
-                <a href="<?= base_url('settings/taxes') ?>" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary"><?= lang("App.save") ?></button>
+                <a href="<?= base_url('settings/taxes') ?>" class="btn btn-secondary"><?= lang("App.cancel") ?></a>
             </div>
         </form>
     </div>

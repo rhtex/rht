@@ -41,7 +41,7 @@
                 </ul>
 
                 <div class="d-grid gap-2">
-                    <a href="<?= site_url('transports/edit/' . $transport['id']) ?>" class="btn btn-primary"><b>Edit Transport</b></a>
+                    <a href="<?= site_url('transports/edit/' . $transport['id']) ?>" class="btn btn-primary"><b><?= lang("App.edit") ?> Transport</b></a>
                 </div>
             </div>
         </div>

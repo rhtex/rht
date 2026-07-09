@@ -1,11 +1,11 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?>Edit Loan<?= $this->endSection() ?>
+<?= $this->section('title') ?><?= lang("App.edit") ?> Loan<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1>Edit Loan</h1>
+        <h1><?= lang("App.edit") ?> Loan</h1>
     </div>
     <div class="col-sm-6">
         <a href="<?= site_url('loans') ?>" class="btn btn-secondary float-sm-end">Back to List</a>

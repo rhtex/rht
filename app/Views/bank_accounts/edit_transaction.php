@@ -1,11 +1,11 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?>Edit Transaction<?= $this->endSection() ?>
+<?= $this->section('title') ?><?= lang("App.edit") ?> Transaction<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1>Edit Transaction</h1>
+        <h1><?= lang("App.edit") ?> Transaction</h1>
     </div>
     <div class="col-sm-6">
         <a href="<?= site_url('bank_accounts/statement/'.$account['id']) ?>" class="btn btn-secondary float-sm-end">Back to Statement</a>

@@ -1,6 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($isEdit) ? 'Edit Receipt' : 'Receive Warping & Sizing' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($isEdit) ? '<?= lang("App.edit") ?> Receipt' : 'Receive Warping & Sizing' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">

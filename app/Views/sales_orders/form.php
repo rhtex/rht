@@ -353,8 +353,8 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2 mb-3">
-            <a href="<?= site_url('sales_orders') ?>" class="btn btn-secondary">Cancel</a>
-            <button type="submit" class="btn btn-primary">Save Order</button>
+            <a href="<?= site_url('sales_orders') ?>" class="btn btn-secondary"><?= lang("App.cancel") ?></a>
+            <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Order</button>
         </div>
     </form>
 </div>

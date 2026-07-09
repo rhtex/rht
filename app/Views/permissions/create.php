@@ -8,7 +8,7 @@
         <h1>Add Permission</h1>
     </div>
     <div class="col-sm-6">
-        <a href="<?= site_url('permissions') ?>" class="btn btn-secondary float-sm-end">Back</a>
+        <a href="<?= site_url('permissions') ?>" class="btn btn-secondary float-sm-end"><?= lang("App.back") ?></a>
     </div>
 </div>
 <?= $this->endSection() ?>
@@ -49,7 +49,7 @@
             </div>
         </div>
         <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Save Permission</button>
+            <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Permission</button>
         </div>
     </form>
 </div>

@@ -5,7 +5,7 @@
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1 class="fw-bold text-dark"><i class="fas fa-palette text-primary me-2"></i><?= isset($color) ? 'Edit Color' : 'Add New Color' ?></h1>
+        <h1 class="fw-bold text-dark"><i class="fas fa-palette text-primary me-2"></i><?= isset($color) ? '<?= lang("App.edit") ?> Color' : '<?= lang("App.add_new") ?> Color' ?></h1>
     </div>
     <div class="col-sm-6 text-end">
         <a href="<?= site_url('production/colors') ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-none"><i class="fas fa-arrow-left me-1"></i> Back</a>

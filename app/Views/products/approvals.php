@@ -123,7 +123,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= lang("App.cancel") ?></button>
                                                                 <button type="submit" class="btn btn-success">Approve Stock</button>
                                                             </div>
                                                         </form>
@@ -152,7 +152,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= lang("App.cancel") ?></button>
                                                                 <button type="submit" class="btn btn-danger">Confirm Rejection</button>
                                                             </div>
                                                         </form>

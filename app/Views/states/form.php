@@ -1,6 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($state) ? 'Edit State' : 'Add New State' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($state) ? '<?= lang("App.edit") ?> State' : '<?= lang("App.add_new") ?> State' ?><?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <div class="content-header">
@@ -53,7 +53,7 @@
                     </div>
                     <div class="mt-3">
                         <button type="submit" class="btn btn-primary"><?= $isEdit ? 'Update' : 'Save' ?></button>
-                        <a href="<?= site_url('states') ?>" class="btn btn-secondary">Cancel</a>
+                        <a href="<?= site_url('states') ?>" class="btn btn-secondary"><?= lang("App.cancel") ?></a>
                     </div>
                 </form>
             </div>

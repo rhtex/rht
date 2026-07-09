@@ -346,8 +346,8 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2 mb-3">
-            <a href="<?= site_url('quotations') ?>" class="btn btn-secondary">Cancel</a>
-            <button type="submit" class="btn btn-primary">Save Quotation</button>
+            <a href="<?= site_url('quotations') ?>" class="btn btn-secondary"><?= lang("App.cancel") ?></a>
+            <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Quotation</button>
         </div>
     </form>
 </div>

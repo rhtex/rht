@@ -1,11 +1,11 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?>Add New Employee<?= $this->endSection() ?>
+<?= $this->section('title') ?><?= lang("App.add_new") ?> Employee<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1>Add New Employee</h1>
+        <h1><?= lang("App.add_new") ?> Employee</h1>
     </div>
     <div class="col-sm-6">
         <a href="<?= site_url('employees') ?>" class="btn btn-secondary float-sm-end">Back to List</a>
@@ -180,7 +180,7 @@
 
         </div>
         <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Save Employee</button>
+            <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Employee</button>
         </div>
     </form>
 </div>

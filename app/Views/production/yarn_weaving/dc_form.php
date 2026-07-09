@@ -1,8 +1,8 @@
 <?= $this->extend('layouts/master') ?>
-<?= $this->section('title') ?><?= isset($dc) ? 'Edit Weaving DC' : 'Create Weaving DC' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($dc) ? '<?= lang("App.edit") ?> Weaving DC' : 'Create Weaving DC' ?><?= $this->endSection() ?>
 <?= $this->section('header') ?>
 <div class="row mb-2">
-    <div class="col-sm-6"><h1><?= isset($dc) ? 'Edit Weaving DC' : 'New Weaving DC' ?></h1></div>
+    <div class="col-sm-6"><h1><?= isset($dc) ? '<?= lang("App.edit") ?> Weaving DC' : 'New Weaving DC' ?></h1></div>
     <div class="col-sm-6 text-end"><a href="<?= site_url('production/yarn-weaving') ?>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a></div>
 </div>
 <?= $this->endSection() ?>

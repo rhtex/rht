@@ -118,7 +118,7 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Changes</button>
                 </div>
             </form>
         </div>

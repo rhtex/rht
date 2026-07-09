@@ -3,10 +3,10 @@
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1>Edit Module</h1>
+        <h1><?= lang("App.edit") ?> Module</h1>
     </div>
     <div class="col-sm-6">
-        <a href="<?= site_url('modules') ?>" class="btn btn-secondary float-sm-end">Back</a>
+        <a href="<?= site_url('modules') ?>" class="btn btn-secondary float-sm-end"><?= lang("App.back") ?></a>
     </div>
 </div>
 <?= $this->endSection() ?>

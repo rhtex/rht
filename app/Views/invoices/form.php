@@ -22,366 +22,401 @@
         <input type="hidden" name="is_inter_state" id="isInterStateField"
             value="<?= $invoice['is_inter_state'] ?? 0 ?>">
 
-        <div class="card card-outline card-primary">
-            <div class="card-header">
-                <h3 class="card-title">Invoice Details</h3>
+        
+        
+<style>
+    .gst-container {
+        font-size: 0.85rem;
+    }
+    .gst-container .form-label {
+        font-weight: 600;
+        margin-bottom: 2px;
+        color: #444;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+    .gst-container .form-control, .gst-container .form-select {
+        font-size: 0.85rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        height: auto;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        transition: all 0.2s ease;
+    }
+    .gst-container .form-control:focus, .gst-container .form-select:focus {
+        border-color: #94a3b8;
+        box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.15);
+    }
+    .gst-container .select2-container--bootstrap-5 .select2-selection {
+        font-size: 0.85rem;
+        padding: 2px 4px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        min-height: 28px;
+    }
+    .gst-table th {
+        background-color: #f8fafc !important;
+        color: #475569;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        vertical-align: middle;
+        padding: 10px 6px !important;
+        border-bottom: 2px solid #e2e8f0 !important;
+    }
+    .gst-table td {
+        padding: 4px !important;
+        vertical-align: middle;
+    }
+    .gst-table .form-control {
+        border: 1px solid transparent;
+        background: transparent;
+    }
+    .gst-table .form-control:focus {
+        border: 1px solid #86b7fe;
+        background: #fff;
+    }
+    .gst-summary-table td {
+        padding: 6px 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .gst-summary-label {
+        font-weight: 600;
+        color: #333;
+    }
+    .grand-total-row {
+        background-color: #f8fafc; color: #334155;
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+    .glass-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(2px);
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+    }
+    .glass-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+</style>
+
+<div class="gst-container mb-4">
+    <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
+        
+        <!-- TOP ROW: Party & Voucher Details -->
+        <div class="row g-0 border-bottom border-secondary-subtle">
+            
+            <!-- LEFT: Party Details -->
+            <div class="col-md-6 border-end border-secondary-subtle p-3">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <h6 class="fw-bold mb-0 text-uppercase"><i class="fas fa-user-tie me-1"></i> Billed To</h6>
+                    <span id="taxModeIndicator" class="badge bg-secondary" style="display: none;">
+                        <span id="taxModeText">Tax Mode</span>
+                    </span>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Select Customer <span class="text-danger">*</span></label>
+                    <select name="customer_id" id="customerSelect" class="form-select select2" required>
+                        <option value="">-- Search Customer --</option>
+                        <?php foreach ($customers as $customer): ?>
+                            <option value="<?= $customer['id'] ?>" <?= ($invoice && $invoice['customer_id'] == $customer['id']) ? 'selected' : '' ?>>
+                                <?= esc($customer['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div id="customerAddressSection" style="display: none;">
+                    <div class="row">
+                        <div class="col-sm-6 mb-2">
+                            <label class="form-label text-primary">Billing Address</label>
+                            <div id="billingAddressDisplay" class="border p-2 bg-light" style="min-height: 80px; white-space: pre-wrap;"></div>
+                        </div>
+                        <div class="col-sm-6 mb-2">
+                            <label class="form-label text-primary">Shipping Address</label>
+                            <div id="shippingAddressDisplay" class="border p-2 bg-light" style="min-height: 80px; white-space: pre-wrap;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-2 bg-light border p-2 m-0">
+                        <div class="col-6">
+                            <label class="form-label">Phone:</label> <span id="customerPhone" class="fw-bold">-</span><br>
+                            <label class="form-label">WhatsApp:</label> <span id="customerWhatsapp" class="fw-bold text-success">-</span>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">GST Type:</label> <span id="customerGstType" class="badge bg-dark">-</span><br>
+                            <label class="form-label">GSTIN:</label> <span id="customerGstin" class="fw-bold text-primary">-</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">Customer <span class="text-danger">*</span></label>
-                            <select name="customer_id" id="customerSelect" class="form-select select2" required>
-                                <option value="">-- Select Customer --</option>
-                                <?php foreach ($customers as $customer): ?>
-                                    <option value="<?= $customer['id'] ?>" <?= ($invoice && $invoice['customer_id'] == $customer['id']) ? 'selected' : '' ?>>
-                                        <?= esc($customer['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <div class="mt-2">
-                                <span id="taxModeIndicator" class="badge bg-secondary" style="display: none;">
-                                    <i class="fas fa-info-circle"></i> <span id="taxModeText">Select customer to see tax
-                                        mode</span>
-                                </span>
-                            </div>
-                            <div id="customerAddressSection" class="row mt-3" style="display: none;">
-                                <div class="col-md-6 mb-3">
-                                    <label class="text-muted small text-uppercase fw-bold mb-1 d-block"><i
-                                            class="fas fa-file-invoice text-primary me-1"></i> Billing Address</label>
-                                    <div id="billingAddressDisplay" class="text-dark small border p-2 rounded bg-light"
-                                        style="white-space: pre-wrap; min-height: 80px;"></div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="text-muted small text-uppercase fw-bold mb-1 d-block"><i
-                                            class="fas fa-truck text-primary me-1"></i> Shipping Address</label>
-                                    <div id="shippingAddressDisplay" class="text-dark small border p-2 rounded bg-light"
-                                        style="white-space: pre-wrap; min-height: 80px;"></div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div id="contactInfoSection" class="row border-top pt-2 mt-1">
-                                        <div class="col-md-3 mb-2">
-                                            <label class="text-muted small text-uppercase fw-bold mb-1 d-block"><i
-                                                    class="fas fa-phone text-primary me-1"></i> Phone</label>
-                                            <div id="customerPhone" class="small text-dark"></div>
-                                        </div>
-                                        <div class="col-md-3 mb-2">
-                                            <label class="text-muted small text-uppercase fw-bold mb-1 d-block"><i
-                                                    class="fab fa-whatsapp text-success me-1"></i> WhatsApp</label>
-                                            <div id="customerWhatsapp" class="small text-dark"></div>
-                                        </div>
-                                        <div class="col-md-6 mb-2">
-                                            <label class="text-muted small text-uppercase fw-bold mb-1 d-block"><i
-                                                    class="fas fa-id-card text-info me-1"></i> GST Details</label>
-                                            <div class="small">
-                                                <span id="customerGstType" class="badge bg-secondary me-1"></span>
-                                                <span id="customerGstin" class="fw-bold text-dark"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
+            <!-- RIGHT: Voucher Details -->
+            <div class="col-md-6 p-3">
+                <h6 class="fw-bold text-uppercase border-bottom pb-2 mb-3"><i class="fas fa-file-invoice me-1"></i> Invoice Details</h6>
+                
+                <div class="row g-2 mb-2">
+                    <div class="col-sm-6">
+                        <label class="form-label">Invoice No.</label>
+                        <input type="text" name="invoice_number" class="form-control fw-bold bg-light" value="<?= $invoice['invoice_number'] ?? $invoice_number ?>" readonly>
                     </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Invoice Date <span class="text-danger">*</span></label>
-                            <input type="date" name="invoice_date" id="invoiceDate" class="form-control"
-                                value="<?= $invoice['invoice_date'] ?? date('Y-m-d') ?>" required
-                                onchange="calculateDueDate()">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label text-primary">Due Date <span class="text-danger">*</span></label>
-                            <input type="date" name="due_date" id="dueDate" class="form-control fw-bold border-primary"
-                                value="<?= $invoice['due_date'] ?? date('Y-m-d', strtotime('+30 days')) ?>" required>
-                        </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Agent (Optional)</label>
+                        <select name="agent_id" id="agentSelect" class="form-select select2">
+                            <option value="">-- Select Agent --</option>
+                            <?php foreach ($agents as $agent): ?>
+                                <option value="<?= $agent['id'] ?>" data-commission="<?= $agent['commission_percentage'] ?>" <?= ($invoice && $invoice['agent_id'] == $agent['id']) ? 'selected' : '' ?>>
+                                    <?= esc($agent['agent_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <input type="hidden" name="agent_commission_percent" id="agentCommissionPercent" value="<?= $invoice['agent_commission_percent'] ?? 0 ?>">
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Invoice Number</label>
-                            <input type="text" name="invoice_number" class="form-control fw-bold"
-                                value="<?= $invoice['invoice_number'] ?? $invoice_number ?>" readonly>
-                        </div>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-sm-6">
+                        <label class="form-label">Invoice Date <span class="text-danger">*</span></label>
+                        <input type="date" name="invoice_date" id="invoiceDate" class="form-control" value="<?= $invoice['invoice_date'] ?? date('Y-m-d') ?>" required onchange="calculateDueDate()">
                     </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">P.O number</label>
-                            <input type="text" name="reference_number" class="form-control"
-                                value="<?= $invoice['reference_number'] ?? '' ?>" placeholder="e.g. PO number">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">P.O Date</label>
-                            <input type="date" name="po_date" class="form-control"
-                                value="<?= $invoice['po_date'] ?? '' ?>">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Agent (Optional)</label>
-                            <select name="agent_id" id="agentSelect" class="form-select select2">
-                                <option value="">-- Select Agent --</option>
-                                <?php foreach ($agents as $agent): ?>
-                                    <option value="<?= $agent['id'] ?>"
-                                        data-commission="<?= $agent['commission_percentage'] ?>" <?= ($invoice && $invoice['agent_id'] == $agent['id']) ? 'selected' : '' ?>>
-                                        <?= esc($agent['agent_name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <!-- Hidden field to store commission percentage -->
-                            <input type="hidden" name="agent_commission_percent" id="agentCommissionPercent"
-                                value="<?= $invoice['agent_commission_percent'] ?? 0 ?>">
-                        </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Due Date <span class="text-danger">*</span></label>
+                        <input type="date" name="due_date" id="dueDate" class="form-control text-danger fw-bold" value="<?= $invoice['due_date'] ?? date('Y-m-d', strtotime('+30 days')) ?>" required>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Transport Name <span class="text-danger">*</span></label>
-                            <select name="transport_name" class="form-select select2" required>
-                                <option value="">-- Select Transport --</option>
-                                <?php foreach ($transports as $transport): ?>
-                                    <option value="<?= esc($transport['transport_name']) ?>" <?= ($invoice && $invoice['transport_name'] == $transport['transport_name']) ? 'selected' : '' ?>>
-                                        <?= esc($transport['transport_name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
+                
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <label class="form-label">P.O Number</label>
+                        <input type="text" name="reference_number" class="form-control" value="<?= $invoice['reference_number'] ?? '' ?>">
                     </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">E-Waybill No.</label>
-                            <input type="text" name="ewaybill_number" class="form-control"
-                                value="<?= $invoice['ewaybill_number'] ?? '' ?>" placeholder="E-Waybill No">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">No. of Packages <span class="text-danger">*</span></label>
-                            <input type="number" required name="packages_count" class="form-control"
-                                value="<?= $invoice['packages_count'] ?? '' ?>" placeholder="Qty">
-                        </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">P.O Date</label>
+                        <input type="date" name="po_date" class="form-control" value="<?= $invoice['po_date'] ?? '' ?>">
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Line Items -->
-        <div class="card card-outline card-secondary" id="lineItemsCard"
-            style="display: <?= ($invoice && !empty($invoice['customer_id'])) ? 'block' : 'none' ?>;">
-            <div class="card-header">
-                <h3 class="card-title">Line Items</h3>
-                <div class="card-tools d-flex gap-2">
+        <!-- DISPATCH BLOCK -->
+        <div class="row g-0 border-bottom border-secondary-subtle bg-light p-2 align-items-end">
+            <div class="col-md-4 px-2">
+                <label class="form-label">Transport Name <span class="text-danger">*</span></label>
+                <select name="transport_name" class="form-select select2" required>
+                    <option value="">-- Select --</option>
+                    <?php foreach ($transports as $transport): ?>
+                        <option value="<?= esc($transport['transport_name']) ?>" <?= ($invoice && $invoice['transport_name'] == $transport['transport_name']) ? 'selected' : '' ?>>
+                            <?= esc($transport['transport_name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-4 px-2">
+                <label class="form-label">E-Waybill No.</label>
+                <input type="text" name="ewaybill_number" class="form-control" value="<?= $invoice['ewaybill_number'] ?? '' ?>" placeholder="E-Waybill">
+            </div>
+            <div class="col-md-4 px-2">
+                <label class="form-label">Packages <span class="text-danger">*</span></label>
+                <input type="number" required name="packages_count" class="form-control" value="<?= $invoice['packages_count'] ?? '' ?>" placeholder="Qty">
+            </div>
+        </div>
+
+        <!-- LINE ITEMS -->
+        <div class="position-relative" id="lineItemsCardWrapper">
+            <div class="d-flex justify-content-between align-items-center bg-light text-dark border-bottom border-secondary-subtle p-2">
+                <h6 class="mb-0 text-uppercase fw-bold"><i class="fas fa-list me-1"></i> Item Details</h6>
+                <div class="d-flex gap-2">
                     <div class="input-group input-group-sm" style="width: 250px;">
-                        <span class="input-group-text"><i class="fas fa-barcode"></i></span>
-                        <input type="text" id="barcodeScanner" class="form-control" placeholder="Scan Barcode here...">
+                        <span class="input-group-text bg-light"><i class="fas fa-barcode"></i></span>
+                        <input type="text" id="barcodeScanner" class="form-control" placeholder="Scan Barcode...">
                     </div>
                     <button type="button" class="btn btn-sm btn-success" onclick="addLineItem()">
-                        <i class="fas fa-plus"></i> Add Item
+                        <i class="fas fa-plus"></i> Add
                     </button>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="itemsTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th width="5%">S.No</th>
-                                <th width="25%">Description</th>
-                                <th width="12%">HSN Code</th>
-                                <th width="10%">Quantity</th>
-                                <th width="12%">Rate (₹)</th>
-                                <th width="10%">GST %</th>
-                                <th width="15%">Amount (₹)</th>
-                                <th width="8%">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="itemsBody">
-                            <?php if ($invoice && !empty($invoice['items'])): ?>
-                                <?php foreach ($invoice['items'] as $index => $item): ?>
-                                    <tr class="item-row">
-                                        <td class="text-center fw-bold index-column"><?= $index + 1 ?></td>
-                                        <td>
-                                            <select name="items[<?= $index ?>][product_id]"
-                                                class="form-control product-select select2">
-                                                <option value="">-- Select Product --</option>
-                                                <?php foreach ($products as $product): ?>
-                                                    <option value="<?= $product['id'] ?>" data-hsn="<?= $product['hsn_code'] ?>"
-                                                        data-rate="<?= $product['selling_price'] ?>"
-                                                        data-gst="<?= $product['tax_percentage'] ?>"
-                                                        <?= ($item['product_id'] == $product['id']) ? 'selected' : '' ?>>
-                                                        <?= esc($product['product_name']) ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <input type="hidden" name="items[<?= $index ?>][description]"
-                                                value="<?= esc($item['description']) ?>">
-                                        </td>
-                                        <td><input type="text" name="items[<?= $index ?>][hsn_code]" class="form-control hsn"
-                                                value="<?= esc($item['hsn_code']) ?>"></td>
-                                        <td><input type="number" name="items[<?= $index ?>][quantity]" class="form-control qty"
-                                                value="<?= $item['quantity'] ?>" step="0.01" min="0.01" required
-                                                onchange="calculateRow(this)"></td>
-                                        <td><input type="number" name="items[<?= $index ?>][rate]" class="form-control rate"
-                                                value="<?= $item['rate'] ?>" step="0.01" min="0" required
-                                                onchange="calculateRow(this)"></td>
-                                        <td>
-                                            <select name="items[<?= $index ?>][tax_percentage]" class="form-control gst"
-                                                onchange="calculateRow(this)">
-                                                <option value="0">0%</option>
-                                                <?php foreach ($taxes as $tax): ?>
-                                                    <option value="<?= $tax['percentage'] ?>"
-                                                        <?= ($item['tax_percentage'] == $tax['percentage']) ? 'selected' : '' ?>>
-                                                        <?= $tax['percentage'] ?>%
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <?php $tax_type = (!empty($item['igst_rate']) && $item['igst_rate'] > 0) ? 'IGST' : 'CGST_SGST'; ?>
-                                            <input type="hidden" name="items[<?= $index ?>][tax_type]" class="tax_type"
-                                                value="<?= $tax_type ?>">
-                                        </td>
-                                        <td><input type="text" class="form-control amount" readonly
-                                                value="<?= number_format($item['amount'], 2) ?>"></td>
-                                        <td><button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)"><i
-                                                    class="fas fa-trash"></i></button></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
+            
+            <div class="table-responsive position-relative p-0 m-0 border-bottom border-secondary-subtle">
+                <!-- Blur Overlay -->
+                <div class="glass-overlay <?= ($invoice && !empty($invoice['customer_id'])) ? '' : 'active' ?>" id="lineItemsOverlay">
+                    <div class="bg-white p-3 border border-secondary-subtle text-center shadow">
+                        <i class="fas fa-lock fs-3 text-muted mb-2"></i>
+                        <h6 class="fw-bold text-uppercase">Customer Required</h6>
+                        <p class="small text-muted mb-0">Select Billed To party first</p>
+                    </div>
+                </div>
+
+                <table class="table table-bordered border-secondary-subtle table-sm mb-0 gst-table" id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th width="4%" class="text-center">S.No</th>
+                            <th width="28%">Description of Goods</th>
+                            <th width="12%">HSN/SAC</th>
+                            <th width="10%" class="text-end">Qty</th>
+                            <th width="12%" class="text-end">Rate (₹)</th>
+                            <th width="12%" class="text-end">GST %</th>
+                            <th width="16%" class="text-end">Amount (₹)</th>
+                            <th width="6%" class="text-center">Del</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                        <?php if ($invoice && !empty($invoice['items'])): ?>
+                            <?php foreach ($invoice['items'] as $index => $item): ?>
                                 <tr class="item-row">
-                                    <td class="text-center fw-bold index-column">1</td>
+                                    <td class="text-center fw-bold index-column text-muted"><?= $index + 1 ?></td>
                                     <td>
-                                        <select name="items[0][product_id]" class="form-control product-select select2">
+                                        <select name="items[<?= $index ?>][product_id]" class="form-select product-select select2">
                                             <option value="">-- Select Product --</option>
                                             <?php foreach ($products as $product): ?>
                                                 <option value="<?= $product['id'] ?>" data-hsn="<?= $product['hsn_code'] ?>"
                                                     data-rate="<?= $product['selling_price'] ?>"
-                                                    data-gst="<?= $product['tax_percentage'] ?>">
+                                                    data-gst="<?= $product['tax_percentage'] ?>"
+                                                    <?= ($item['product_id'] == $product['id']) ? 'selected' : '' ?>>
                                                     <?= esc($product['product_name']) ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <input type="hidden" name="items[0][description]">
+                                        <input type="hidden" name="items[<?= $index ?>][description]" value="<?= esc($item['description']) ?>">
                                     </td>
-                                    <td><input type="text" name="items[0][hsn_code]" class="form-control hsn"></td>
-                                    <td><input type="number" name="items[0][quantity]" class="form-control qty" value="1"
-                                            step="0.01" min="0.01" required onchange="calculateRow(this)"></td>
-                                    <td><input type="number" name="items[0][rate]" class="form-control rate" value="0"
-                                            step="0.01" min="0" required onchange="calculateRow(this)"></td>
+                                    <td><input type="text" name="items[<?= $index ?>][hsn_code]" class="form-control text-center hsn" value="<?= esc($item['hsn_code']) ?>"></td>
+                                    <td><input type="number" name="items[<?= $index ?>][quantity]" class="form-control text-end qty" value="<?= $item['quantity'] ?>" step="0.01" min="0.01" required onchange="calculateRow(this)"></td>
+                                    <td><input type="number" name="items[<?= $index ?>][rate]" class="form-control text-end rate" value="<?= $item['rate'] ?>" step="0.01" min="0" required onchange="calculateRow(this)"></td>
                                     <td>
-                                        <select name="items[0][tax_percentage]" class="form-control gst"
-                                            onchange="calculateRow(this)">
+                                        <select name="items[<?= $index ?>][tax_percentage]" class="form-select text-end gst" onchange="calculateRow(this)">
                                             <option value="0">0%</option>
                                             <?php foreach ($taxes as $tax): ?>
-                                                <option value="<?= $tax['percentage'] ?>">
+                                                <option value="<?= $tax['percentage'] ?>" <?= ($item['tax_percentage'] == $tax['percentage']) ? 'selected' : '' ?>>
                                                     <?= $tax['percentage'] ?>%
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <input type="hidden" name="items[0][tax_type]" class="tax_type" value="CGST_SGST">
+                                        <?php $tax_type = (!empty($item['igst_rate']) && $item['igst_rate'] > 0) ? 'IGST' : 'CGST_SGST'; ?>
+                                        <input type="hidden" name="items[<?= $index ?>][tax_type]" class="tax_type" value="<?= $tax_type ?>">
                                     </td>
-                                    <td><input type="text" class="form-control amount" readonly value="0.00"></td>
-                                    <td><button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)"><i
-                                                class="fas fa-trash"></i></button></td>
+                                    <td><input type="text" class="form-control text-end fw-bold amount" readonly value="<?= number_format($item['amount'], 2, '.', '') ?>"></td>
+                                    <td class="text-center"><button type="button" class="btn btn-sm text-danger p-0" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
                                 </tr>
-                            <?php endif; ?>
-                        </tbody>
-                        <tfoot class="table-secondary">
-                            <tr>
-                                <td colspan="6" class="text-end fw-bold">Subtotal:</td>
-                                <td><input type="text" id="subtotal" class="form-control fw-bold" readonly value="0.00">
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr class="item-row">
+                                <td class="text-center fw-bold index-column text-muted">1</td>
+                                <td>
+                                    <select name="items[0][product_id]" class="form-select product-select select2">
+                                        <option value="">-- Select Product --</option>
+                                        <?php foreach ($products as $product): ?>
+                                            <option value="<?= $product['id'] ?>" data-hsn="<?= $product['hsn_code'] ?>"
+                                                data-rate="<?= $product['selling_price'] ?>"
+                                                data-gst="<?= $product['tax_percentage'] ?>">
+                                                <?= esc($product['product_name']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <input type="hidden" name="items[0][description]">
                                 </td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td colspan="6" class="text-end">
-                                    <div class="input-group input-group-sm justify-content-end"
-                                        style="width: 250px; float: right;">
-                                        <span class="input-group-text">Discount</span>
-                                        <select name="discount_type" id="discount_type"
-                                            class="form-select form-select-sm" style="max-width: 80px;"
-                                            onchange="calculateTotals()">
-                                            <option value="Fixed" <?= ($invoice['discount_type'] ?? '') == 'Fixed' ? 'selected' : '' ?>>₹</option>
-                                            <option value="Percentage" <?= ($invoice['discount_type'] ?? '') == 'Percentage' ? 'selected' : '' ?>>%</option>
-                                        </select>
-                                        <input type="number" name="discount_amount" id="discount_amount"
-                                            class="form-control form-control-sm"
-                                            value="<?= $invoice['discount_amount'] ?? 0 ?>" min="0" step="0.01"
-                                            onchange="calculateTotals()">
-                                    </div>
+                                <td><input type="text" name="items[0][hsn_code]" class="form-control text-center hsn"></td>
+                                <td><input type="number" name="items[0][quantity]" class="form-control text-end qty" value="1" step="0.01" min="0.01" required onchange="calculateRow(this)"></td>
+                                <td><input type="number" name="items[0][rate]" class="form-control text-end rate" value="0" step="0.01" min="0" required onchange="calculateRow(this)"></td>
+                                <td>
+                                    <select name="items[0][tax_percentage]" class="form-select text-end gst" onchange="calculateRow(this)">
+                                        <option value="0">0%</option>
+                                        <?php foreach ($taxes as $tax): ?>
+                                            <option value="<?= $tax['percentage'] ?>">
+                                                <?= $tax['percentage'] ?>%
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <input type="hidden" name="items[0][tax_type]" class="tax_type" value="CGST_SGST">
                                 </td>
-                                <td><input type="text" id="calculatedDiscount" class="form-control text-danger" readonly
-                                        value="0.00"></td>
-                                <td></td>
+                                <td><input type="text" class="form-control text-end fw-bold amount" readonly value="0.00"></td>
+                                <td class="text-center"><button type="button" class="btn btn-sm text-danger p-0" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
                             </tr>
-                            <tbody id="taxBreakdownBody">
-                                <!-- Dynamic tax rows -->
-                            </tbody>
-                            <tr>
-                                <td colspan="6" class="text-end">Total Tax:</td>
-                                <td><input type="text" id="taxAmount" class="form-control" readonly value="0.00"></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td colspan="6" class="text-end">Shipping Charges:</td>
-                                <td><input type="number" name="shipping_charge" id="shipping_charge"
-                                        class="form-control" value="<?= $invoice['shipping_charge'] ?? 0 ?>" min="0"
-                                        step="0.01" onchange="calculateTotals()"></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td colspan="6" class="text-end">Roundoff:</td>
-                                <td><input type="number" name="roundoff_amount" id="roundoff_amount"
-                                        class="form-control" value="<?= $invoice['roundoff_amount'] ?? 0 ?>" step="0.01"
-                                        onchange="calculateTotals()"></td>
-                                <td></td>
-                            </tr>
-                            <tr class="table-primary">
-                                <td colspan="6" class="text-end fw-bold fs-5">Total:</td>
-                                <td><input type="text" id="totalAmount" name="total_amount"
-                                        class="form-control fw-bold fs-5" readonly value="0.00"></td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- Notes and Terms -->
-        <div class="card card-outline card-info">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">Notes</label>
-                            <textarea name="notes" class="form-control" rows="3"
-                                placeholder="Notes for the customer..."><?= $invoice['notes'] ?? '' ?></textarea>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">Terms & Conditions</label>
-                            <textarea name="terms" class="form-control" rows="3"
-                                placeholder="Terms for the customer..."><?= $invoice['terms'] ?? '1. Goods once sold cannot be taken back or exchanged.
+        <!-- FOOTER: Notes & Summary -->
+        <div class="row g-0">
+            <!-- LEFT: Notes -->
+            <div class="col-md-7 border-end border-secondary-subtle p-3 d-flex flex-column">
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea name="notes" class="form-control bg-light" rows="3" placeholder="Add notes..."><?= $invoice['notes'] ?? '' ?></textarea>
+                </div>
+                <div class="mt-auto">
+                    <label class="form-label">Terms & Conditions</label>
+                    <textarea name="terms" class="form-control bg-light" rows="3" placeholder="Terms..."><?= $invoice['terms'] ?? '1. Goods once sold cannot be taken back or exchanged.
 2. Please verify the items at the time of delivery.' ?></textarea>
-                        </div>
-                    </div>
+                </div>
+            </div>
+            
+            <!-- RIGHT: Summary -->
+            <div class="col-md-5">
+                <table class="table table-borderless gst-summary-table mb-0 w-100">
+                    <tr>
+                        <td width="50%" class="gst-summary-label">Taxable Subtotal</td>
+                        <td width="50%"><input type="text" id="subtotal" class="form-control text-end fw-bold bg-light" readonly value="0.00"></td>
+                    </tr>
+                    <tr>
+                        <td class="gst-summary-label align-middle">Less: Discount</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <input type="number" step="1" name="discount_amount" id="discount_amount" class="form-control text-end" value="<?= $invoice['discount_amount'] ?? 0 ?>" min="0" onchange="calculateTotals()">
+                                <select name="discount_type" id="discount_type" class="form-select flex-shrink-0" style="width: 48px; padding: 2px;" onchange="calculateTotals()">
+                                    <option value="Percentage" <?= (!isset($invoice) || empty($invoice['discount_type']) || $invoice['discount_type'] == 'Percentage') ? 'selected' : '' ?>>%</option>
+                                    <option value="Fixed" <?= (isset($invoice) && $invoice['discount_type'] == 'Fixed') ? 'selected' : '' ?>>₹</option>
+                                </select>
+                                <input type="text" id="calculatedDiscount" class="form-control text-end text-danger bg-light flex-shrink-0" readonly value="0.00" style="width: 70px;">
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tbody id="taxBreakdownBody">
+                        <!-- JS injected tax rows -->
+                    </tbody>
+
+                    <tr>
+                        <td class="gst-summary-label border-top border-secondary-subtle">Total Tax</td>
+                        <td class="border-top border-secondary-subtle"><input type="text" id="taxAmount" class="form-control text-end fw-bold bg-light" readonly value="0.00"></td>
+                    </tr>
+                    <tr>
+                        <td class="gst-summary-label">Add: Shipping</td>
+                        <td><input type="number" name="shipping_charge" id="shipping_charge" class="form-control text-end" value="<?= $invoice['shipping_charge'] ?? 0 ?>" min="0" step="0.01" onchange="calculateTotals()"></td>
+                    </tr>
+                    <tr>
+                        <td class="gst-summary-label">Round Off</td>
+                        <td><input type="number" name="roundoff_amount" id="roundoff_amount" class="form-control text-end bg-light" value="<?= $invoice['roundoff_amount'] ?? 0 ?>" step="0.01" readonly></td>
+                    </tr>
+                    <tr class="grand-total-row border-top border-secondary-subtle">
+                        <td class="py-3">Grand Total (₹)</td>
+                        <td class="py-3"><input type="text" id="totalAmount" name="total_amount" class="form-control text-end fw-bold bg-transparent border-0 fs-5" readonly value="0.00"></td>
+                    </tr>
+                </table>
+                <div class="p-3 text-end bg-light border-top border-secondary-subtle">
+                    <a href="<?= site_url('invoices') ?>" class="btn btn-secondary me-2">Cancel</a>
+                    <button type="submit" id="submitBtn" class="btn btn-dark fw-bold"><i class="fas fa-save me-1"></i> Save Invoice</button>
                 </div>
             </div>
         </div>
-
-        <!-- Submit Buttons -->
-        <div class="d-flex justify-content-end gap-2 mb-3">
-            <a href="<?= site_url('invoices') ?>" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
-            <button type="submit" id="submitBtn" class="btn btn-primary"><i class="fas fa-save"></i> Save
-                Invoice</button>
-        </div>
-    </form>
+    </div>
+</div>
+</form>
 </div>
 <?= $this->endSection() ?>
 
@@ -415,7 +450,7 @@
         // Validation: Check if customer is selected
         const customerId = $('#customerSelect').val();
         if (!customerId) {
-            toastr.error('Please select a customer first.');
+            alert('Please select a customer first.');
             $('#customerSelect').select2('open');
             return;
         }
@@ -592,9 +627,8 @@
             if (isInterState) {
                 taxBody.innerHTML += `
                 <tr>
-                    <td colspan="5" class="text-end">IGST (${rate}%):</td>
-                    <td><input type="text" class="form-control" readonly value="${amount.toFixed(2)}"></td>
-                    <td></td>
+                    <td class="gst-summary-label text-primary">Add: IGST (${rate}%)</td>
+                    <td><input type="text" class="form-control text-end text-primary fw-bold bg-light" readonly value="${amount.toFixed(2)}"></td>
                 </tr>
             `;
             } else {
@@ -602,23 +636,24 @@
                 const halfRate = rate / 2;
                 taxBody.innerHTML += `
                 <tr>
-                    <td colspan="5" class="text-end">CGST (${halfRate}%):</td>
-                    <td><input type="text" class="form-control" readonly value="${halfAmount.toFixed(2)}"></td>
-                    <td></td>
+                    <td class="gst-summary-label text-primary">Add: CGST (${halfRate}%)</td>
+                    <td><input type="text" class="form-control text-end text-primary fw-bold bg-light" readonly value="${halfAmount.toFixed(2)}"></td>
                 </tr>
                 <tr>
-                    <td colspan="5" class="text-end">SGST (${halfRate}%):</td>
-                    <td><input type="text" class="form-control" readonly value="${halfAmount.toFixed(2)}"></td>
-                    <td></td>
+                    <td class="gst-summary-label text-primary">Add: SGST (${halfRate}%)</td>
+                    <td><input type="text" class="form-control text-end text-primary fw-bold bg-light" readonly value="${halfAmount.toFixed(2)}"></td>
                 </tr>
             `;
             }
         });
 
         const shipping = parseFloat(document.getElementById('shipping_charge').value) || 0;
-        const roundoff = parseFloat(document.getElementById('roundoff_amount').value) || 0;
-
-        const netTotal = (grossSubtotal - totalDiscount) + totalTax + shipping + roundoff;
+        
+        const preRoundoffTotal = (grossSubtotal - totalDiscount) + totalTax + shipping;
+        const netTotal = Math.round(preRoundoffTotal);
+        const roundoff = netTotal - preRoundoffTotal;
+        
+        document.getElementById('roundoff_amount').value = roundoff.toFixed(2);
 
         document.getElementById('subtotal').value = grossSubtotal.toFixed(2);
         document.getElementById('calculatedDiscount').value = totalDiscount.toFixed(2);
@@ -964,13 +999,14 @@
 
             // 1. Visibility Logic (Instant)
             if (customerId) {
-                $('#lineItemsCard').slideDown();
+                $('#lineItemsOverlay').removeClass('active');
+                $('#customerAddressSection').slideDown();
                 // If specific invoice logic for tax/billing/shipping is needed here, add it
                 loadCustomerDetails(customerId);
             } else {
-                $('#lineItemsCard').slideUp();
+                $('#lineItemsOverlay').addClass('active');
                 $('#taxModeIndicator').hide();
-                $('#customerAddressSection').hide();
+                $('#customerAddressSection').slideUp();
                 $('#billingAddressDisplay').text('');
                 $('#shippingAddressDisplay').text('');
             }
@@ -1003,7 +1039,7 @@
             // Validation: Check if customer is selected
             const customerId = $('#customerSelect').val();
             if (!customerId) {
-                toastr.error('Please select a customer first.');
+                alert('Please select a customer first.');
                 $('#customerSelect').select2('open');
                 return;
             }
@@ -1023,18 +1059,18 @@
                     if (response.success && response.data) {
                         addProductByBarcode(response.data);
                         $input.val('').focus(); // Clear and keep focus for next scan
-                        toastr.success('Item added: ' + response.data.product_name);
+                        alert('Item added: ' + response.data.product_name);
                     } else {
-                        toastr.error('Product not found for barcode: ' + barcode);
+                        alert('Product not found for barcode: ' + barcode);
                         $input.select();
                     }
                 },
                 error: function (xhr) {
                     // Check for 404
                     if (xhr.status === 404) {
-                        toastr.error('Product not found for barcode: ' + barcode);
+                        alert('Product not found for barcode: ' + barcode);
                     } else {
-                        toastr.error('Error searching for barcode');
+                        alert('Error searching for barcode');
                     }
                     $input.select();
                 },
@@ -1060,7 +1096,7 @@
         if ($select.find(`option[value="${product.id}"]`).length > 0) {
             $select.val(product.id).trigger('change');
         } else {
-            toastr.warning('Product found but not in list. Please check active status.');
+            alert('Product found but not in list. Please check active status.');
         }
     }
 </script>

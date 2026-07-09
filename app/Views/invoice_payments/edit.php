@@ -10,7 +10,7 @@
             <ol class="breadcrumb float-sm-end">
                 <li class="breadcrumb-item"><a href="<?= base_url('dashboard') ?>">Home</a></li>
                 <li class="breadcrumb-item"><a href="<?= base_url('invoice_payments') ?>">Customer Receipts</a></li>
-                <li class="breadcrumb-item active">Edit Receipt</li>
+                <li class="breadcrumb-item active"><?= lang("App.edit") ?> Receipt</li>
             </ol>
         </div>
     </div>
@@ -133,7 +133,7 @@
                         </div>
                     </div>
                     <div class="card-footer d-flex justify-content-end gap-2">
-                        <a href="<?= site_url('invoice_payments/view/' . $payment['id']) ?>" class="btn btn-secondary">Cancel</a>
+                        <a href="<?= site_url('invoice_payments/view/' . $payment['id']) ?>" class="btn btn-secondary"><?= lang("App.cancel") ?></a>
                         <button type="submit" class="btn btn-warning">Update Receipt</button>
                     </div>
                 </form>

@@ -158,8 +158,8 @@
             </div>
         </div>
         <div class="card-footer text-end">
-            <button type="submit" class="btn btn-primary">Save Sales Return</button>
-            <a href="<?= site_url('sales_returns') ?>" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Sales Return</button>
+            <a href="<?= site_url('sales_returns') ?>" class="btn btn-secondary"><?= lang("App.cancel") ?></a>
         </div>
     </form>
 </div>

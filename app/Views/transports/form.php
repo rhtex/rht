@@ -1,6 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($transport) ? 'Edit Transport' : 'Add New Transport' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($transport) ? '<?= lang("App.edit") ?> Transport' : '<?= lang("App.add_new") ?> Transport' ?><?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <div class="content-header">
@@ -80,7 +80,7 @@
                     </div>
                     <div class="mt-3">
                         <button type="submit" class="btn btn-primary"><?= $isEdit ? 'Update' : 'Save' ?></button>
-                        <a href="<?= site_url('transports') ?>" class="btn btn-secondary">Cancel</a>
+                        <a href="<?= site_url('transports') ?>" class="btn btn-secondary"><?= lang("App.cancel") ?></a>
                     </div>
                 </form>
             </div>

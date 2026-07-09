@@ -1,14 +1,14 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($customer) ? 'Edit Customer' : 'Add New Customer' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($customer) ? '<?= lang("App.edit") ?> Customer' : '<?= lang("App.add_new") ?> Customer' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1><?= isset($customer) ? 'Edit Customer' : 'Add New Customer' ?></h1>
+        <h1><?= isset($customer) ? '<?= lang("App.edit") ?> Customer' : '<?= lang("App.add_new") ?> Customer' ?></h1>
     </div>
     <div class="col-sm-6">
-        <a href="<?= site_url('customers') ?>" class="btn btn-secondary float-sm-end">Back</a>
+        <a href="<?= site_url('customers') ?>" class="btn btn-secondary float-sm-end"><?= lang("App.back") ?></a>
     </div>
 </div>
 <?= $this->endSection() ?>

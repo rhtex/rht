@@ -1,6 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?>Edit Product<?= $this->endSection() ?>
+<?= $this->section('title') ?><?= lang("App.edit") ?> Product<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
@@ -88,7 +88,7 @@
         </div>
         <div class="card-footer">
             <button type="submit" class="btn btn-warning">Update Product</button>
-            <a href="<?= site_url('products') ?>" class="btn btn-secondary">Cancel</a>
+            <a href="<?= site_url('products') ?>" class="btn btn-secondary"><?= lang("App.cancel") ?></a>
         </div>
     </form>
 </div>

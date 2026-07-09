@@ -1,8 +1,8 @@
 <?= $this->extend('layouts/master') ?>
-<?= $this->section('title') ?><?= isset($isEdit) ? 'Edit Dyeing Receipt' : 'Receive Dyed Yarn Stock' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($isEdit) ? '<?= lang("App.edit") ?> Dyeing Receipt' : 'Receive Dyed Yarn Stock' ?><?= $this->endSection() ?>
 <?= $this->section('header') ?>
 <div class="row mb-2">
-    <div class="col-sm-6"><h1><?= isset($isEdit) ? 'Edit Dyeing Receipt' : 'Receive Dyed Yarn' ?> (Against DC: <?= esc($dc['dc_number']) ?>)</h1></div>
+    <div class="col-sm-6"><h1><?= isset($isEdit) ? '<?= lang("App.edit") ?> Dyeing Receipt' : 'Receive Dyed Yarn' ?> (Against DC: <?= esc($dc['dc_number']) ?>)</h1></div>
     <div class="col-sm-6 text-end"><a href="<?= site_url('production/yarn-dyeing/view/'.$dc['id']) ?>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a></div>
 </div>
 <?= $this->endSection() ?>

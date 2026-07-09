@@ -45,7 +45,7 @@
                     </li>
                 </ul>
 
-                <a href="<?= site_url('employees/edit/' . $employee['id']) ?>" class="btn btn-primary d-block"><b>Edit Profile</b></a>
+                <a href="<?= site_url('employees/edit/' . $employee['id']) ?>" class="btn btn-primary d-block"><b><?= lang("App.edit") ?> Profile</b></a>
             </div>
         </div>
 
@@ -120,7 +120,7 @@
                                     <?php endif; ?>
                                     <?php if ($employee['address_proof_back_image']): ?>
                                     <div class="col-6 text-center">
-                                        <small>Back</small><br>
+                                        <small><?= lang("App.back") ?></small><br>
                                         <a href="<?= base_url($employee['address_proof_back_image']) ?>" target="_blank">
                                             <img src="<?= base_url($employee['address_proof_back_image']) ?>" class="img-thumbnail" style="max-height: 100px;">
                                         </a>

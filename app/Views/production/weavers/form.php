@@ -1,14 +1,14 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($weaver) ? 'Edit Weaver' : 'Add New Weaver' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($weaver) ? '<?= lang("App.edit") ?> Weaver' : '<?= lang("App.add_new") ?> Weaver' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1><?= isset($weaver) ? 'Edit Weaver' : 'Add New Weaver' ?></h1>
+        <h1><?= isset($weaver) ? '<?= lang("App.edit") ?> Weaver' : '<?= lang("App.add_new") ?> Weaver' ?></h1>
     </div>
     <div class="col-sm-6">
-        <a href="<?= site_url('production/weavers') ?>" class="btn btn-secondary float-sm-end">Back</a>
+        <a href="<?= site_url('production/weavers') ?>" class="btn btn-secondary float-sm-end"><?= lang("App.back") ?></a>
     </div>
 </div>
 <?= $this->endSection() ?>

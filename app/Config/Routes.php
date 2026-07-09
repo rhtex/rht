@@ -13,9 +13,10 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
 
 
 
-// Dashboard protected group
-$routes->group('', ['filter' => 'auth'], function ($routes) {
-    $routes->get('dashboard', 'Home::index');
+    // Dashboard protected group
+    $routes->group('', ['filter' => 'auth'], function ($routes) {
+        $routes->get('dashboard', 'Home::index');
+        $routes->get('dashboard/chart-data', 'Home::getChartData');
 
 
     // Profile
@@ -681,7 +682,22 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('production/looms/store', 'LoomController::store', ['filter' => 'permission:weaver.edit']);
     $routes->post('production/looms/update/(:num)', 'LoomController::update/$1', ['filter' => 'permission:weaver.edit']);
     $routes->post('production/looms/delete/(:num)', 'LoomController::delete/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->get('production/looms/view/(:num)', 'LoomController::view/$1', ['filter' => 'permission:weaver.view']);
     $routes->get('production/looms/by-weaver/(:num)', 'LoomController::getLoomsByWeaver/$1', ['filter' => 'permission:weaver.view']);
+
+    // Loom Ledgers
+    $routes->post('production/loom-ledgers/store', 'LoomLedgerController::store', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/loom-ledgers/update/(:num)', 'LoomLedgerController::update/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/loom-ledgers/delete/(:num)', 'LoomLedgerController::delete/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/loom-ledgers/payment/(:num)', 'LoomLedgerController::addPayment/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/loom-ledgers/reverse/(:num)', 'LoomLedgerController::reverseTransaction/$1', ['filter' => 'permission:weaver.edit']);
+
+    // Weaver Personal Ledgers
+    $routes->post('production/weaver-ledgers/store', 'WeaverLedgerController::store', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/weaver-ledgers/update/(:num)', 'WeaverLedgerController::update/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/weaver-ledgers/delete/(:num)', 'WeaverLedgerController::delete/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/weaver-ledgers/payment/(:num)', 'WeaverLedgerController::addPayment/$1', ['filter' => 'permission:weaver.edit']);
+    $routes->post('production/weaver-ledgers/reverse/(:num)', 'WeaverLedgerController::reverseTransaction/$1', ['filter' => 'permission:weaver.edit']);
 
     // Warp & Weft Allocation
     $routes->get('production/warp-allocations', 'WarpAllocationController::index', ['filter' => 'permission:warp_allocation.view']);

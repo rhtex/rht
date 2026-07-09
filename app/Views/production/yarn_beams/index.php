@@ -215,7 +215,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= lang("App.cancel") ?></button>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Beam</button>
                 </div>
             </form>

@@ -47,7 +47,7 @@
 
     <div class="row mt-3">
         <div class="col-12">
-            <button type="submit" class="btn btn-primary">Save Permissions</button>
+            <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Permissions</button>
         </div>
     </div>
 </form>

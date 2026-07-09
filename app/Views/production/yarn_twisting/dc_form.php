@@ -1,8 +1,8 @@
 <?= $this->extend('layouts/master') ?>
-<?= $this->section('title') ?><?= isset($dc) ? 'Edit Twisting DC' : 'Create Twisting DC' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($dc) ? '<?= lang("App.edit") ?> Twisting DC' : 'Create Twisting DC' ?><?= $this->endSection() ?>
 <?= $this->section('header') ?>
 <div class="row mb-2">
-    <div class="col-sm-6"><h1><?= isset($dc) ? 'Edit Twisting DC' : 'New Twisting DC' ?></h1></div>
+    <div class="col-sm-6"><h1><?= isset($dc) ? '<?= lang("App.edit") ?> Twisting DC' : 'New Twisting DC' ?></h1></div>
     <div class="col-sm-6 text-end"><a href="<?= site_url('production/yarn-twisting') ?>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a></div>
 </div>
 <?= $this->endSection() ?>

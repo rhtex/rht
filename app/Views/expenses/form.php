@@ -1,11 +1,11 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($expense) ? 'Edit Expense' : 'Add New Expense' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($expense) ? '<?= lang("App.edit") ?> Expense' : '<?= lang("App.add_new") ?> Expense' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1><?= isset($expense) ? 'Edit Expense' : 'Add New Expense' ?></h1>
+        <h1><?= isset($expense) ? '<?= lang("App.edit") ?> Expense' : '<?= lang("App.add_new") ?> Expense' ?></h1>
     </div>
     <div class="col-sm-6">
         <a href="<?= site_url('expenses') ?>" class="btn btn-secondary float-sm-end">
@@ -18,7 +18,7 @@
 <?= $this->section('content') ?>
 <div class="card card-outline card-primary">
     <div class="card-header">
-        <h3 class="card-title"><?= isset($expense) ? 'Edit Expense Details' : 'New Expense Details' ?></h3>
+        <h3 class="card-title"><?= isset($expense) ? '<?= lang("App.edit") ?> Expense Details' : 'New Expense Details' ?></h3>
     </div>
     <form action="<?= isset($expense) ? site_url('expenses/update/'.$expense['id']) : site_url('expenses/store') ?>" method="post">
         <?= csrf_field() ?>

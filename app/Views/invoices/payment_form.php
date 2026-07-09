@@ -138,8 +138,8 @@
                         </div>
                     </div>
                     <div class="card-footer d-flex justify-content-end gap-2">
-                        <a href="<?= site_url('invoices/view/' . $invoice['id']) ?>" class="btn btn-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-success">Save Receipt</button>
+                        <a href="<?= site_url('invoices/view/' . $invoice['id']) ?>" class="btn btn-secondary"><?= lang("App.cancel") ?></a>
+                        <button type="submit" class="btn btn-success"><?= lang("App.save") ?> Receipt</button>
                     </div>
                 </form>
             </div>

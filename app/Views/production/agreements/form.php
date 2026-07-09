@@ -1,14 +1,14 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($agreement) ? 'Edit Agreement' : 'Add New Agreement' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($agreement) ? '<?= lang("App.edit") ?> Agreement' : '<?= lang("App.add_new") ?> Agreement' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1><?= isset($agreement) ? 'Edit Agreement' : 'Add New Agreement' ?></h1>
+        <h1><?= isset($agreement) ? '<?= lang("App.edit") ?> Agreement' : '<?= lang("App.add_new") ?> Agreement' ?></h1>
     </div>
     <div class="col-sm-6">
-        <a href="<?= site_url('production/agreements') ?>" class="btn btn-secondary float-sm-end">Back</a>
+        <a href="<?= site_url('production/agreements') ?>" class="btn btn-secondary float-sm-end"><?= lang("App.back") ?></a>
     </div>
 </div>
 <?= $this->endSection() ?>

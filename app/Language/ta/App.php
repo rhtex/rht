@@ -23,6 +23,7 @@ return [
     'add_new'       => 'புதியதை சேர்', // Add New - Puthiyathai Ser
     'create'        => 'உருவாக்கு', // Create - Uruvakku
     'edit'          => 'திருத்து', // Edit - Thiruthu
+    'view'          => 'காண்க', // View - Kaanka
     'delete'        => 'நீக்கு', // Delete - Neekku
     'save'          => 'சேமி', // Save - Semi
     'update'        => 'புதுப்பி', // Update - Puthuppi

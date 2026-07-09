@@ -1,14 +1,14 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($category) ? 'Edit Category' : 'Add New Category' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($category) ? '<?= lang("App.edit") ?> Category' : '<?= lang("App.add_new") ?> Category' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1><?= isset($category) ? 'Edit Category' : 'Add New Category' ?></h1>
+        <h1><?= isset($category) ? '<?= lang("App.edit") ?> Category' : '<?= lang("App.add_new") ?> Category' ?></h1>
     </div>
     <div class="col-sm-6">
-        <a href="<?= site_url('expense_categories') ?>" class="btn btn-secondary float-sm-end">Back</a>
+        <a href="<?= site_url('expense_categories') ?>" class="btn btn-secondary float-sm-end"><?= lang("App.back") ?></a>
     </div>
 </div>
 <?= $this->endSection() ?>
@@ -45,7 +45,7 @@
             </div>
         </div>
         <div class="card-footer text-end">
-            <button type="submit" class="btn btn-primary">Save Category</button>
+            <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Category</button>
         </div>
     </form>
 </div>

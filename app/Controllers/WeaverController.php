@@ -34,6 +34,38 @@ class WeaverController extends BaseController
             return redirect()->to('production/weavers')->with('error', 'Weaver not found.');
         }
         $data['title'] = 'Weaver Details';
+
+        $loomModel = new \App\Models\WeaverLoomModel();
+        $data['looms'] = $loomModel->where('weaver_id', $id)->findAll();
+
+        $weaverLedgerModel = new \App\Models\WeaverLedgerModel();
+        $data['weaver_ledgers'] = $weaverLedgerModel->where('weaver_id', $id)->findAll();
+        
+        $weaverTxnModel = new \App\Models\WeaverLedgerTransactionModel();
+        $data['weaver_transactions'] = [];
+        foreach ($data['weaver_ledgers'] as $ledger) {
+            $data['weaver_transactions'][$ledger['id']] = $weaverTxnModel->where('ledger_id', $ledger['id'])->orderBy('transaction_date', 'DESC')->findAll();
+        }
+
+        // Consolidated Transactions (Loom + Weaver)
+        $db = \Config\Database::connect();
+        $builder = $db->table('weaver_ledger_transactions wlt');
+        $builder->select("wlt.transaction_date, wlt.transaction_type, wlt.amount, wlt.payment_method, wlt.reference_number, wlt.remarks, wl.title as ledger_name, 'Personal' as ledger_type");
+        $builder->join('weaver_ledgers wl', 'wl.id = wlt.ledger_id');
+        $builder->where('wl.weaver_id', $id);
+        
+        $builder2 = $db->table('loom_ledger_transactions llt');
+        $builder2->select("llt.transaction_date, llt.transaction_type, llt.amount, llt.payment_method, llt.reference_number, llt.remarks, ll.title as ledger_name, CONCAT('Loom ', l.loom_number) as ledger_type");
+        $builder2->join('loom_ledgers ll', 'll.id = llt.ledger_id');
+        $builder2->join('weaver_looms l', 'l.id = ll.loom_id');
+        $builder2->where('ll.weaver_id', $id);
+
+        $query = $db->query($builder->getCompiledSelect() . ' UNION ALL ' . $builder2->getCompiledSelect() . ' ORDER BY transaction_date DESC, ledger_name ASC');
+        $data['consolidated_txns'] = $query->getResultArray();
+
+        $settlementModel = new \App\Models\ProductionWeaverSettlementModel();
+        $data['settlements'] = $settlementModel->where('weaver_id', $id)->orderBy('settlement_date', 'DESC')->findAll();
+
         return view('production/weavers/view', $data);
     }
 

@@ -1,6 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?>Add New Loan<?= $this->endSection() ?>
+<?= $this->section('title') ?><?= lang("App.add_new") ?> Loan<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">

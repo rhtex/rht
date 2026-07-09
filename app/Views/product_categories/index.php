@@ -15,7 +15,7 @@
     <div class="col-md-4">
         <div class="card card-outline card-primary">
             <div class="card-header">
-                <h3 class="card-title">Add New Category</h3>
+                <h3 class="card-title"><?= lang("App.add_new") ?> Category</h3>
             </div>
             <div class="card-body">
                 <form action="<?= site_url('product_categories/store') ?>" method="post">
@@ -47,7 +47,7 @@
                             <option value="inactive">Inactive</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Save Category</button>
+                    <button type="submit" class="btn btn-primary w-100"><?= lang("App.save") ?> Category</button>
                 </form>
             </div>
         </div>

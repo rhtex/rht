@@ -1,11 +1,11 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($yarn) ? 'Edit Predefined Yarn' : 'Add Predefined Yarn' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($yarn) ? '<?= lang("App.edit") ?> Predefined Yarn' : 'Add Predefined Yarn' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1><?= isset($yarn) ? 'Edit Predefined Yarn' : 'Add Predefined Yarn' ?></h1>
+        <h1><?= isset($yarn) ? '<?= lang("App.edit") ?> Predefined Yarn' : 'Add Predefined Yarn' ?></h1>
     </div>
     <div class="col-sm-6 text-end">
         <a href="<?= site_url('production/yarns/master') ?>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>

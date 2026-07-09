@@ -1,14 +1,14 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($yarn) ? 'Edit Yarn Stock' : 'Add New Yarn Stock' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($yarn) ? '<?= lang("App.edit") ?> Yarn Stock' : '<?= lang("App.add_new") ?> Yarn Stock' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1><?= isset($yarn) ? 'Edit Yarn Stock' : 'Add New Yarn Stock' ?></h1>
+        <h1><?= isset($yarn) ? '<?= lang("App.edit") ?> Yarn Stock' : '<?= lang("App.add_new") ?> Yarn Stock' ?></h1>
     </div>
     <div class="col-sm-6">
-        <a href="<?= site_url('production/yarns') ?>" class="btn btn-secondary float-sm-end">Back</a>
+        <a href="<?= site_url('production/yarns') ?>" class="btn btn-secondary float-sm-end"><?= lang("App.back") ?></a>
     </div>
 </div>
 <?= $this->endSection() ?>

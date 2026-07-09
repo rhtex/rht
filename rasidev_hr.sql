@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 09, 2026 at 05:30 AM
+-- Generation Time: Jul 09, 2026 at 03:32 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -1803,6 +1803,66 @@ CREATE TABLE `loan_payments` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `loom_ledgers`
+--
+
+CREATE TABLE `loom_ledgers` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `loom_id` int(11) UNSIGNED NOT NULL,
+  `weaver_id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL COMMENT 'e.g. Purchase Advance, Maintenance Loan',
+  `principal_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `interest_rate` decimal(5,2) NOT NULL DEFAULT 0.00 COMMENT 'Flat percentage',
+  `total_amount_due` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `balance_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `status` enum('Active','Cleared') NOT NULL DEFAULT 'Active',
+  `created_by` int(11) UNSIGNED DEFAULT NULL,
+  `updated_by` int(11) UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `loom_ledgers`
+--
+
+INSERT INTO `loom_ledgers` (`id`, `loom_id`, `weaver_id`, `title`, `principal_amount`, `interest_rate`, `total_amount_due`, `balance_amount`, `status`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(1, 4, 1, 'Loom Purchase', 150000.00, 0.00, 150000.00, 150000.00, 'Active', 1, NULL, '2026-07-09 11:08:14', '2026-07-09 11:08:14'),
+(2, 4, 1, 'Jacquard Purchase', 150000.00, 0.00, 150000.00, 150000.00, 'Active', 1, NULL, '2026-07-09 11:08:14', '2026-07-09 11:08:14'),
+(3, 4, 1, 'Fitting Advance', 20000.00, 0.00, 20000.00, 20000.00, 'Active', 1, NULL, '2026-07-09 11:08:14', '2026-07-09 11:08:14');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `loom_ledger_transactions`
+--
+
+CREATE TABLE `loom_ledger_transactions` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `ledger_id` int(11) UNSIGNED NOT NULL,
+  `transaction_type` enum('Principal','Interest Addition','Payment','Reversal','Waiveoff') NOT NULL DEFAULT 'Payment',
+  `amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `payment_method` varchar(100) DEFAULT NULL COMMENT 'Cash, Bank Transfer, Automatic Deduction',
+  `reference_number` varchar(100) DEFAULT NULL,
+  `transaction_date` date DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  `created_by` int(11) UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `loom_ledger_transactions`
+--
+
+INSERT INTO `loom_ledger_transactions` (`id`, `ledger_id`, `transaction_type`, `amount`, `payment_method`, `reference_number`, `transaction_date`, `remarks`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Principal', 150000.00, NULL, NULL, '2026-07-09', 'Auto-generated Loom Purchase', 1, '2026-07-09 11:08:14', '2026-07-09 11:08:14'),
+(2, 2, 'Principal', 150000.00, NULL, NULL, '2026-07-09', 'Auto-generated Jacquard Purchase', 1, '2026-07-09 11:08:14', '2026-07-09 11:08:14'),
+(3, 3, 'Principal', 20000.00, NULL, NULL, '2026-07-09', 'Auto-generated Fitting Advance', 1, '2026-07-09 11:08:14', '2026-07-09 11:08:14');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `migrations`
 --
 
@@ -1932,7 +1992,11 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 (131, '2026-07-01-124836', 'App\\Database\\Migrations\\CreateColorsTable', 'default', 'App', 1782910142, 62),
 (132, '2026-07-08-143659', 'App\\Database\\Migrations\\RemoveZohoIntegration', 'default', 'App', 1783521731, 63),
 (134, '2026-07-09-024256', 'App\\Database\\Migrations\\AddWarpAllocationModule', 'default', 'App', 1783565036, 64),
-(135, '2026-07-09-025405', 'App\\Database\\Migrations\\AddLoomOwnershipFields', 'default', 'App', 1783565668, 65);
+(135, '2026-07-09-025405', 'App\\Database\\Migrations\\AddLoomOwnershipFields', 'default', 'App', 1783565668, 65),
+(136, '2026-07-09-105734', 'App\\Database\\Migrations\\CreateLoomLedgersTables', 'default', 'App', 1783594779, 66),
+(137, '2026-07-09-111111', 'App\\Database\\Migrations\\AlterLoomLedgerTransactionType', 'default', 'App', 1783595491, 67),
+(138, '2026-07-09-112446', 'App\\Database\\Migrations\\CreateWeaverLedgersTables', 'default', 'App', 1783596315, 68),
+(139, '2026-07-09-114438', 'App\\Database\\Migrations\\AddReferenceNumberToLedgerTransactions', 'default', 'App', 1783597505, 69);
 
 -- --------------------------------------------------------
 
@@ -4159,6 +4223,47 @@ INSERT INTO `weavers` (`id`, `name`, `code`, `phone`, `address`, `address_proof`
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `weaver_ledgers`
+--
+
+CREATE TABLE `weaver_ledgers` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `weaver_id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL COMMENT 'e.g. Festival Advance, Personal Loan',
+  `principal_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `interest_rate` decimal(5,2) NOT NULL DEFAULT 0.00 COMMENT 'Flat percentage',
+  `total_amount_due` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `balance_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `status` enum('Active','Cleared') NOT NULL DEFAULT 'Active',
+  `created_by` int(11) UNSIGNED DEFAULT NULL,
+  `updated_by` int(11) UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `weaver_ledger_transactions`
+--
+
+CREATE TABLE `weaver_ledger_transactions` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `ledger_id` int(11) UNSIGNED NOT NULL,
+  `transaction_type` enum('Principal','Interest Addition','Payment','Reversal','Waiveoff') NOT NULL DEFAULT 'Payment',
+  `amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `payment_method` varchar(100) DEFAULT NULL COMMENT 'e.g., Cash, Bank Transfer, Auto Deduction',
+  `reference_number` varchar(100) DEFAULT NULL,
+  `transaction_date` date DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  `created_by` int(11) UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `weaver_looms`
 --
 
@@ -4185,8 +4290,7 @@ CREATE TABLE `weaver_looms` (
 --
 
 INSERT INTO `weaver_looms` (`id`, `weaver_id`, `loom_number`, `contract_type`, `status`, `loom_owner`, `loom_cost`, `jacquard_owner`, `jacquard_cost`, `fitted_by`, `fitting_cost`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
-(1, 1, 'Loom 1', 'Job Work', 'Active', 'Weaver', 0.00, 'Weaver', 0.00, 'Weaver', 0.00, '2026-07-09 02:50:25', '2026-07-09 02:50:25', 1, NULL),
-(2, 1, 'Loom 2', 'Job Work', 'Active', 'Weaver', 0.00, 'Weaver', 0.00, 'Weaver', 0.00, '2026-07-09 02:50:30', '2026-07-09 02:50:30', 1, NULL);
+(4, 1, 'Loom 1', 'Job Work', 'Active', 'Company', 150000.00, 'Company', 150000.00, 'Company', 20000.00, '2026-07-09 11:08:14', '2026-07-09 11:08:14', 1, NULL);
 
 --
 -- Indexes for dumped tables
@@ -4371,6 +4475,21 @@ ALTER TABLE `loans`
 ALTER TABLE `loan_payments`
   ADD PRIMARY KEY (`id`),
   ADD KEY `loan_payments_loan_id_foreign` (`loan_id`);
+
+--
+-- Indexes for table `loom_ledgers`
+--
+ALTER TABLE `loom_ledgers`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `loom_ledgers_loom_id_foreign` (`loom_id`),
+  ADD KEY `loom_ledgers_weaver_id_foreign` (`weaver_id`);
+
+--
+-- Indexes for table `loom_ledger_transactions`
+--
+ALTER TABLE `loom_ledger_transactions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `loom_ledger_transactions_ledger_id_foreign` (`ledger_id`);
 
 --
 -- Indexes for table `migrations`
@@ -4846,6 +4965,20 @@ ALTER TABLE `weavers`
   ADD UNIQUE KEY `code` (`code`);
 
 --
+-- Indexes for table `weaver_ledgers`
+--
+ALTER TABLE `weaver_ledgers`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `weaver_ledgers_weaver_id_foreign` (`weaver_id`);
+
+--
+-- Indexes for table `weaver_ledger_transactions`
+--
+ALTER TABLE `weaver_ledger_transactions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `weaver_ledger_transactions_ledger_id_foreign` (`ledger_id`);
+
+--
 -- Indexes for table `weaver_looms`
 --
 ALTER TABLE `weaver_looms`
@@ -5001,10 +5134,22 @@ ALTER TABLE `loan_payments`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `loom_ledgers`
+--
+ALTER TABLE `loom_ledgers`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `loom_ledger_transactions`
+--
+ALTER TABLE `loom_ledger_transactions`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=140;
 
 --
 -- AUTO_INCREMENT for table `modules`
@@ -5385,10 +5530,22 @@ ALTER TABLE `weavers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `weaver_ledgers`
+--
+ALTER TABLE `weaver_ledgers`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `weaver_ledger_transactions`
+--
+ALTER TABLE `weaver_ledger_transactions`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `weaver_looms`
 --
 ALTER TABLE `weaver_looms`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
@@ -5492,6 +5649,19 @@ ALTER TABLE `loans`
 --
 ALTER TABLE `loan_payments`
   ADD CONSTRAINT `loan_payments_loan_id_foreign` FOREIGN KEY (`loan_id`) REFERENCES `loans` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `loom_ledgers`
+--
+ALTER TABLE `loom_ledgers`
+  ADD CONSTRAINT `loom_ledgers_loom_id_foreign` FOREIGN KEY (`loom_id`) REFERENCES `weaver_looms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `loom_ledgers_weaver_id_foreign` FOREIGN KEY (`weaver_id`) REFERENCES `weavers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `loom_ledger_transactions`
+--
+ALTER TABLE `loom_ledger_transactions`
+  ADD CONSTRAINT `loom_ledger_transactions_ledger_id_foreign` FOREIGN KEY (`ledger_id`) REFERENCES `loom_ledgers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `payments`
@@ -5710,6 +5880,18 @@ ALTER TABLE `users`
 ALTER TABLE `vendor_credits`
   ADD CONSTRAINT `vendor_credits_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `vendor_credits_vendor_id_foreign` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `weaver_ledgers`
+--
+ALTER TABLE `weaver_ledgers`
+  ADD CONSTRAINT `weaver_ledgers_weaver_id_foreign` FOREIGN KEY (`weaver_id`) REFERENCES `weavers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `weaver_ledger_transactions`
+--
+ALTER TABLE `weaver_ledger_transactions`
+  ADD CONSTRAINT `weaver_ledger_transactions_ledger_id_foreign` FOREIGN KEY (`ledger_id`) REFERENCES `weaver_ledgers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

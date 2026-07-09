@@ -87,8 +87,8 @@ Calendar & Tasks
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Reminder</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= lang("App.cancel") ?></button>
+                    <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Reminder</button>
                 </div>
             </form>
         </div>

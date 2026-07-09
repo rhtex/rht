@@ -1,11 +1,11 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($purchase) ? 'Edit Yarn Purchase' : 'Add Yarn Purchase' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($purchase) ? '<?= lang("App.edit") ?> Yarn Purchase' : 'Add Yarn Purchase' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1><?= isset($purchase) ? 'Edit Yarn Purchase' : 'Add Yarn Purchase' ?></h1>
+        <h1><?= isset($purchase) ? '<?= lang("App.edit") ?> Yarn Purchase' : 'Add Yarn Purchase' ?></h1>
     </div>
     <div class="col-sm-6 text-end">
         <a href="<?= site_url('production/yarn-purchases') ?>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>

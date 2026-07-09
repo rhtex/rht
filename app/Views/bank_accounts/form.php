@@ -1,11 +1,11 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($account) ? 'Edit Bank Account' : 'Add New Bank Account' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($account) ? '<?= lang("App.edit") ?> Bank Account' : '<?= lang("App.add_new") ?> Bank Account' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1><?= isset($account) ? 'Edit Bank Account' : 'Add New Bank Account' ?></h1>
+        <h1><?= isset($account) ? '<?= lang("App.edit") ?> Bank Account' : '<?= lang("App.add_new") ?> Bank Account' ?></h1>
     </div>
     <div class="col-sm-6">
         <a href="<?= site_url('bank_accounts') ?>" class="btn btn-secondary float-sm-end">
@@ -18,7 +18,7 @@
 <?= $this->section('content') ?>
 <div class="card card-outline card-primary">
     <div class="card-header">
-        <h3 class="card-title"><?= isset($account) ? 'Edit Account Details' : 'New Account Details' ?></h3>
+        <h3 class="card-title"><?= isset($account) ? '<?= lang("App.edit") ?> Account Details' : 'New Account Details' ?></h3>
     </div>
     <form action="<?= isset($account) ? site_url('bank_accounts/update/'.$account['id']) : site_url('bank_accounts/store') ?>" method="post">
         <?= csrf_field() ?>

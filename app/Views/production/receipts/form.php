@@ -96,7 +96,7 @@
                         </div>
                     </div>
                     <div class="card-footer text-end">
-                        <button type="submit" class="btn btn-primary">Save Receipt</button>
+                        <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Receipt</button>
                     </div>
                 </form>
             </div>

@@ -14,7 +14,13 @@ class Home extends BaseController
         $billModel = new \App\Models\BillModel();
         $userModel = new \App\Models\UserModel();
         $employeeModel = new \App\Models\EmployeeModel();
-        $returnModel = new \App\Models\ProductItemModel();
+        $quotationModel = new \App\Models\QuotationModel();
+        $salesOrderModel = new \App\Models\SalesOrderModel();
+        $returnModel = new \App\Models\SalesReturnModel();
+        $weaverModel = new \App\Models\WeaverModel();
+        $productionYarnModel = new \App\Models\ProductionYarnModel();
+        $yarnPurchaseModel = new \App\Models\YarnPurchaseModel();
+        $yarnWeavingDcModel = new \App\Models\YarnWeavingDcModel();
         $db = \Config\Database::connect();
 
         // 1. Basic Counts & Summary
@@ -40,21 +46,46 @@ class Home extends BaseController
             ->where('YEAR(bill_date)', $currentYear)
             ->get()->getRow()->total_amount ?? 0;
 
-        // 4. Profit & Margins
+        // 4. Accounts Receivable & Payable
+        $data['accountsReceivable'] = $invoiceModel->selectSum('total_amount')
+            ->whereIn('status', ['Unpaid', 'Partially Paid', 'Overdue'])
+            ->get()->getRow()->total_amount ?? 0;
+
+        $data['accountsPayable'] = $billModel->selectSum('total_amount')
+            ->whereIn('status', ['Unpaid', 'Partially Paid', 'Overdue'])
+            ->get()->getRow()->total_amount ?? 0;
+
         $data['totalProfit'] = $data['totalSales'] - $data['totalPurchases'];
         $data['profitMargin'] = ($data['totalSales'] > 0) ? ($data['totalProfit'] / $data['totalSales']) * 100 : 0;
 
-        // 5. Agent Commissions
-        $data['pendingCommissions'] = $invoiceModel->selectSum('agent_commission_amount')
-            ->where('agent_commission_status', 'Unpaid')
-            ->get()->getRow()->agent_commission_amount ?? 0;
+        // 5. Sales Funnel & Operational Metrics
+        $data['pendingQuotations'] = $quotationModel->whereIn('status', ['Draft', 'Sent'])->countAllResults();
+        $data['activeSalesOrders'] = $salesOrderModel->whereIn('status', ['Pending', 'Processing'])->countAllResults();
+        
+        $data['pendingReturns'] = 0;
+        try {
+            $data['pendingReturns'] = $returnModel->where('status', 'Pending')->countAllResults();
+        } catch (\Exception $e) {}
+
+        // 5b. Production Metrics
+        $data['totalWeavers'] = 0;
+        $data['totalYarnStock'] = 0;
+        $data['yarnPurchasedYTD'] = 0;
+        $data['pendingWeavingJobs'] = 0;
+        try {
+            $data['totalWeavers'] = $weaverModel->where('status', 'active')->countAllResults();
+            $data['totalYarnStock'] = $productionYarnModel->selectSum('stock_kg')->get()->getRow()->stock_kg ?? 0;
+            $data['yarnPurchasedYTD'] = $yarnPurchaseModel->selectSum('total_weight_kg')
+                ->where('YEAR(purchase_date)', $currentYear)
+                ->get()->getRow()->total_weight_kg ?? 0;
+            $data['pendingWeavingJobs'] = $yarnWeavingDcModel->whereIn('status', ['Open', 'Partially Received'])->countAllResults();
+        } catch (\Exception $e) {}
 
         // 6. Monthly Trend Data (Last 6 Months)
         $months = [];
         $salesTrend = [];
         $purchaseTrend = [];
         $profitTrend = [];
-        $returnTrend = [];
 
         for ($i = 5; $i >= 0; $i--) {
             $monthDay = date('Y-m', strtotime("-$i months"));
@@ -76,21 +107,14 @@ class Home extends BaseController
 
             // Profit per month
             $profitTrend[] = (float) ($sTotal - $pTotal);
-
-            // Returns per month
-            $returnCount = $returnModel->where("DATE_FORMAT(updated_at, '%Y-%m')", $monthDay)
-                ->where('status', 'rejected')
-                ->countAllResults();
-            $returnTrend[] = $returnCount;
         }
 
         $data['chartLabels'] = $months;
         $data['salesTrend'] = $salesTrend;
         $data['purchaseTrend'] = $purchaseTrend;
         $data['profitTrend'] = $profitTrend;
-        $data['returnTrend'] = $returnTrend;
 
-        // 7. Category Performance (Pie Chart)
+        // 7. Category Performance
         $data['categorySales'] = $db->table('invoice_items')
             ->select('product_categories.category_name as label, SUM(invoice_items.amount) as value')
             ->join('products', 'products.id = invoice_items.product_id')
@@ -100,8 +124,7 @@ class Home extends BaseController
             ->limit(5)
             ->get()->getResultArray();
 
-        // 8. Top Performance Metrics
-        // Top 5 Selling Products
+        // 8. Top Products
         $data['topProducts'] = $db->table('invoice_items')
             ->select('products.product_name, SUM(invoice_items.quantity) as total_qty, SUM(invoice_items.amount) as total_revenue')
             ->join('products', 'products.id = invoice_items.product_id')
@@ -110,7 +133,7 @@ class Home extends BaseController
             ->limit(5)
             ->get()->getResultArray();
 
-        // Top 5 Customers
+        // 9. Top Customers
         $data['topCustomers'] = $db->table('invoices')
             ->select('customers.name, COUNT(invoices.id) as total_orders, SUM(invoices.total_amount) as total_spent')
             ->join('customers', 'customers.id = invoices.customer_id')
@@ -120,13 +143,27 @@ class Home extends BaseController
             ->limit(5)
             ->get()->getResultArray();
 
-        // 7. Recent Lists
-        $data['recentInvoices'] = $invoiceModel->getInvoicesWithCustomer();
-        $data['recentInvoices'] = array_slice($data['recentInvoices'], 0, 5);
+        // 10. Recent Lists
+        $data['recentInvoices'] = $db->table('invoices')
+            ->select('invoices.*, customers.name as customer_name')
+            ->join('customers', 'customers.id = invoices.customer_id', 'left')
+            ->orderBy('invoices.created_at', 'DESC')
+            ->limit(5)
+            ->get()->getResultArray();
 
-        $data['recentBills'] = $billModel->getBillsWithVendor();
-        $data['recentBills'] = array_slice($data['recentBills'], 0, 5);
-
+        $data['recentBills'] = $db->table('bills')
+            ->select('bills.*, vendors.name as vendor_name')
+            ->join('vendors', 'vendors.id = bills.vendor_id', 'left')
+            ->orderBy('bills.created_at', 'DESC')
+            ->limit(5)
+            ->get()->getResultArray();
+            
+        $data['recentQuotations'] = $db->table('quotations')
+            ->select('quotations.*, customers.name as customer_name')
+            ->join('customers', 'customers.id = quotations.customer_id', 'left')
+            ->orderBy('quotations.created_at', 'DESC')
+            ->limit(5)
+            ->get()->getResultArray();
 
         return view('dashboard/index', $data);
     }
@@ -137,5 +174,100 @@ class Home extends BaseController
         $session->remove('lang');
         $session->set('lang', $locale);
         return redirect()->back();
+    }
+
+    public function getChartData()
+    {
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $billModel = new \App\Models\BillModel();
+        $filter = $this->request->getGet('filter') ?? '6m';
+
+        $months = [];
+        $salesTrend = [];
+        $purchaseTrend = [];
+        $profitTrend = [];
+
+        if ($filter == '6m' || $filter == '12m') {
+            $numMonths = ($filter == '12m') ? 11 : 5;
+            for ($i = $numMonths; $i >= 0; $i--) {
+                $monthDay = date('Y-m', strtotime("-$i months"));
+                $months[] = date('M Y', strtotime("-$i months"));
+
+                $sTotal = $invoiceModel->selectSum('total_amount')
+                    ->where("DATE_FORMAT(invoice_date, '%Y-%m')", $monthDay)
+                    ->whereNotIn('status', ['Void', 'Draft'])
+                    ->get()->getRow()->total_amount ?? 0;
+                $salesTrend[] = (float) $sTotal;
+
+                $pTotal = $billModel->selectSum('total_amount')
+                    ->where("DATE_FORMAT(bill_date, '%Y-%m')", $monthDay)
+                    ->whereNotIn('status', ['Void', 'Draft'])
+                    ->get()->getRow()->total_amount ?? 0;
+                $purchaseTrend[] = (float) $pTotal;
+
+                $profitTrend[] = (float) ($sTotal - $pTotal);
+            }
+        } elseif ($filter == 'fy') {
+            $currentMonth = (int)date('m');
+            $currentYear = (int)date('Y');
+            
+            if ($currentMonth < 4) {
+                $startYear = $currentYear - 2;
+            } else {
+                $startYear = $currentYear - 1;
+            }
+            
+            $start = mktime(0,0,0, 4, 1, $startYear);
+            
+            for ($i = 0; $i < 12; $i++) {
+                $loopTime = strtotime("+$i months", $start);
+                $monthDay = date('Y-m', $loopTime);
+                $months[] = date('M Y', $loopTime);
+
+                $sTotal = $invoiceModel->selectSum('total_amount')
+                    ->where("DATE_FORMAT(invoice_date, '%Y-%m')", $monthDay)
+                    ->whereNotIn('status', ['Void', 'Draft'])
+                    ->get()->getRow()->total_amount ?? 0;
+                $salesTrend[] = (float) $sTotal;
+
+                $pTotal = $billModel->selectSum('total_amount')
+                    ->where("DATE_FORMAT(bill_date, '%Y-%m')", $monthDay)
+                    ->whereNotIn('status', ['Void', 'Draft'])
+                    ->get()->getRow()->total_amount ?? 0;
+                $purchaseTrend[] = (float) $pTotal;
+
+                $profitTrend[] = (float) ($sTotal - $pTotal);
+            }
+        } elseif ($filter == 'compare') {
+            $currentMonthTime = time();
+            $lastYearMonthTime = strtotime("-1 year");
+            
+            $times = [$lastYearMonthTime, $currentMonthTime];
+            foreach ($times as $t) {
+                $monthDay = date('Y-m', $t);
+                $months[] = date('M Y', $t);
+                
+                $sTotal = $invoiceModel->selectSum('total_amount')
+                    ->where("DATE_FORMAT(invoice_date, '%Y-%m')", $monthDay)
+                    ->whereNotIn('status', ['Void', 'Draft'])
+                    ->get()->getRow()->total_amount ?? 0;
+                $salesTrend[] = (float) $sTotal;
+
+                $pTotal = $billModel->selectSum('total_amount')
+                    ->where("DATE_FORMAT(bill_date, '%Y-%m')", $monthDay)
+                    ->whereNotIn('status', ['Void', 'Draft'])
+                    ->get()->getRow()->total_amount ?? 0;
+                $purchaseTrend[] = (float) $pTotal;
+
+                $profitTrend[] = (float) ($sTotal - $pTotal);
+            }
+        }
+
+        return $this->response->setJSON([
+            'labels' => $months,
+            'sales' => $salesTrend,
+            'purchases' => $purchaseTrend,
+            'profit' => $profitTrend
+        ]);
     }
 }

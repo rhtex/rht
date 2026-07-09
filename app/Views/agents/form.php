@@ -1,6 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($agent) ? 'Edit Agent' : 'Add New Agent' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($agent) ? '<?= lang("App.edit") ?> Agent' : '<?= lang("App.add_new") ?> Agent' ?><?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <div class="content-header">
@@ -104,7 +104,7 @@
                     </div>
                     <div class="mt-3">
                         <button type="submit" class="btn btn-primary"><?= $isEdit ? 'Update' : 'Save' ?></button>
-                        <a href="<?= site_url('agents') ?>" class="btn btn-secondary">Cancel</a>
+                        <a href="<?= site_url('agents') ?>" class="btn btn-secondary"><?= lang("App.cancel") ?></a>
                     </div>
                 </form>
             </div>

@@ -102,23 +102,39 @@ class InvoiceController extends BaseController
             'status' => 'Draft'
         ];
 
+        $rawItems = $this->request->getPost('items') ?? [];
+        $items = [];
+        foreach ($rawItems as $item) {
+            $hasProduct = !empty($item['product_id']);
+            $hasDesc = !empty(trim($item['description'] ?? ''));
+            $qty = floatval($item['quantity'] ?? 0);
+            if (($hasProduct || $hasDesc) && $qty > 0) {
+                $items[] = $item;
+            }
+        }
+
+        if (empty($items)) {
+            $db->transRollback();
+            return redirect()->back()->withInput()->with('error', 'Please add at least one line item with quantity.');
+        }
+
         if (!$this->invoiceModel->insert($invoiceData)) {
+            $db->transRollback();
             return redirect()->back()->withInput()->with('errors', $this->invoiceModel->errors());
         }
 
         $invoiceId = $this->invoiceModel->getInsertID();
-        $items = $this->request->getPost('items');
 
         foreach ($items as $item) {
             $this->itemModel->insert([
                 'invoice_id' => $invoiceId,
-                'product_id' => $item['product_id'] ?: null,
-                'description' => $item['description'],
-                'hsn_code' => $item['hsn_code'],
-                'quantity' => $item['quantity'],
-                'rate' => $item['rate'],
-                'tax_percentage' => $item['tax_percentage'],
-                'amount' => $item['quantity'] * $item['rate']
+                'product_id' => !empty($item['product_id']) ? $item['product_id'] : null,
+                'description' => $item['description'] ?? '',
+                'hsn_code' => $item['hsn_code'] ?? '',
+                'quantity' => floatval($item['quantity']),
+                'rate' => floatval($item['rate']),
+                'tax_percentage' => floatval($item['tax_percentage'] ?? 0),
+                'amount' => floatval($item['quantity']) * floatval($item['rate'])
             ]);
         }
 
@@ -170,39 +186,7 @@ class InvoiceController extends BaseController
         }
 
         // --- ACCOUNTING LEDGER ---
-        $finalInvoice = $this->invoiceModel->find($invoiceId);
-        $invDate = $finalInvoice['invoice_date'];
-        $invRef = "Sale Invoice: " . $finalInvoice['invoice_number'];
-
-        // 1. Calculations for Ledger
-        $totalDiscount = 0;
-        if ($finalInvoice['discount_type'] == 'Percentage') {
-            $totalDiscount = ($finalInvoice['subtotal'] * $finalInvoice['discount_amount']) / 100;
-        } else {
-            $totalDiscount = $finalInvoice['discount_amount'];
-        }
-
-        // 2. Dr Accounts Receivable (Total amount due)
-        $this->accountingModel->postEntry('Accounts Receivable', $invDate, $finalInvoice['total_amount'], 0, $invRef, 'invoice', $invoiceId);
-
-        // 3. Dr Customer Discount (Expense - if any)
-        if ($totalDiscount > 0) {
-            $this->accountingModel->postEntry('Customer Discount', $invDate, $totalDiscount, 0, "Discount Allowed on $invRef", 'invoice', $invoiceId);
-        }
-
-        // 4. Cr Sales Income (Gross Subtotal)
-        $this->accountingModel->postEntry('Sales Income', $invDate, 0, $finalInvoice['subtotal'], $invRef, 'invoice', $invoiceId);
-
-        // 5. Cr GST Payable (Tax)
-        if ($finalInvoice['tax_amount'] > 0) {
-            $this->accountingModel->postEntry('GST Payable', $invDate, 0, $finalInvoice['tax_amount'], "GST on $invRef", 'invoice', $invoiceId);
-        }
-
-        // 6. Cr Shipping Income (If any)
-        if ($finalInvoice['shipping_charge'] > 0) {
-            // Need a shipping income account. I'll add it or post to Sales Income.
-            $this->accountingModel->postEntry('Sales Income', $invDate, 0, $finalInvoice['shipping_charge'], "Shipping handling for $invRef", 'invoice', $invoiceId);
-        }
+        $this->syncAccountingLedger($invoiceId);
         // ------------------------
 
         return redirect()->to('invoices/view/' . $invoiceId)->with('success', 'Invoice created successfully.');
@@ -271,22 +255,37 @@ class InvoiceController extends BaseController
             'updated_by' => session('user_id'),
         ];
 
+        $rawItems = $this->request->getPost('items') ?? [];
+        $items = [];
+        foreach ($rawItems as $item) {
+            $hasProduct = !empty($item['product_id']);
+            $hasDesc = !empty(trim($item['description'] ?? ''));
+            $qty = floatval($item['quantity'] ?? 0);
+            if (($hasProduct || $hasDesc) && $qty > 0) {
+                $items[] = $item;
+            }
+        }
+
+        if (empty($items)) {
+            $db->transRollback();
+            return redirect()->back()->withInput()->with('error', 'Please add at least one line item with quantity.');
+        }
+
         $this->invoiceModel->update($id, $invoiceData);
 
         // Update items
         $this->itemModel->where('invoice_id', $id)->delete();
-        $items = $this->request->getPost('items');
 
         foreach ($items as $item) {
             $this->itemModel->insert([
                 'invoice_id' => $id,
-                'product_id' => $item['product_id'] ?: null,
-                'description' => $item['description'],
-                'hsn_code' => $item['hsn_code'],
-                'quantity' => $item['quantity'],
-                'rate' => $item['rate'],
-                'tax_percentage' => $item['tax_percentage'],
-                'amount' => $item['quantity'] * $item['rate']
+                'product_id' => !empty($item['product_id']) ? $item['product_id'] : null,
+                'description' => $item['description'] ?? '',
+                'hsn_code' => $item['hsn_code'] ?? '',
+                'quantity' => floatval($item['quantity']),
+                'rate' => floatval($item['rate']),
+                'tax_percentage' => floatval($item['tax_percentage'] ?? 0),
+                'amount' => floatval($item['quantity']) * floatval($item['rate'])
             ]);
         }
 
@@ -339,6 +338,10 @@ class InvoiceController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update invoice.');
         }
 
+        // --- ACCOUNTING LEDGER ---
+        $this->syncAccountingLedger($id);
+        // ------------------------
+
         return redirect()->to('invoices/view/' . $id)->with('success', 'Invoice updated successfully.');
     }
 
@@ -358,6 +361,8 @@ class InvoiceController extends BaseController
         $db->transStart();
         $this->itemModel->where('invoice_id', $id)->delete();
         $this->invoiceModel->delete($id);
+        // Remove ledger entries
+        $this->accountingModel->deleteEntries('invoice', $id);
         $db->transComplete();
 
         if ($db->transStatus() === false) {
@@ -365,6 +370,62 @@ class InvoiceController extends BaseController
         }
 
         return redirect()->to('invoices')->with('success', 'Invoice deleted successfully.');
+    }
+
+    /**
+     * Synchronize double-entry accounting ledger entries for an invoice
+     */
+    private function syncAccountingLedger($invoiceId)
+    {
+        $finalInvoice = $this->invoiceModel->find($invoiceId);
+        if (!$finalInvoice) {
+            return;
+        }
+
+        // Clear existing entries for this invoice to prevent duplicates
+        $this->accountingModel->deleteEntries('invoice', $invoiceId);
+
+        $invDate = $finalInvoice['invoice_date'];
+        $invRef = "Sale Invoice: " . $finalInvoice['invoice_number'];
+
+        // 1. Calculations for Ledger
+        $totalDiscount = 0;
+        if ($finalInvoice['discount_type'] == 'Percentage') {
+            $totalDiscount = ($finalInvoice['subtotal'] * $finalInvoice['discount_amount']) / 100;
+        } else {
+            $totalDiscount = (float)$finalInvoice['discount_amount'];
+        }
+
+        // 2. Dr Accounts Receivable (Total amount due)
+        $this->accountingModel->postEntry('Accounts Receivable', $invDate, $finalInvoice['total_amount'], 0, $invRef, 'invoice', $invoiceId);
+
+        // 3. Dr Customer Discount (Expense - if any)
+        if ($totalDiscount > 0) {
+            $this->accountingModel->postEntry('Customer Discount', $invDate, $totalDiscount, 0, "Discount Allowed on $invRef", 'invoice', $invoiceId);
+        }
+
+        // 4. Cr Sales Income (Gross Subtotal)
+        $this->accountingModel->postEntry('Sales Income', $invDate, 0, $finalInvoice['subtotal'], $invRef, 'invoice', $invoiceId);
+
+        // 5. Cr GST Payable (Tax)
+        if ($finalInvoice['tax_amount'] > 0) {
+            $this->accountingModel->postEntry('GST Payable', $invDate, 0, $finalInvoice['tax_amount'], "GST on $invRef", 'invoice', $invoiceId);
+        }
+
+        // 6. Cr Shipping Income (If any)
+        if ($finalInvoice['shipping_charge'] > 0) {
+            $this->accountingModel->postEntry('Sales Income', $invDate, 0, $finalInvoice['shipping_charge'], "Shipping handling for $invRef", 'invoice', $invoiceId);
+        }
+
+        // 7. Round Off balancing entry
+        $roundoff = (float)($finalInvoice['roundoff_amount'] ?? 0);
+        if ($roundoff > 0) {
+            // Invoice total was rounded UP -> Credits need to match Debits
+            $this->accountingModel->postEntry('Round Off', $invDate, 0, abs($roundoff), "Round off on $invRef", 'invoice', $invoiceId);
+        } elseif ($roundoff < 0) {
+            // Invoice total was rounded DOWN -> Debits need to match Credits
+            $this->accountingModel->postEntry('Round Off', $invDate, abs($roundoff), 0, "Round off on $invRef", 'invoice', $invoiceId);
+        }
     }
 
     public function recordPayment($invoiceId)

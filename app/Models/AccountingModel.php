@@ -25,7 +25,22 @@ class AccountingModel extends Model
     {
         $db = \Config\Database::connect();
         $row = $db->table('accounts')->where('name', $name)->get()->getRowArray();
-        return $row ? $row['id'] : null;
+        if ($row) {
+            return $row['id'];
+        }
+
+        if ($name === 'Round Off') {
+            $db->table('accounts')->insert([
+                'name' => 'Round Off',
+                'type' => 'Expense',
+                'balance' => 0,
+                'status' => 'Active',
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+            return $db->insertID();
+        }
+
+        return null;
     }
 
     /**
@@ -85,5 +100,25 @@ class AccountingModel extends Model
         }
 
         $db->table('accounts')->where('id', $accountId)->update(['balance' => $balance]);
+    }
+
+    /**
+     * Delete all ledger entries for a given reference and update affected account balances
+     */
+    public function deleteEntries($refType, $refId)
+    {
+        $entries = $this->where('reference_type', $refType)->where('reference_id', $refId)->findAll();
+        if (empty($entries)) {
+            return true;
+        }
+
+        $accountIds = array_unique(array_column($entries, 'account_id'));
+        $this->where('reference_type', $refType)->where('reference_id', $refId)->delete();
+
+        foreach ($accountIds as $accId) {
+            $this->updateAccountBalance($accId);
+        }
+
+        return true;
     }
 }

@@ -438,7 +438,7 @@ class CustomerController extends BaseController
         return $this->response->setJSON([
             'status' => 'success',
             'state_id' => $stateId,
-            'is_inter_state' => ($stateId != $companyStateId),
+            'is_inter_state' => (!empty($stateId) && !empty($companyStateId) && $stateId != $companyStateId),
             'billing_address' => $billingText,
             'shipping_address' => $shippingText,
             'agent_id' => $customer['agent_id'] ?? null,

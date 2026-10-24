@@ -135,8 +135,12 @@ class WeaverController extends BaseController
         }
 
         $data['updated_by'] = session('user_id');
+        $data['id'] = $id;
 
-        $this->weaverModel->update($id, $data);
+        if (!$this->weaverModel->skipValidation(true)->update($id, $data)) {
+            return redirect()->back()->withInput()->with('errors', $this->weaverModel->errors() ?: ['Failed to update weaver.']);
+        }
+
         return redirect()->to('production/weavers')->with('success', 'Weaver updated successfully.');
     }
 

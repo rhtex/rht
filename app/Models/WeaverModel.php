@@ -23,10 +23,11 @@ class WeaverModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'name'   => 'required|min_length[3]|max_length[100]',
-        'code'   => 'permit_empty|is_unique[weavers.code,id,{id}]',
-        'phone'  => 'permit_empty|min_length[10]',
-        'status' => 'in_list[active,inactive]',
+        'name'     => 'required|min_length[3]|max_length[100]',
+        'code'     => 'permit_empty|is_unique[weavers.code,id,{id}]',
+        'phone'    => 'permit_empty|min_length[10]',
+        'location' => 'permit_empty',
+        'status'   => 'in_list[active,inactive]',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;

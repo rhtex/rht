@@ -35,16 +35,41 @@ class BillController extends BaseController
     public function index()
     {
         $filters = [
-            'vendor_id' => $this->request->getGet('vendor_id'),
-            'status' => $this->request->getGet('status'),
-            'date_from' => $this->request->getGet('date_from'),
-            'date_to' => $this->request->getGet('date_to'),
+            'bill_number' => $this->request->getGet('bill_number'),
+            'vendor_id'   => $this->request->getGet('vendor_id'),
+            'status'      => $this->request->getGet('status'),
+            'date_from'   => $this->request->getGet('date_from'),
+            'date_to'     => $this->request->getGet('date_to'),
         ];
 
         $data['bills'] = $this->billModel->getBillsWithVendor($filters);
         $data['vendors'] = $this->vendorModel->findAll();
         $data['filters'] = $filters;
-        $data['title'] = 'Bills';
+        $data['title'] = 'Purchase Bills';
+
+        $stats = [
+            'total'        => count($data['bills']),
+            'total_amount' => 0.0,
+            'paid_amount'  => 0.0,
+            'balance'      => 0.0,
+            'paid_count'   => 0,
+            'open_count'   => 0,
+            'overdue_count'=> 0,
+        ];
+        foreach ($data['bills'] as $b) {
+            $stats['total_amount'] += (float) ($b['total_amount'] ?? 0);
+            $stats['paid_amount']  += (float) ($b['paid_amount'] ?? 0);
+            $stats['balance']      += (float) ($b['balance'] ?? 0);
+            $st = $b['status'] ?? '';
+            if ($st === 'Paid') {
+                $stats['paid_count']++;
+            } elseif ($st === 'Overdue') {
+                $stats['overdue_count']++;
+            } elseif ($st === 'Open' || $st === 'Partially Paid') {
+                $stats['open_count']++;
+            }
+        }
+        $data['stats'] = $stats;
 
         return view('bills/index', $data);
     }
@@ -52,9 +77,9 @@ class BillController extends BaseController
     public function create()
     {
         $data['vendors'] = $this->vendorModel->findAll();
-        $data['products'] = $this->productModel->findAll();
+        $data['products'] = $this->productModel->getProductsWithCategory();
         $data['taxes'] = $this->taxModel->where('status', 'Active')->findAll();
-        $data['title'] = 'Create Bill';
+        $data['title'] = 'Create Purchase Bill';
         $data['bill'] = null;
 
         return view('bills/form', $data);
@@ -108,23 +133,36 @@ class BillController extends BaseController
         $isInterState = ($vendorStateId != $companyStateId);
 
         // Save bill items
-        $items = $this->request->getPost('items'); // Array of items
-        if ($items) {
-            foreach ($items as $item) {
-                $itemData = [
-                    'bill_id' => $billId,
-                    'product_id' => $item['product_id'] ?? null,
-                    'description' => $item['description'],
-                    'hsn_code' => $item['hsn_code'] ?? '',
-                    'quantity' => $item['quantity'],
-                    'rate' => $item['rate'],
-                    'tax_percentage' => $item['tax_percentage'] ?? 0,
-                ];
-
-                // Apply GST rates
-                $this->itemModel->applyGSTRates($itemData, $isInterState);
-                $this->itemModel->insert($itemData);
+        $rawItems = $this->request->getPost('items') ?? [];
+        $validItems = [];
+        foreach ($rawItems as $item) {
+            $hasProduct = !empty($item['product_id']);
+            $hasDesc = !empty(trim($item['description'] ?? ''));
+            $qty = floatval($item['quantity'] ?? 0);
+            if (($hasProduct || $hasDesc) && $qty > 0) {
+                $validItems[] = $item;
             }
+        }
+
+        if (empty($validItems)) {
+            $db->transRollback();
+            return redirect()->back()->withInput()->with('error', 'Please add at least one valid item with quantity and rate.');
+        }
+
+        foreach ($validItems as $item) {
+            $itemData = [
+                'bill_id'        => $billId,
+                'product_id'     => !empty($item['product_id']) ? $item['product_id'] : null,
+                'description'    => $item['description'] ?? '',
+                'hsn_code'       => $item['hsn_code'] ?? '',
+                'quantity'       => floatval($item['quantity']),
+                'rate'           => floatval($item['rate']),
+                'tax_percentage' => floatval($item['tax_percentage'] ?? 0),
+            ];
+
+            // Apply GST rates
+            $this->itemModel->applyGSTRates($itemData, $isInterState);
+            $this->itemModel->insert($itemData);
         }
 
         // Calculate GST and totals
@@ -195,7 +233,7 @@ class BillController extends BaseController
         }
 
         $data['vendors'] = $this->vendorModel->findAll();
-        $data['products'] = $this->productModel->findAll();
+        $data['products'] = $this->productModel->getProductsWithCategory();
         $data['taxes'] = $this->taxModel->where('status', 'Active')->findAll();
         $data['title'] = 'Edit Bill #' . $data['bill']['bill_number'];
 
@@ -247,23 +285,35 @@ class BillController extends BaseController
         $isInterState = ($vendorStateId != $companyStateId);
 
         // Re-save items
-        $items = $this->request->getPost('items');
-        if ($items) {
-            foreach ($items as $item) {
-                $itemData = [
-                    'bill_id' => $id,
-                    'product_id' => $item['product_id'] ?? null,
-                    'description' => $item['description'],
-                    'hsn_code' => $item['hsn_code'] ?? '',
-                    'quantity' => $item['quantity'],
-                    'rate' => $item['rate'],
-                    'tax_percentage' => $item['tax_percentage'] ?? 0,
-                    'tax_id' => $item['tax_id'] ?? null,
-                ];
-
-                $this->itemModel->applyGSTRates($itemData, $isInterState);
-                $this->itemModel->insert($itemData);
+        $rawItems = $this->request->getPost('items') ?? [];
+        $validItems = [];
+        foreach ($rawItems as $item) {
+            $hasProduct = !empty($item['product_id']);
+            $hasDesc = !empty(trim($item['description'] ?? ''));
+            $qty = floatval($item['quantity'] ?? 0);
+            if (($hasProduct || $hasDesc) && $qty > 0) {
+                $validItems[] = $item;
             }
+        }
+
+        if (empty($validItems)) {
+            $db->transRollback();
+            return redirect()->back()->withInput()->with('error', 'Please add at least one valid item with quantity and rate.');
+        }
+
+        foreach ($validItems as $item) {
+            $itemData = [
+                'bill_id'        => $id,
+                'product_id'     => !empty($item['product_id']) ? $item['product_id'] : null,
+                'description'    => $item['description'] ?? '',
+                'hsn_code'       => $item['hsn_code'] ?? '',
+                'quantity'       => floatval($item['quantity']),
+                'rate'           => floatval($item['rate']),
+                'tax_percentage' => floatval($item['tax_percentage'] ?? 0),
+            ];
+
+            $this->itemModel->applyGSTRates($itemData, $isInterState);
+            $this->itemModel->insert($itemData);
         }
 
         // Recalculate GST
@@ -422,9 +472,13 @@ class BillController extends BaseController
 
         $settingsModel = new \App\Models\SettingModel();
         $data = [
-            'bill' => $bill,
-            'settings' => $settingsModel->getAllSettings(),
-            'title' => 'Bill - ' . $bill['bill_number']
+            'bill'            => $bill,
+            'settings'        => $settingsModel->getAllSettings(),
+            'company_name'    => get_setting('app_name', 'RasiDev'),
+            'company_address' => get_setting('company_address', ''),
+            'company_gstin'   => get_setting('company_gstin', ''),
+            'company_contact' => get_setting('company_phone', ''),
+            'title'           => 'Purchase Bill - ' . $bill['bill_number']
         ];
 
         return view('bills/print', $data);

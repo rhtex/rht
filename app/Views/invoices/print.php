@@ -138,6 +138,15 @@
                 <?php if ($invoice['po_date']): ?>
                     <p><strong>P.O Date:</strong> <?= date('d/m/Y', strtotime($invoice['po_date'])) ?></p>
                 <?php endif; ?>
+                <?php if (!empty($invoice['so_number'])): ?>
+                    <p><strong>SO Number:</strong> <?= esc($invoice['so_number']) ?></p>
+                <?php endif; ?>
+                <?php if (!empty($invoice['so_date'])): ?>
+                    <p><strong>SO Date:</strong> <?= date('d/m/Y', strtotime($invoice['so_date'])) ?></p>
+                <?php endif; ?>
+                <?php if (!empty($invoice['selection_type'])): ?>
+                    <p><strong>Selection:</strong> <?= esc($invoice['selection_type']) ?></p>
+                <?php endif; ?>
                 <?php if ($invoice['transport_name']): ?>
                     <p><strong>Transport:</strong> <?= esc($invoice['transport_name']) ?></p>
                 <?php endif; ?>

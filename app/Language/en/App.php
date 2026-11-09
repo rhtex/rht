@@ -67,7 +67,7 @@ return [
     'quotations' => 'Quotations',
     'sales_orders' => 'Sales Orders',
     'invoices' => 'Invoices',
-    'invoice_tracking' => 'Invoice Tracking',
+    'invoice_tracking' => 'Parcel Tracking',
     'invoice_doc_tracking' => 'Invoice Doc Tracking',
     'sales_returns' => 'Sales Returns',
     'receipts' => 'Receipts',

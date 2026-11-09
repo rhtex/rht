@@ -37,6 +37,24 @@ class ExpenseController extends BaseController
         
         $data['title'] = 'Expense Management';
         $data['filters'] = $filters;
+
+        $stats = [
+            'total'        => count($data['expenses']),
+            'total_amount' => 0.0,
+            'cash_amount'  => 0.0,
+            'bank_amount'  => 0.0,
+        ];
+        foreach ($data['expenses'] as $exp) {
+            $amt = (float) ($exp['amount'] ?? 0);
+            $stats['total_amount'] += $amt;
+            $mode = strtolower($exp['payment_mode'] ?? '');
+            if (strpos($mode, 'cash') !== false) {
+                $stats['cash_amount'] += $amt;
+            } else {
+                $stats['bank_amount'] += $amt;
+            }
+        }
+        $data['stats'] = $stats;
         
         return view('expenses/index', $data);
     }

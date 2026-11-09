@@ -25,6 +25,7 @@
     <!-- Custom Sidebar Styles -->
     <link rel="stylesheet" href="<?= base_url('assets/css/sidebar_colors.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/custom.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/list-ui.css') ?>">
     <!-- DataTables -->
     <link href="https://cdn.datatables.net/v/bs5/dt-1.13.8/datatables.min.css" rel="stylesheet">
     <!-- Flatpickr (Datepicker) -->
@@ -138,5 +139,7 @@
         });
     </script>
     <?= $this->renderSection('scripts') ?>
+    <!-- List UI Enhancements -->
+    <script src="<?= base_url('assets/js/list-ui.js') ?>"></script>
 </body>
 </html>

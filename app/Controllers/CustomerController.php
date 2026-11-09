@@ -52,6 +52,9 @@ class CustomerController extends BaseController
         $data['title'] = 'Customer Management';
         $data['filters'] = $filters;
         $data['has_more'] = count($data['customers']) == $limit;
+        $data['totalCount'] = (new \App\Models\CustomerModel())->countAllResults();
+        $data['activeCount'] = (new \App\Models\CustomerModel())->where('status', 'active')->countAllResults();
+        $data['inactiveCount'] = (new \App\Models\CustomerModel())->where('status', 'inactive')->countAllResults();
 
         return view('customers/index', $data);
     }

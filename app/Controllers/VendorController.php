@@ -51,6 +51,9 @@ class VendorController extends BaseController
         $data['title'] = 'Vendor Management';
         $data['filters'] = $filters;
         $data['has_more'] = count($data['vendors']) == $limit;
+        $data['totalCount'] = (new \App\Models\VendorModel())->countAllResults();
+        $data['activeCount'] = (new \App\Models\VendorModel())->where('status', 'active')->countAllResults();
+        $data['inactiveCount'] = (new \App\Models\VendorModel())->where('status', 'inactive')->countAllResults();
 
         return view('vendors/index', $data);
     }

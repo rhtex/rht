@@ -57,7 +57,10 @@ class InvoiceModel extends Model
         'notes',
         'terms',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'so_number',
+        'so_date',
+        'selection_type'
     ];
 
     protected $useTimestamps = true;
@@ -71,6 +74,40 @@ class InvoiceModel extends Model
         'due_date' => 'required|valid_date',
     ];
 
+    // Callbacks
+    protected $allowCallbacks = true;
+    protected $beforeInsert   = ['autoMarkAsSentOnDelivery'];
+    protected $beforeUpdate   = ['autoMarkAsSentOnDelivery'];
+
+    /**
+     * Automatically mark invoice as Open (Sent) if delivery status is Booked, In Transit, or Delivered
+     */
+    protected function autoMarkAsSentOnDelivery(array $data)
+    {
+        if (!isset($data['data'])) {
+            return $data;
+        }
+
+        $triggerStatuses = ['Booked', 'In Transit', 'Delivered'];
+        if (isset($data['data']['delivery_status']) && in_array($data['data']['delivery_status'], $triggerStatuses)) {
+            if (isset($data['data']['status'])) {
+                if ($data['data']['status'] === 'Draft') {
+                    $data['data']['status'] = 'Open';
+                }
+            } else {
+                $id = is_array($data['id'] ?? null) ? ($data['id'][0] ?? null) : ($data['id'] ?? null);
+                if ($id) {
+                    $existing = $this->select('status')->find($id);
+                    if ($existing && $existing['status'] === 'Draft') {
+                        $data['data']['status'] = 'Open';
+                    }
+                }
+            }
+        }
+
+        return $data;
+    }
+
     /**
      * Get invoices with customer details
      */
@@ -79,6 +116,14 @@ class InvoiceModel extends Model
         $builder = $this->select('invoices.*, customers.name as customer_name, addresses.city as customer_city')
             ->join('customers', 'customers.id = invoices.customer_id', 'left')
             ->join('addresses', 'addresses.owner_id = customers.id AND addresses.owner_type = "customer" AND addresses.address_type = "billing" AND addresses.is_active = 1', 'left');
+
+        if (!empty($filters['invoice_number'])) {
+            $builder->like('invoices.invoice_number', trim($filters['invoice_number']));
+        }
+
+        if (!empty($filters['so_number'])) {
+            $builder->like('invoices.so_number', trim($filters['so_number']));
+        }
 
         if (!empty($filters['customer_id'])) {
             $builder->where('invoices.customer_id', $filters['customer_id']);

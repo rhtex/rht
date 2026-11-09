@@ -111,6 +111,11 @@ class AgentPaymentController extends BaseController
         $countBuilder = clone $builder;
         $totalResults = $countBuilder->countAllResults(false);
 
+        // Calculate total disbursed amount
+        $sumBuilder = clone $builder;
+        $sumResult = $sumBuilder->selectSum('agent_payments.amount', 'total_amount')->get()->getRowArray();
+        $totalAmount = (float)($sumResult['total_amount'] ?? 0);
+
         $payments = $builder->orderBy('agent_payments.payment_date', 'DESC')
                             ->orderBy('agent_payments.id', 'DESC')
                             ->get($limit, $offset)
@@ -121,6 +126,7 @@ class AgentPaymentController extends BaseController
             'payments'     => $payments,
             'agents'       => $this->agentModel->orderBy('agent_name', 'ASC')->findAll(),
             'total_count'  => $totalResults,
+            'total_amount' => $totalAmount,
             'filters'      => $filters,
             'limit'        => $limit,
             'offset'       => $offset,

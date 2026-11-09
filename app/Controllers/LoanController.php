@@ -32,6 +32,24 @@ class LoanController extends BaseController
         $data['employees'] = $this->employeeModel->where('status', 'active')->orderBy('first_name', 'ASC')->findAll();
         $data['title'] = 'Loans';
         $data['filters'] = $filters;
+
+        $stats = [
+            'total'          => count($data['loans']),
+            'total_amount'   => 0.0,
+            'remaining_total'=> 0.0,
+            'approved_count' => 0,
+            'pending_count'  => 0,
+        ];
+        foreach ($data['loans'] as $l) {
+            $stats['total_amount']    += (float) ($l['loan_amount'] ?? 0);
+            $stats['remaining_total'] += (float) ($l['remaining_amount'] ?? 0);
+            if (($l['status'] ?? '') === 'Approved') {
+                $stats['approved_count']++;
+            } elseif (($l['status'] ?? '') === 'Pending') {
+                $stats['pending_count']++;
+            }
+        }
+        $data['stats'] = $stats;
         
         return view('loans/index', $data);
     }

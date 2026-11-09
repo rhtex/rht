@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="row mb-2">
         <div class="col-sm-6">
-            <h1 class="m-0 text-dark"><?= $title ?></h1>
+            <h1 class="m-0 text-dark"><?= esc($title) ?></h1>
         </div>
         <div class="col-sm-6">
             <ol class="breadcrumb float-sm-end">
@@ -15,664 +15,844 @@
         </div>
     </div>
 
-    <form action="<?= $quotation ? site_url('quotations/update/' . $quotation['id']) : site_url('quotations/store') ?>"
+    <form id="quotationForm"
+        action="<?= $quotation ? site_url('quotations/update/' . $quotation['id']) : site_url('quotations/store') ?>"
         method="post">
         <?= csrf_field() ?>
+        <input type="hidden" name="is_inter_state" id="isInterStateField"
+            value="<?= $quotation['is_inter_state'] ?? 0 ?>">
 
-        <div class="card card-outline card-primary">
-            <div class="card-header">
-                <h3 class="card-title">Quotation Details</h3>
+<style>
+    .gst-container {
+        font-size: 0.85rem;
+    }
+    .gst-container .form-label {
+        font-weight: 600;
+        margin-bottom: 2px;
+        color: #444;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+    .gst-container .form-control, .gst-container .form-select {
+        font-size: 0.85rem;
+        padding: 5px 8px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        height: auto;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        transition: all 0.2s ease;
+    }
+    .gst-container .form-control:focus, .gst-container .form-select:focus {
+        border-color: #94a3b8;
+        box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.15);
+    }
+    .gst-container .select2-container--bootstrap-5 .select2-selection {
+        font-size: 0.85rem;
+        padding: 2px 4px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        min-height: 32px;
+    }
+    .gst-table th {
+        background-color: #f8fafc !important;
+        color: #475569;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        vertical-align: middle;
+        padding: 8px 6px !important;
+        border-bottom: 2px solid #e2e8f0 !important;
+    }
+    .gst-table td {
+        padding: 4px !important;
+        vertical-align: middle;
+    }
+    .gst-table .form-control, .gst-table .form-select {
+        border: 1px solid #e2e8f0;
+        background: #fff;
+    }
+    .gst-table .form-control:focus, .gst-table .form-select:focus {
+        border-color: #86b7fe;
+    }
+    .gst-summary-table td {
+        padding: 6px 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .gst-summary-label {
+        font-weight: 600;
+        color: #333;
+    }
+    .grand-total-row {
+        background-color: #f8fafc;
+        color: #334155;
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+    .glass-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(2px);
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+    .glass-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+    .scan-feedback {
+        transition: all 0.3s ease;
+    }
+</style>
+
+<div class="gst-container mb-4">
+    <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
+        
+        <!-- TOP ROW: Party & Voucher Details -->
+        <div class="row g-0 border-bottom border-secondary-subtle">
+            
+            <!-- LEFT: Party Details -->
+            <div class="col-md-6 border-end border-secondary-subtle p-3">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <h6 class="fw-bold mb-0 text-uppercase"><i class="fas fa-user-tie me-1"></i> Quotation For (Customer)</h6>
+                    <span id="taxModeIndicator" class="badge bg-secondary" style="display: none;">
+                        <span id="taxModeText">Tax Mode</span>
+                    </span>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Select Customer <span class="text-danger">*</span></label>
+                    <select name="customer_id" id="customerSelect" class="form-select select2" required>
+                        <option value="">-- Search Customer --</option>
+                        <?php foreach ($customers as $customer): ?>
+                            <option value="<?= $customer['id'] ?>" <?= ($quotation && $quotation['customer_id'] == $customer['id']) ? 'selected' : '' ?>>
+                                <?= esc($customer['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div id="customerAddressSection" style="display: none;">
+                    <div class="row">
+                        <div class="col-sm-6 mb-2">
+                            <label class="form-label text-primary">Billing Address</label>
+                            <div id="billingAddressDisplay" class="border p-2 bg-light rounded" style="min-height: 75px; white-space: pre-wrap; font-size: 0.8rem;"></div>
+                        </div>
+                        <div class="col-sm-6 mb-2">
+                            <label class="form-label text-primary">Shipping Address</label>
+                            <div id="shippingAddressDisplay" class="border p-2 bg-light rounded" style="min-height: 75px; white-space: pre-wrap; font-size: 0.8rem;"></div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-1">
+                        <div class="col-sm-6">
+                            <span class="text-muted"><i class="fas fa-phone me-1"></i> Phone:</span>
+                            <span id="customerPhone" class="fw-semibold"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted"><i class="fab fa-whatsapp text-success me-1"></i> WA:</span>
+                            <span id="customerWhatsapp" class="fw-semibold"></span>
+                        </div>
+                    </div>
+                    <div class="row mt-1">
+                        <div class="col-sm-12">
+                            <span class="text-muted"><i class="fas fa-id-card me-1"></i> GSTIN:</span>
+                            <span id="customerGstin" class="fw-semibold badge bg-light text-dark border"></span>
+                            <span id="customerGstType" class="badge bg-secondary ms-1"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">Customer <span class="text-danger">*</span></label>
-                            <select name="customer_id" id="customerSelect" class="form-select select2" required>
-                                <option value="">-- Select Customer --</option>
-                                <?php foreach ($customers as $customer): ?>
-                                    <option value="<?= $customer['id'] ?>" <?= ($quotation && $quotation['customer_id'] == $customer['id']) ? 'selected' : '' ?>>
-                                        <?= esc($customer['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div id="contactInfoSection" class="row mb-3" style="display: none;">
-                            <div class="col-md-6 mb-2">
-                                <label class="text-muted small text-uppercase fw-bold mb-1 d-block"><i
-                                        class="fas fa-phone text-primary me-1"></i> Phone</label>
-                                <div id="customerPhone" class="small"></div>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <label class="text-muted small text-uppercase fw-bold mb-1 d-block"><i
-                                        class="fab fa-whatsapp text-success me-1"></i> WhatsApp</label>
-                                <div id="customerWhatsapp" class="small"></div>
-                            </div>
-                            <div class="col-md-12">
-                                <label class="text-muted small text-uppercase fw-bold mb-1 d-block"><i
-                                        class="fas fa-id-card text-info me-1"></i> GST Details</label>
-                                <div class="small">
-                                    <span id="customerGstType" class="badge bg-secondary me-1"></span>
-                                    <span id="customerGstin" class="fw-bold"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Billing Address</label>
-                            <div id="billingAddressDisplay" class="p-2 border rounded bg-light small"
-                                style="min-height: 80px; white-space: pre-wrap;">Select Customer</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Shipping Address</label>
-                            <div id="shippingAddressDisplay" class="p-2 border rounded bg-light small"
-                                style="min-height: 80px; white-space: pre-wrap;">Select Customer</div>
-                        </div>
-                    </div>
+
+            <!-- RIGHT: Voucher Details -->
+            <div class="col-md-6 p-3 bg-light bg-opacity-25">
+                <div class="border-bottom pb-2 mb-3">
+                    <h6 class="fw-bold mb-0 text-uppercase"><i class="fas fa-file-invoice me-1"></i> Estimate / Quotation Details</h6>
                 </div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Quotation Date <span class="text-danger">*</span></label>
-                            <input type="date" name="quotation_date" class="form-control"
-                                value="<?= $quotation['quotation_date'] ?? date('Y-m-d') ?>" required>
-                        </div>
+                
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <label class="form-label">Quotation Number <span class="text-danger">*</span></label>
+                        <input type="text" name="quotation_number" class="form-control fw-bold bg-light"
+                            value="<?= esc($quotation['quotation_number'] ?? $quotation_number) ?>" readonly>
                     </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Expiry Date</label>
-                            <input type="date" name="expiry_date" class="form-control"
-                                value="<?= $quotation['expiry_date'] ?? date('Y-m-d', strtotime('+15 days')) ?>">
-                        </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Quotation Date <span class="text-danger">*</span></label>
+                        <input type="date" name="quotation_date" class="form-control"
+                            value="<?= $quotation['quotation_date'] ?? date('Y-m-d') ?>" required>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">Quotation Number</label>
-                            <input type="text" name="quotation_number" class="form-control fw-bold"
-                                value="<?= $quotation['quotation_number'] ?? $quotation_number ?>" readonly>
-                        </div>
+
+                    <div class="col-sm-6">
+                        <label class="form-label">Expiry / Valid Until</label>
+                        <input type="date" name="expiry_date" class="form-control"
+                            value="<?= $quotation['expiry_date'] ?? date('Y-m-d', strtotime('+15 days')) ?>">
                     </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">P.O number</label>
-                            <input type="text" name="reference_number" class="form-control"
-                                value="<?= $quotation['reference_number'] ?? '' ?>" placeholder="e.g. Lead ID">
-                        </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Customer Ref / P.O Number</label>
+                        <input type="text" name="reference_number" class="form-control"
+                            value="<?= esc($quotation['reference_number'] ?? '') ?>" placeholder="Customer P.O. / Enquiry Ref">
                     </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">Agent (Optional)</label>
-                            <select name="agent_id" id="agentSelect" class="form-select select2">
-                                <option value="">-- Select Agent --</option>
-                                <?php foreach ($agents as $agent): ?>
-                                    <option value="<?= $agent['id'] ?>"
-                                        data-commission="<?= $agent['commission_percentage'] ?>" <?= ($quotation && $quotation['agent_id'] == $agent['id']) ? 'selected' : '' ?>>
-                                        <?= esc($agent['agent_name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
+
+                    <div class="col-sm-6">
+                        <label class="form-label">Commission Agent</label>
+                        <select name="agent_id" id="agentSelect" class="form-select select2">
+                            <option value="">-- No Agent --</option>
+                            <?php foreach ($agents as $agent): ?>
+                                <option value="<?= $agent['id'] ?>" 
+                                    data-commission="<?= $agent['commission_percentage'] ?? 0 ?>"
+                                    <?= ($quotation && $quotation['agent_id'] == $agent['id']) ? 'selected' : '' ?>>
+                                    <?= esc($agent['agent_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">Transport Name</label>
-                            <select name="transport_name" class="form-select select2">
-                                <option value="">-- Select Transport --</option>
-                                <?php foreach ($transports as $transport): ?>
-                                    <option value="<?= esc($transport['transport_name']) ?>" <?= ($quotation && $quotation['transport_name'] == $transport['transport_name']) ? 'selected' : '' ?>>
-                                        <?= esc($transport['transport_name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Agent Comm. %</label>
+                        <input type="number" step="0.01" name="agent_commission_percent" id="agentCommPercent" class="form-control"
+                            value="<?= esc($quotation['agent_commission_percent'] ?? 0) ?>" placeholder="0.00">
                     </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Tax Mode</label>
-                            <div id="taxModeIndicator" class="alert alert-info py-1 px-2 mb-0">
-                                <i class="fas fa-info-circle"></i> <span id="taxModeText">Loading...</span>
-                            </div>
-                            <input type="hidden" name="is_inter_state" id="is_inter_state"
-                                value="<?= $quotation['is_inter_state'] ?? 0 ?>">
-                        </div>
+
+                    <div class="col-sm-6">
+                        <label class="form-label">Preferred Transport</label>
+                        <select name="transport_name" class="form-select select2">
+                            <option value="">-- Select Transport --</option>
+                            <?php foreach ($transports as $t): ?>
+                                <option value="<?= esc($t['transport_name']) ?>" <?= ($quotation && $quotation['transport_name'] == $t['transport_name']) ? 'selected' : '' ?>>
+                                    <?= esc($t['transport_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Waybill / LR No</label>
+                        <input type="text" name="waybill_number" class="form-control"
+                            value="<?= esc($quotation['waybill_number'] ?? '') ?>" placeholder="LR / Reference">
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Line Items -->
-        <div class="card card-outline card-secondary" id="lineItemsCard"
-            style="display: <?= ($quotation && !empty($quotation['customer_id'])) ? 'block' : 'none' ?>;">
-            <div class="card-header">
-                <h3 class="card-title">Line Items</h3>
-                <div class="card-tools d-flex align-items-center">
-                    <div class="input-group input-group-sm me-2" style="width: 250px;">
-                        <span class="input-group-text"><i class="fas fa-barcode"></i></span>
-                        <input type="text" id="barcodeScan" class="form-control" placeholder="Scan Barcode / SKU"
-                            autocomplete="off">
-                    </div>
-                    <button type="button" class="btn btn-sm btn-success" onclick="addLineItem()">
-                        <i class="fas fa-plus"></i> Add Item
-                    </button>
-                </div>
+        <!-- BARCODE & QUICK SCANNER -->
+        <div class="bg-light p-2 border-bottom d-flex align-items-center gap-2 position-relative">
+            <span class="badge bg-dark px-2 py-1"><i class="fas fa-barcode me-1"></i> Barcode Scanner</span>
+            <input type="text" id="barcodeScannerInput" class="form-control form-control-sm" style="max-width: 320px;" placeholder="Scan barcode or type & press enter...">
+            <span id="scanFeedback" class="small text-muted"></span>
+            
+            <div class="ms-auto d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="addEmptyRowBtn">
+                    <i class="fas fa-plus me-1"></i> Add Item Line
+                </button>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="itemsTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th width="5%">S.No</th>
-                                <th width="35%">Description</th>
-                                <th width="10%">HSN</th>
-                                <th width="10%">Qty</th>
-                                <th width="12%">Rate (₹)</th>
-                                <th width="10%">GST %</th>
-                                <th width="15%">Amount (₹)</th>
-                                <th width="8%">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="itemsBody">
-                            <?php if ($quotation && !empty($quotation['items'])): ?>
-                                <?php foreach ($quotation['items'] as $index => $item): ?>
-                                    <tr class="item-row">
-                                        <td class="text-center fw-bold index-column"><?= $index + 1 ?></td>
-                                        <td>
-                                            <select name="items[<?= $index ?>][product_id]"
-                                                class="form-control product-select select2">
-                                                <option value="">-- Select Product --</option>
-                                                <?php foreach ($products as $product): ?>
-                                                    <option value="<?= $product['id'] ?>" data-hsn="<?= $product['hsn_code'] ?>"
-                                                        data-rate="<?= $product['selling_price'] ?>"
-                                                        data-gst="<?= $product['tax_percentage'] ?>"
-                                                        <?= ($item['product_id'] == $product['id']) ? 'selected' : '' ?>>
-                                                        <?= esc($product['product_name']) ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <input type="hidden" name="items[<?= $index ?>][description]"
-                                                value="<?= esc($item['description']) ?>">
-                                        </td>
-                                        <td><input type="text" name="items[<?= $index ?>][hsn_code]" class="form-control hsn"
-                                                value="<?= esc($item['hsn_code']) ?>"></td>
-                                        <td><input type="number" name="items[<?= $index ?>][quantity]" class="form-control qty"
-                                                value="<?= $item['quantity'] ?>" step="0.01" min="0.01" required
-                                                onchange="calculateRow(this)"></td>
-                                        <td><input type="number" name="items[<?= $index ?>][rate]" class="form-control rate"
-                                                value="<?= $item['rate'] ?>" step="0.01" min="0" required
-                                                onchange="calculateRow(this)"></td>
-                                        <td>
-                                            <select name="items[<?= $index ?>][tax_percentage]" class="form-control gst"
-                                                onchange="calculateRow(this)">
-                                                <option value="0">0%</option>
-                                                <?php foreach ($taxes as $tax): ?>
-                                                    <option value="<?= $tax['percentage'] ?>"
-                                                        <?= ($item['tax_percentage'] == $tax['percentage']) ? 'selected' : '' ?>>
-                                                        <?= $tax['percentage'] ?>%
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                        </td>
-                                        <td><input type="text" class="form-control amount" readonly
-                                                value="<?= number_format($item['amount'], 2) ?>"></td>
-                                        <td><button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)"><i
-                                                    class="fas fa-trash"></i></button></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr class="item-row">
-                                    <td class="text-center fw-bold index-column">1</td>
+        </div>
+
+        <!-- ITEMS TABLE CONTAINER WITH GLASS OVERLAY -->
+        <div class="position-relative">
+            <div id="tableGlassOverlay" class="glass-overlay">
+                <div class="spinner-border text-primary mb-2" role="status"></div>
+                <h6 class="fw-bold text-dark">Adding Product via Barcode...</h6>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered gst-table mb-0 align-middle" id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th width="3%" class="text-center">#</th>
+                            <th width="28%">Product / Item Description</th>
+                            <th width="12%">HSN / SAC</th>
+                            <th width="10%" class="text-center">Quantity</th>
+                            <th width="12%" class="text-end">Rate (₹)</th>
+                            <th width="12%">GST Rate</th>
+                            <th width="15%" class="text-end">Amount (₹)</th>
+                            <th width="4%" class="text-center"><i class="fas fa-trash"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                        <?php if (!empty($quotation['items'])): ?>
+                            <?php foreach ($quotation['items'] as $index => $item): ?>
+                                <tr class="item-row" data-index="<?= $index ?>">
+                                    <td class="text-center row-number fw-bold text-muted"><?= $index + 1 ?></td>
                                     <td>
-                                        <select name="items[0][product_id]" class="form-control product-select select2">
-                                            <option value="">-- Select Product --</option>
-                                            <?php foreach ($products as $product): ?>
-                                                <option value="<?= $product['id'] ?>" data-hsn="<?= $product['hsn_code'] ?>"
-                                                    data-rate="<?= $product['selling_price'] ?>"
-                                                    data-gst="<?= $product['tax_percentage'] ?>">
-                                                    <?= esc($product['product_name']) ?>
+                                        <select name="items[<?= $index ?>][product_id]" class="form-select form-select-sm product-select select2 mb-1">
+                                            <option value="">-- Custom Item / Select Product --</option>
+                                            <?php foreach ($products as $prod): ?>
+                                                <option value="<?= $prod['id'] ?>" 
+                                                    data-rate="<?= $prod['selling_price'] ?? $prod['rate'] ?? 0 ?>" 
+                                                    data-hsn="<?= $prod['hsn_code'] ?? '' ?>" 
+                                                    data-tax="<?= $prod['tax_percentage'] ?? 0 ?>"
+                                                    <?= ($item['product_id'] == $prod['id']) ? 'selected' : '' ?>>
+                                                    <?= esc($prod['product_name']) ?> (<?= esc($prod['product_code'] ?? $prod['sku'] ?? '') ?>)
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <input type="hidden" name="items[0][description]">
+                                        <input type="text" name="items[<?= $index ?>][description]" class="form-control form-control-sm item-desc" placeholder="Item description" value="<?= esc($item['description']) ?>" required>
                                     </td>
-                                    <td><input type="text" name="items[0][hsn_code]" class="form-control hsn"></td>
-                                    <td><input type="number" name="items[0][quantity]" class="form-control qty" value="1"
-                                            step="0.01" min="0.01" required onchange="calculateRow(this)"></td>
-                                    <td><input type="number" name="items[0][rate]" class="form-control rate" value="0"
-                                            step="0.01" min="0" required onchange="calculateRow(this)"></td>
                                     <td>
-                                        <select name="items[0][tax_percentage]" class="form-control gst"
-                                            onchange="calculateRow(this)">
-                                            <option value="0">0%</option>
+                                        <input type="text" name="items[<?= $index ?>][hsn_code]" class="form-control form-control-sm item-hsn text-center" value="<?= esc($item['hsn_code']) ?>">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" name="items[<?= $index ?>][quantity]" class="form-control form-control-sm item-qty text-center fw-bold" value="<?= $item['quantity'] + 0 ?>" min="0.01" required>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" name="items[<?= $index ?>][rate]" class="form-control form-control-sm item-rate text-end fw-bold" value="<?= number_format($item['rate'], 2, '.', '') ?>" min="0" required>
+                                    </td>
+                                    <td>
+                                        <select name="items[<?= $index ?>][tax_percentage]" class="form-select form-select-sm item-tax">
+                                            <option value="0" <?= ((float)$item['tax_percentage'] == 0) ? 'selected' : '' ?>>0% (Exempt)</option>
                                             <?php foreach ($taxes as $tax): ?>
-                                                <option value="<?= $tax['percentage'] ?>">
-                                                    <?= $tax['percentage'] ?>%
+                                                <option value="<?= $tax['percentage'] ?>" <?= ((float)$item['tax_percentage'] == (float)$tax['percentage']) ? 'selected' : '' ?>>
+                                                    <?= esc($tax['name']) ?> (<?= $tax['percentage'] + 0 ?>%)
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
                                     </td>
-                                    <td><input type="text" class="form-control amount" readonly value="0.00"></td>
-                                    <td><button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)"><i
-                                                class="fas fa-trash"></i></button></td>
+                                    <td class="text-end">
+                                        <span class="item-amount-display fw-bold">0.00</span>
+                                        <input type="hidden" name="items[<?= $index ?>][amount]" class="item-amount" value="<?= $item['amount'] ?? 0 ?>">
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-link text-danger remove-row-btn p-0" title="Delete Row"><i class="fas fa-times-circle fs-6"></i></button>
+                                    </td>
                                 </tr>
-                            <?php endif; ?>
-                        </tbody>
-                        <tfoot class="table-secondary">
-                            <tr>
-                                <td colspan="5" class="text-end fw-bold">Subtotal:</td>
-                                <td><input type="text" id="subtotal" class="form-control fw-bold" readonly value="0.00">
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <!-- Initial Empty Row -->
+                            <tr class="item-row" data-index="0">
+                                <td class="text-center row-number fw-bold text-muted">1</td>
+                                <td>
+                                    <select name="items[0][product_id]" class="form-select form-select-sm product-select select2 mb-1">
+                                        <option value="">-- Custom Item / Select Product --</option>
+                                        <?php foreach ($products as $prod): ?>
+                                            <option value="<?= $prod['id'] ?>" 
+                                                data-rate="<?= $prod['selling_price'] ?? $prod['rate'] ?? 0 ?>" 
+                                                data-hsn="<?= $prod['hsn_code'] ?? '' ?>" 
+                                                data-tax="<?= $prod['tax_percentage'] ?? 0 ?>">
+                                                <?= esc($prod['product_name']) ?> (<?= esc($prod['product_code'] ?? $prod['sku'] ?? '') ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <input type="text" name="items[0][description]" class="form-control form-control-sm item-desc" placeholder="Item description" required>
                                 </td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td colspan="5" class="text-end">
-                                    <div class="input-group input-group-sm justify-content-end"
-                                        style="width: 250px; float: right;">
-                                        <span class="input-group-text">Discount</span>
-                                        <select name="discount_type" id="discount_type"
-                                            class="form-select form-select-sm" style="max-width: 80px;"
-                                            onchange="calculateTotals()">
-                                            <option value="Fixed" <?= ($quotation['discount_type'] ?? '') == 'Fixed' ? 'selected' : '' ?>>₹</option>
-                                            <option value="Percentage" <?= ($quotation['discount_type'] ?? '') == 'Percentage' ? 'selected' : '' ?>>%</option>
-                                        </select>
-                                        <input type="number" name="discount_amount" id="discount_amount"
-                                            class="form-control form-control-sm"
-                                            value="<?= $quotation['discount_amount'] ?? 0 ?>" min="0" step="0.01"
-                                            onchange="calculateTotals()">
-                                    </div>
+                                <td>
+                                    <input type="text" name="items[0][hsn_code]" class="form-control form-control-sm item-hsn text-center">
                                 </td>
-                                <td><input type="text" id="calculatedDiscount" class="form-control text-danger" readonly
-                                        value="0.00"></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td colspan="5" class="text-end">Total Tax:</td>
-                                <td id="taxBreakdownSection" class="p-0">
-                                    <table class="table table-sm table-borderless mb-0">
-                                        <tbody id="taxBreakdownBody">
-                                            <!-- Dynamic tax rows -->
-                                        </tbody>
-                                    </table>
-                                    <input type="hidden" id="taxAmount" value="0.00">
+                                <td>
+                                    <input type="number" step="0.01" name="items[0][quantity]" class="form-control form-control-sm item-qty text-center fw-bold" value="1" min="0.01" required>
                                 </td>
-                                <td></td>
+                                <td>
+                                    <input type="number" step="0.01" name="items[0][rate]" class="form-control form-control-sm item-rate text-end fw-bold" value="0.00" min="0" required>
+                                </td>
+                                <td>
+                                    <select name="items[0][tax_percentage]" class="form-select form-select-sm item-tax">
+                                        <option value="0">0% (Exempt)</option>
+                                        <?php foreach ($taxes as $tax): ?>
+                                            <option value="<?= $tax['percentage'] ?>" <?= ((float)$tax['percentage'] == 5) ? 'selected' : '' ?>>
+                                                <?= esc($tax['name']) ?> (<?= $tax['percentage'] + 0 ?>%)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </td>
+                                <td class="text-end">
+                                    <span class="item-amount-display fw-bold">0.00</span>
+                                    <input type="hidden" name="items[0][amount]" class="item-amount" value="0">
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-link text-danger remove-row-btn p-0" title="Delete Row"><i class="fas fa-times-circle fs-6"></i></button>
+                                </td>
                             </tr>
-                            <tr>
-                                <td colspan="5" class="text-end">Shipping:</td>
-                                <td><input type="number" name="shipping_charge" id="shipping_charge"
-                                        class="form-control" value="<?= $quotation['shipping_charge'] ?? 0 ?>"
-                                        step="0.01" onchange="calculateTotals()"></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td colspan="5" class="text-end">Roundoff:</td>
-                                <td><input type="number" name="roundoff_amount" id="roundoff_amount"
-                                        class="form-control" value="<?= $quotation['roundoff_amount'] ?? 0 ?>"
-                                        step="0.01" onchange="calculateTotals()"></td>
-                                <td></td>
-                            </tr>
-                            <tr class="table-primary">
-                                <td colspan="5" class="text-end fw-bold fs-5">Total:</td>
-                                <td><input type="text" id="totalAmount" class="form-control fw-bold fs-5" readonly
-                                        value="0.00"></td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="card card-outline card-info">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <label class="form-label">Notes</label>
-                        <textarea name="notes" class="form-control" rows="3"><?= $quotation['notes'] ?? '' ?></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Terms & Conditions</label>
-                        <textarea name="terms" class="form-control"
-                            rows="3"><?= $quotation['terms'] ?? '1. Quotation valid for 15 days.' ?></textarea>
-                    </div>
+        <!-- BOTTOM ROW: Notes/Terms & Summary Totals -->
+        <div class="row g-0 border-top">
+            <!-- Left: Notes & Terms -->
+            <div class="col-md-7 p-3 border-end">
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-sticky-note me-1"></i> Customer Notes</label>
+                    <textarea name="notes" class="form-control" rows="2" placeholder="Notes will be displayed on the quotation document..."><?= esc($quotation['notes'] ?? '') ?></textarea>
                 </div>
+                <div>
+                    <label class="form-label"><i class="fas fa-gavel me-1"></i> Terms & Conditions</label>
+                    <textarea name="terms" class="form-control" rows="3" placeholder="Payment terms, delivery schedules, validity terms..."><?= esc($quotation['terms'] ?? "1. Prices are valid until the expiry date mentioned above.\n2. Goods once sold will not be taken back.\n3. Subject to local jurisdiction.") ?></textarea>
+                </div>
+            </div>
+
+            <!-- Right: Calculation Summary Card -->
+            <div class="col-md-5 p-0 bg-light">
+                <table class="table gst-summary-table mb-0 w-100">
+                    <tr>
+                        <td class="gst-summary-label">Sub Total:</td>
+                        <td class="text-end fw-bold">₹<span id="subTotalDisplay">0.00</span></td>
+                    </tr>
+                    <tr>
+                        <td class="gst-summary-label">
+                            <div class="d-flex align-items-center gap-1">
+                                <span>Discount:</span>
+                                <select name="discount_type" id="discountType" class="form-select form-select-sm p-0 px-1" style="width: auto; height: 24px; font-size: 0.75rem;">
+                                    <option value="Fixed" <?= (($quotation['discount_type'] ?? '') == 'Fixed') ? 'selected' : '' ?>>₹ Fixed</option>
+                                    <option value="Percentage" <?= (($quotation['discount_type'] ?? '') == 'Percentage') ? 'selected' : '' ?>>% Pct</option>
+                                </select>
+                            </div>
+                        </td>
+                        <td class="text-end">
+                            <div class="input-group input-group-sm justify-content-end">
+                                <input type="number" step="0.01" name="discount_amount" id="discountAmountInput" class="form-control form-control-sm text-end" style="max-width: 110px;" value="<?= $quotation['discount_amount'] ?? 0 ?>">
+                            </div>
+                            <span id="discountCalculatedDisplay" class="text-danger small" style="display: none;">(-₹0.00)</span>
+                        </td>
+                    </tr>
+
+                    <!-- DYNAMIC TAX ROWS (CGST/SGST OR IGST) -->
+                    <tr id="cgstRow">
+                        <td class="gst-summary-label ps-3 text-muted">CGST Total:</td>
+                        <td class="text-end text-muted">₹<span id="cgstDisplay">0.00</span></td>
+                    </tr>
+                    <tr id="sgstRow">
+                        <td class="gst-summary-label ps-3 text-muted">SGST Total:</td>
+                        <td class="text-end text-muted">₹<span id="sgstDisplay">0.00</span></td>
+                    </tr>
+                    <tr id="igstRow" style="display: none;">
+                        <td class="gst-summary-label ps-3 text-muted">IGST Total:</td>
+                        <td class="text-end text-muted">₹<span id="igstDisplay">0.00</span></td>
+                    </tr>
+
+                    <tr>
+                        <td class="gst-summary-label">Shipping / Freight:</td>
+                        <td class="text-end">
+                            <input type="number" step="0.01" name="shipping_charge" id="shippingChargeInput" class="form-control form-control-sm text-end float-end" style="max-width: 110px;" value="<?= $quotation['shipping_charge'] ?? 0 ?>">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="gst-summary-label">Round Off:</td>
+                        <td class="text-end">
+                            <input type="number" step="0.01" name="roundoff_amount" id="roundoffInput" class="form-control form-control-sm text-end float-end" style="max-width: 110px;" value="<?= $quotation['roundoff_amount'] ?? 0 ?>">
+                        </td>
+                    </tr>
+
+                    <tr class="grand-total-row">
+                        <td class="text-uppercase py-3">Total Amount (₹):</td>
+                        <td class="text-end py-3 text-primary fw-bolder fs-5">₹<span id="grandTotalDisplay">0.00</span></td>
+                    </tr>
+                </table>
             </div>
         </div>
 
-        <div class="d-flex justify-content-end gap-2 mb-3">
-            <a href="<?= site_url('quotations') ?>" class="btn btn-secondary"><?= lang("App.cancel") ?></a>
-            <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Quotation</button>
+        <!-- FORM ACTION BUTTONS -->
+        <div class="card-footer bg-white p-3 d-flex justify-content-between align-items-center">
+            <a href="<?= site_url('quotations') ?>" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Quotations
+            </a>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                    <i class="fas fa-check-circle me-1"></i> <?= $quotation ? 'Update Quotation / Estimate' : 'Save Quotation / Estimate' ?>
+                </button>
+            </div>
         </div>
-    </form>
+
+    </div>
 </div>
-<?= $this->endSection() ?>
+</form>
+</div>
 
-<?= $this->section('scripts') ?>
+<!-- TEMPLATE ROW FOR ADDING PRODUCTS DYNAMICALLY -->
+<template id="rowTemplate">
+    <tr class="item-row">
+        <td class="text-center row-number fw-bold text-muted"></td>
+        <td>
+            <select class="form-select form-select-sm product-select select2-dynamic mb-1">
+                <option value="">-- Custom Item / Select Product --</option>
+                <?php foreach ($products as $prod): ?>
+                    <option value="<?= $prod['id'] ?>" 
+                        data-rate="<?= $prod['selling_price'] ?? $prod['rate'] ?? 0 ?>" 
+                        data-hsn="<?= $prod['hsn_code'] ?? '' ?>" 
+                        data-tax="<?= $prod['tax_percentage'] ?? 0 ?>">
+                        <?= esc($prod['product_name']) ?> (<?= esc($prod['product_code'] ?? $prod['sku'] ?? '') ?>)
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <input type="text" class="form-control form-control-sm item-desc" placeholder="Item description" required>
+        </td>
+        <td>
+            <input type="text" class="form-control form-control-sm item-hsn text-center">
+        </td>
+        <td>
+            <input type="number" step="0.01" class="form-control form-control-sm item-qty text-center fw-bold" value="1" min="0.01" required>
+        </td>
+        <td>
+            <input type="number" step="0.01" class="form-control form-control-sm item-rate text-end fw-bold" value="0.00" min="0" required>
+        </td>
+        <td>
+            <select class="form-select form-select-sm item-tax">
+                <option value="0">0% (Exempt)</option>
+                <?php foreach ($taxes as $tax): ?>
+                    <option value="<?= $tax['percentage'] ?>" <?= ((float)$tax['percentage'] == 5) ? 'selected' : '' ?>>
+                        <?= esc($tax['name']) ?> (<?= $tax['percentage'] + 0 ?>%)
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </td>
+        <td class="text-end">
+            <span class="item-amount-display fw-bold">0.00</span>
+            <input type="hidden" class="item-amount" value="0">
+        </td>
+        <td class="text-center">
+            <button type="button" class="btn btn-sm btn-link text-danger remove-row-btn p-0" title="Delete Row"><i class="fas fa-times-circle fs-6"></i></button>
+        </td>
+    </tr>
+</template>
+
 <script>
-    let rowIndex = <?= $quotation && !empty($quotation['items']) ? count($quotation['items']) : 1 ?>;
-    let isInterState = <?= $quotation['is_inter_state'] ?? 0 ?>;
+document.addEventListener('DOMContentLoaded', function() {
+    let isInterState = <?= !empty($quotation['is_inter_state']) ? 'true' : 'false' ?>;
 
-    // Global caches for clean HTML templates
-    let _productOptionsHtml = '';
-    let _taxOptionsHtml = '';
+    // Initialize Select2 elements
+    function initSelect2(element) {
+        if (typeof $.fn.select2 !== 'undefined') {
+            $(element).select2({
+                theme: 'bootstrap-5',
+                width: '100%'
+            });
+        }
+    }
 
-    function addLineItem() {
-        const customerId = $('#customerSelect').val();
+    $('.select2').each(function() {
+        initSelect2(this);
+    });
+
+    // Handle Customer Selection
+    $('#customerSelect').on('change', function() {
+        const customerId = $(this).val();
         if (!customerId) {
-            toastr.error('Please select a customer first.');
-            $('#customerSelect').select2('open');
+            $('#customerAddressSection').slideUp();
+            $('#taxModeIndicator').hide();
             return;
         }
 
-        const tbody = document.getElementById('itemsBody');
-        const row = document.createElement('tr');
-        row.className = 'item-row';
+        fetch(`<?= site_url('customers/details/') ?>${customerId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    $('#billingAddressDisplay').text(data.billing_address || 'N/A');
+                    $('#shippingAddressDisplay').text(data.shipping_address || 'Same as billing address');
+                    $('#customerPhone').text(data.phone || 'N/A');
+                    $('#customerWhatsapp').text(data.whatsapp_number || 'N/A');
+                    $('#customerGstin').text(data.gstin || 'URP / Not Registered');
+                    $('#customerGstType').text(data.gst_type || 'Unregistered');
+                    $('#customerAddressSection').slideDown();
 
-        // Use clean cached options if available, otherwise fallback to DOM
-        const productOptions = _productOptionsHtml || document.querySelector('.product-select').innerHTML;
-        const taxOptions = _taxOptionsHtml || document.querySelector('.gst').innerHTML;
+                    // Tax mode determination
+                    isInterState = data.is_inter_state;
+                    $('#isInterStateField').val(isInterState ? 1 : 0);
 
-        row.innerHTML = `
-            <td class="text-center fw-bold index-column">${document.querySelectorAll('.item-row').length + 1}</td>
-            <td>
-                <select name="items[${rowIndex}][product_id]" class="form-control product-select select2">
-                    ${productOptions}
-                </select>
-                <input type="hidden" name="items[${rowIndex}][description]">
-            </td>
-            <td><input type="text" name="items[${rowIndex}][hsn_code]" class="form-control hsn"></td>
-            <td><input type="number" name="items[${rowIndex}][quantity]" class="form-control qty" value="1" step="0.01" min="0.01" required onchange="calculateRow(this)"></td>
-            <td><input type="number" name="items[${rowIndex}][rate]" class="form-control rate" value="0" step="0.01" min="0" required onchange="calculateRow(this)"></td>
-            <td>
-                <select name="items[${rowIndex}][tax_percentage]" class="form-control gst" onchange="calculateRow(this)">
-                    ${taxOptions}
-                </select>
-            </td>
-            <td><input type="text" class="form-control amount" readonly value="0.00"></td>
-            <td><button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
-        `;
-        tbody.appendChild(row);
-        initSelect2(row.querySelector('.select2'));
-        rowIndex++;
-        updateIndices();
-    }
+                    if (isInterState) {
+                        $('#taxModeIndicator').show().removeClass('bg-secondary bg-primary').addClass('bg-info').find('#taxModeText').text('Inter-State (IGST)');
+                        $('#cgstRow, #sgstRow').hide();
+                        $('#igstRow').show();
+                    } else {
+                        $('#taxModeIndicator').show().removeClass('bg-secondary bg-info').addClass('bg-primary').find('#taxModeText').text('Intra-State (CGST + SGST)');
+                        $('#cgstRow, #sgstRow').show();
+                        $('#igstRow').hide();
+                    }
 
-    function updateProductDetails(select) {
-        const $select = $(select);
-        const $option = $select.find(':selected');
-
-        if (!$option.val()) return;
-
-        const row = $select.closest('tr')[0];
-        const hsn = $option.attr('data-hsn') || '';
-        const rate = parseFloat($option.attr('data-rate')) || 0;
-        const gst = $option.attr('data-gst') || 0;
-
-        row.querySelector('.hsn').value = hsn;
-        row.querySelector('.rate').value = rate.toFixed(2);
-        row.querySelector('.gst').value = gst;
-        row.querySelector('input[name*="[description]"]').value = $option.text();
-
-        calculateRow(select);
-    }
-
-    function removeRow(btn) {
-        if (document.querySelectorAll('.item-row').length > 1) {
-            btn.closest('tr').remove();
-            updateIndices();
-            calculateTotals();
-        }
-    }
-
-    function updateIndices() {
-        document.querySelectorAll('.item-row').forEach((row, index) => {
-            row.querySelector('.index-column').textContent = index + 1;
-        });
-    }
-
-    function calculateRow(input) {
-        const row = input.closest('tr');
-        const qty = parseFloat(row.querySelector('.qty').value) || 0;
-        const rate = parseFloat(row.querySelector('.rate').value) || 0;
-        row.querySelector('.amount').value = (qty * rate).toFixed(2);
-        calculateTotals();
-    }
-
-    function calculateTotals() {
-        let subtotal = 0;
-        const taxGroups = {};
-
-        document.querySelectorAll('.item-row').forEach(row => {
-            const qty = parseFloat(row.querySelector('.qty').value) || 0;
-            const rate = parseFloat(row.querySelector('.rate').value) || 0;
-            const gst = parseFloat(row.querySelector('.gst').value) || 0;
-            const amt = qty * rate;
-            subtotal += amt;
-
-            if (gst > 0) {
-                taxGroups[gst] = (taxGroups[gst] || 0) + amt;
-            }
-        });
-
-        const disc = parseFloat(document.getElementById('discount_amount').value) || 0;
-        const type = document.getElementById('discount_type').value;
-        const totalDisc = (type === 'Percentage') ? (subtotal * disc / 100) : disc;
-
-        let totalTax = 0;
-        const $taxBody = $('#taxBreakdownBody');
-        $taxBody.empty();
-
-        Object.keys(taxGroups).forEach(gst => {
-            const groupBase = taxGroups[gst];
-            const ratio = subtotal > 0 ? groupBase / subtotal : 0;
-            const groupDisc = totalDisc * ratio;
-            const taxableAmount = groupBase - groupDisc;
-            const groupTax = taxableAmount * (gst / 100);
-            totalTax += groupTax;
-
-            if (isInterState) {
-                $taxBody.append(`<tr><td class="py-0">IGST ${gst}%</td><td class="py-0 text-end">₹${groupTax.toFixed(2)}</td></tr>`);
-            } else {
-                const halfTax = groupTax / 2;
-                const halfRate = gst / 2;
-                $taxBody.append(`<tr><td class="py-0">CGST ${halfRate}%</td><td class="py-0 text-end">₹${halfTax.toFixed(2)}</td></tr>`);
-                $taxBody.append(`<tr><td class="py-0">SGST ${halfRate}%</td><td class="py-0 text-end">₹${halfTax.toFixed(2)}</td></tr>`);
-            }
-        });
-
-        const shipping = parseFloat(document.getElementById('shipping_charge').value) || 0;
-        const roundoff = parseFloat(document.getElementById('roundoff_amount').value) || 0;
-
-        document.getElementById('subtotal').value = subtotal.toFixed(2);
-        document.getElementById('calculatedDiscount').value = totalDisc.toFixed(2);
-        document.getElementById('taxAmount').value = totalTax.toFixed(2);
-        document.getElementById('totalAmount').value = (subtotal - totalDisc + totalTax + shipping + roundoff).toFixed(2);
-    }
-
-    function updateTaxMode(customerId) {
-        if (!customerId) return;
-
-        $.get('<?= site_url('customers/details/') ?>' + customerId, function (data) {
-            if (data.status === 'success') {
-                isInterState = data.is_inter_state ? 1 : 0;
-                $('#is_inter_state').val(isInterState);
-                const status = isInterState ? 'INTER-STATE (IGST)' : 'INTRA-STATE (CGST+SGST)';
-                $('#taxModeText').text(status);
-                $('#taxModeIndicator').removeClass('alert-info alert-success alert-warning').addClass(isInterState ? 'alert-warning' : 'alert-success');
-
-                $('#billingAddressDisplay').text(data.billing_address);
-                $('#shippingAddressDisplay').text(data.shipping_address);
-
-                // Update contact info
-                $('#contactInfoSection').show();
-                $('#customerPhone').text(data.phone || 'N/A');
-                $('#customerWhatsapp').text(data.whatsapp_number || 'N/A');
-                $('#customerGstType').text(data.gst_type || 'Unregistered');
-                $('#customerGstin').text(data.gstin || 'N/A');
-
-                if (data.agent_id) {
-                    $('#agentSelect').val(data.agent_id).trigger('change');
+                    recalculateAll();
                 }
-
-                calculateTotals();
-            }
-        });
-    }
-
-    $(document).ready(function () {
-        // 1. Capture clean templates
-        const $prod = $('.product-select').first();
-        if ($prod.length) {
-            const $clone = $prod.clone();
-            $clone.find('option').prop('selected', false).removeAttr('selected');
-            _productOptionsHtml = $clone.html();
-        }
-        const $gst = $('.gst').first();
-        if ($gst.length) {
-            const $clone = $gst.clone();
-            $clone.find('option').prop('selected', false).removeAttr('selected');
-            _taxOptionsHtml = $clone.html();
-        }
-
-        // 2. Initialize Select2
-        initSelect2();
-
-        // 3. Delegated Product Selection
-        $(document).on('change select2:select', '.product-select', function () {
-            updateProductDetails(this);
-        });
-
-        // 4. Unified Customer Change Handler
-        function handleCustomerChange() {
-            const customerId = $('select[name="customer_id"]').val();
-
-            // 1. Visibility Logic (Instant)
-            if (customerId) {
-                $('#lineItemsCard').slideDown();
-            } else {
-                $('#lineItemsCard').slideUp();
-                $('#contactInfoSection').slideUp();
-                $('#billingAddressDisplay').text('Select Customer');
-                $('#shippingAddressDisplay').text('Select Customer');
-                $('#taxModeText').text('Select Customer');
-                $('#taxModeIndicator').removeClass('alert-success alert-warning').addClass('alert-info');
-            }
-
-            // 2. Data Fetching Logic (Async)
-            if (customerId) {
-                updateTaxMode(customerId);
-            }
-        }
-
-        // Bind to change event
-        $('select[name="customer_id"]').on('change', handleCustomerChange);
-
-        // Initial check on page load
-        handleCustomerChange();
-
-        calculateTotals();
+            })
+            .catch(err => {
+                console.error("Error fetching customer info:", err);
+            });
     });
 
-    function initSelect2(element) {
-        const config = {
-            theme: 'bootstrap-5',
-            placeholder: '-- Select --',
-            allowClear: true,
-            width: '100%'
-        };
-
-        if (element) {
-            $(element).select2(config);
-        } else {
-            $('.select2').each(function () {
-                $(this).select2({
-                    theme: 'bootstrap-5',
-                    placeholder: $(this).data('placeholder') || '-- Select --',
-                    allowClear: true,
-                    width: '100%'
-                });
-            });
-        }
+    // Trigger customer info load if editing
+    if ($('#customerSelect').val()) {
+        $('#customerSelect').trigger('change');
     }
 
-    // Barcode Scanning Logic
-    $('#barcodeScan').on('keypress', function (e) {
-        if (e.which === 13) { // Enter key
+    // Barcode Scanner Listener
+    const barcodeInput = document.getElementById('barcodeScannerInput');
+    const glassOverlay = document.getElementById('tableGlassOverlay');
+    const scanFeedback = document.getElementById('scanFeedback');
+
+    barcodeInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
             e.preventDefault();
+            const code = this.value.trim();
+            if (!code) return;
 
-            const customerId = $('#customerSelect').val(); // Corrected ID to customer_id
-            if (!customerId) {
-                toastr.error('Please select a customer first.');
-                $('#customerSelect').select2('open'); // Corrected ID to customer_id
-                return;
-            }
+            glassOverlay.classList.add('active');
+            scanFeedback.innerHTML = `<span class="text-primary"><i class="fas fa-spinner fa-spin"></i> Searching ${code}...</span>`;
 
-            const barcode = $(this).val().trim();
-            if (!barcode) return;
-
-            // Show loading state
-            const $input = $(this);
-            $input.prop('disabled', true);
-
-            $.ajax({
-                url: '<?= site_url('master-data/product-by-barcode') ?>',
-                method: 'GET',
-                data: { barcode: barcode },
-                success: function (response) {
-                    if (response.success && response.data) {
-                        addProductByBarcode(response.data);
-                        $input.val('').focus(); // Clear and keep focus for next scan
-                        toastr.success('Item added: ' + response.data.product_name);
+            fetch(`<?= site_url('master-data/product-by-barcode') ?>?barcode=${encodeURIComponent(code)}`)
+                .then(res => res.json())
+                .then(data => {
+                    glassOverlay.classList.remove('active');
+                    if (data && data.status === 'success' && data.product) {
+                        addProductRow(data.product);
+                        scanFeedback.innerHTML = `<span class="text-success"><i class="fas fa-check"></i> Added: ${data.product.product_name}</span>`;
+                        barcodeInput.value = '';
+                        barcodeInput.focus();
                     } else {
-                        toastr.error('Product not found for barcode: ' + barcode);
-                        $input.select();
+                        scanFeedback.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Not found: ${code}</span>`;
+                        barcodeInput.select();
                     }
-                },
-                error: function (xhr) {
-                    // Check for 404
-                    if (xhr.status === 404) {
-                        toastr.error('Product not found for barcode: ' + barcode);
-                    } else {
-                        toastr.error('Error searching for barcode');
-                    }
-                    $input.select();
-                },
-                complete: function () {
-                    $input.prop('disabled', false).focus();
-                }
-            });
+                })
+                .catch(err => {
+                    glassOverlay.classList.remove('active');
+                    scanFeedback.innerHTML = `<span class="text-danger">Error scanning barcode</span>`;
+                });
         }
     });
 
-    function addProductByBarcode(product) {
-        // Add new row
-        addLineItem();
+    // Add Empty Row
+    $('#addEmptyRowBtn').on('click', function() {
+        addNewRow();
+    });
 
-        // Get the last added row (which is the new one)
-        const $rows = $('.item-row');
-        const $lastRow = $rows.last();
-        const rowIndex = $rows.length - 1; // 0-based index
+    function addNewRow(productData = null) {
+        const tbody = document.getElementById('itemsBody');
+        const template = document.getElementById('rowTemplate');
+        const clone = template.content.cloneNode(true);
+        const tr = clone.querySelector('tr');
+        
+        tbody.appendChild(tr);
+        reindexRows();
 
-        // 1. Set Product in Select2
-        const $select = $lastRow.find('.product-select');
+        const newSelect = $(tr).find('.product-select');
+        initSelect2(newSelect);
 
-        // Check if option exists, if not create it (though it should exist if master data is complete)
-        if ($select.find(`option[value="${product.id}"]`).length > 0) {
-            $select.val(product.id).trigger('change');
-        } else {
-            // Option doesn't exist in the dropdown (maybe inactive or not loaded?)
-            // For now, we assume it exists as we just fetched it from DB. 
-            // If we have pagination on select2, we might need to append option.
-            // Let's assume standard select for now.
-            toastr.warning('Product found but not in list. Please check active status.');
+        if (productData) {
+            newSelect.val(productData.id).trigger('change');
+            $(tr).find('.item-desc').val(productData.product_name || productData.name);
+            $(tr).find('.item-hsn').val(productData.hsn_code || '');
+            $(tr).find('.item-rate').val(parseFloat(productData.selling_price || productData.rate || 0).toFixed(2));
+            if (productData.tax_percentage !== undefined) {
+                $(tr).find('.item-tax').val(productData.tax_percentage);
+            }
         }
 
+        recalculateAll();
+        return tr;
     }
+
+    function addProductRow(product) {
+        // Check if product is already in the table
+        let existingRow = null;
+        $('#itemsBody .item-row').each(function() {
+            const pid = $(this).find('.product-select').val();
+            if (pid == product.id) {
+                existingRow = this;
+                return false;
+            }
+        });
+
+        if (existingRow) {
+            const qtyInput = $(existingRow).find('.item-qty');
+            qtyInput.val(parseFloat(qtyInput.val() || 0) + 1);
+            recalculateRow($(existingRow));
+            recalculateAll();
+        } else {
+            // Check if first row is completely empty, use it
+            const firstRow = $('#itemsBody .item-row').first();
+            if (firstRow.length && !firstRow.find('.product-select').val() && !firstRow.find('.item-desc').val()) {
+                firstRow.find('.product-select').val(product.id).trigger('change');
+                firstRow.find('.item-desc').val(product.product_name || product.name);
+                firstRow.find('.item-hsn').val(product.hsn_code || '');
+                firstRow.find('.item-rate').val(parseFloat(product.selling_price || product.rate || 0).toFixed(2));
+                if (product.tax_percentage !== undefined) {
+                    firstRow.find('.item-tax').val(product.tax_percentage);
+                }
+                recalculateRow(firstRow);
+                recalculateAll();
+            } else {
+                addNewRow(product);
+            }
+        }
+    }
+
+    // Reindex all rows for proper POST structure
+    function reindexRows() {
+        $('#itemsBody .item-row').each(function(index) {
+            $(this).attr('data-index', index);
+            $(this).find('.row-number').text(index + 1);
+            $(this).find('.product-select').attr('name', `items[${index}][product_id]`);
+            $(this).find('.item-desc').attr('name', `items[${index}][description]`);
+            $(this).find('.item-hsn').attr('name', `items[${index}][hsn_code]`);
+            $(this).find('.item-qty').attr('name', `items[${index}][quantity]`);
+            $(this).find('.item-rate').attr('name', `items[${index}][rate]`);
+            $(this).find('.item-tax').attr('name', `items[${index}][tax_percentage]`);
+            $(this).find('.item-amount').attr('name', `items[${index}][amount]`);
+        });
+    }
+
+    // Product selection change inside row
+    $(document).on('change', '.product-select', function() {
+        const tr = $(this).closest('tr');
+        const selected = $(this).find(':selected');
+        const pid = $(this).val();
+
+        if (pid) {
+            const rate = selected.data('rate') || 0;
+            const hsn = selected.data('hsn') || '';
+            const tax = selected.data('tax') || 0;
+            const text = selected.text().trim();
+
+            if (!tr.find('.item-desc').val()) {
+                tr.find('.item-desc').val(text.split('(')[0].trim());
+            }
+            tr.find('.item-hsn').val(hsn);
+            tr.find('.item-rate').val(parseFloat(rate).toFixed(2));
+            tr.find('.item-tax').val(tax);
+        }
+        recalculateRow(tr);
+        recalculateAll();
+    });
+
+    // Remove row
+    $(document).on('click', '.remove-row-btn', function() {
+        if ($('#itemsBody .item-row').length > 1) {
+            $(this).closest('tr').remove();
+            reindexRows();
+            recalculateAll();
+        } else {
+            // Just clear the single row
+            const tr = $(this).closest('tr');
+            tr.find('.product-select').val('').trigger('change');
+            tr.find('.item-desc').val('');
+            tr.find('.item-hsn').val('');
+            tr.find('.item-qty').val('1');
+            tr.find('.item-rate').val('0.00');
+            tr.find('.item-tax').val('0');
+            recalculateRow(tr);
+            recalculateAll();
+        }
+    });
+
+    // Dynamic inputs calculation
+    $(document).on('input change', '.item-qty, .item-rate, .item-tax', function() {
+        recalculateRow($(this).closest('tr'));
+        recalculateAll();
+    });
+
+    $('#discountType, #discountAmountInput, #shippingChargeInput, #roundoffInput').on('input change', function() {
+        recalculateAll();
+    });
+
+    // Calculate individual row
+    function recalculateRow(tr) {
+        const qty = parseFloat(tr.find('.item-qty').val()) || 0;
+        const rate = parseFloat(tr.find('.item-rate').val()) || 0;
+        const amount = qty * rate;
+
+        tr.find('.item-amount-display').text(amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+        tr.find('.item-amount').val(amount.toFixed(2));
+    }
+
+    // Recalculate Grand Totals & Taxes
+    function recalculateAll() {
+        let subtotal = 0;
+        let taxGroups = {};
+
+        $('#itemsBody .item-row').each(function() {
+            const qty = parseFloat($(this).find('.item-qty').val()) || 0;
+            const rate = parseFloat($(this).find('.item-rate').val()) || 0;
+            const taxPct = parseFloat($(this).find('.item-tax').val()) || 0;
+            const lineAmount = qty * rate;
+
+            subtotal += lineAmount;
+
+            if (lineAmount > 0 && taxPct > 0) {
+                if (!taxGroups[taxPct]) taxGroups[taxPct] = 0;
+                taxGroups[taxPct] += lineAmount;
+            }
+        });
+
+        // Discount calculation
+        const discType = $('#discountType').val();
+        const discInput = parseFloat($('#discountAmountInput').val()) || 0;
+        let totalDiscount = 0;
+
+        if (discType === 'Percentage') {
+            totalDiscount = (subtotal * discInput) / 100;
+            $('#discountCalculatedDisplay').text(`(-₹${totalDiscount.toFixed(2)})`).show();
+        } else {
+            totalDiscount = discInput;
+            $('#discountCalculatedDisplay').hide();
+        }
+
+        if (totalDiscount > subtotal) totalDiscount = subtotal;
+
+        // Taxes with proportional discount deduction
+        let totalTax = 0;
+        let totalCGST = 0;
+        let totalSGST = 0;
+        let totalIGST = 0;
+
+        for (let slab in taxGroups) {
+            const slabAmount = taxGroups[slab];
+            const slabProportionalDiscount = subtotal > 0 ? (slabAmount / subtotal) * totalDiscount : 0;
+            const taxableValue = Math.max(0, slabAmount - slabProportionalDiscount);
+            const slabTax = (taxableValue * parseFloat(slab)) / 100;
+
+            totalTax += slabTax;
+            if (isInterState) {
+                totalIGST += slabTax;
+            } else {
+                totalCGST += slabTax / 2;
+                totalSGST += slabTax / 2;
+            }
+        }
+
+        const shipping = parseFloat($('#shippingChargeInput').val()) || 0;
+        let roundoff = parseFloat($('#roundoffInput').val()) || 0;
+
+        const baseGrandTotal = (subtotal - totalDiscount) + totalTax + shipping;
+        
+        // Auto calculate round off if not manually set or zero
+        if ($('#roundoffInput').data('auto') !== false) {
+            const roundedTotal = Math.round(baseGrandTotal);
+            roundoff = +(roundedTotal - baseGrandTotal).toFixed(2);
+            $('#roundoffInput').val(roundoff);
+        }
+
+        const grandTotal = Math.max(0, baseGrandTotal + roundoff);
+
+        // Update displays
+        $('#subTotalDisplay').text(subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+        $('#cgstDisplay').text(totalCGST.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+        $('#sgstDisplay').text(totalSGST.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+        $('#igstDisplay').text(totalIGST.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+        $('#grandTotalDisplay').text(grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    }
+
+    $('#roundoffInput').on('change', function() {
+        $(this).data('auto', false);
+    });
+
+    // Agent commission pre-fill
+    $('#agentSelect').on('change', function() {
+        const comm = $(this).find(':selected').data('commission') || 0;
+        if (comm > 0) {
+            $('#agentCommPercent').val(comm);
+        }
+    });
+
+    // Initialize calculation on load
+    $('#itemsBody .item-row').each(function() {
+        recalculateRow($(this));
+    });
+    recalculateAll();
+});
 </script>
 <?= $this->endSection() ?>

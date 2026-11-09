@@ -98,6 +98,30 @@
                     <table class="table table-sm">
                         <tr><th width="40%">Invoice Date:</th><td><?= date('d/m/Y', strtotime($invoice['invoice_date'])) ?></td></tr>
                         <tr><th>Due Date:</th><td><?= date('d/m/Y', strtotime($invoice['due_date'])) ?></td></tr>
+                        <?php if (!empty($invoice['so_number'])): ?>
+                            <tr><th>SO Number:</th><td>
+                                <?php if (!empty($linked_sales_order)): ?>
+                                    <a href="<?= site_url('sales_orders/view/' . $linked_sales_order['id']) ?>" class="badge bg-primary text-decoration-none">
+                                        <i class="fas fa-shopping-cart me-1"></i> <?= esc($invoice['so_number']) ?>
+                                    </a>
+                                <?php else: ?>
+                                    <span class="text-primary fw-bold"><?= esc($invoice['so_number']) ?></span>
+                                <?php endif; ?>
+                            </td></tr>
+                        <?php endif; ?>
+                        <?php if (!empty($invoice['so_date'])): ?>
+                            <tr><th>SO Date:</th><td><?= date('d/m/Y', strtotime($invoice['so_date'])) ?></td></tr>
+                        <?php endif; ?>
+                        <?php if (!empty($linked_quotation)): ?>
+                            <tr><th>Source Quotation:</th><td>
+                                <a href="<?= site_url('quotations/view/' . $linked_quotation['id']) ?>" class="badge bg-info text-decoration-none">
+                                    <i class="fas fa-file-invoice me-1"></i> <?= esc($linked_quotation['quotation_number']) ?>
+                                </a>
+                            </td></tr>
+                        <?php endif; ?>
+                        <?php if (!empty($invoice['selection_type'])): ?>
+                            <tr><th>Selection Type:</th><td><span class="badge bg-secondary"><?= esc($invoice['selection_type']) ?></span></td></tr>
+                        <?php endif; ?>
                     </table>
                 </div>
             </div>

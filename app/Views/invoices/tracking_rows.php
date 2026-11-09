@@ -1,6 +1,20 @@
 <?php foreach ($invoices as $inv): ?>
     <tr>
-        <td class="fw-bold"><?= esc($inv['invoice_number']) ?></td>
+        <td>
+            <div class="fw-bold"><?= esc($inv['invoice_number']) ?></div>
+            <?php
+            $invStatusColors = [
+                'Draft'          => 'secondary',
+                'Open'           => 'info',
+                'Paid'           => 'success',
+                'Partially Paid' => 'warning',
+                'Overdue'        => 'danger',
+                'Void'           => 'dark'
+            ];
+            $invColor = $invStatusColors[$inv['status']] ?? 'secondary';
+            ?>
+            <span class="badge bg-<?= $invColor ?>" title="Invoice Status"><?= esc($inv['status']) ?></span>
+        </td>
         <td><?= date('d/m/Y', strtotime($inv['invoice_date'])) ?></td>
         <td><?= esc($inv['customer_name'] ?? 'N/A') ?></td>
         <td><?= esc($inv['transport_name']) ?: '<span class="text-muted">Not Selected</span>' ?></td>
@@ -21,10 +35,11 @@
         <td>
             <?php
             $delStatusColors = [
-                'Pending' => 'secondary',
+                'Pending'    => 'secondary',
+                'Booked'     => 'info',
                 'In Transit' => 'primary',
-                'Delivered' => 'success',
-                'Cancelled' => 'danger'
+                'Delivered'  => 'success',
+                'Cancelled'  => 'danger'
             ];
             $delColor = $delStatusColors[$inv['delivery_status']] ?? 'secondary';
             ?>
@@ -43,7 +58,8 @@
                             'waybill_date' => $inv['waybill_date'],
                             'transport_amount' => $inv['transport_amount'] ?? 0,
                             'transport_pay_type' => $inv['transport_pay_type'] ?? 'To Pay',
-                            'waybill_shipping_charge' => $inv['waybill_shipping_charge'] ?? 0
+                            'waybill_shipping_charge' => $inv['waybill_shipping_charge'] ?? 0,
+                            'status' => $inv['status']
                         ])) ?>)">
                     <i class="fas fa-truck"></i><span> Waybill</span>
                 </button>
@@ -51,7 +67,8 @@
                         onclick="openDeliveryModal(<?= htmlspecialchars(json_encode([
                             'id' => $inv['id'],
                             'invoice_number' => $inv['invoice_number'],
-                            'delivery_status' => $inv['delivery_status']
+                            'delivery_status' => $inv['delivery_status'],
+                            'status' => $inv['status']
                         ])) ?>)">
                     <i class="fas fa-check-circle"></i><span> Delivery</span>
                 </button>

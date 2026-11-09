@@ -1,18 +1,18 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?>Invoice Tracking<?= $this->endSection() ?>
+<?= $this->section('title') ?><?= lang('App.invoice_tracking') ?><?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <div class="container-fluid">
     <div class="row mb-2">
         <div class="col-sm-6">
-            <h1 class="m-0 text-dark">Invoice Tracking</h1>
+            <h1 class="m-0 text-dark"><?= lang('App.invoice_tracking') ?></h1>
         </div>
         <div class="col-sm-6">
             <ol class="breadcrumb float-sm-end">
                 <li class="breadcrumb-item"><a href="<?= base_url('dashboard') ?>">Home</a></li>
                 <li class="breadcrumb-item"><a href="<?= base_url('invoices') ?>">Invoices</a></li>
-                <li class="breadcrumb-item active">Tracking</li>
+                <li class="breadcrumb-item active"><?= lang('App.invoice_tracking') ?></li>
             </ol>
         </div>
     </div>
@@ -150,6 +150,9 @@
                         <input type="file" name="waybill_image" class="form-control" accept="image/*">
                         <small class="text-muted">Accepted formats: JPG, PNG. Max size: 2MB</small>
                     </div>
+                    <div id="waybillAutoSentNotice" class="alert alert-info py-2 px-3 small mb-0" style="display: none;">
+                        <i class="fas fa-info-circle me-1"></i> This invoice is currently <strong>Draft</strong>. Updating waybill will set delivery status to <strong>Booked</strong> and automatically mark the invoice as <strong>Sent (Open)</strong>.
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -184,6 +187,9 @@
                     <div class="mb-3" id="deliveredDateGroup" style="display: none;">
                         <label class="form-label">Delivered Date <span class="text-danger">*</span></label>
                         <input type="date" name="delivered_date" id="modalDeliveredDate" class="form-control" value="<?= date('Y-m-d') ?>">
+                    </div>
+                    <div id="modalAutoSentNotice" class="alert alert-info py-2 px-3 small mb-0" style="display: none;">
+                        <i class="fas fa-info-circle me-1"></i> This invoice is currently <strong>Draft</strong>. Setting delivery status to <strong id="autoSentStatusName">Booked</strong> will automatically mark the invoice as <strong>Sent (Open)</strong>.
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -308,6 +314,11 @@ function openWaybillModal(data) {
     document.getElementById('modalTransportPayType').value = data.transport_pay_type || 'To Pay';
     document.getElementById('modalWaybillShippingCharge').value = data.waybill_shipping_charge || '';
     
+    const waybillNotice = document.getElementById('waybillAutoSentNotice');
+    if (waybillNotice) {
+        waybillNotice.style.display = (data.status === 'Draft') ? 'block' : 'none';
+    }
+
     document.getElementById('updateWaybillForm').action = '<?= site_url('invoices/update-waybill') ?>/' + data.id;
     modal.show();
 }
@@ -316,23 +327,30 @@ function openDeliveryModal(data) {
     const modal = new bootstrap.Modal(document.getElementById('updateDeliveryModal'));
     document.getElementById('deliveryInvoiceNumber').textContent = data.invoice_number;
     const defaultStatus = data.delivery_status ? data.delivery_status.trim() : 'Pending';
-    document.getElementById('modalDeliveryStatus').value = defaultStatus || 'Pending';
+    const delStatusSelect = document.getElementById('modalDeliveryStatus');
+    delStatusSelect.value = defaultStatus || 'Pending';
     
     const delDateGroup = document.getElementById('deliveredDateGroup');
-    const delStatusSelect = document.getElementById('modalDeliveryStatus');
-    
-    // Initial check
-    delDateGroup.style.display = delStatusSelect.value === 'Delivered' ? 'block' : 'none';
-    
-    // Change listener
-    delStatusSelect.onchange = function() {
-        delDateGroup.style.display = this.value === 'Delivered' ? 'block' : 'none';
-        if (this.value === 'Delivered') {
-            document.getElementById('modalDeliveredDate').required = true;
-        } else {
-            document.getElementById('modalDeliveredDate').required = false;
+    const autoSentNotice = document.getElementById('modalAutoSentNotice');
+    const autoSentStatusName = document.getElementById('autoSentStatusName');
+
+    function checkDeliveryState() {
+        const val = delStatusSelect.value;
+        delDateGroup.style.display = val === 'Delivered' ? 'block' : 'none';
+        document.getElementById('modalDeliveredDate').required = (val === 'Delivered');
+
+        if (autoSentNotice) {
+            if (data.status === 'Draft' && ['Booked', 'In Transit', 'Delivered'].includes(val)) {
+                if (autoSentStatusName) autoSentStatusName.textContent = val;
+                autoSentNotice.style.display = 'block';
+            } else {
+                autoSentNotice.style.display = 'none';
+            }
         }
-    };
+    }
+    
+    delStatusSelect.onchange = checkDeliveryState;
+    checkDeliveryState();
 
     document.getElementById('updateDeliveryForm').action = '<?= site_url('invoices/update-delivery-status') ?>/' + data.id;
     modal.show();

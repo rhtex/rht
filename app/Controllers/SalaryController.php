@@ -42,6 +42,22 @@ class SalaryController extends BaseController
         $data['month'] = $filters['month'];
         $data['filters'] = $filters;
 
+        $stats = [
+            'total'      => count($data['salaries']),
+            'total_net'  => 0.0,
+            'paid_count' => 0,
+            'unpaid_count' => 0,
+        ];
+        foreach ($data['salaries'] as $s) {
+            $stats['total_net'] += (float) ($s['net_salary'] ?? 0);
+            if (!empty($s['is_paid'])) {
+                $stats['paid_count']++;
+            } else {
+                $stats['unpaid_count']++;
+            }
+        }
+        $data['stats'] = $stats;
+
         return view('salaries/index', $data);
     }
 

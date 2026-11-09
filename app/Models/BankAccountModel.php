@@ -22,13 +22,38 @@ class BankAccountModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'bank_name'      => 'required|min_length[2]|max_length[100]',
-        'account_number' => 'required|min_length[5]|max_length[50]|is_unique[bank_accounts.account_number,id,{id}]',
-        'ifsc_code'      => 'required|min_length[4]|max_length[20]',
-        'branch_name'    => 'required|min_length[2]|max_length[100]',
-        'account_type'   => 'required|in_list[Bank,Cash]',
-        'status'         => 'required|in_list[active,inactive]',
+        'bank_name'       => 'required|min_length[2]|max_length[100]',
+        'account_number'  => 'required|min_length[5]|max_length[50]|is_unique[bank_accounts.account_number,id,{id}]',
+        'ifsc_code'       => 'permit_empty',
+        'branch_name'     => 'required|min_length[2]|max_length[100]',
+        'account_type'    => 'required|in_list[Bank,Cash]',
+        'current_balance' => 'permit_empty|numeric',
+        'status'          => 'required|in_list[active,inactive]',
     ];
+
+    protected $validationMessages   = [
+        'ifsc_code' => [
+            'required'     => 'IFSC code is required for Bank accounts.',
+            'exact_length' => 'IFSC code must be exactly 11 characters.',
+            'alpha_numeric'=> 'IFSC code must contain only letters and numbers.',
+        ],
+    ];
+
+    /**
+     * Dynamically clean / adjust validation rules based on row data
+     */
+    protected function cleanValidationRules(array $rules, array $row): array
+    {
+        $rules = parent::cleanValidationRules($rules, $row);
+
+        if (isset($row['account_type']) && $row['account_type'] === 'Cash') {
+            $rules['ifsc_code'] = 'permit_empty';
+        } elseif (isset($row['account_type']) && $row['account_type'] === 'Bank') {
+            $rules['ifsc_code'] = 'required|exact_length[11]|alpha_numeric';
+        }
+
+        return $rules;
+    }
 
     /**
      * Get accounts with filters
@@ -47,6 +72,10 @@ class BankAccountModel extends Model
 
         if (!empty($filters['status'])) {
             $builder->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['account_type'])) {
+            $builder->where('account_type', $filters['account_type']);
         }
 
         return $builder->orderBy('bank_name', 'ASC')->get()->getResultArray();

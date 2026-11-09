@@ -34,6 +34,27 @@ class EmployeeController extends BaseController
         $data['title'] = 'Employees';
         $data['filters'] = $filters;
 
+        $stats = [
+            'total'     => count($data['employees']),
+            'active'    => 0,
+            'inactive'  => 0,
+            'permanent' => 0,
+            'temporary' => 0,
+        ];
+        foreach ($data['employees'] as $emp) {
+            if (($emp['status'] ?? '') === 'active') {
+                $stats['active']++;
+            } else {
+                $stats['inactive']++;
+            }
+            if (($emp['employment_type'] ?? '') === 'Permanent') {
+                $stats['permanent']++;
+            } else {
+                $stats['temporary']++;
+            }
+        }
+        $data['stats'] = $stats;
+
         return view('employees/index', $data);
     }
 

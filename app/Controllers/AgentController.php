@@ -29,6 +29,17 @@ class AgentController extends BaseController
         $data['title'] = 'Agents';
         $data['filters'] = $filters;
 
+        $stats = [
+            'total'          => count($data['agents']),
+            'total_comm'     => 0.0,
+            'avg_commission' => 0.0,
+        ];
+        foreach ($data['agents'] as $ag) {
+            $stats['total_comm'] += (float) ($ag['commission_percentage'] ?? 0);
+        }
+        $stats['avg_commission'] = ($stats['total'] > 0) ? ($stats['total_comm'] / $stats['total']) : 0.0;
+        $data['stats'] = $stats;
+
         return view('agents/index', $data);
     }
 

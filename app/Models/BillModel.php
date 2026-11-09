@@ -54,8 +54,16 @@ class BillModel extends Model
      */
     public function getBillsWithVendor($filters = [])
     {
-        $builder = $this->select('bills.*, vendors.name as vendor_name')
-            ->join('vendors', 'vendors.id = bills.vendor_id', 'left');
+        $builder = $this->select('bills.*, vendors.name as vendor_name, addresses.city as vendor_city')
+            ->join('vendors', 'vendors.id = bills.vendor_id', 'left')
+            ->join('addresses', 'addresses.owner_id = vendors.id AND addresses.owner_type = "vendor" AND addresses.address_type = "billing" AND addresses.is_active = 1', 'left');
+
+        if (!empty($filters['bill_number'])) {
+            $builder->groupStart()
+                ->like('bills.bill_number', $filters['bill_number'])
+                ->orLike('bills.reference_number', $filters['bill_number'])
+                ->groupEnd();
+        }
 
         if (!empty($filters['vendor_id'])) {
             $builder->where('bills.vendor_id', $filters['vendor_id']);
@@ -81,7 +89,7 @@ class BillModel extends Model
      */
     public function getBillById($id)
     {
-        $bill = $this->select('bills.*, vendors.name as vendor_name, states.id as vendor_state_id, states.name as vendor_state')
+        $bill = $this->select('bills.*, vendors.name as vendor_name, vendors.phone as vendor_phone, vendors.whatsapp_number as vendor_whatsapp, vendors.gstin as vendor_gstin, vendors.gst_type as vendor_gst_type, states.id as vendor_state_id, states.name as vendor_state, addresses.address_line1 as vendor_address1, addresses.address_line2 as vendor_address2, addresses.city as vendor_city, addresses.pincode as vendor_pincode')
             ->join('vendors', 'vendors.id = bills.vendor_id', 'left')
             ->join('addresses', 'addresses.owner_id = vendors.id AND addresses.owner_type = "vendor" AND addresses.address_type = "billing" AND addresses.is_active = 1', 'left')
             ->join('states', 'states.id = addresses.state_id', 'left')

@@ -32,27 +32,54 @@ class QuotationController extends BaseController
     public function index()
     {
         $filters = [
-            'customer_id' => $this->request->getGet('customer_id'),
-            'status' => $this->request->getGet('status'),
+            'quotation_number' => $this->request->getGet('quotation_number'),
+            'customer_id'      => $this->request->getGet('customer_id'),
+            'status'           => $this->request->getGet('status'),
+            'date_from'        => $this->request->getGet('date_from'),
+            'date_to'          => $this->request->getGet('date_to'),
         ];
 
         $data['quotations'] = $this->quotationModel->getQuotationsWithCustomer($filters);
-        $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
-        $data['title'] = 'Quotations';
+        $data['customers']  = $this->customerModel->where('status', 'active')->findAll();
+        $data['filters']    = $filters;
+        $data['title']      = 'Quotations / Estimates';
+
+        $stats = [
+            'total'          => count($data['quotations']),
+            'total_amount'   => 0.0,
+            'accepted_count' => 0,
+            'invoiced_count' => 0,
+            'sent_count'     => 0,
+            'draft_count'    => 0,
+        ];
+        foreach ($data['quotations'] as $q) {
+            $stats['total_amount'] += (float) ($q['total_amount'] ?? 0);
+            $st = $q['status'] ?? '';
+            if ($st === 'Accepted') {
+                $stats['accepted_count']++;
+            } elseif ($st === 'Invoiced') {
+                $stats['invoiced_count']++;
+            } elseif ($st === 'Sent') {
+                $stats['sent_count']++;
+            } elseif ($st === 'Draft') {
+                $stats['draft_count']++;
+            }
+        }
+        $data['stats'] = $stats;
 
         return view('quotations/index', $data);
     }
 
     public function create()
     {
-        $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
-        $data['products'] = $this->productModel->getProductsWithCategory();
-        $data['taxes'] = $this->taxModel->where('status', 'Active')->findAll();
-        $data['agents'] = $this->agentModel->findAll();
-        $data['transports'] = $this->transportModel->orderBy('transport_name', 'ASC')->findAll();
+        $data['customers']        = $this->customerModel->where('status', 'active')->findAll();
+        $data['products']         = $this->productModel->getProductsWithCategory();
+        $data['taxes']            = $this->taxModel->where('status', 'Active')->findAll();
+        $data['agents']           = $this->agentModel->findAll();
+        $data['transports']       = $this->transportModel->orderBy('transport_name', 'ASC')->findAll();
         $data['quotation_number'] = $this->quotationModel->generateQuotationNumber();
-        $data['title'] = 'Create Quotation';
-        $data['quotation'] = null;
+        $data['title']            = 'Create Quotation / Estimate';
+        $data['quotation']        = null;
 
         return view('quotations/form', $data);
     }
@@ -62,45 +89,71 @@ class QuotationController extends BaseController
         $db = \Config\Database::connect();
         $db->transStart();
 
-        $quotationData = [
-            'customer_id' => $this->request->getPost('customer_id'),
-            'agent_id' => $this->request->getPost('agent_id') ?: null,
-            'quotation_number' => $this->request->getPost('quotation_number'),
-            'quotation_date' => $this->request->getPost('quotation_date'),
-            'expiry_date' => $this->request->getPost('expiry_date'),
-            'reference_number' => $this->request->getPost('reference_number'),
-            'transport_name' => $this->request->getPost('transport_name'),
-            'waybill_number' => $this->request->getPost('waybill_number'),
-            'notes' => $this->request->getPost('notes'),
-            'terms' => $this->request->getPost('terms'),
-            'discount_amount' => $this->request->getPost('discount_amount') ?? 0,
-            'discount_type' => $this->request->getPost('discount_type') ?? 'Fixed',
-            'shipping_charge' => $this->request->getPost('shipping_charge') ?? 0,
-            'roundoff_amount' => $this->request->getPost('roundoff_amount') ?? 0,
-            'is_inter_state' => $this->request->getPost('is_inter_state') ?? 0,
-            'created_by' => session('user_id'),
-            'status' => 'Draft'
-        ];
-
-        // Manual Calculation for Totals
-        $items = $this->request->getPost('items');
-        $subtotal = 0;
-        foreach ($items as $item) {
-            $subtotal += ($item['quantity'] * $item['rate']);
+        $rawItems = $this->request->getPost('items') ?? [];
+        $items = [];
+        foreach ($rawItems as $item) {
+            if (!empty($item['description']) || !empty($item['product_id'])) {
+                $qty = (float) ($item['quantity'] ?? 0);
+                $rate = (float) ($item['rate'] ?? 0);
+                if ($qty > 0 && $rate >= 0) {
+                    $items[] = $item;
+                }
+            }
         }
 
-        $totalDiscount = ($quotationData['discount_type'] == 'Percentage') ? ($subtotal * $quotationData['discount_amount'] / 100) : $quotationData['discount_amount'];
+        if (empty($items)) {
+            return redirect()->back()->withInput()->with('error', 'Please add at least one valid line item with quantity and rate.');
+        }
+
+        $subtotal = 0;
+        foreach ($items as $item) {
+            $subtotal += ((float) $item['quantity'] * (float) $item['rate']);
+        }
+
+        $discountAmount = (float) ($this->request->getPost('discount_amount') ?? 0);
+        $discountType = $this->request->getPost('discount_type') ?? 'Fixed';
+        $totalDiscount = ($discountType == 'Percentage') ? ($subtotal * $discountAmount / 100) : $discountAmount;
 
         $taxAmount = 0;
         foreach ($items as $item) {
-            $itemAmt = $item['quantity'] * $item['rate'];
+            $itemAmt = (float) $item['quantity'] * (float) $item['rate'];
             $itemDiscount = ($subtotal > 0) ? ($itemAmt / $subtotal * $totalDiscount) : 0;
-            $taxAmount += ($itemAmt - $itemDiscount) * ($item['tax_percentage'] / 100);
+            $taxableVal = max(0, $itemAmt - $itemDiscount);
+            $taxAmount += ($taxableVal * ((float) ($item['tax_percentage'] ?? 0)) / 100);
         }
 
-        $quotationData['subtotal'] = $subtotal;
-        $quotationData['tax_amount'] = $taxAmount;
-        $quotationData['total_amount'] = ($subtotal - $totalDiscount) + $taxAmount + $quotationData['shipping_charge'] + $quotationData['roundoff_amount'];
+        $shippingCharge = (float) ($this->request->getPost('shipping_charge') ?? 0);
+        $roundoffAmount = (float) ($this->request->getPost('roundoff_amount') ?? 0);
+        $totalAmount = max(0, ($subtotal - $totalDiscount) + $taxAmount + $shippingCharge + $roundoffAmount);
+
+        $agentId = $this->request->getPost('agent_id') ?: null;
+        $agentCommissionPercent = (float) ($this->request->getPost('agent_commission_percent') ?? 0);
+        $agentCommissionAmount = ($agentId && $agentCommissionPercent > 0) ? ($subtotal * $agentCommissionPercent / 100) : 0;
+
+        $quotationData = [
+            'customer_id'              => $this->request->getPost('customer_id'),
+            'agent_id'                 => $agentId,
+            'agent_commission_percent' => $agentCommissionPercent,
+            'agent_commission_amount'  => $agentCommissionAmount,
+            'quotation_number'         => $this->request->getPost('quotation_number'),
+            'quotation_date'           => $this->request->getPost('quotation_date'),
+            'expiry_date'              => $this->request->getPost('expiry_date') ?: null,
+            'reference_number'         => $this->request->getPost('reference_number'),
+            'transport_name'           => $this->request->getPost('transport_name'),
+            'waybill_number'           => $this->request->getPost('waybill_number'),
+            'notes'                    => $this->request->getPost('notes'),
+            'terms'                    => $this->request->getPost('terms'),
+            'subtotal'                 => $subtotal,
+            'discount_amount'          => $discountAmount,
+            'discount_type'            => $discountType,
+            'tax_amount'               => $taxAmount,
+            'shipping_charge'          => $shippingCharge,
+            'roundoff_amount'          => $roundoffAmount,
+            'total_amount'             => $totalAmount,
+            'is_inter_state'           => $this->request->getPost('is_inter_state') ? 1 : 0,
+            'created_by'               => session('user_id'),
+            'status'                   => 'Draft'
+        ];
 
         if (!$this->quotationModel->insert($quotationData)) {
             return redirect()->back()->withInput()->with('errors', $this->quotationModel->errors());
@@ -110,14 +163,14 @@ class QuotationController extends BaseController
 
         foreach ($items as $item) {
             $this->itemModel->insert([
-                'quotation_id' => $quotationId,
-                'product_id' => $item['product_id'] ?: null,
-                'description' => $item['description'],
-                'hsn_code' => $item['hsn_code'],
-                'quantity' => $item['quantity'],
-                'rate' => $item['rate'],
-                'tax_percentage' => $item['tax_percentage'],
-                'amount' => $item['quantity'] * $item['rate']
+                'quotation_id'   => $quotationId,
+                'product_id'     => !empty($item['product_id']) ? $item['product_id'] : null,
+                'description'    => $item['description'],
+                'hsn_code'       => $item['hsn_code'] ?? null,
+                'quantity'       => (float) $item['quantity'],
+                'rate'           => (float) $item['rate'],
+                'tax_percentage' => (float) ($item['tax_percentage'] ?? 0),
+                'amount'         => (float) $item['quantity'] * (float) $item['rate']
             ]);
         }
 
@@ -126,7 +179,6 @@ class QuotationController extends BaseController
         if ($db->transStatus() === false) {
             return redirect()->back()->withInput()->with('error', 'Failed to create quotation.');
         }
-
 
         return redirect()->to('quotations/view/' . $quotationId)->with('success', 'Quotation created successfully.');
     }
@@ -149,6 +201,11 @@ class QuotationController extends BaseController
             return redirect()->to('quotations')->with('error', 'Quotation not found.');
         }
 
+        $isConverted = !empty($data['quotation']['converted_to_so_id']) || !empty($data['quotation']['converted_to_invoice_id']) || !empty($data['quotation']['linked_so_id']) || in_array($data['quotation']['status'], ['Accepted', 'Invoiced']);
+        if ($isConverted) {
+            return redirect()->to('quotations/view/' . $id)->with('error', 'Cannot edit a quotation that has already been converted.');
+        }
+
         $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
         $data['agents'] = $this->agentModel->findAll();
         $data['transports'] = $this->transportModel->orderBy('transport_name', 'ASC')->findAll();
@@ -161,59 +218,95 @@ class QuotationController extends BaseController
 
     public function update($id)
     {
+        $quotation = $this->quotationModel->find($id);
+        if (!$quotation) {
+            return redirect()->to('quotations')->with('error', 'Quotation not found.');
+        }
+
+        if (!empty($quotation['converted_to_so_id']) || !empty($quotation['converted_to_invoice_id']) || in_array($quotation['status'], ['Accepted', 'Invoiced'])) {
+            return redirect()->to('quotations/view/' . $id)->with('error', 'Cannot edit a quotation that has already been converted.');
+        }
+
         $db = \Config\Database::connect();
         $db->transStart();
 
-        $quotationData = [
-            'customer_id' => $this->request->getPost('customer_id'),
-            'agent_id' => $this->request->getPost('agent_id') ?: null,
-            'quotation_date' => $this->request->getPost('quotation_date'),
-            'expiry_date' => $this->request->getPost('expiry_date'),
-            'reference_number' => $this->request->getPost('reference_number'),
-            'transport_name' => $this->request->getPost('transport_name'),
-            'waybill_number' => $this->request->getPost('waybill_number'),
-            'notes' => $this->request->getPost('notes'),
-            'terms' => $this->request->getPost('terms'),
-            'discount_amount' => $this->request->getPost('discount_amount') ?? 0,
-            'discount_type' => $this->request->getPost('discount_type') ?? 'Fixed',
-            'shipping_charge' => $this->request->getPost('shipping_charge') ?? 0,
-            'roundoff_amount' => $this->request->getPost('roundoff_amount') ?? 0,
-            'is_inter_state' => $this->request->getPost('is_inter_state') ?? 0,
-            'updated_by' => session('user_id'),
-        ];
-
-        $items = $this->request->getPost('items');
-        $subtotal = 0;
-        foreach ($items as $item) {
-            $subtotal += ($item['quantity'] * $item['rate']);
+        $rawItems = $this->request->getPost('items') ?? [];
+        $items = [];
+        foreach ($rawItems as $item) {
+            if (!empty($item['description']) || !empty($item['product_id'])) {
+                $qty = (float) ($item['quantity'] ?? 0);
+                $rate = (float) ($item['rate'] ?? 0);
+                if ($qty > 0 && $rate >= 0) {
+                    $items[] = $item;
+                }
+            }
         }
 
-        $totalDiscount = ($quotationData['discount_type'] == 'Percentage') ? ($subtotal * $quotationData['discount_amount'] / 100) : $quotationData['discount_amount'];
+        if (empty($items)) {
+            return redirect()->back()->withInput()->with('error', 'Please add at least one valid line item with quantity and rate.');
+        }
+
+        $subtotal = 0;
+        foreach ($items as $item) {
+            $subtotal += ((float) $item['quantity'] * (float) $item['rate']);
+        }
+
+        $discountAmount = (float) ($this->request->getPost('discount_amount') ?? 0);
+        $discountType = $this->request->getPost('discount_type') ?? 'Fixed';
+        $totalDiscount = ($discountType == 'Percentage') ? ($subtotal * $discountAmount / 100) : $discountAmount;
 
         $taxAmount = 0;
         foreach ($items as $item) {
-            $itemAmt = $item['quantity'] * $item['rate'];
+            $itemAmt = (float) $item['quantity'] * (float) $item['rate'];
             $itemDiscount = ($subtotal > 0) ? ($itemAmt / $subtotal * $totalDiscount) : 0;
-            $taxAmount += ($itemAmt - $itemDiscount) * ($item['tax_percentage'] / 100);
+            $taxableVal = max(0, $itemAmt - $itemDiscount);
+            $taxAmount += ($taxableVal * ((float) ($item['tax_percentage'] ?? 0)) / 100);
         }
 
-        $quotationData['subtotal'] = $subtotal;
-        $quotationData['tax_amount'] = $taxAmount;
-        $quotationData['total_amount'] = ($subtotal - $totalDiscount) + $taxAmount + $quotationData['shipping_charge'] + $quotationData['roundoff_amount'];
+        $shippingCharge = (float) ($this->request->getPost('shipping_charge') ?? 0);
+        $roundoffAmount = (float) ($this->request->getPost('roundoff_amount') ?? 0);
+        $totalAmount = max(0, ($subtotal - $totalDiscount) + $taxAmount + $shippingCharge + $roundoffAmount);
+
+        $agentId = $this->request->getPost('agent_id') ?: null;
+        $agentCommissionPercent = (float) ($this->request->getPost('agent_commission_percent') ?? 0);
+        $agentCommissionAmount = ($agentId && $agentCommissionPercent > 0) ? ($subtotal * $agentCommissionPercent / 100) : 0;
+
+        $quotationData = [
+            'customer_id'              => $this->request->getPost('customer_id'),
+            'agent_id'                 => $agentId,
+            'agent_commission_percent' => $agentCommissionPercent,
+            'agent_commission_amount'  => $agentCommissionAmount,
+            'quotation_date'           => $this->request->getPost('quotation_date'),
+            'expiry_date'              => $this->request->getPost('expiry_date') ?: null,
+            'reference_number'         => $this->request->getPost('reference_number'),
+            'transport_name'           => $this->request->getPost('transport_name'),
+            'waybill_number'           => $this->request->getPost('waybill_number'),
+            'notes'                    => $this->request->getPost('notes'),
+            'terms'                    => $this->request->getPost('terms'),
+            'subtotal'                 => $subtotal,
+            'discount_amount'          => $discountAmount,
+            'discount_type'            => $discountType,
+            'tax_amount'               => $taxAmount,
+            'shipping_charge'          => $shippingCharge,
+            'roundoff_amount'          => $roundoffAmount,
+            'total_amount'             => $totalAmount,
+            'is_inter_state'           => $this->request->getPost('is_inter_state') ? 1 : 0,
+            'updated_by'               => session('user_id'),
+        ];
 
         $this->quotationModel->update($id, $quotationData);
 
         $this->itemModel->where('quotation_id', $id)->delete();
         foreach ($items as $item) {
             $this->itemModel->insert([
-                'quotation_id' => $id,
-                'product_id' => $item['product_id'] ?: null,
-                'description' => $item['description'],
-                'hsn_code' => $item['hsn_code'],
-                'quantity' => $item['quantity'],
-                'rate' => $item['rate'],
-                'tax_percentage' => $item['tax_percentage'],
-                'amount' => $item['quantity'] * $item['rate']
+                'quotation_id'   => $id,
+                'product_id'     => !empty($item['product_id']) ? $item['product_id'] : null,
+                'description'    => $item['description'],
+                'hsn_code'       => $item['hsn_code'] ?? null,
+                'quantity'       => (float) $item['quantity'],
+                'rate'           => (float) $item['rate'],
+                'tax_percentage' => (float) ($item['tax_percentage'] ?? 0),
+                'amount'         => (float) $item['quantity'] * (float) $item['rate']
             ]);
         }
 
@@ -223,7 +316,6 @@ class QuotationController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update quotation.');
         }
 
-
         return redirect()->to('quotations/view/' . $id)->with('success', 'Quotation updated successfully.');
     }
 
@@ -232,6 +324,10 @@ class QuotationController extends BaseController
         $quotation = $this->quotationModel->find($id);
         if (!$quotation) {
             return redirect()->to('quotations')->with('error', 'Quotation not found.');
+        }
+
+        if (!empty($quotation['converted_to_so_id']) || !empty($quotation['converted_to_invoice_id']) || in_array($quotation['status'], ['Accepted', 'Invoiced'])) {
+            return redirect()->to('quotations/view/' . $id)->with('error', 'Cannot delete a quotation that has already been converted.');
         }
 
         $db = \Config\Database::connect();
@@ -244,21 +340,73 @@ class QuotationController extends BaseController
             return redirect()->to('quotations')->with('error', 'Failed to delete quotation.');
         }
 
-
         return redirect()->to('quotations')->with('success', 'Quotation deleted successfully.');
     }
 
+    public function convertToSalesOrder($id)
+    {
+        $quotation = $this->quotationModel->getQuotationById($id);
+        if (!$quotation) {
+            return redirect()->to('quotations')->with('error', 'Quotation not found.');
+        }
+
+        $soId = $quotation['converted_to_so_id'] ?: ($quotation['linked_so_id'] ?? null);
+        if (!empty($soId)) {
+            return redirect()->to('sales_orders/view/' . $soId)
+                ->with('info', 'This quotation has already been converted to Sales Order ' . (!empty($quotation['converted_so_number']) ? '#' . $quotation['converted_so_number'] : '') . '.');
+        }
+
+        if (!empty($quotation['converted_to_invoice_id'])) {
+            return redirect()->to('invoices/view/' . $quotation['converted_to_invoice_id'])
+                ->with('info', 'This quotation has already been converted to an Invoice.');
+        }
+
+        if (in_array($quotation['status'], ['Accepted', 'Invoiced'])) {
+            return redirect()->to('quotations/view/' . $id)
+                ->with('error', 'This quotation has already been converted and cannot be converted again.');
+        }
+
+        return redirect()->to('sales_orders/create?quotation_id=' . $id);
+    }
+
+    public function convertToInvoice($id)
+    {
+        $quotation = $this->quotationModel->getQuotationById($id);
+        if (!$quotation) {
+            return redirect()->to('quotations')->with('error', 'Quotation not found.');
+        }
+
+        if (!empty($quotation['converted_to_invoice_id'])) {
+            return redirect()->to('invoices/view/' . $quotation['converted_to_invoice_id'])
+                ->with('info', 'This quotation has already been converted to Invoice ' . (!empty($quotation['converted_invoice_number']) ? '#' . $quotation['converted_invoice_number'] : '') . '.');
+        }
+
+        $soId = $quotation['converted_to_so_id'] ?: ($quotation['linked_so_id'] ?? null);
+        if (!empty($soId)) {
+            return redirect()->to('sales_orders/view/' . $soId)
+                ->with('info', 'This quotation has already been converted to a Sales Order.');
+        }
+
+        if (in_array($quotation['status'], ['Accepted', 'Invoiced'])) {
+            return redirect()->to('quotations/view/' . $id)
+                ->with('error', 'This quotation has already been converted and cannot be converted again.');
+        }
+
+        return redirect()->to('invoices/create?quotation_id=' . $id);
+    }
 
     public function print($id)
     {
         $data['quotation'] = $this->quotationModel->getQuotationById($id);
-        if (!$data['quotation'])
-            return 'Quotation not found';
+        if (!$data['quotation']) {
+            return redirect()->to('quotations')->with('error', 'Quotation not found.');
+        }
 
-        $data['company_name'] = get_setting('app_name', 'RasiDev');
+        $data['company_name']    = get_setting('app_name', 'RasiDev');
         $data['company_address'] = get_setting('company_address', '');
-        $data['company_gstin'] = get_setting('company_gstin', '');
-        $data['title'] = 'Quotation ' . $data['quotation']['quotation_number'];
+        $data['company_gstin']   = get_setting('company_gstin', '');
+        $data['company_contact'] = get_setting('company_phone', '');
+        $data['title']           = 'Quotation / Estimate #' . $data['quotation']['quotation_number'];
 
         return view('quotations/print', $data);
     }

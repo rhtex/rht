@@ -40,6 +40,24 @@ class ProductController extends BaseController
         $data['total_count']  = count($data['products']);
         $data['applied_filters'] = $filters;
 
+        $stats = [
+            'total'     => count($data['products']),
+            'active'    => 0,
+            'inactive'  => 0,
+            'out_stock' => 0,
+        ];
+        foreach ($data['products'] as $p) {
+            if (($p['status'] ?? '') === 'active') {
+                $stats['active']++;
+            } else {
+                $stats['inactive']++;
+            }
+            if (($p['total_stock'] ?? 0) <= 0) {
+                $stats['out_stock']++;
+            }
+        }
+        $data['stats'] = $stats;
+
         return view('products/index', $data);
     }
 

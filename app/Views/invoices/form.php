@@ -15,12 +15,16 @@
         </div>
     </div>
 
+    <?php
+    $selectedCustId = $invoice['customer_id'] ?? ($sales_order['customer_id'] ?? ($quotation['customer_id'] ?? null));
+    $activeInvoiceItems = !empty($invoice['items']) ? $invoice['items'] : (!empty($sales_order['items']) ? $sales_order['items'] : (!empty($quotation['items']) ? $quotation['items'] : []));
+    ?>
     <form id="invoiceForm"
         action="<?= $invoice ? site_url('invoices/update/' . $invoice['id']) : site_url('invoices/store') ?>"
         method="post">
         <?= csrf_field() ?>
         <input type="hidden" name="is_inter_state" id="isInterStateField"
-            value="<?= $invoice['is_inter_state'] ?? 0 ?>">
+            value="<?= $invoice['is_inter_state'] ?? ($sales_order['is_inter_state'] ?? ($quotation['is_inter_state'] ?? 0)) ?>">
 
 <style>
     .gst-container {
@@ -135,14 +139,14 @@
                     <select name="customer_id" id="customerSelect" class="form-select select2" required>
                         <option value="">-- Search Customer --</option>
                         <?php foreach ($customers as $customer): ?>
-                            <option value="<?= $customer['id'] ?>" <?= ($invoice && $invoice['customer_id'] == $customer['id']) ? 'selected' : '' ?>>
+                            <option value="<?= $customer['id'] ?>" <?= ($selectedCustId == $customer['id']) ? 'selected' : '' ?>>
                                 <?= esc($customer['name']) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
 
-                <div id="customerAddressSection" style="display: none;">
+                <div id="customerAddressSection" style="<?= ($selectedCustId) ? '' : 'display: none;' ?>">
                     <div class="row">
                         <div class="col-sm-6 mb-2">
                             <label class="form-label text-primary">Billing Address</label>
@@ -216,6 +220,42 @@
                         <input type="date" name="po_date" class="form-control" value="<?= esc($invoice['po_date'] ?? '') ?>">
                     </div>
                 </div>
+
+                <?php
+                // Determine SO values: from existing invoice, or from a sales order being converted
+                $soNumber      = $invoice['so_number'] ?? ($sales_order['sales_order_number'] ?? '');
+                $soDate        = $invoice['so_date']   ?? ($sales_order['order_date'] ?? '');
+                $selectionType = $invoice['selection_type'] ?? ($sales_order['selection_type'] ?? '');
+                $fromSO        = !empty($sales_order);
+                ?>
+                <input type="hidden" name="sales_order_id" value="<?= esc($sales_order['id'] ?? '') ?>">
+                <input type="hidden" name="quotation_id" value="<?= esc($quotation['id'] ?? '') ?>">
+                <div class="row g-2 mt-1">
+                    <div class="col-sm-4">
+                        <label class="form-label">SO Number
+                            <?php if ($fromSO): ?>
+                                <span class="badge bg-info text-white ms-1" style="font-size:0.7rem;">Auto-filled from SO</span>
+                            <?php endif; ?>
+                        </label>
+                        <input type="text" name="so_number" class="form-control <?= $fromSO ? 'bg-light' : '' ?>"
+                            placeholder="Sales Order No." value="<?= esc($soNumber) ?>"
+                            <?= $fromSO ? 'readonly' : '' ?>>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label">SO Date</label>
+                        <input type="date" name="so_date" class="form-control <?= $fromSO ? 'bg-light' : '' ?>"
+                            value="<?= esc($soDate ? date('Y-m-d', strtotime($soDate)) : '') ?>"
+                            <?= $fromSO ? 'readonly' : '' ?>>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label">Selection Type</label>
+                        <select name="selection_type" class="form-select">
+                            <option value="">-- None --</option>
+                            <option value="Personal Selection" <?= ($selectionType == 'Personal Selection') ? 'selected' : '' ?>>Personal Selection</option>
+                            <option value="Company Selection" <?= ($selectionType == 'Company Selection') ? 'selected' : '' ?>>Company Selection</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -270,7 +310,7 @@
             
             <div class="table-responsive position-relative p-0 m-0 border-bottom border-secondary-subtle">
                 <!-- Blur Overlay -->
-                <div class="glass-overlay <?= ($invoice && !empty($invoice['customer_id'])) ? '' : 'active' ?>" id="lineItemsOverlay">
+                <div class="glass-overlay <?= ($selectedCustId) ? '' : 'active' ?>" id="lineItemsOverlay">
                     <div class="bg-white p-3 border border-secondary-subtle text-center shadow rounded-3">
                         <i class="fas fa-lock fs-3 text-muted mb-2"></i>
                         <h6 class="fw-bold text-uppercase">Customer Required</h6>
@@ -292,8 +332,8 @@
                         </tr>
                     </thead>
                     <tbody id="itemsBody">
-                        <?php if ($invoice && !empty($invoice['items'])): ?>
-                            <?php foreach ($invoice['items'] as $index => $item): ?>
+                        <?php if (!empty($activeInvoiceItems)): ?>
+                            <?php foreach ($activeInvoiceItems as $index => $item): ?>
                                 <tr class="item-row">
                                     <td class="text-center fw-bold index-column text-muted"><?= $index + 1 ?></td>
                                     <td>
@@ -326,7 +366,7 @@
                                         <?php $tax_type = (!empty($item['igst_rate']) && $item['igst_rate'] > 0) ? 'IGST' : 'CGST_SGST'; ?>
                                         <input type="hidden" name="items[<?= $index ?>][tax_type]" class="tax_type" value="<?= $tax_type ?>">
                                     </td>
-                                    <td><input type="text" class="form-control text-end fw-bold amount bg-light" readonly value="<?= number_format($item['amount'], 2, '.', '') ?>"></td>
+                                    <td><input type="text" class="form-control text-end fw-bold amount bg-light" readonly value="<?= number_format($item['amount'] ?? ($item['quantity'] * $item['rate']), 2, '.', '') ?>"></td>
                                     <td class="text-center"><button type="button" class="btn btn-sm text-danger p-0" onclick="removeRow(this)" title="Delete Row"><i class="fas fa-trash"></i></button></td>
                                 </tr>
                             <?php endforeach; ?>
@@ -395,10 +435,10 @@
                         <td>
                             <div class="d-flex gap-1">
                                 <input type="number" step="0.01" name="discount_amount" id="discount_amount" class="form-control text-end"
-                                    value="<?= esc($invoice['discount_amount'] ?? 0) ?>" min="0" oninput="calculateTotals()" onchange="calculateTotals()">
+                                    value="<?= esc($invoice['discount_amount'] ?? ($sales_order['discount_amount'] ?? ($quotation['discount_amount'] ?? 0))) ?>" min="0" oninput="calculateTotals()" onchange="calculateTotals()">
                                 <select name="discount_type" id="discount_type" class="form-select flex-shrink-0" style="width: 50px; padding: 2px;" onchange="calculateTotals()">
-                                    <option value="Percentage" <?= (!isset($invoice) || empty($invoice['discount_type']) || $invoice['discount_type'] == 'Percentage') ? 'selected' : '' ?>>%</option>
-                                    <option value="Fixed" <?= (isset($invoice) && $invoice['discount_type'] == 'Fixed') ? 'selected' : '' ?>>₹</option>
+                                    <option value="Percentage" <?= ((($invoice['discount_type'] ?? ($sales_order['discount_type'] ?? ($quotation['discount_type'] ?? ''))) == 'Percentage') || empty($invoice['discount_type'])) ? 'selected' : '' ?>>%</option>
+                                    <option value="Fixed" <?= (($invoice['discount_type'] ?? ($sales_order['discount_type'] ?? ($quotation['discount_type'] ?? ''))) == 'Fixed') ? 'selected' : '' ?>>₹</option>
                                 </select>
                                 <input type="text" id="calculatedDiscount" class="form-control text-end text-danger bg-light flex-shrink-0" readonly value="0.00" style="width: 80px;">
                             </div>
@@ -416,12 +456,12 @@
                     <tr>
                         <td class="gst-summary-label">Add: Shipping</td>
                         <td><input type="number" name="shipping_charge" id="shipping_charge" class="form-control text-end"
-                            value="<?= esc($invoice['shipping_charge'] ?? 0) ?>" min="0" step="0.01" oninput="calculateTotals()" onchange="calculateTotals()"></td>
+                            value="<?= esc($invoice['shipping_charge'] ?? ($sales_order['shipping_charge'] ?? ($quotation['shipping_charge'] ?? 0))) ?>" min="0" step="0.01" oninput="calculateTotals()" onchange="calculateTotals()"></td>
                     </tr>
                     <tr>
                         <td class="gst-summary-label">Round Off</td>
                         <td><input type="text" name="roundoff_amount" id="roundoff_amount" class="form-control text-end bg-light"
-                            value="<?= esc($invoice['roundoff_amount'] ?? '0.00') ?>" readonly></td>
+                            value="<?= esc($invoice['roundoff_amount'] ?? ($sales_order['roundoff_amount'] ?? ($quotation['roundoff_amount'] ?? '0.00'))) ?>" readonly></td>
                     </tr>
                     <tr class="grand-total-row border-top border-secondary-subtle">
                         <td class="py-3">Grand Total (₹)</td>
@@ -442,10 +482,10 @@
 
 <?= $this->section('scripts') ?>
 <script>
-    let rowIndex = <?= ($invoice && !empty($invoice['items'])) ? count($invoice['items']) : 1 ?>;
-    let isInterState = <?= (isset($invoice) && !empty($invoice['is_inter_state'])) ? 'true' : 'false' ?>;
+    let rowIndex = <?= (!empty($activeInvoiceItems)) ? count($activeInvoiceItems) : 1 ?>;
+    let isInterState = <?= (isset($invoice) && !empty($invoice['is_inter_state'])) ? 'true' : (!empty($sales_order['is_inter_state']) || !empty($quotation['is_inter_state']) ? 'true' : 'false') ?>;
     let currentCreditDays = 0;
-    let isInitialLoad = <?= $invoice ? 'true' : 'false' ?>;
+    let isInitialLoad = <?= (!empty($invoice) || !empty($selectedCustId)) ? 'true' : 'false' ?>;
 
     // Global caches for clean HTML templates
     let _productOptionsHtml = '';

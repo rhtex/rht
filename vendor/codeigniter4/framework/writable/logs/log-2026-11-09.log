@@ -1,0 +1,11 @@
+CRITICAL - 2026-11-09 06:31:14 --> CodeIgniter\Exceptions\CriticalError: The required PHP extension "sqlite3" is not loaded. Install and enable it to use "SQLite3" driver.
+[Method: GET, Route: /]
+in SYSTEMPATH\Database\Database.php on line 186.
+ 1 SYSTEMPATH\Database\Database.php(59): CodeIgniter\Database\Database->checkDbExtension('SQLite3')
+ 2 SYSTEMPATH\Database\Config.php(82): CodeIgniter\Database\Database->load([...], 'tests')
+ 3 SYSTEMPATH\Validation\Rules.php(210): CodeIgniter\Database\Config::connect('tests')
+ 4 SYSTEMPATH\Validation\Rules.php(165): CodeIgniter\Validation\Rules->prepareUniqueQuery('12345678901', 'account_number', [...])
+ 5 SYSTEMPATH\Validation\StrictRules\Rules.php(187): CodeIgniter\Validation\Rules->is_unique('12345678901', 'bank_accounts.account_number,id,{id}', [...])
+ 6 SYSTEMPATH\Validation\Validation.php(345): CodeIgniter\Validation\StrictRules\Rules->is_unique('12345678901', 'bank_accounts.account_number,id,{id}', [...], null, 'account_number')
+ 7 SYSTEMPATH\Validation\Validation.php(210): CodeIgniter\Validation\Validation->processRules('account_number', 'account_number', '12345678901', [...], [...], 'account_number')
+ 8 C:\Users\GOWHAM\.gemini\antigravity\brain\b8d66065-e759-4a4d-8872-8b05dcd37021\scratch\test.php(30): CodeIgniter\Validation\Validation->run([...])

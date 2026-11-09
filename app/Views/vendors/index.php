@@ -3,57 +3,81 @@
 <?= $this->section('title') ?>Vendors<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
-<div class="row mb-2">
+<div class="row mb-3 align-items-center">
     <div class="col-sm-6">
-        <h1>Vendor Management</h1>
+        <h1 class="m-0"><i class="fas fa-truck text-primary me-2"></i>Vendor Management</h1>
     </div>
     <div class="col-sm-6 text-end">
-        <?php if (in_array('vendor.create', session('permissions') ?? [])): ?>
-            <a href="<?= site_url('vendors/create') ?>" class="btn btn-primary"><i class="fas fa-plus"></i> Add New
-                Vendor</a>
-        <?php endif; ?>
+        <div class="d-inline-flex gap-2 align-items-center">
+            <a href="<?= base_url('sample_customer.csv') ?>" class="btn btn-sm btn-outline-secondary" title="Download Sample CSV">
+                <i class="fas fa-download me-1"></i> Sample CSV
+            </a>
+            <a href="<?= site_url('bulk-upload/form') ?>" class="btn btn-sm btn-outline-primary" title="Bulk Upload Vendors">
+                <i class="fas fa-file-upload me-1"></i> Bulk Upload
+            </a>
+            <?php if (in_array('vendor.create', session('permissions') ?? [])): ?>
+                <a href="<?= site_url('vendors/create') ?>" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus me-1"></i> Add New Vendor
+                </a>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<!-- Summary Stat Cards -->
+<div class="row g-3 mb-3">
+    <div class="col-md-4 col-sm-6">
+        <a href="<?= site_url('vendors') ?>" class="bt-stat bt-g-blue text-decoration-none <?= empty($filters['status']) ? 'active' : '' ?>">
+            <i class="fas fa-truck bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= $totalCount ?? count($vendors) ?></div>
+            <div class="bt-stat-label">Total Vendors</div>
+            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
+        </a>
+    </div>
+    <div class="col-md-4 col-sm-6">
+        <a href="<?= site_url('vendors?status=active') ?>" class="bt-stat bt-g-green text-decoration-none <?= ($filters['status'] ?? '') === 'active' ? 'active' : '' ?>">
+            <i class="fas fa-check-circle bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= $activeCount ?? 0 ?></div>
+            <div class="bt-stat-label">Active Vendors</div>
+            <div class="progress"><div class="progress-bar" style="width:<?= (!empty($totalCount) && $totalCount > 0) ? round(($activeCount / $totalCount) * 100) : 100 ?>%"></div></div>
+        </a>
+    </div>
+    <div class="col-md-4 col-sm-6">
+        <a href="<?= site_url('vendors?status=inactive') ?>" class="bt-stat bt-g-slate text-decoration-none <?= ($filters['status'] ?? '') === 'inactive' ? 'active' : '' ?>">
+            <i class="fas fa-ban bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= $inactiveCount ?? 0 ?></div>
+            <div class="bt-stat-label">Inactive Vendors</div>
+            <div class="progress"><div class="progress-bar" style="width:<?= (!empty($totalCount) && $totalCount > 0) ? round(($inactiveCount / $totalCount) * 100) : 0 ?>%"></div></div>
+        </a>
+    </div>
+</div>
+
 <!-- Filters -->
-<div class="card card-outline card-primary mb-3">
-    <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-filter"></i> Filters</h3>
+<div class="card card-outline card-primary mb-3 shadow-sm">
+    <div class="card-header py-2">
+        <h3 class="card-title fw-bold"><i class="fas fa-filter me-1"></i> Filter Vendors</h3>
     </div>
     <div class="card-body">
         <form method="get" action="<?= site_url('vendors') ?>">
-            <div class="row">
+            <div class="row g-2">
                 <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label">Search</label>
-                        <input type="text" name="search" class="form-control" placeholder="Name, Phone or City..."
-                            value="<?= esc($filters['search'] ?? '') ?>">
-                    </div>
+                    <label class="form-label small fw-bold">Search</label>
+                    <input type="text" name="search" class="form-control" placeholder="Name, Phone or City..."
+                        value="<?= esc($filters['search'] ?? '') ?>">
                 </div>
                 <div class="col-md-3">
-                    <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-select">
-                            <option value="">-- All Status --</option>
-                            <option value="active" <?= (($filters['status'] ?? '') == 'active') ? 'selected' : '' ?>>Active
-                            </option>
-                            <option value="inactive" <?= (($filters['status'] ?? '') == 'inactive') ? 'selected' : '' ?>>
-                                Inactive</option>
-                        </select>
-                    </div>
+                    <label class="form-label small fw-bold">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">-- All Status --</option>
+                        <option value="active" <?= (($filters['status'] ?? '') == 'active') ? 'selected' : '' ?>>Active</option>
+                        <option value="inactive" <?= (($filters['status'] ?? '') == 'inactive') ? 'selected' : '' ?>>Inactive</option>
+                    </select>
                 </div>
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label class="form-label">&nbsp;</label>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary flex-grow-1"><i class="fas fa-search"></i>
-                                Filter</button>
-                            <a href="<?= site_url('vendors') ?>" class="btn btn-outline-secondary"
-                                title="Clear Filters"><i class="fas fa-times"></i></a>
-                        </div>
-                    </div>
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1"><i class="fas fa-search me-1"></i> Filter</button>
+                    <a href="<?= site_url('vendors') ?>" class="btn btn-outline-secondary" title="Clear Filters"><i class="fas fa-times"></i></a>
                 </div>
             </div>
             <!-- Preserve sorting in filter form -->
@@ -63,21 +87,11 @@
     </div>
 </div>
 
-<div class="mb-3">
-    <a href="<?= base_url('sample_customer.csv') ?>" class="btn btn-link">
-        <i class="bi bi-download"></i> Download Sample CSV
-    </a>
-</div>
-<div class="mb-3">
-    <a href="<?= site_url('bulk-upload/form') ?>" class="btn btn-primary">
-        <i class="fas fa-upload"></i> Bulk Upload Vendors
-    </a>
-</div>
-<div class="card card-outline card-primary">
-    <div class="card-header">
-        <h3 class="card-title">List of Vendors</h3>
+<div class="card card-outline card-primary shadow-sm">
+    <div class="card-header py-2">
+        <h3 class="card-title fw-bold"><i class="fas fa-list me-1"></i> List of Vendors</h3>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-bordered table-striped">
                 <thead>
@@ -123,25 +137,44 @@
                     <?php if (!empty($vendors)): ?>
                         <?php foreach ($vendors as $vendor): ?>
                             <tr>
-                                <td><?= $vendor['id'] ?></td>
+                                <td class="text-center text-muted fw-bold">#<?= $vendor['id'] ?></td>
                                 <td>
-                                    <strong><a href="<?= site_url('vendors/view/' . $vendor['id']) ?>"
-                                            class="text-dark"><?= esc($vendor['name']) ?></a></strong>
-                                    <?php if ($vendor['city']): ?>
-                                        <small class="text-muted">(<?= esc($vendor['city']) ?>)</small>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="bt-avatar"><?= esc(strtoupper(mb_substr($vendor['name'], 0, 1))) ?></span>
+                                        <div>
+                                            <strong><a href="<?= site_url('vendors/view/' . $vendor['id']) ?>"
+                                                    class="text-dark"><?= esc($vendor['name']) ?></a></strong>
+                                            <?php if ($vendor['city']): ?>
+                                                <span class="badge bg-light text-dark border ms-1"><i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($vendor['city']) ?></span>
+                                            <?php endif; ?>
+                                            <?php if (!empty($vendor['contact_person'])): ?>
+                                                <div class="small text-muted"><i class="far fa-user me-1"></i><?= esc($vendor['contact_person']) ?></div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php if (!empty($vendor['phone'])): ?>
+                                        <a href="tel:<?= esc($vendor['phone']) ?>" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i><?= esc($vendor['phone']) ?></a><br>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
                                     <?php endif; ?>
-                                    <br>
-                                    <small class="text-muted"><?= esc($vendor['contact_person']) ?></small>
+                                    <?php if (!empty($vendor['email'])): ?>
+                                        <small class="text-muted"><i class="far fa-envelope me-1"></i><?= esc($vendor['email']) ?></small>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?= esc($vendor['phone'] ?: '-') ?><br>
-                                    <small><?= esc($vendor['email']) ?></small>
+                                    <?php if (!empty($vendor['gstin'])): ?>
+                                        <code><?= esc($vendor['gstin']) ?></code>
+                                    <?php else: ?>
+                                        <span class="text-muted small">N/A</span>
+                                    <?php endif; ?>
                                 </td>
-                                <td><code><?= esc($vendor['gstin'] ?: 'N/A') ?></code></td>
-                                <td
-                                    class="text-end fw-bold <?= $vendor['pending_balance'] >= 0 ? 'text-danger' : 'text-success' ?>">
-                                    ₹<?= number_format(abs($vendor['pending_balance']), 2) ?>
-                                    <?= $vendor['pending_balance'] >= 0 ? 'Payable' : 'Advance' ?>
+                                <td class="text-end fw-bold">
+                                    <span class="<?= $vendor['pending_balance'] >= 0 ? 'text-danger' : 'text-success' ?>">
+                                        ₹<?= number_format(abs($vendor['pending_balance']), 2) ?>
+                                        <?= $vendor['pending_balance'] >= 0 ? 'Payable' : 'Advance' ?>
+                                    </span>
                                 </td>
                                 <td class="text-center">
                                     <span class="badge bg-<?= $vendor['status'] === 'active' ? 'success' : 'danger' ?>">
@@ -150,16 +183,13 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm">
-                                        <a href="<?= site_url('vendors/edit/' . $vendor['id']) ?>" class="btn btn-warning"
-                                            title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="<?= site_url('vendors/view/' . $vendor['id']) ?>"
-                                            class="btn btn-info text-white" title="View">
+                                        <a href="<?= site_url('vendors/view/' . $vendor['id']) ?>" class="btn btn-outline-info" title="View">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="<?= site_url('vendors/delete/' . $vendor['id']) ?>" class="btn btn-danger"
-                                            onclick="return confirm('Are you sure?')" title="Delete">
+                                        <a href="<?= site_url('vendors/edit/' . $vendor['id']) ?>" class="btn btn-outline-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="<?= site_url('vendors/delete/' . $vendor['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure?')" title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -168,7 +198,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr id="noRecordsRow">
-                            <td colspan="7" class="text-center">No vendors found</td>
+                            <td colspan="7" class="text-center py-4 text-muted">No vendors found</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -214,20 +244,25 @@
                                 const balanceClass = pendingBalance >= 0 ? 'text-danger' : 'text-success';
                                 const formattedBalance = '₹' + Math.abs(pendingBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + balanceType;
 
+                                const firstLetter = (vendor.name || 'V').charAt(0).toUpperCase();
                                 const row = `
                                 <tr>
-                                    <td>${vendor.id}</td>
+                                    <td class="text-center text-muted fw-bold">#${vendor.id}</td>
                                     <td>
-                                        <strong><a href="<?= site_url('vendors/view/') ?>${vendor.id}" class="text-dark">${vendor.name}</a></strong>
-                                        ${vendor.city ? `<small class="text-muted">(${vendor.city})</small>` : ''}
-                                        <br>
-                                        <small class="text-muted">${vendor.contact_person || ''}</small>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="bt-avatar">${firstLetter}</span>
+                                            <div>
+                                                <strong><a href="<?= site_url('vendors/view/') ?>${vendor.id}" class="text-dark">${vendor.name}</a></strong>
+                                                ${vendor.city ? `<span class="badge bg-light text-dark border ms-1"><i class="fas fa-map-marker-alt text-danger me-1"></i>${vendor.city}</span>` : ''}
+                                                ${vendor.contact_person ? `<div class="small text-muted"><i class="far fa-user me-1"></i>${vendor.contact_person}</div>` : ''}
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>
-                                        ${vendor.phone || '-'}<br>
-                                        <small>${vendor.email || ''}</small>
+                                        ${vendor.phone ? `<a href="tel:${vendor.phone}" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i>${vendor.phone}</a><br>` : '-<br>'}
+                                        ${vendor.email ? `<small class="text-muted"><i class="far fa-envelope me-1"></i>${vendor.email}</small>` : ''}
                                     </td>
-                                    <td><code>${vendor.gstin || 'N/A'}</code></td>
+                                    <td>${vendor.gstin ? `<code>${vendor.gstin}</code>` : '<span class="text-muted small">N/A</span>'}</td>
                                     <td class="text-end fw-bold ${balanceClass}">
                                         ${formattedBalance}
                                     </td>
@@ -238,13 +273,13 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm">
-                                            <a href="<?= site_url('vendors/edit/') ?>${vendor.id}" class="btn btn-warning" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="<?= site_url('vendors/view/') ?>${vendor.id}" class="btn btn-info text-white" title="View">
+                                            <a href="<?= site_url('vendors/view/') ?>${vendor.id}" class="btn btn-outline-info" title="View">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="<?= site_url('vendors/delete/') ?>${vendor.id}" class="btn btn-danger" onclick="return confirm('Are you sure?')" title="Delete">
+                                            <a href="<?= site_url('vendors/edit/') ?>${vendor.id}" class="btn btn-outline-warning" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="<?= site_url('vendors/delete/') ?>${vendor.id}" class="btn btn-outline-danger" onclick="return confirm('Are you sure?')" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </div>

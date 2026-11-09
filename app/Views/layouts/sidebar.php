@@ -12,8 +12,8 @@
         <nav class="mt-2">
             <?php
                 $uri = service('uri');
-                $segment1 = $uri->getSegment(1);
-                $segment2 = $uri->getSegment(2);
+                $segment1 = $uri->getTotalSegments() >= 1 ? $uri->getSegment(1) : '';
+                $segment2 = $uri->getTotalSegments() >= 2 ? $uri->getSegment(2) : '';
                 
                 $isSales = in_array($segment1, ['customers', 'quotations', 'sales_orders', 'invoices', 'sales_returns', 'invoice_payments', 'agents', 'agent-payments']);
                 $isPurchases = in_array($segment1, ['vendors', 'bills', 'payments', 'expenses', 'expense_categories']);

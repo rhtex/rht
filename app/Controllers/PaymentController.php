@@ -36,6 +36,21 @@ class PaymentController extends BaseController
         $data['title'] = 'Payments History';
         $data['filters'] = $filters;
 
+        $stats = [
+            'total'            => count($data['payments']),
+            'total_amount'     => 0.0,
+            'total_deductions' => 0.0,
+            'total_settlement' => 0.0,
+        ];
+        foreach ($data['payments'] as $p) {
+            $ded = (float) ($p['discount_amount'] ?? 0) + (float) ($p['mahimai_amount'] ?? 0) + (float) ($p['postal_charges'] ?? 0);
+            $amt = (float) ($p['amount'] ?? 0);
+            $stats['total_amount']     += $amt;
+            $stats['total_deductions'] += $ded;
+            $stats['total_settlement'] += ($amt + $ded);
+        }
+        $data['stats'] = $stats;
+
         return view('payments/index', $data);
     }
 

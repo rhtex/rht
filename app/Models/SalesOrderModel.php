@@ -24,9 +24,11 @@ class SalesOrderModel extends Model
         'order_date',
         'shipment_date',
         'reference_number',
+        'selection_type',
         'transport_name',
         'waybill_number',
         'status',
+        'converted_to_invoice_id',
         'is_inter_state',
         'subtotal',
         'discount_amount',
@@ -53,8 +55,14 @@ class SalesOrderModel extends Model
 
     public function getOrdersWithCustomer($filters = [])
     {
-        $builder = $this->select('sales_orders.*, customers.name as customer_name')
-            ->join('customers', 'customers.id = sales_orders.customer_id', 'left');
+        $builder = $this->select('sales_orders.*, customers.name as customer_name, addresses.city as customer_city, invoices.invoice_number as converted_invoice_number')
+            ->join('customers', 'customers.id = sales_orders.customer_id', 'left')
+            ->join('addresses', 'addresses.owner_id = customers.id AND addresses.owner_type = "customer" AND addresses.address_type = "billing" AND addresses.is_active = 1', 'left')
+            ->join('invoices', 'invoices.id = sales_orders.converted_to_invoice_id', 'left');
+
+        if (!empty($filters['sales_order_number'])) {
+            $builder->like('sales_orders.sales_order_number', trim($filters['sales_order_number']));
+        }
 
         if (!empty($filters['customer_id'])) {
             $builder->where('sales_orders.customer_id', $filters['customer_id']);
@@ -64,14 +72,24 @@ class SalesOrderModel extends Model
             $builder->where('sales_orders.status', $filters['status']);
         }
 
+        if (!empty($filters['date_from'])) {
+            $builder->where('sales_orders.order_date >=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $builder->where('sales_orders.order_date <=', $filters['date_to']);
+        }
+
         return $builder->orderBy('sales_orders.created_at', 'DESC')->findAll();
     }
 
     public function getOrderById($id)
     {
-        $order = $this->select('sales_orders.*, customers.name as customer_name, agents.agent_name')
+        $order = $this->select('sales_orders.*, customers.name as customer_name, agents.agent_name, invoices.invoice_number as converted_invoice_number, quotations.quotation_number as source_quotation_number')
             ->join('customers', 'customers.id = sales_orders.customer_id', 'left')
             ->join('agents', 'agents.id = sales_orders.agent_id', 'left')
+            ->join('invoices', 'invoices.id = sales_orders.converted_to_invoice_id', 'left')
+            ->join('quotations', 'quotations.id = sales_orders.quotation_id', 'left')
             ->find($id);
 
         if ($order) {
@@ -80,6 +98,17 @@ class SalesOrderModel extends Model
         }
 
         return $order;
+    }
+
+    /**
+     * Mark a sales order as converted to invoice
+     */
+    public function markConverted($orderId, $invoiceId)
+    {
+        return $this->update($orderId, [
+            'status'                   => 'Closed',
+            'converted_to_invoice_id'  => $invoiceId,
+        ]);
     }
 
     public function generateOrderNumber()

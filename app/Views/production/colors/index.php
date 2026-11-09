@@ -3,58 +3,111 @@
 <?= $this->section('title') ?><?= esc($title) ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
-<div class="row mb-2">
+<div class="row mb-3 align-items-center">
     <div class="col-sm-6">
-        <h1 class="fw-bold text-dark"><i class="fas fa-palette text-primary me-2"></i>Color Management</h1>
+        <h1 class="m-0"><i class="fas fa-palette text-primary me-2"></i>Color Palette Management</h1>
     </div>
     <div class="col-sm-6 text-end">
-        <a href="<?= site_url('production/colors/create') ?>" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm"><i class="fas fa-plus me-1"></i> Add Color</a>
+        <div class="d-inline-flex gap-2 align-items-center">
+            <a href="<?= site_url('production/colors') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
+                <i class="fas fa-sync-alt me-1"></i> Refresh
+            </a>
+            <a href="<?= site_url('production/colors/create') ?>" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus me-1"></i> Add Color
+            </a>
+        </div>
     </div>
 </div>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4" style="border-radius: 12px;">
-    <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);">
-        <h5 class="card-title text-white mb-0 fw-bold"><i class="fas fa-list-ul me-2"></i>Colors List</h5>
+<?php
+$totalColors = count($colors ?? []);
+$activeColors = 0;
+$inactiveColors = 0;
+
+if (!empty($colors)) {
+    foreach ($colors as $c) {
+        if (($c['status'] ?? '') === 'Active') {
+            $activeColors++;
+        } else {
+            $inactiveColors++;
+        }
+    }
+}
+?>
+
+<!-- Summary Stat Cards -->
+<div class="row g-3 mb-3">
+    <div class="col-md-4 col-sm-6">
+        <div class="bt-stat bt-g-blue" style="cursor:default;">
+            <i class="fas fa-palette bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format($totalColors) ?></div>
+            <div class="bt-stat-label">Total Color Shades</div>
+            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
+        </div>
     </div>
-    <div class="card-body p-3 bg-white">
+    <div class="col-md-4 col-sm-6">
+        <div class="bt-stat bt-g-green" style="cursor:default;">
+            <i class="fas fa-check-circle bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format($activeColors) ?></div>
+            <div class="bt-stat-label">Active Shades</div>
+            <div class="progress"><div class="progress-bar" style="width:<?= ($totalColors > 0) ? min(100, round(($activeColors / $totalColors) * 100)) : 0 ?>%"></div></div>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+        <div class="bt-stat bt-g-slate" style="cursor:default;">
+            <i class="fas fa-pause-circle bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format($inactiveColors) ?></div>
+            <div class="bt-stat-label">Inactive Shades</div>
+            <div class="progress"><div class="progress-bar" style="width:<?= ($totalColors > 0) ? min(100, round(($inactiveColors / $totalColors) * 100)) : 0 ?>%"></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="card card-outline card-secondary shadow-sm">
+    <div class="card-header py-2 bg-white">
+        <h3 class="card-title fw-bold">Yarn & Fabric Color Master</h3>
+    </div>
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table align-middle table-hover mb-0" id="colorsTable">
-                <thead>
+            <table class="table table-striped table-hover align-middle mb-0" id="colorsTable">
+                <thead class="table-light">
                     <tr>
-                        <th class="py-2 px-3 text-secondary fw-bold text-uppercase border-bottom">Color Name</th>
-                        <th class="py-2 px-2 text-secondary fw-bold text-uppercase border-bottom">Color Code</th>
-                        <th class="py-2 px-2 text-secondary fw-bold text-uppercase border-bottom text-center">Color Palette</th>
-                        <th class="py-2 px-2 text-secondary fw-bold text-uppercase border-bottom text-center">Status</th>
-                        <th width="15%" class="py-2 px-3 text-secondary fw-bold text-uppercase border-bottom text-center">Actions</th>
+                        <th style="min-width: 180px;">Color Name</th>
+                        <th style="min-width: 120px;">Color Code</th>
+                        <th class="text-center" style="min-width: 150px;">Color Swatch</th>
+                        <th class="text-center" style="min-width: 100px;">Status</th>
+                        <th class="text-end" style="min-width: 110px;">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="table-group-divider">
+                <tbody>
                     <?php if(!empty($colors)): ?>
                         <?php foreach($colors as $color): ?>
                         <tr>
-                            <td class="py-2 px-3 fw-bold text-dark"><?= esc($color['name']) ?></td>
-                            <td class="py-2 px-2 text-secondary font-monospace"><?= esc($color['code'] ?: '-') ?></td>
-                            <td class="py-2 px-2 text-center">
+                            <td>
+                                <span class="fw-bold text-dark"><?= esc($color['name']) ?></span>
+                            </td>
+                            <td><code class="text-secondary"><?= esc($color['code'] ?: '-') ?></code></td>
+                            <td class="text-center">
                                 <?php if($color['color_palette']): ?>
                                     <div class="d-inline-flex align-items-center gap-2">
-                                        <span class="d-inline-block rounded border border-light-subtle shadow-sm" style="width: 24px; height: 24px; background-color: <?= esc($color['color_palette']) ?>;"></span>
-                                        <span class="small font-monospace text-muted"><?= esc($color['color_palette']) ?></span>
+                                        <span class="d-inline-block rounded-circle border border-2 shadow-sm" style="width: 26px; height: 26px; background-color: <?= esc($color['color_palette']) ?>;"></span>
+                                        <code class="text-dark"><?= esc($color['color_palette']) ?></code>
                                     </div>
                                 <?php else: ?>
                                     <span class="text-muted">-</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="py-2 px-2 text-center">
-                                <span class="badge rounded-pill bg-<?= $color['status'] === 'Active' ? 'success' : 'danger' ?> px-2 py-1 text-uppercase" style="font-size: 0.65rem; font-weight: 750;">
-                                    <?= esc($color['status']) ?>
+                            <td class="text-center">
+                                <span class="badge text-bg-<?= ($color['status'] ?? '') === 'Active' ? 'success' : 'secondary' ?>">
+                                    <?= esc($color['status'] ?? 'Inactive') ?>
                                 </span>
                             </td>
-                            <td class="py-2 px-3 text-center">
-                                <div class="d-flex justify-content-center gap-1">
-                                    <a href="<?= site_url('production/colors/edit/'.$color['id']) ?>" class="btn btn-xs btn-warning text-dark rounded-pill px-2" title="Edit"><i class="fas fa-edit"></i></a>
-                                    <a href="<?= site_url('production/colors/delete/'.$color['id']) ?>" class="btn btn-xs btn-danger text-white rounded-pill px-2" onclick="return confirm('Delete this color?')" title="Delete"><i class="fas fa-trash"></i></a>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="<?= site_url('production/colors/edit/'.$color['id']) ?>" class="btn btn-outline-warning" title="Edit"><i class="fas fa-edit"></i></a>
+                                    <a href="<?= site_url('production/colors/delete/'.$color['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this color?')" title="Delete"><i class="fas fa-trash"></i></a>
                                 </div>
                             </td>
                         </tr>
@@ -63,7 +116,7 @@
                         <tr>
                             <td colspan="5" class="text-center text-muted py-4">
                                 <i class="fas fa-palette fa-2x text-muted mb-2 d-block"></i>
-                                No Colors found.
+                                No colors found in the catalog.
                             </td>
                         </tr>
                     <?php endif; ?>
@@ -77,7 +130,7 @@
 <?= $this->section('scripts') ?>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        if (typeof $ !== 'undefined') {
+        if (typeof $ !== 'undefined' && $.fn.DataTable) {
             if ($.fn.DataTable.isDataTable('#colorsTable')) {
                 $('#colorsTable').DataTable().destroy();
             }

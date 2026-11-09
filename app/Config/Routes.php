@@ -269,6 +269,8 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('quotations/update/(:num)', 'QuotationController::update/$1', ['filter' => 'permission:quotation.edit']);
     $routes->get('quotations/delete/(:num)', 'QuotationController::delete/$1', ['filter' => 'permission:quotation.delete']);
     $routes->get('quotations/print/(:num)', 'QuotationController::print/$1', ['filter' => 'permission:quotation.view']);
+    $routes->get('quotations/convert-so/(:num)', 'QuotationController::convertToSalesOrder/$1', ['filter' => 'permission:sales_order.create']);
+    $routes->get('quotations/convert-invoice/(:num)', 'QuotationController::convertToInvoice/$1', ['filter' => 'permission:invoice.create']);
 
     // Sales Orders
     $routes->get('sales_orders', 'SalesOrderController::index', ['filter' => 'permission:sales_order.view']);
@@ -279,6 +281,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('sales_orders/update/(:num)', 'SalesOrderController::update/$1', ['filter' => 'permission:sales_order.edit']);
     $routes->get('sales_orders/delete/(:num)', 'SalesOrderController::delete/$1', ['filter' => 'permission:sales_order.delete']);
     $routes->get('sales_orders/print/(:num)', 'SalesOrderController::print/$1', ['filter' => 'permission:sales_order.view']);
+    $routes->get('sales_orders/convert/(:num)', 'SalesOrderController::convertToInvoice/$1', ['filter' => 'permission:invoice.create']);
 
     // Invoices
     $routes->get('invoices', 'InvoiceController::index', ['filter' => 'permission:invoice.view']);
@@ -584,6 +587,8 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('quotations/update/(:num)', 'QuotationController::update/$1', ['filter' => 'permission:quotation.edit']);
     $routes->get('quotations/delete/(:num)', 'QuotationController::delete/$1', ['filter' => 'permission:quotation.delete']);
     $routes->get('quotations/print/(:num)', 'QuotationController::print/$1', ['filter' => 'permission:quotation.view']);
+    $routes->get('quotations/convert-so/(:num)', 'QuotationController::convertToSalesOrder/$1', ['filter' => 'permission:sales_order.create']);
+    $routes->get('quotations/convert-invoice/(:num)', 'QuotationController::convertToInvoice/$1', ['filter' => 'permission:invoice.create']);
 
     // Sales Orders
     $routes->get('sales_orders', 'SalesOrderController::index', ['filter' => 'permission:sales_order.view']);
@@ -594,6 +599,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('sales_orders/update/(:num)', 'SalesOrderController::update/$1', ['filter' => 'permission:sales_order.edit']);
     $routes->get('sales_orders/delete/(:num)', 'SalesOrderController::delete/$1', ['filter' => 'permission:sales_order.delete']);
     $routes->get('sales_orders/print/(:num)', 'SalesOrderController::print/$1', ['filter' => 'permission:sales_order.view']);
+    $routes->get('sales_orders/convert/(:num)', 'SalesOrderController::convertToInvoice/$1', ['filter' => 'permission:invoice.create']);
 
     // Invoices
     $routes->get('invoices', 'InvoiceController::index', ['filter' => 'permission:invoice.view']);

@@ -31,6 +31,19 @@ class YarnBeamController extends BaseController
         }
 
         $data['beams'] = $query->findAll();
+
+        // Overall stats (independent of filters)
+        $allBeams = (new YarnBeamModel())->findAll();
+        $stats = ['total' => count($allBeams), 'empty' => 0, 'loaded' => 0, 'inHouse' => 0, 'atJobWork' => 0, 'atWeaving' => 0, 'damaged' => 0];
+        foreach ($allBeams as $b) {
+            if (($b['status'] ?? '') === 'Empty') $stats['empty']++;
+            if (($b['status'] ?? '') === 'Loaded') $stats['loaded']++;
+            if (($b['location'] ?? '') === 'In-House') $stats['inHouse']++;
+            if (($b['location'] ?? '') === 'At Job Work') $stats['atJobWork']++;
+            if (($b['location'] ?? '') === 'At Weaving') $stats['atWeaving']++;
+            if (($b['condition_status'] ?? '') === 'Damaged') $stats['damaged']++;
+        }
+        $data['stats'] = $stats;
         $data['selectedStatus'] = $status;
         $data['selectedLocation'] = $location;
         $data['title'] = 'Beam Tracker';

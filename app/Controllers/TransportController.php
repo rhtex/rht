@@ -29,6 +29,21 @@ class TransportController extends BaseController
         $data['title'] = 'Transports';
         $data['filters'] = $filters;
 
+        $stats = [
+            'total'   => count($data['transports']),
+            'parcel'  => 0,
+            'courier' => 0,
+        ];
+        foreach ($data['transports'] as $tr) {
+            $type = $tr['transport_type'] ?? 'Parcel Service';
+            if ($type === 'Courier Service') {
+                $stats['courier']++;
+            } else {
+                $stats['parcel']++;
+            }
+        }
+        $data['stats'] = $stats;
+
         return view('transports/index', $data);
     }
 

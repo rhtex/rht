@@ -1,81 +1,149 @@
 <?= $this->extend('layouts/master') ?>
+
 <?= $this->section('title') ?>Yarn Warping & Sizing<?= $this->endSection() ?>
+
 <?= $this->section('header') ?>
-<div class="row mb-2">
+<div class="row mb-3 align-items-center">
     <div class="col-sm-6">
-        <h1 class="fw-bold text-dark"><i class="fas fa-ring text-primary me-2"></i>Yarn Warping & Sizing Job Work</h1>
+        <h1 class="m-0"><i class="fas fa-ring text-primary me-2"></i>Yarn Warping & Sizing Job Work</h1>
     </div>
     <div class="col-sm-6 text-end">
-        <a href="<?= site_url('production/yarn-warping-sizing/create') ?>" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm"><i class="fas fa-plus me-1"></i> New Warping & Sizing DC</a>
+        <div class="d-inline-flex gap-2 align-items-center">
+            <a href="<?= site_url('production/yarn-warping-sizing') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
+                <i class="fas fa-sync-alt me-1"></i> Refresh
+            </a>
+            <a href="<?= site_url('production/yarn-warping-sizing/create') ?>" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus me-1"></i> New Warping & Sizing DC
+            </a>
+        </div>
     </div>
 </div>
 <?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4" style="border-radius: 12px;">
-    <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #1565c0 0%, #1e88e5 100%);">
-        <h5 class="card-title text-white mb-0 fw-bold"><i class="fas fa-list-ul me-2"></i>Warping & Sizing Delivery Challans</h5>
+<?php
+$totalDcs = count($dcs ?? []);
+$openCount = 0;
+$partialCount = 0;
+$completedCount = 0;
+
+if (!empty($dcs)) {
+    foreach ($dcs as $dc) {
+        $st = $dc['status'] ?? '';
+        if ($st === 'Open') $openCount++;
+        elseif ($st === 'Partially Received') $partialCount++;
+        elseif ($st === 'Completed') $completedCount++;
+    }
+}
+?>
+
+<!-- Summary Stat Cards -->
+<div class="row g-3 mb-3">
+    <div class="col-xl-3 col-sm-6">
+        <div class="bt-stat bt-g-blue" style="cursor:default;">
+            <i class="fas fa-ring bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format($totalDcs) ?></div>
+            <div class="bt-stat-label">Total Delivery Challans</div>
+            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
+        </div>
     </div>
-    <div class="card-body p-3 bg-white">
-        <?php if(session()->has('success')): ?><div class="alert alert-success alert-dismissible fade show"><?= session('success') ?></div><?php endif; ?>
-        <?php if(session()->has('error')): ?><div class="alert alert-danger alert-dismissible fade show"><?= session('error') ?></div><?php endif; ?>
-        
+    <div class="col-xl-3 col-sm-6">
+        <div class="bt-stat bt-g-indigo" style="cursor:default;">
+            <i class="fas fa-clock bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format($openCount) ?></div>
+            <div class="bt-stat-label">Open / At Sizer</div>
+            <div class="progress"><div class="progress-bar" style="width:<?= ($totalDcs > 0) ? min(100, round(($openCount / $totalDcs) * 100)) : 0 ?>%"></div></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="bt-stat bt-g-amber" style="cursor:default;">
+            <i class="fas fa-hourglass-half bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format($partialCount) ?></div>
+            <div class="bt-stat-label">Partially Received</div>
+            <div class="progress"><div class="progress-bar" style="width:<?= ($totalDcs > 0) ? min(100, round(($partialCount / $totalDcs) * 100)) : 0 ?>%"></div></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="bt-stat bt-g-green" style="cursor:default;">
+            <i class="fas fa-check-circle bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format($completedCount) ?></div>
+            <div class="bt-stat-label">Fully Completed</div>
+            <div class="progress"><div class="progress-bar" style="width:<?= ($totalDcs > 0) ? min(100, round(($completedCount / $totalDcs) * 100)) : 0 ?>%"></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="card card-outline card-secondary shadow-sm">
+    <div class="card-header py-2 bg-white">
+        <h3 class="card-title fw-bold">Warping & Sizing Delivery Challans</h3>
+    </div>
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table align-middle table-hover mb-0">
-                <thead>
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-light">
                     <tr>
-                        <th class="py-2 px-3 text-secondary fw-bold text-uppercase border-bottom">DC Number</th>
-                        <th class="py-2 px-2 text-secondary fw-bold text-uppercase border-bottom">Date</th>
-                        <th class="py-2 px-2 text-secondary fw-bold text-uppercase border-bottom">Vendor (Sizer)</th>
-                        <th class="py-2 px-2 text-secondary fw-bold text-uppercase border-bottom">Design Pattern</th>
-                        <th class="py-2 px-2 text-secondary fw-bold text-uppercase border-bottom text-center">Total Ends</th>
-                        <th class="py-2 px-2 text-secondary fw-bold text-uppercase border-bottom text-center">Status</th>
-                        <th width="15%" class="py-2 px-3 text-secondary fw-bold text-uppercase border-bottom text-center">Actions</th>
+                        <th style="min-width: 140px;">DC Number</th>
+                        <th style="min-width: 110px;">Date</th>
+                        <th style="min-width: 180px;">Vendor (Sizer)</th>
+                        <th style="min-width: 150px;">Design Pattern</th>
+                        <th class="text-center" style="min-width: 90px;">Total Ends</th>
+                        <th class="text-center" style="min-width: 130px;">Status</th>
+                        <th class="text-end" style="min-width: 120px;">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="table-group-divider">
-                    <?php foreach($dcs as $dc): ?>
-                    <tr class="table-row-card">
-                        <td class="py-2 px-3 fw-bold text-dark">
-                            <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle me-2" style="width: 28px; height: 28px;">
-                                <i class="fas fa-file-invoice" style="font-size: 0.8rem;"></i>
-                            </span>
-                            <?= esc($dc['dc_number']) ?>
-                        </td>
-                        <td class="py-2 px-2 text-secondary" style="font-size: 0.85rem;">
-                            <i class="far fa-calendar-alt text-muted me-1"></i> <?= date('d-M-Y', strtotime($dc['dc_date'])) ?>
-                        </td>
-                        <td class="py-2 px-2 text-dark fw-semibold" style="font-size: 0.85rem;">
-                            <i class="fas fa-user-tie text-muted me-1"></i> <?= esc($dc['vendor_name']) ?>
-                        </td>
-                        <td class="py-2 px-2 text-muted" style="font-size: 0.85rem;">
-                            <?= esc($dc['design_pattern'] ?: '-') ?>
-                        </td>
-                        <td class="py-2 px-2 text-center fw-bold text-dark" style="font-size: 0.85rem;">
-                            <?= esc($dc['total_ends'] ?: '0') ?>
-                        </td>
-                        <td class="py-2 px-2 text-center">
-                            <?php 
-                            $statusClass = 'secondary';
-                            if ($dc['status'] === 'Open') $statusClass = 'info';
-                            if ($dc['status'] === 'Partially Received') $statusClass = 'warning text-dark';
-                            if ($dc['status'] === 'Completed') $statusClass = 'success';
-                            if ($dc['status'] === 'Cancelled') $statusClass = 'danger';
-                            ?>
-                            <span class="badge rounded-pill bg-<?= $statusClass ?> px-2 py-1 text-uppercase" style="font-size: 0.65rem; font-weight: 750;">
-                                <?= esc($dc['status']) ?>
-                            </span>
-                        </td>
-                        <td class="py-2 px-3 text-center">
-                            <div class="d-flex justify-content-center gap-1">
-                                <a href="<?= site_url('production/yarn-warping-sizing/view/'.$dc['id']) ?>" class="btn btn-xs btn-outline-info rounded-pill px-2" title="View"><i class="fas fa-eye"></i></a>
-                                <?php if($dc['status'] === 'Open'): ?>
-                                    <a href="<?= site_url('production/yarn-warping-sizing/edit/'.$dc['id']) ?>" class="btn btn-xs btn-outline-warning rounded-pill px-2" title="Edit"><i class="fas fa-edit"></i></a>
-                                    <a href="<?= site_url('production/yarn-warping-sizing/delete/'.$dc['id']) ?>" class="btn btn-xs btn-outline-danger rounded-pill px-2" onclick="return confirm('Delete this DC?')" title="Delete"><i class="fas fa-trash"></i></a>
-                                <?php endif; ?>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
+                <tbody>
+                    <?php if(!empty($dcs)): ?>
+                        <?php foreach($dcs as $dc): ?>
+                        <tr>
+                            <td>
+                                <a href="<?= site_url('production/yarn-warping-sizing/view/'.$dc['id']) ?>" class="fw-bold text-primary text-decoration-none">
+                                    <i class="fas fa-file-invoice text-primary me-2"></i><?= esc($dc['dc_number']) ?>
+                                </a>
+                            </td>
+                            <td><?= date('d/m/Y', strtotime($dc['dc_date'])) ?></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-primary-subtle text-primary fw-bold me-2 d-flex align-items-center justify-content-center" style="width:32px;height:32px;min-width:32px;font-size:0.8rem;">
+                                        <?= strtoupper(substr($dc['vendor_name'] ?? 'S', 0, 1)) ?>
+                                    </div>
+                                    <span class="fw-semibold text-dark"><?= esc($dc['vendor_name']) ?></span>
+                                </div>
+                            </td>
+                            <td><?= esc($dc['design_pattern'] ?: '-') ?></td>
+                            <td class="text-center fw-bold text-dark"><?= esc($dc['total_ends'] ?: '0') ?></td>
+                            <td class="text-center">
+                                <?php 
+                                $statusClass = match($dc['status']) {
+                                    'Open'               => 'primary',
+                                    'Partially Received' => 'warning',
+                                    'Completed'          => 'success',
+                                    'Cancelled'          => 'danger',
+                                    default              => 'secondary'
+                                };
+                                ?>
+                                <span class="badge text-bg-<?= $statusClass ?> px-2 py-1">
+                                    <?= esc($dc['status']) ?>
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="<?= site_url('production/yarn-warping-sizing/view/'.$dc['id']) ?>" class="btn btn-outline-primary" title="View"><i class="fas fa-eye"></i></a>
+                                    <?php if($dc['status'] === 'Open'): ?>
+                                        <a href="<?= site_url('production/yarn-warping-sizing/edit/'.$dc['id']) ?>" class="btn btn-outline-warning" title="Edit"><i class="fas fa-edit"></i></a>
+                                        <a href="<?= site_url('production/yarn-warping-sizing/delete/'.$dc['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Delete this DC?')" title="Delete"><i class="fas fa-trash"></i></a>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="fas fa-ring fa-2x text-muted mb-2 d-block"></i>
+                                No warping and sizing delivery challans found.
+                            </td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>

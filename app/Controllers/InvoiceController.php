@@ -45,21 +45,66 @@ class InvoiceController extends BaseController
     public function index()
     {
         $filters = [
-            'customer_id' => $this->request->getGet('customer_id'),
-            'status' => $this->request->getGet('status'),
-            'date_from' => $this->request->getGet('date_from'),
-            'date_to' => $this->request->getGet('date_to'),
+            'invoice_number' => $this->request->getGet('invoice_number'),
+            'customer_id'    => $this->request->getGet('customer_id'),
+            'status'         => $this->request->getGet('status'),
+            'date_from'      => $this->request->getGet('date_from'),
+            'so_number'         => $this->request->getGet('so_number'),
+            'date_to'        => $this->request->getGet('date_to'),
         ];
 
         $data['invoices'] = $this->invoiceModel->getInvoicesWithCustomer($filters);
         $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
+        $data['filters'] = $filters;
         $data['title'] = 'Invoices';
+
+        $stats = [
+            'total'        => count($data['invoices']),
+            'total_amount' => 0.0,
+            'paid_amount'  => 0.0,
+            'balance'      => 0.0,
+            'paid_count'   => 0,
+            'open_count'   => 0,
+            'overdue_count'=> 0,
+        ];
+        foreach ($data['invoices'] as $inv) {
+            $stats['total_amount'] += (float) ($inv['total_amount'] ?? 0);
+            $stats['paid_amount']  += (float) ($inv['paid_amount'] ?? 0);
+            $stats['balance']      += (float) ($inv['balance'] ?? 0);
+            $st = $inv['status'] ?? '';
+            if ($st === 'Paid') {
+                $stats['paid_count']++;
+            } elseif ($st === 'Overdue') {
+                $stats['overdue_count']++;
+            } elseif ($st === 'Open' || $st === 'Partially Paid') {
+                $stats['open_count']++;
+            }
+        }
+        $data['stats'] = $stats;
 
         return view('invoices/index', $data);
     }
 
     public function create()
     {
+        // Check if creating from a Sales Order
+        $soId = $this->request->getGet('so_id');
+        $salesOrder = null;
+        if ($soId) {
+            $salesOrderModel = new \App\Models\SalesOrderModel();
+            $salesOrder = $salesOrderModel->getOrderById($soId) ?: $salesOrderModel->find($soId);
+        }
+        $data['sales_order'] = $salesOrder;
+
+        // Check if creating from a Quotation
+        $quotationId = $this->request->getGet('quotation_id');
+        $quotation = null;
+        if ($quotationId) {
+            $quotationModel = new \App\Models\QuotationModel();
+            $quotation = $quotationModel->getQuotationById($quotationId);
+        }
+        $data['quotation'] = $quotation;
+
         $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
         $data['agents'] = $this->agentModel->findAll();
         $data['transports'] = $this->transportModel->orderBy('transport_name', 'ASC')->findAll();
@@ -86,6 +131,9 @@ class InvoiceController extends BaseController
             'due_date' => $this->request->getPost('due_date'),
             'reference_number' => $this->request->getPost('reference_number'),
             'po_date' => $this->request->getPost('po_date') ?: null,
+            'so_number' => $this->request->getPost('so_number') ?: null,
+            'so_date' => $this->request->getPost('so_date') ?: null,
+            'selection_type' => $this->request->getPost('selection_type') ?: null,
             'transport_name' => $this->request->getPost('transport_name'),
             'waybill_number' => $this->request->getPost('waybill_number'),
             'waybill_date' => $this->request->getPost('waybill_date') ?: null,
@@ -189,6 +237,29 @@ class InvoiceController extends BaseController
         $this->syncAccountingLedger($invoiceId);
         // ------------------------
 
+        // --- MARK SALES ORDER AS CONVERTED ---
+        $soId = $this->request->getPost('sales_order_id');
+        if ($soId) {
+            $salesOrderModel = new \App\Models\SalesOrderModel();
+            $salesOrderModel->markConverted((int)$soId, $invoiceId);
+
+            // If the Sales Order was linked to a quotation, also update that quotation
+            $so = $salesOrderModel->find((int)$soId);
+            if (!empty($so['quotation_id'])) {
+                $quotationModel = new \App\Models\QuotationModel();
+                $quotationModel->markConvertedToInvoice((int)$so['quotation_id'], $invoiceId);
+            }
+        }
+        // -------------------------------------
+
+        // --- MARK QUOTATION AS CONVERTED (direct conversion) ---
+        $quotationId = $this->request->getPost('quotation_id');
+        if ($quotationId) {
+            $quotationModel = new \App\Models\QuotationModel();
+            $quotationModel->markConvertedToInvoice((int)$quotationId, $invoiceId);
+        }
+        // --------------------------------------------------------
+
         return redirect()->to('invoices/view/' . $invoiceId)->with('success', 'Invoice created successfully.');
     }
 
@@ -205,6 +276,13 @@ class InvoiceController extends BaseController
         }
 
         $data['history'] = $this->historyModel->getHistoryByInvoice($id);
+
+        $salesOrderModel = new \App\Models\SalesOrderModel();
+        $data['linked_sales_order'] = $salesOrderModel->where('converted_to_invoice_id', $id)->first();
+
+        $quotationModel = new \App\Models\QuotationModel();
+        $data['linked_quotation'] = $quotationModel->where('converted_to_invoice_id', $id)->first();
+
         $data['title'] = 'Invoice #' . $data['invoice']['invoice_number'];
         return view('invoices/view', $data);
     }
@@ -222,6 +300,7 @@ class InvoiceController extends BaseController
         $data['products'] = $this->productModel->getProductsWithCategory();
         $data['taxes'] = $this->taxModel->where('status', 'Active')->findAll();
         $data['title'] = 'Edit Invoice #' . $data['invoice']['invoice_number'];
+        $data['sales_order'] = null; // Not converting from SO when editing
 
         return view('invoices/form', $data);
     }
@@ -240,6 +319,9 @@ class InvoiceController extends BaseController
             'due_date' => $this->request->getPost('due_date'),
             'reference_number' => $this->request->getPost('reference_number'),
             'po_date' => $this->request->getPost('po_date') ?: null,
+            'so_number' => $this->request->getPost('so_number') ?: null,
+            'so_date' => $this->request->getPost('so_date') ?: null,
+            'selection_type' => $this->request->getPost('selection_type') ?: null,
             'transport_name' => $this->request->getPost('transport_name'),
             'waybill_number' => $this->request->getPost('waybill_number'),
             'waybill_date' => $this->request->getPost('waybill_date') ?: null,
@@ -650,8 +732,15 @@ class InvoiceController extends BaseController
             'waybill_date' => $this->request->getPost('waybill_date'),
             'transport_amount' => $transport_amount,
             'transport_pay_type' => $transport_pay_type,
-            'waybill_shipping_charge' => $waybill_shipping_charge
+            'waybill_shipping_charge' => $waybill_shipping_charge,
+            'delivery_status' => 'Booked'
         ];
+
+        $autoMarkedSent = false;
+        if ($invoice['status'] === 'Draft') {
+            $updateData['status'] = 'Open';
+            $autoMarkedSent = true;
+        }
 
         $img = $this->request->getFile('waybill_image');
         if ($img && $img->isValid() && !$img->hasMoved()) {
@@ -718,10 +807,17 @@ class InvoiceController extends BaseController
                 'created_by' => session('user_id')
             ]);
 
-            // Update delivery_status to Booked
-            $this->invoiceModel->update($id, ['delivery_status' => 'Booked']);
+            if ($autoMarkedSent) {
+                $this->historyModel->insert([
+                    'invoice_id' => $id,
+                    'status' => 'Open',
+                    'description' => "Invoice automatically marked as sent (Open) upon waybill booking",
+                    'created_by' => session('user_id')
+                ]);
+            }
 
-            return redirect()->back()->with('success', 'Waybill information updated and expenses recorded successfully.');
+            $successMsg = 'Waybill information updated and expenses recorded successfully.' . ($autoMarkedSent ? ' Invoice was automatically marked as sent.' : '');
+            return redirect()->back()->with('success', $successMsg);
         }
 
         return redirect()->back()->with('error', 'Failed to update waybill information.');
@@ -751,6 +847,12 @@ class InvoiceController extends BaseController
             $updateData['delivered_date'] = $deliveredDate;
         }
 
+        $autoMarkedSent = false;
+        if (in_array($newStatus, ['Booked', 'In Transit', 'Delivered']) && $invoice['status'] === 'Draft') {
+            $updateData['status'] = 'Open';
+            $autoMarkedSent = true;
+        }
+
         if ($this->invoiceModel->update($id, $updateData)) {
             // Log history
             $this->historyModel->insert([
@@ -760,7 +862,17 @@ class InvoiceController extends BaseController
                 'created_by' => session('user_id')
             ]);
 
-            return redirect()->back()->with('success', 'Delivery status updated successfully.');
+            if ($autoMarkedSent) {
+                $this->historyModel->insert([
+                    'invoice_id' => $id,
+                    'status' => 'Open',
+                    'description' => "Invoice automatically marked as sent (Open) due to delivery status: " . $newStatus,
+                    'created_by' => session('user_id')
+                ]);
+            }
+
+            $successMsg = 'Delivery status updated successfully.' . ($autoMarkedSent ? ' Invoice was automatically marked as sent.' : '');
+            return redirect()->back()->with('success', $successMsg);
         }
 
         return redirect()->back()->with('error', 'Failed to update delivery status.');

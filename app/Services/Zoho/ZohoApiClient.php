@@ -278,8 +278,8 @@ class ZohoApiClient
             $curlOpts = [
                 CURLOPT_CUSTOMREQUEST  => strtoupper($method),
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT        => 45,
-                CURLOPT_CONNECTTIMEOUT => 12,
+                CURLOPT_TIMEOUT        => 60,
+                CURLOPT_CONNECTTIMEOUT => 30,
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_HEADERFUNCTION => static function ($curl, $headerLine) use (&$responseHeaders) {
                     $len   = strlen($headerLine);

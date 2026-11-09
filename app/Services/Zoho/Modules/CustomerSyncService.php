@@ -247,17 +247,6 @@ class CustomerSyncService extends AbstractModuleSyncService
             $localCustomer = $this->customerModel->find((int) $mapping['local_record_id']);
         }
 
-        // Natural-key fallback matching by GSTIN or exact Customer Name to prevent duplicates
-        if (!$localCustomer) {
-            $zohoGstin = strtoupper(trim((string) ($zohoContact['gst_no'] ?? '')));
-            if ($zohoGstin !== '') {
-                $localCustomer = $this->customerModel->where('gstin', $zohoGstin)->first();
-            }
-            if (!$localCustomer && !empty($zohoContact['contact_name'])) {
-                $localCustomer = $this->customerModel->where('name', trim($zohoContact['contact_name']))->first();
-            }
-        }
-
         $normalizedZoho = $this->normalizeZohoCustomer($zohoContact);
 
         if ($localCustomer && !$forceOverwrite && $mapping) {

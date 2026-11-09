@@ -180,6 +180,10 @@ class QuotationController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to create quotation.');
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('quotations', (int) $quotationId, 'CREATE');
+        }
+
         return redirect()->to('quotations/view/' . $quotationId)->with('success', 'Quotation created successfully.');
     }
 
@@ -316,6 +320,10 @@ class QuotationController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update quotation.');
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('quotations', (int) $id, 'UPDATE');
+        }
+
         return redirect()->to('quotations/view/' . $id)->with('success', 'Quotation updated successfully.');
     }
 
@@ -328,6 +336,10 @@ class QuotationController extends BaseController
 
         if (!empty($quotation['converted_to_so_id']) || !empty($quotation['converted_to_invoice_id']) || in_array($quotation['status'], ['Accepted', 'Invoiced'])) {
             return redirect()->to('quotations/view/' . $id)->with('error', 'Cannot delete a quotation that has already been converted.');
+        }
+
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('quotations', (int) $id, 'DELETE');
         }
 
         $db = \Config\Database::connect();

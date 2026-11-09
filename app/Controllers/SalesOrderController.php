@@ -180,8 +180,14 @@ class SalesOrderController extends BaseController
         $quotationId = $this->request->getPost('quotation_id');
         if (!empty($quotationId)) {
             $this->quotationModel->markConvertedToSo((int) $quotationId, $orderId);
+            if (function_exists('zoho_auto_sync')) {
+                zoho_auto_sync('quotations', (int) $quotationId, 'UPDATE');
+            }
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('sales_orders', (int) $orderId, 'CREATE');
+        }
 
         return redirect()->to('sales_orders/view/' . $orderId)->with('success', 'Sales Order created successfully.');
     }
@@ -311,6 +317,9 @@ class SalesOrderController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update sales order.');
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('sales_orders', (int) $id, 'UPDATE');
+        }
 
         return redirect()->to('sales_orders/view/' . $id)->with('success', 'Sales Order updated successfully.');
     }
@@ -344,6 +353,10 @@ class SalesOrderController extends BaseController
 
         if (!empty($order['converted_to_invoice_id']) || $order['status'] == 'Closed') {
             return redirect()->to('sales_orders/view/' . $id)->with('error', 'Cannot delete a sales order that has already been converted to an invoice.');
+        }
+
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('sales_orders', (int) $id, 'DELETE');
         }
 
         $db = \Config\Database::connect();

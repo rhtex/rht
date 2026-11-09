@@ -23,9 +23,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
     
     <!-- Custom Sidebar Styles -->
-    <link rel="stylesheet" href="<?= base_url('assets/css/sidebar_colors.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/css/custom.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/css/list-ui.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/sidebar_colors.css') ?>?v=<?= filemtime(FCPATH . 'assets/css/sidebar_colors.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/custom.css') ?>?v=<?= filemtime(FCPATH . 'assets/css/custom.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/list-ui.css') ?>?v=<?= filemtime(FCPATH . 'assets/css/list-ui.css') ?>">
     <!-- DataTables -->
     <link href="https://cdn.datatables.net/v/bs5/dt-1.13.8/datatables.min.css" rel="stylesheet">
     <!-- Flatpickr (Datepicker) -->

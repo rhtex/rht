@@ -57,7 +57,7 @@ class PaymentController extends BaseController
     public function view($id)
     {
         $data['payment'] = $this->paymentModel->select('payments.*, bills.bill_number, vendors.name as vendor_name, bank_accounts.bank_name, bank_accounts.account_number')
-            ->join('bills', 'bills.id = payments.bill_id')
+            ->join('bills', 'bills.id = payments.bill_id', 'left')
             ->join('vendors', 'vendors.id = payments.vendor_id')
             ->join('bank_accounts', 'bank_accounts.id = payments.bank_account_id', 'left')
             ->find($id);
@@ -137,6 +137,10 @@ class PaymentController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update payment.');
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('vendor_payments', (int) $id, 'UPDATE');
+        }
+
         return redirect()->to('payments/view/' . $id)->with('success', 'Payment updated successfully.');
     }
 
@@ -147,16 +151,22 @@ class PaymentController extends BaseController
             return redirect()->to('payments')->with('error', 'Payment not found.');
         }
 
-        $bill = $this->billModel->find($payment['bill_id']);
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('vendor_payments', (int) $id, 'DELETE');
+        }
+
+        $bill = $payment['bill_id'] ? $this->billModel->find($payment['bill_id']) : null;
         $settlement = $payment['amount'] + $payment['discount_amount'] + $payment['mahimai_amount'] + $payment['postal_charges'];
 
         $db = \Config\Database::connect();
         $db->transStart();
 
         // Revert bill totals
-        $newPaidAmount = $bill['paid_amount'] - $settlement;
-        $this->billModel->update($bill['id'], ['paid_amount' => $newPaidAmount]);
-        $this->billModel->updateBalance($bill['id']);
+        if ($bill) {
+            $newPaidAmount = max(0, $bill['paid_amount'] - $settlement);
+            $this->billModel->update($bill['id'], ['paid_amount' => $newPaidAmount]);
+            $this->billModel->updateBalance($bill['id']);
+        }
 
         // Delete payment
         $this->paymentModel->delete($id);

@@ -600,6 +600,45 @@
                                     </a>
                                 </li>
                                 <?php endif; ?>
+
+                                <?php if(session('role') === 'admin' || in_array('setting.view', session('permissions') ?? []) || in_array('zoho.view', session('permissions') ?? [])): ?>
+                                <?php $isZohoMenu = ($segment1 === 'settings' && $segment2 === 'integrations'); ?>
+                                <li class="nav-item <?= $isZohoMenu ? 'menu-open' : '' ?>">
+                                    <a href="#" class="nav-link <?= $isZohoMenu ? 'active' : '' ?>">
+                                        <i class="fas fa-plug nav-icon text-warning"></i>
+                                        <p>
+                                            Integrations
+                                            <i class="nav-arrow fas fa-angle-right"></i>
+                                        </p>
+                                    </a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item">
+                                            <a href="<?= site_url('settings/integrations/zoho') ?>" class="nav-link">
+                                                <i class="fas fa-book-open nav-icon text-info"></i>
+                                                <p>Zoho Books</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="nav-link">
+                                                <i class="fas fa-sync-alt nav-icon text-success"></i>
+                                                <p>Zoho Synchronization</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="nav-link">
+                                                <i class="fas fa-code-branch nav-icon text-danger"></i>
+                                                <p>Zoho Conflicts</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="nav-link">
+                                                <i class="fas fa-balance-scale nav-icon text-primary"></i>
+                                                <p>Zoho Reconciliation</p>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <?php endif; ?>
                             </ul>
                         </li>
                         <?php endif; ?>

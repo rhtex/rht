@@ -62,6 +62,7 @@
                                 $color = $statusColors[$invoice['status']] ?? 'secondary';
                                 ?>
                                 <span class="badge text-bg-<?= $color ?>"><?= $invoice['status'] ?></span>
+                                <?= function_exists('zoho_sync_badge') ? zoho_sync_badge('invoices', (int) $invoice['id']) : '' ?>
                             </td>
                         </tr>
                         <tr><th>Transport:</th><td><?= esc($invoice['transport_name']) ?: '-' ?></td></tr>

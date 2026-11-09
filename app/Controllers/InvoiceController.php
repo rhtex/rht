@@ -260,6 +260,10 @@ class InvoiceController extends BaseController
         }
         // --------------------------------------------------------
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('invoices', (int) $invoiceId, 'CREATE');
+        }
+
         return redirect()->to('invoices/view/' . $invoiceId)->with('success', 'Invoice created successfully.');
     }
 
@@ -424,6 +428,10 @@ class InvoiceController extends BaseController
         $this->syncAccountingLedger($id);
         // ------------------------
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('invoices', (int) $id, 'UPDATE');
+        }
+
         return redirect()->to('invoices/view/' . $id)->with('success', 'Invoice updated successfully.');
     }
 
@@ -437,6 +445,10 @@ class InvoiceController extends BaseController
         // Check if there are payments
         if ($invoice['paid_amount'] > 0) {
             return redirect()->to('invoices')->with('error', 'Cannot delete invoice with payments.');
+        }
+
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('invoices', (int) $id, 'DELETE');
         }
 
         $db = \Config\Database::connect();
@@ -603,6 +615,11 @@ class InvoiceController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to record payment.');
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('customer_payments', (int) $paymentId, 'CREATE');
+            zoho_auto_sync('invoices', (int) $invoiceId, 'UPDATE');
+        }
+
         return redirect()->to('invoices/view/' . $invoiceId)->with('success', 'Payment recorded successfully.');
     }
 
@@ -632,6 +649,10 @@ class InvoiceController extends BaseController
         }
 
         $this->invoiceModel->update($id, ['status' => 'Open']);
+
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('invoices', (int) $id, 'UPDATE');
+        }
 
         return redirect()->back()->with('success', 'Invoice marked as sent and is now open.');
     }

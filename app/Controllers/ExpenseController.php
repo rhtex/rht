@@ -98,6 +98,10 @@ class ExpenseController extends BaseController
                 ->update();
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('expenses', (int) $expenseId, 'CREATE');
+        }
+
         return redirect()->to('expenses')->with('success', 'Expense recorded successfully.');
     }
 
@@ -141,6 +145,10 @@ class ExpenseController extends BaseController
                 ->update();
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('expenses', (int) $id, 'UPDATE');
+        }
+
         return redirect()->to('expenses')->with('success', 'Expense updated successfully.');
     }
 
@@ -148,6 +156,9 @@ class ExpenseController extends BaseController
     {
         $expense = $this->expenseModel->find($id);
         if ($expense) {
+            if (function_exists('zoho_auto_sync')) {
+                zoho_auto_sync('expenses', (int) $id, 'DELETE');
+            }
             // Revert bank balance
             if (!empty($expense['bank_account_id'])) {
                 $this->bankAccountModel->where('id', $expense['bank_account_id'])

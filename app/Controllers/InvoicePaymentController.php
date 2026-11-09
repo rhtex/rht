@@ -57,7 +57,7 @@ class InvoicePaymentController extends BaseController
     public function view($id)
     {
         $data['payment'] = $this->paymentModel->select('invoice_payments.*, invoices.invoice_number, customers.name as customer_name, bank_accounts.bank_name, bank_accounts.account_number')
-            ->join('invoices', 'invoices.id = invoice_payments.invoice_id')
+            ->join('invoices', 'invoices.id = invoice_payments.invoice_id', 'left')
             ->join('customers', 'customers.id = invoice_payments.customer_id')
             ->join('bank_accounts', 'bank_accounts.id = invoice_payments.bank_account_id', 'left')
             ->find($id);
@@ -134,6 +134,10 @@ class InvoicePaymentController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update receipt.');
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('customer_payments', (int) $id, 'UPDATE');
+        }
+
         return redirect()->to('invoice_payments/view/' . $id)->with('success', 'Receipt updated successfully.');
     }
 
@@ -144,15 +148,21 @@ class InvoicePaymentController extends BaseController
             return redirect()->to('invoice_payments')->with('error', 'Receipt not found.');
         }
 
-        $invoice = $this->invoiceModel->find($payment['invoice_id']);
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('customer_payments', (int) $id, 'DELETE');
+        }
+
+        $invoice = $payment['invoice_id'] ? $this->invoiceModel->find($payment['invoice_id']) : null;
         $settlement = $payment['amount'] + $payment['discount_amount'] + $payment['mahimai_amount'] + $payment['postal_charges'];
 
         $db = \Config\Database::connect();
         $db->transStart();
 
-        $newPaidAmount = $invoice['paid_amount'] - $settlement;
-        $this->invoiceModel->update($invoice['id'], ['paid_amount' => $newPaidAmount]);
-        $this->invoiceModel->updateBalance($invoice['id']);
+        if ($invoice) {
+            $newPaidAmount = max(0, $invoice['paid_amount'] - $settlement);
+            $this->invoiceModel->update($invoice['id'], ['paid_amount' => $newPaidAmount]);
+            $this->invoiceModel->updateBalance($invoice['id']);
+        }
 
         $this->paymentModel->delete($id);
 

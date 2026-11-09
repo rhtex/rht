@@ -732,4 +732,34 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
         $routes->get('form', 'BulkUploadController::showForm');
         $routes->post('process', 'BulkUploadController::process');
     });
+
+    // Zoho Books Integration (Settings -> Integrations -> Zoho Books)
+    $routes->group('settings/integrations/zoho', function ($routes) {
+        $routes->get('', 'ZohoSettingsController::index');
+        $routes->post('save', 'ZohoSettingsController::save');
+        $routes->get('connect', 'ZohoSettingsController::connect');
+        $routes->get('callback', 'ZohoSettingsController::callback');
+        $routes->post('test', 'ZohoSettingsController::testConnection');
+        $routes->post('refresh-token', 'ZohoSettingsController::refreshToken');
+        $routes->post('disconnect', 'ZohoSettingsController::disconnect');
+        $routes->post('select-organization', 'ZohoSettingsController::selectOrganization');
+
+        // Synchronization Dashboard & Manual Actions
+        $routes->get('sync', 'ZohoSyncController::dashboard');
+        $routes->post('sync-from-zoho', 'ZohoSyncController::syncFromZoho');
+        $routes->post('sync-to-zoho', 'ZohoSyncController::syncToZoho');
+        $routes->post('full-sync', 'ZohoSyncController::fullSync');
+        $routes->post('sync-module', 'ZohoSyncController::syncModule');
+        $routes->post('sync-records', 'ZohoSyncController::syncSelectedRecords');
+        $routes->get('sync-record/(:segment)/(:num)', 'ZohoSyncController::syncSingleRecord/$1/$2');
+        $routes->post('sync-record/(:segment)/(:num)', 'ZohoSyncController::syncSingleRecord/$1/$2');
+        $routes->post('retry-failed', 'ZohoSyncController::retryFailed');
+        $routes->get('module-records/(:segment)', 'ZohoSyncController::fetchModuleRecords/$1');
+
+        // Conflicts, Reconciliation & Logs
+        $routes->get('conflicts', 'ZohoSyncController::conflicts');
+        $routes->post('conflicts/resolve/(:num)', 'ZohoSyncController::resolveConflict/$1');
+        $routes->get('reconciliation', 'ZohoSyncController::reconciliation');
+        $routes->get('logs', 'ZohoSyncController::logs');
+    });
 });

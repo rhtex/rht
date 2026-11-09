@@ -86,6 +86,9 @@ class VendorController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to save vendor data.');
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('vendors', (int) $vendorId, 'CREATE');
+        }
 
         return redirect()->to('vendors')->with('success', 'Vendor added successfully.');
     }
@@ -124,6 +127,9 @@ class VendorController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update vendor data.');
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('vendors', (int) $id, 'UPDATE');
+        }
 
         return redirect()->to('vendors')->with('success', 'Vendor updated successfully.');
     }
@@ -171,6 +177,9 @@ class VendorController extends BaseController
 
     public function delete($id)
     {
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('vendors', (int) $id, 'DELETE');
+        }
         $this->vendorModel->delete($id);
         $this->addressModel->where('owner_type', 'vendor')->where('owner_id', $id)->delete();
         return redirect()->to('vendors')->with('success', 'Vendor deleted successfully.');
@@ -602,6 +611,7 @@ class VendorController extends BaseController
         }
 
         // Create vendor credit if action is Returned
+        $vendorCreditId = null;
         if ($action == 'Returned' && $totalAmount > 0) {
             // Ref number is already generated
 
@@ -613,12 +623,17 @@ class VendorController extends BaseController
                 'status' => 'Unused',
                 'created_by' => session('user_id')
             ]);
+            $vendorCreditId = $this->creditModel->getInsertID();
         }
 
         $db->transComplete();
 
         if ($db->transStatus() === false) {
             return redirect()->back()->with('error', 'Failed to process return batch.');
+        }
+
+        if ($vendorCreditId && function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('vendor_credits', (int) $vendorCreditId, 'CREATE');
         }
 
         $message = "Successfully processed {$processedCount} items as {$action}.";

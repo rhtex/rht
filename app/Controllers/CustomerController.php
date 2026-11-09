@@ -97,6 +97,7 @@ class CustomerController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to save customer data.');
         }
 
+        zoho_auto_sync('customers', (int) $customerId, 'CREATE');
 
         return redirect()->to('customers')->with('success', 'Customer added successfully.');
     }
@@ -197,6 +198,7 @@ class CustomerController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update customer data.');
         }
 
+        zoho_auto_sync('customers', (int) $id, 'UPDATE');
 
         return redirect()->to('customers')->with('success', 'Customer updated successfully.');
     }
@@ -403,6 +405,7 @@ class CustomerController extends BaseController
         $this->customerModel->delete($id);
         // Optionally delete addresses or keep them (audit trail)
         $this->addressModel->where('owner_type', 'customer')->where('owner_id', $id)->delete();
+        zoho_auto_sync('customers', (int) $id, 'DELETE');
         return redirect()->to('customers')->with('success', 'Customer deleted successfully.');
     }
 

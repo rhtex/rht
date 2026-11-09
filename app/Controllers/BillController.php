@@ -209,6 +209,10 @@ class BillController extends BaseController
         $this->accountingModel->postEntry('Accounts Payable', $billDate, 0, $finalBill['total_amount'], $billRef, 'bill', $billId);
         // ------------------------
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('bills', (int) $billId, 'CREATE');
+        }
+
         return redirect()->to('bills')->with('success', 'Bill created successfully.');
     }
 
@@ -325,6 +329,10 @@ class BillController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to update bill.');
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('bills', (int) $id, 'UPDATE');
+        }
+
         return redirect()->to('bills/view/' . $id)->with('success', 'Bill updated successfully.');
     }
 
@@ -340,6 +348,10 @@ class BillController extends BaseController
             'status' => 'Void',
             'updated_by' => session('user_id')
         ]);
+
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('bills', (int) $id, 'VOID');
+        }
 
         return redirect()->to('bills')->with('success', 'Bill voided successfully.');
     }
@@ -359,6 +371,10 @@ class BillController extends BaseController
             'status' => 'Open',
             'updated_by' => session('user_id')
         ]);
+
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('bills', (int) $id, 'UPDATE');
+        }
 
         return redirect()->to('bills/view/' . $id)->with('success', 'Bill marked as Open successfully.');
     }
@@ -455,6 +471,11 @@ class BillController extends BaseController
 
         if ($db->transStatus() === false) {
             return redirect()->back()->withInput()->with('error', 'Failed to record payment.');
+        }
+
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('vendor_payments', (int) $paymentId, 'CREATE');
+            zoho_auto_sync('bills', (int) $billId, 'UPDATE');
         }
 
         return redirect()->to('bills/view/' . $billId)->with('success', 'Payment recorded successfully.');

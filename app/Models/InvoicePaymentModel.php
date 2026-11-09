@@ -13,8 +13,8 @@ class InvoicePaymentModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'invoice_id', 'customer_id', 'bank_account_id', 'bank_transaction_id', 'payment_number',
-        'payment_date', 'payment_mode', 'amount', 'discount_amount', 'mahimai_amount',
+        'invoice_id', 'customer_id', 'payment_type', 'bank_account_id', 'bank_transaction_id', 'payment_number',
+        'payment_date', 'payment_mode', 'amount', 'unapplied_amount', 'discount_amount', 'mahimai_amount',
         'postal_charges', 'reference_number',
         'notes', 'created_by', 'updated_by'
     ];
@@ -25,7 +25,7 @@ class InvoicePaymentModel extends Model
     protected $updatedField  = 'updated_at';
 
     protected $validationRules = [
-        'invoice_id'   => 'required|integer',
+        'invoice_id'   => 'permit_empty|integer',
         'customer_id'  => 'required|integer',
         'payment_date' => 'required|valid_date',
         'amount'       => 'required|decimal',
@@ -37,8 +37,8 @@ class InvoicePaymentModel extends Model
     public function getPaymentsWithFilters($filters = [])
     {
         $builder = $this->select('invoice_payments.*, invoices.invoice_number, customers.name as customer_name')
-                        ->join('invoices', 'invoices.id = invoice_payments.invoice_id')
-                        ->join('customers', 'customers.id = invoice_payments.customer_id');
+                        ->join('invoices', 'invoices.id = invoice_payments.invoice_id', 'left')
+                        ->join('customers', 'customers.id = invoice_payments.customer_id', 'left');
 
         if (!empty($filters['customer_id'])) {
             $builder->where('invoice_payments.customer_id', $filters['customer_id']);

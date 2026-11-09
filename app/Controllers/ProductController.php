@@ -111,6 +111,10 @@ class ProductController extends BaseController
             }
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('items', (int) $productId, 'CREATE');
+        }
+
         return redirect()->to('products')->with('success', 'Product created successfully');
     }
 
@@ -228,11 +232,17 @@ class ProductController extends BaseController
         ];
 
         $this->productModel->update($id, $data);
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('items', (int) $id, 'UPDATE');
+        }
         return redirect()->to('products')->with('success', 'Product updated successfully');
     }
 
     public function delete($id)
     {
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('items', (int) $id, 'DELETE');
+        }
         // Should handle deleting items and images too, but maybe just logical delete or restricted
         $this->productModel->delete($id);
         return redirect()->to('products')->with('success', 'Product deleted');

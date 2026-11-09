@@ -77,6 +77,7 @@
                                 $color = $statusColors[$bill['status']] ?? 'secondary';
                                 ?>
                                 <span class="badge text-bg-<?= $color ?> px-2 py-1"><?= $bill['status'] ?></span>
+                                <?= function_exists('zoho_sync_badge') ? zoho_sync_badge('bills', (int) $bill['id']) : '' ?>
                             </td>
                         </tr>
                         <tr>

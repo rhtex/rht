@@ -6,7 +6,10 @@
 <div class="row align-items-center mb-4">
     <div class="col-sm-6">
         <h1 class="m-0 text-dark fw-bold"><?= esc($customer['name']) ?></h1>
-        <p class="text-muted mb-0">Customer ID: #<?= str_pad($customer['id'], 5, '0', STR_PAD_LEFT) ?></p>
+        <p class="text-muted mb-0">
+            Customer ID: #<?= str_pad($customer['id'], 5, '0', STR_PAD_LEFT) ?>
+            <?= function_exists('zoho_sync_badge') ? zoho_sync_badge('customers', (int) $customer['id']) : '' ?>
+        </p>
     </div>
     <div class="col-sm-6 text-end">
         <div class="btn-group">

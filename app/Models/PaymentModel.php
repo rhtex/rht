@@ -13,8 +13,8 @@ class PaymentModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'bill_id', 'vendor_id', 'bank_transaction_id', 'payment_number',
-        'payment_date', 'payment_mode', 'amount', 'discount_amount', 'mahimai_amount',
+        'bill_id', 'vendor_id', 'payment_type', 'bank_transaction_id', 'payment_number',
+        'payment_date', 'payment_mode', 'amount', 'unapplied_amount', 'discount_amount', 'mahimai_amount',
         'postal_charges', 'reference_number', 'bank_account_id',
         'notes', 'created_by', 'updated_by'
     ];
@@ -25,7 +25,7 @@ class PaymentModel extends Model
     protected $updatedField  = 'updated_at';
 
     protected $validationRules = [
-        'bill_id'      => 'required|integer',
+        'bill_id'      => 'permit_empty|integer',
         'vendor_id'    => 'required|integer',
         'payment_date' => 'required|valid_date',
         'amount'       => 'required|decimal',
@@ -37,8 +37,8 @@ class PaymentModel extends Model
     public function getPaymentsWithFilters($filters = [])
     {
         $builder = $this->select('payments.*, bills.bill_number, vendors.name as vendor_name')
-                        ->join('bills', 'bills.id = payments.bill_id')
-                        ->join('vendors', 'vendors.id = payments.vendor_id');
+                        ->join('bills', 'bills.id = payments.bill_id', 'left')
+                        ->join('vendors', 'vendors.id = payments.vendor_id', 'left');
 
         if (!empty($filters['vendor_id'])) {
             $builder->where('payments.vendor_id', $filters['vendor_id']);

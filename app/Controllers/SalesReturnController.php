@@ -108,6 +108,9 @@ class SalesReturnController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to save return.');
         }
 
+        if (function_exists('zoho_auto_sync')) {
+            zoho_auto_sync('credit_notes', (int) $returnId, 'CREATE');
+        }
 
         return redirect()->to('sales_returns')->with('success', 'Sales return recorded successfully.');
     }

@@ -115,6 +115,7 @@
                                 $color = $colors[$quotation['status']] ?? 'secondary';
                                 ?>
                                 <span class="badge text-bg-<?= $color ?> px-2 py-1"><?= $quotation['status'] ?></span>
+                                <?= function_exists('zoho_sync_badge') ? zoho_sync_badge('quotations', (int) $quotation['id']) : '' ?>
                                 <?php if ($isConvertedToSO): ?>
                                     <a href="<?= site_url('sales_orders/view/' . $soTargetId) ?>" class="badge bg-primary text-decoration-none ms-1">
                                         <i class="fas fa-shopping-cart me-1"></i> <?= esc($quotation['converted_so_number'] ?? 'SO #' . $soTargetId) ?>

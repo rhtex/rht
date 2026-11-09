@@ -70,6 +70,7 @@
                                 $color = $colors[$order['status']] ?? 'secondary';
                                 ?>
                                 <span class="badge text-bg-<?= $color ?>"><?= $order['status'] ?></span>
+                                <?= function_exists('zoho_sync_badge') ? zoho_sync_badge('sales_orders', (int) $order['id']) : '' ?>
                             </td>
                         </tr>
                         <tr><th>Transport:</th><td><?= esc($order['transport_name']) ?: '-' ?></td></tr>

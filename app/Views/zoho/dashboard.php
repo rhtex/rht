@@ -3,30 +3,29 @@
 <?= $this->section('title') ?>Zoho Books Synchronization Dashboard<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
-<div class="bt-hero">
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-        <div>
-            <span class="bt-eyebrow"><i class="fas fa-sync-alt"></i> Settings &rarr; Integrations &rarr; Zoho Books &rarr; Synchronization</span>
-            <h1><i class="fas fa-exchange-alt"></i> Zoho Books Synchronization Center</h1>
-            <p>Manage manual &amp; automated bidirectional CRUD synchronization across all Sales, Purchase, Inventory, and Finance modules.</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="<?= site_url('settings/integrations/zoho') ?>" class="btn btn-outline-light fw-bold">
+<div class="row mb-3 align-items-center">
+    <div class="col-sm-6">
+        <h1 class="m-0"><i class="fas fa-exchange-alt text-primary me-2"></i>Zoho Books Synchronization</h1>
+        <small class="text-muted">Manage manual &amp; automated bidirectional CRUD sync across Sales, Purchase, Inventory, and Finance.</small>
+    </div>
+    <div class="col-sm-6 text-end">
+        <div class="d-inline-flex flex-wrap gap-2 align-items-center">
+            <a href="<?= site_url('settings/integrations/zoho') ?>" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-cog me-1"></i> Configuration
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="btn btn-light fw-bold shadow-sm">
-                <i class="fas fa-sync-alt text-primary me-1"></i> Sync Dashboard
+            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="btn btn-sm btn-primary">
+                <i class="fas fa-sync-alt me-1"></i> Sync Dashboard
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-code-branch me-1"></i> Conflicts
                 <?php if (!empty($totalConflicts)): ?>
                     <span class="badge bg-danger ms-1"><?= (int) $totalConflicts ?></span>
                 <?php endif; ?>
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-balance-scale me-1"></i> Reconciliation
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/logs') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/logs') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-history me-1"></i> Audit Logs
             </a>
         </div>
@@ -37,11 +36,13 @@
 <?= $this->section('content') ?>
 
 <!-- 7 Required Manual Synchronization Action Bar -->
-<div class="card border-0 shadow-sm rounded-4 mb-4">
-    <div class="card-body p-4">
+<div class="card card-outline card-primary shadow-sm mb-3">
+    <div class="card-header bg-white py-2">
+        <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-play-circle text-primary me-2"></i>Manual Synchronization Controls</h3>
+    </div>
+    <div class="card-body p-3">
         <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3">
             <div>
-                <h5 class="fw-bold mb-1 text-dark"><i class="fas fa-play-circle text-primary me-2"></i>Manual Synchronization Controls</h5>
                 <div class="text-muted small">
                     Last Sync: <strong><?= !empty($config['last_sync_at']) ? date('d M Y, h:i:s A', strtotime($config['last_sync_at'])) : 'Never' ?></strong>
                     &bull; Organization: <strong><?= esc($config['organization_name'] ?: ($config['organization_id'] ?: 'Not Configured')) ?></strong>
@@ -109,57 +110,46 @@
 </div>
 
 <!-- KPI Summary Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="bt-stat bt-stat--emerald">
-            <div class="bt-stat__icon"><i class="fas fa-check-double"></i></div>
-            <div>
-                <div class="bt-stat__label">Synced &amp; Mapped</div>
-                <div class="bt-stat__val"><?= number_format($totalMapped) ?></div>
-                <div class="bt-stat__sub">Linked Local &harr; Zoho IDs</div>
-            </div>
+<div class="row g-3 mb-3">
+    <div class="col-md-3 col-sm-6">
+        <div class="bt-stat bt-g-green" style="cursor:default;">
+            <i class="fas fa-check-double bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format($totalMapped) ?></div>
+            <div class="bt-stat-label">Synced &amp; Mapped</div>
+            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="bt-stat bt-stat--blue">
-            <div class="bt-stat__icon"><i class="fas fa-hourglass-half"></i></div>
-            <div>
-                <div class="bt-stat__label">Unsynced Local Records</div>
-                <div class="bt-stat__val"><?= number_format($totalUnsynced) ?></div>
-                <div class="bt-stat__sub">Queue Pending: <?= number_format($pendingQueue) ?></div>
-            </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="bt-stat bt-g-blue" style="cursor:default;">
+            <i class="fas fa-hourglass-half bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format($totalUnsynced) ?></div>
+            <div class="bt-stat-label">Unsynced (Queue: <?= number_format($pendingQueue) ?>)</div>
+            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="bt-stat <?= $totalConflicts > 0 ? 'bt-stat--amber' : 'bt-stat--purple' ?>">
-            <div class="bt-stat__icon"><i class="fas fa-code-branch"></i></div>
-            <div>
-                <div class="bt-stat__label">Open Conflicts</div>
-                <div class="bt-stat__val"><?= number_format($totalConflicts) ?></div>
-                <div class="bt-stat__sub">
-                    <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="text-decoration-none">Review Conflicts &rarr;</a>
-                </div>
-            </div>
-        </div>
+    <div class="col-md-3 col-sm-6">
+        <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="bt-stat <?= $totalConflicts > 0 ? 'bt-g-amber' : 'bt-g-purple' ?> text-decoration-none">
+            <i class="fas fa-code-branch bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format($totalConflicts) ?></div>
+            <div class="bt-stat-label">Open Conflicts</div>
+            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
+        </a>
     </div>
-    <div class="col-md-3">
-        <div class="bt-stat <?= $totalFailed > 0 ? 'bt-stat--rose' : 'bt-stat--slate' ?>">
-            <div class="bt-stat__icon"><i class="fas fa-exclamation-circle"></i></div>
-            <div>
-                <div class="bt-stat__label">Failed Synchronizations</div>
-                <div class="bt-stat__val"><?= number_format($totalFailed) ?></div>
-                <div class="bt-stat__sub">
-                    <a href="<?= site_url('settings/integrations/zoho/logs?status=FAILED') ?>" class="text-decoration-none">View Error Logs &rarr;</a>
-                </div>
-            </div>
-        </div>
+    <div class="col-md-3 col-sm-6">
+        <a href="<?= site_url('settings/integrations/zoho/logs?status=FAILED') ?>" class="bt-stat <?= $totalFailed > 0 ? 'bt-g-red' : 'bt-g-slate' ?> text-decoration-none">
+            <i class="fas fa-exclamation-circle bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format($totalFailed) ?></div>
+            <div class="bt-stat-label">Failed Syncs</div>
+            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
+        </a>
     </div>
+</div>
 </div>
 
 <!-- Module-by-Module Synchronization Status Matrix -->
-<div class="card border-0 shadow-sm rounded-4 mb-4">
-    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-cubes text-primary me-2"></i>Module Synchronization Matrix (13 Modules)</h5>
+<div class="card card-outline card-secondary shadow-sm mb-3">
+    <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-cubes text-primary me-2"></i>Module Synchronization Matrix (13 Modules)</h3>
         <span class="text-muted small">Click any module action to sync only that module</span>
     </div>
     <div class="card-body p-0">

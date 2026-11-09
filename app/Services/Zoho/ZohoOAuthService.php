@@ -225,7 +225,8 @@ class ZohoOAuthService
     {
         $start = microtime(true);
         $ch    = curl_init($url);
-        curl_setopt_array($ch, [
+        $caBundle = WRITEPATH . 'cacert_combined.pem';
+        $curlOpts = [
             CURLOPT_POST           => true,
             CURLOPT_POSTFIELDS     => http_build_query($postFields),
             CURLOPT_RETURNTRANSFER => true,
@@ -233,7 +234,11 @@ class ZohoOAuthService
             CURLOPT_CONNECTTIMEOUT => 10,
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_HTTPHEADER     => ['Content-Type: application/x-www-form-urlencoded'],
-        ]);
+        ];
+        if (file_exists($caBundle)) {
+            $curlOpts[CURLOPT_CAINFO] = $caBundle;
+        }
+        curl_setopt_array($ch, $curlOpts);
 
         $rawBody  = curl_exec($ch);
         $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);

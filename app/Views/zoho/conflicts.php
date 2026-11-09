@@ -3,27 +3,26 @@
 <?= $this->section('title') ?>Zoho Synchronization Conflicts<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
-<div class="bt-hero">
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-        <div>
-            <span class="bt-eyebrow"><i class="fas fa-code-branch"></i> Settings &rarr; Integrations &rarr; Zoho Books &rarr; Conflicts</span>
-            <h1><i class="fas fa-exclamation-triangle"></i> Synchronization Conflict Management</h1>
-            <p>Review and resolve records modified independently in both CI4 ERP and Zoho Books without losing accounting integrity.</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="<?= site_url('settings/integrations/zoho') ?>" class="btn btn-outline-light fw-bold">
+<div class="row mb-3 align-items-center">
+    <div class="col-sm-6">
+        <h1 class="m-0"><i class="fas fa-exclamation-triangle text-primary me-2"></i>Synchronization Conflicts</h1>
+        <small class="text-muted">Review and resolve records modified independently in both CI4 ERP and Zoho Books.</small>
+    </div>
+    <div class="col-sm-6 text-end">
+        <div class="d-inline-flex flex-wrap gap-2 align-items-center">
+            <a href="<?= site_url('settings/integrations/zoho') ?>" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-cog me-1"></i> Configuration
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-sync-alt me-1"></i> Sync Dashboard
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="btn btn-light fw-bold shadow-sm">
-                <i class="fas fa-code-branch text-primary me-1"></i> Conflicts
+            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="btn btn-sm btn-primary">
+                <i class="fas fa-code-branch me-1"></i> Conflicts
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-balance-scale me-1"></i> Reconciliation
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/logs') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/logs') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-history me-1"></i> Audit Logs
             </a>
         </div>
@@ -34,7 +33,10 @@
 <?= $this->section('content') ?>
 
 <!-- Filter Bar -->
-<div class="card border-0 shadow-sm rounded-4 mb-4">
+<div class="card card-outline card-primary shadow-sm mb-3">
+    <div class="card-header bg-white py-2">
+        <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-filter text-primary me-2"></i>Filter Conflicts</h3>
+    </div>
     <div class="card-body p-3">
         <form action="<?= site_url('settings/integrations/zoho/conflicts') ?>" method="get" class="row g-2 align-items-end">
             <div class="col-md-4">
@@ -69,7 +71,7 @@
 </div>
 
 <?php if (empty($conflicts)): ?>
-    <div class="card border-0 shadow-sm rounded-4">
+    <div class="card card-outline card-secondary shadow-sm">
         <div class="card-body text-center py-5">
             <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
             <h5 class="fw-bold text-dark">No Synchronization Conflicts Found</h5>
@@ -84,16 +86,16 @@
             $zohoVals  = json_decode($c['zoho_payload_json'] ?? '{}', true) ?: [];
             $modLabel  = $modulesList[$c['module']]['label'] ?? ucfirst($c['module']);
         ?>
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-header bg-white py-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="card card-outline card-warning shadow-sm mb-3">
+            <div class="card-header bg-white py-2 d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-danger px-2 py-1"><i class="fas fa-exclamation-triangle me-1"></i>Conflict #<?= (int) $c['id'] ?></span>
                     <span class="badge bg-primary-subtle text-primary border px-2 py-1"><?= esc($modLabel) ?></span>
-                    <strong class="fs-6 text-dark">Record: <?= esc($c['record_number'] ?: ('#' . $c['local_record_id'])) ?></strong>
+                    <strong class="text-dark">Record: <?= esc($c['record_number'] ?: ('#' . $c['local_record_id'])) ?></strong>
                     <span class="text-muted small">(Local ID: #<?= (int) $c['local_record_id'] ?> &bull; Zoho ID: <code><?= esc($c['zoho_record_id']) ?></code>)</span>
                 </div>
                 <div>
-                    <span class="badge <?= $c['status'] === 'OPEN' ? 'bg-warning text-dark' : 'bg-success-subtle text-success' ?> px-3 py-1">
+                    <span class="badge <?= $c['status'] === 'OPEN' ? 'bg-warning text-dark' : 'bg-success-subtle text-success' ?> px-2 py-1">
                         <?= esc($c['status']) ?>
                     </span>
                 </div>

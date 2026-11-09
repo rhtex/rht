@@ -3,30 +3,29 @@
 <?= $this->section('title') ?>Zoho Books Integration<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
-<div class="bt-hero">
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-        <div>
-            <span class="bt-eyebrow"><i class="fas fa-plug"></i> Settings &rarr; Integrations &rarr; Zoho Books</span>
-            <h1><i class="fas fa-book-open"></i> Zoho Books API Configuration</h1>
-            <p>Two-way OAuth 2.0 integration between CI4 ERP and your Zoho Books Organization.</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="<?= site_url('settings/integrations/zoho') ?>" class="btn btn-light fw-bold shadow-sm">
-                <i class="fas fa-cog text-primary me-1"></i> Configuration
+<div class="row mb-3 align-items-center">
+    <div class="col-sm-6">
+        <h1 class="m-0"><i class="fas fa-book-open text-primary me-2"></i>Zoho Books API Configuration</h1>
+        <small class="text-muted">Two-way OAuth 2.0 integration between CI4 ERP and your Zoho Books Organization.</small>
+    </div>
+    <div class="col-sm-6 text-end">
+        <div class="d-inline-flex flex-wrap gap-2 align-items-center">
+            <a href="<?= site_url('settings/integrations/zoho') ?>" class="btn btn-sm btn-primary">
+                <i class="fas fa-cog me-1"></i> Configuration
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="btn btn-warning fw-bold shadow-sm">
+            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-sync-alt me-1"></i> Sync Dashboard
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-code-branch me-1"></i> Conflicts
                 <?php if (!empty($openConflicts)): ?>
                     <span class="badge bg-danger ms-1"><?= (int) $openConflicts ?></span>
                 <?php endif; ?>
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-balance-scale me-1"></i> Reconciliation
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/logs') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/logs') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-history me-1"></i> Audit Logs
             </a>
         </div>
@@ -36,56 +35,48 @@
 
 <?= $this->section('content') ?>
 
-<!-- Connection & Status KPI Strip -->
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="bt-stat <?= !empty($config['is_enabled']) ? 'bt-stat--emerald' : 'bt-stat--slate' ?>">
-            <div class="bt-stat__icon"><i class="fas fa-power-off"></i></div>
-            <div>
-                <div class="bt-stat__label">Integration Status</div>
-                <div class="bt-stat__val"><?= !empty($config['is_enabled']) ? 'Enabled' : 'Disabled' ?></div>
-                <div class="bt-stat__sub">Auto-Sync: <?= !empty($config['auto_sync_enabled']) ? 'Active' : 'Manual Only' ?></div>
-            </div>
+<!-- Summary Stat Cards -->
+<div class="row g-3 mb-3">
+    <div class="col-md-3 col-sm-6">
+        <div class="bt-stat <?= !empty($config['is_enabled']) ? 'bt-g-green' : 'bt-g-slate' ?>" style="cursor:default;">
+            <i class="fas fa-power-off bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= !empty($config['is_enabled']) ? 'Enabled' : 'Disabled' ?></div>
+            <div class="bt-stat-label">Integration Status</div>
+            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="bt-stat <?= !empty($config['has_refresh_token']) ? 'bt-stat--blue' : 'bt-stat--amber' ?>">
-            <div class="bt-stat__icon"><i class="fas fa-key"></i></div>
-            <div>
-                <div class="bt-stat__label">OAuth 2.0 Status</div>
-                <div class="bt-stat__val"><?= !empty($config['has_refresh_token']) ? 'Connected' : 'Not Connected' ?></div>
-                <div class="bt-stat__sub">DC: <?= strtoupper(esc($config['data_center'] ?? 'in')) ?></div>
-            </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="bt-stat <?= !empty($config['has_refresh_token']) ? 'bt-g-blue' : 'bt-g-amber' ?>" style="cursor:default;">
+            <i class="fas fa-key bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= !empty($config['has_refresh_token']) ? 'Connected' : 'Not Connected' ?></div>
+            <div class="bt-stat-label">OAuth 2.0 (<?= strtoupper(esc($config['data_center'] ?? 'in')) ?>)</div>
+            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="bt-stat bt-stat--purple">
-            <div class="bt-stat__icon"><i class="fas fa-clock"></i></div>
-            <div>
-                <div class="bt-stat__label">Last Successful Connection</div>
-                <div class="bt-stat__val" style="font-size:1rem;">
-                    <?= !empty($config['last_connected_at']) ? date('d M Y, h:i A', strtotime($config['last_connected_at'])) : 'Never' ?>
-                </div>
-                <div class="bt-stat__sub">Org ID: <?= esc($config['organization_id'] ?: 'Not set') ?></div>
+    <div class="col-md-3 col-sm-6">
+        <div class="bt-stat bt-g-purple" style="cursor:default;">
+            <i class="fas fa-clock bt-stat-icon"></i>
+            <div class="bt-stat-num" style="font-size:1.1rem; line-height:1.4;">
+                <?= !empty($config['last_connected_at']) ? date('d M Y, h:i A', strtotime($config['last_connected_at'])) : 'Never' ?>
             </div>
+            <div class="bt-stat-label">Last Connection</div>
+            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="bt-stat bt-stat--emerald">
-            <div class="bt-stat__icon"><i class="fas fa-exchange-alt"></i></div>
-            <div>
-                <div class="bt-stat__label">Last Synchronization</div>
-                <div class="bt-stat__val" style="font-size:1rem;">
-                    <?= !empty($config['last_sync_at']) ? date('d M Y, h:i A', strtotime($config['last_sync_at'])) : 'Never' ?>
-                </div>
-                <div class="bt-stat__sub"><?= esc($config['organization_name'] ?: 'Zoho Books') ?></div>
+    <div class="col-md-3 col-sm-6">
+        <div class="bt-stat bt-g-indigo" style="cursor:default;">
+            <i class="fas fa-exchange-alt bt-stat-icon"></i>
+            <div class="bt-stat-num" style="font-size:1.1rem; line-height:1.4;">
+                <?= !empty($config['last_sync_at']) ? date('d M Y, h:i A', strtotime($config['last_sync_at'])) : 'Never' ?>
             </div>
+            <div class="bt-stat-label">Last Sync</div>
+            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
 </div>
 
 <?php if (!empty($config['last_error'])): ?>
-<div class="alert alert-warning border-start border-4 border-warning shadow-sm mb-4">
+<div class="alert alert-warning border-start border-4 border-warning shadow-sm mb-3">
     <div class="d-flex align-items-center">
         <i class="fas fa-exclamation-triangle fa-lg text-warning me-3"></i>
         <div>
@@ -96,13 +87,13 @@
 </div>
 <?php endif; ?>
 
-<div class="row g-4">
+<div class="row g-3">
     <!-- Left Column: Main Configuration Form -->
     <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-sliders-h text-primary me-2"></i>Zoho Books API Credentials & Settings</h5>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1">
+        <div class="card card-outline card-primary shadow-sm mb-4">
+            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-sliders-h text-primary me-2"></i>Zoho Books API Credentials & Settings</h3>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
                     <i class="fas fa-shield-alt me-1"></i>AES-256 Encrypted Storage
                 </span>
             </div>
@@ -202,14 +193,17 @@
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">
                                 Zoho Refresh Token
+                                <span class="badge bg-secondary-subtle text-muted ms-1">Auto-Generated</span>
                                 <?php if (!empty($config['has_refresh_token'])): ?>
-                                    <span class="badge bg-success-subtle text-success ms-1">Saved (<?= esc($config['refresh_token_masked']) ?>)</span>
+                                    <span class="badge bg-success-subtle text-success ms-1">Connected (<?= esc($config['refresh_token_masked']) ?>)</span>
                                 <?php endif; ?>
                             </label>
                             <input type="password" name="refresh_token" class="form-control"
-                                   placeholder="<?= !empty($config['has_refresh_token']) ? 'Auto-managed via OAuth or enter new Refresh Token' : '1000.xxxx (Or click Connect to Zoho Books)' ?>"
+                                   placeholder="<?= !empty($config['has_refresh_token']) ? 'Auto-managed by OAuth 2.0 (Connected)' : 'Automatically generated when you click Connect to Zoho Books' ?>"
                                    autocomplete="new-password">
-                            <small class="text-muted">Populated automatically when you click <strong>Connect to Zoho Books</strong>, or paste a self-client refresh token.</small>
+                            <small class="text-muted d-block mt-1">
+                                <i class="fas fa-magic text-primary me-1"></i><strong>You do not need to generate or type this manually.</strong> Just save your Client ID &amp; Secret, then click <strong>Connect to Zoho Books</strong>.
+                            </small>
                         </div>
 
                         <div class="col-md-6">
@@ -315,12 +309,18 @@
     <!-- Right Column: Connection Actions & Organization Selector -->
     <div class="col-lg-4">
         <!-- Connection Actions Card -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-header bg-white py-3 border-bottom">
-                <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-bolt text-warning me-2"></i>Connection Actions</h5>
+        <div class="card card-outline card-warning shadow-sm mb-3">
+            <div class="card-header bg-white py-2">
+                <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-bolt text-warning me-2"></i>Connection Actions</h3>
             </div>
-            <div class="card-body p-4 d-grid gap-2">
-                <a href="<?= site_url('settings/integrations/zoho/connect') ?>" class="btn btn-success fw-bold py-2">
+            <div class="card-body p-3 d-grid gap-2">
+                <?php if (empty($config['has_client_id']) || empty($config['has_client_secret'])): ?>
+                    <div class="alert alert-warning py-2 px-3 small mb-2 border-0">
+                        <i class="fas fa-info-circle me-1"></i> Enter your <strong>Client ID</strong> &amp; <strong>Client Secret</strong> on the left, then click <strong>Save Configuration</strong> first.
+                    </div>
+                <?php endif; ?>
+
+                <a href="<?= site_url('settings/integrations/zoho/connect') ?>" class="btn btn-success fw-bold py-2 <?= (empty($config['has_client_id']) || empty($config['has_client_secret'])) ? 'opacity-75' : '' ?>">
                     <i class="fas fa-plug me-2"></i> Connect to Zoho Books (OAuth 2.0)
                 </a>
 
@@ -349,11 +349,11 @@
         </div>
 
         <!-- Organization Selector Card -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-header bg-white py-3 border-bottom">
-                <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-building text-info me-2"></i>Select Zoho Organization</h5>
+        <div class="card card-outline card-info shadow-sm mb-3">
+            <div class="card-header bg-white py-2">
+                <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-building text-info me-2"></i>Select Zoho Organization</h3>
             </div>
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 <?php if (!empty($config['organizations'])): ?>
                     <form action="<?= site_url('settings/integrations/zoho/select-organization') ?>" method="post">
                         <?= csrf_field() ?>
@@ -382,12 +382,12 @@
 
         <!-- Live API Rate Limit & Quota Monitor -->
         <?php if (!empty($rateUsage)): ?>
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-gauge-high text-primary me-2"></i>API Frequency &amp; Daily Quota</h6>
+        <div class="card card-outline card-secondary shadow-sm mb-3">
+            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-gauge-high text-primary me-2"></i>API Frequency &amp; Daily Quota</h3>
                 <span class="badge bg-info-subtle text-info border border-info-subtle text-uppercase"><?= esc($rateUsage['subscription_plan']) ?> Plan</span>
             </div>
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 <div class="mb-3">
                     <div class="d-flex justify-content-between small fw-semibold mb-1">
                         <span>Daily Allowance (24h)</span>
@@ -422,9 +422,9 @@
         <?php endif; ?>
 
         <!-- cPanel Cron Command Reference -->
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white py-3 border-bottom">
-                <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-terminal text-secondary me-2"></i>Shared cPanel Cron Job</h6>
+        <div class="card card-outline card-secondary shadow-sm mb-3">
+            <div class="card-header bg-white py-2">
+                <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-terminal text-secondary me-2"></i>Shared cPanel Cron Job</h3>
             </div>
             <div class="card-body p-3">
                 <p class="text-muted small mb-2">To process the background queue and incremental sync automatically on cPanel, schedule:</p>

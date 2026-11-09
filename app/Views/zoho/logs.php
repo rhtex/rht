@@ -3,28 +3,27 @@
 <?= $this->section('title') ?>Zoho Audit Logs & Queue<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
-<div class="bt-hero">
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-        <div>
-            <span class="bt-eyebrow"><i class="fas fa-history"></i> Settings &rarr; Integrations &rarr; Zoho Books &rarr; Audit Logs</span>
-            <h1><i class="fas fa-satellite-dish"></i> Zoho API Audit Logs &amp; Sync Queue</h1>
-            <p>Inspect HTTP request/response logs (with redacted secrets) and manage queued synchronization items.</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="<?= site_url('settings/integrations/zoho') ?>" class="btn btn-outline-light fw-bold">
+<div class="row mb-3 align-items-center">
+    <div class="col-sm-6">
+        <h1 class="m-0"><i class="fas fa-satellite-dish text-primary me-2"></i>Zoho API Logs &amp; Queue</h1>
+        <small class="text-muted">Inspect HTTP request/response logs and background synchronization queue items.</small>
+    </div>
+    <div class="col-sm-6 text-end">
+        <div class="d-inline-flex flex-wrap gap-2 align-items-center">
+            <a href="<?= site_url('settings/integrations/zoho') ?>" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-cog me-1"></i> Configuration
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-sync-alt me-1"></i> Sync Dashboard
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-code-branch me-1"></i> Conflicts
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-balance-scale me-1"></i> Reconciliation
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/logs') ?>" class="btn btn-light fw-bold shadow-sm">
-                <i class="fas fa-history text-primary me-1"></i> Audit Logs
+            <a href="<?= site_url('settings/integrations/zoho/logs') ?>" class="btn btn-sm btn-primary">
+                <i class="fas fa-history me-1"></i> Audit Logs
             </a>
         </div>
     </div>
@@ -34,7 +33,10 @@
 <?= $this->section('content') ?>
 
 <!-- Filter Bar -->
-<div class="card border-0 shadow-sm rounded-4 mb-4">
+<div class="card card-outline card-primary shadow-sm mb-3">
+    <div class="card-header bg-white py-2">
+        <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-filter text-primary me-2"></i>Filter Logs</h3>
+    </div>
     <div class="card-body p-3">
         <form action="<?= site_url('settings/integrations/zoho/logs') ?>" method="get" class="row g-2 align-items-end">
             <div class="col-md-3">
@@ -78,9 +80,9 @@
 
 <!-- Synchronization Queue Card -->
 <?php if (!empty($queueItems)): ?>
-<div class="card border-0 shadow-sm rounded-4 mb-4">
-    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-        <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-list-ol text-warning me-2"></i>Recent Synchronization Queue Items</h6>
+<div class="card card-outline card-warning shadow-sm mb-3">
+    <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-list-ol text-warning me-2"></i>Recent Synchronization Queue Items</h3>
         <form action="<?= site_url('settings/integrations/zoho/retry-failed') ?>" method="post" class="d-inline">
             <?= csrf_field() ?>
             <button type="submit" class="btn btn-xs btn-warning fw-bold">
@@ -136,9 +138,9 @@
 <?php endif; ?>
 
 <!-- HTTP Request & Response Audit Logs -->
-<div class="card border-0 shadow-sm rounded-4">
-    <div class="card-header bg-white py-3 border-bottom">
-        <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-terminal text-primary me-2"></i>API Request &amp; Response Logs (Latest 150)</h6>
+<div class="card card-outline card-secondary shadow-sm mb-3">
+    <div class="card-header bg-white py-2">
+        <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-terminal text-primary me-2"></i>API Request &amp; Response Logs (Latest 150)</h3>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">

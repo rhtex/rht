@@ -192,6 +192,42 @@ class ZohoSyncOrchestrator
     }
 
     /**
+     * Process pending items in the queue (FIFO, rate-limited, respecting next_retry_at).
+     */
+    public function processPendingQueue(int $limit = 50): array
+    {
+        $now = date('Y-m-d H:i:s');
+        $items = $this->queueModel
+            ->groupStart()
+                ->where('status', 'PENDING')
+                ->orGroupStart()
+                    ->where('status', 'FAILED')
+                    ->where('attempts <', 5)
+                    ->where('next_retry_at <=', $now)
+                ->groupEnd()
+            ->groupEnd()
+            ->orderBy('id', 'ASC')
+            ->findAll($limit);
+
+        $processed = 0;
+        $failed    = 0;
+        foreach ($items as $item) {
+            $res = $this->processQueueItem((int) $item['id']);
+            $processed++;
+            if (empty($res['success'])) {
+                $failed++;
+            }
+        }
+
+        return [
+            'success'       => true,
+            'processed'     => $processed,
+            'failed_count'  => $failed,
+            'status'        => 'completed',
+        ];
+    }
+
+    /**
      * Manual / Scheduled: Sync from Zoho Books -> CI4 ERP.
      */
     public function syncFromZoho(?string $moduleFilter = null, bool $incremental = false, ?int $userId = null): array
@@ -214,6 +250,16 @@ class ZohoSyncOrchestrator
             'failed_count'    => 0,
             'summary'         => [],
         ];
+
+        $config = $this->settingModel->getConfig(false);
+        if (empty($config['has_refresh_token'])) {
+            $msg = 'Zoho Books is not connected. Please go to Settings -> Integrations -> Zoho Books and click "Connect to Zoho Books (OAuth 2.0)".';
+            return array_merge(['success' => false, 'message' => $msg, 'failed_count' => count($modules)], $totals);
+        }
+        if (empty($config['organization_id'])) {
+            $msg = 'Zoho Organization ID is not selected. Please connect and select an organization under Settings -> Integrations -> Zoho Books.';
+            return array_merge(['success' => false, 'message' => $msg, 'failed_count' => count($modules)], $totals);
+        }
 
         try {
             // Prime Taxes & Chart of Accounts metadata cache first

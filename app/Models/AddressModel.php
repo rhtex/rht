@@ -75,4 +75,22 @@ class AddressModel extends Model
             ->where('is_active', 1)
             ->first();
     }
+
+    /**
+     * Convenience method: Get active billing address with state/country names.
+     */
+    public function getBillingAddress($ownerType, $ownerId)
+    {
+        return $this->getAddressWithNames($ownerType, $ownerId, 'billing') 
+            ?: $this->getActiveAddress($ownerType, $ownerId, 'billing');
+    }
+
+    /**
+     * Convenience method: Get active shipping address with state/country names.
+     */
+    public function getShippingAddress($ownerType, $ownerId)
+    {
+        return $this->getAddressWithNames($ownerType, $ownerId, 'shipping') 
+            ?: $this->getActiveAddress($ownerType, $ownerId, 'shipping');
+    }
 }

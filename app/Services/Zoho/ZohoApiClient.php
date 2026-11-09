@@ -274,6 +274,7 @@ class ZohoApiClient
 
             $responseHeaders = [];
             $ch = curl_init($url);
+            $caBundle = WRITEPATH . 'cacert_combined.pem';
             $curlOpts = [
                 CURLOPT_CUSTOMREQUEST  => strtoupper($method),
                 CURLOPT_RETURNTRANSFER => true,
@@ -289,6 +290,10 @@ class ZohoApiClient
                     return $len;
                 },
             ];
+
+            if (file_exists($caBundle)) {
+                $curlOpts[CURLOPT_CAINFO] = $caBundle;
+            }
 
             if ($payload !== null && in_array(strtoupper($method), ['POST', 'PUT', 'PATCH'], true)) {
                 $headers[] = 'Content-Type: application/json;charset=UTF-8';

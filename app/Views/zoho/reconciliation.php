@@ -3,27 +3,26 @@
 <?= $this->section('title') ?>Zoho Books Reconciliation Report<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
-<div class="bt-hero">
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-        <div>
-            <span class="bt-eyebrow"><i class="fas fa-balance-scale"></i> Settings &rarr; Integrations &rarr; Zoho Books &rarr; Reconciliation</span>
-            <h1><i class="fas fa-check-double"></i> CI4 ERP vs Zoho Books Reconciliation</h1>
-            <p>Compare record counts, invoice/bill totals, and customer/supplier balances across both applications.</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="<?= site_url('settings/integrations/zoho') ?>" class="btn btn-outline-light fw-bold">
+<div class="row mb-3 align-items-center">
+    <div class="col-sm-6">
+        <h1 class="m-0"><i class="fas fa-check-double text-primary me-2"></i>Zoho Books Reconciliation</h1>
+        <small class="text-muted">Compare record counts, invoice/bill totals, and customer/supplier balances across applications.</small>
+    </div>
+    <div class="col-sm-6 text-end">
+        <div class="d-inline-flex flex-wrap gap-2 align-items-center">
+            <a href="<?= site_url('settings/integrations/zoho') ?>" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-cog me-1"></i> Configuration
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-sync-alt me-1"></i> Sync Dashboard
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-code-branch me-1"></i> Conflicts
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="btn btn-light fw-bold shadow-sm">
-                <i class="fas fa-balance-scale text-primary me-1"></i> Reconciliation
+            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="btn btn-sm btn-primary">
+                <i class="fas fa-balance-scale me-1"></i> Reconciliation
             </a>
-            <a href="<?= site_url('settings/integrations/zoho/logs') ?>" class="btn btn-outline-light fw-bold">
+            <a href="<?= site_url('settings/integrations/zoho/logs') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-history me-1"></i> Audit Logs
             </a>
         </div>
@@ -33,10 +32,10 @@
 
 <?= $this->section('content') ?>
 
-<div class="card border-0 shadow-sm rounded-4 mb-4">
-    <div class="card-header bg-white py-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+<div class="card card-outline card-primary shadow-sm mb-3">
+    <div class="card-header bg-white py-2 d-flex flex-wrap justify-content-between align-items-center gap-2">
         <div>
-            <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-clipboard-check text-primary me-2"></i>Reconciliation Summary Matrix</h5>
+            <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-clipboard-check text-primary me-2"></i>Reconciliation Summary Matrix</h3>
             <small class="text-muted">Generated at <?= esc($report['generated_at'] ?? date('Y-m-d H:i:s')) ?> &bull; Live Zoho API Queried: <strong><?= !empty($report['live_zoho_queried']) ? 'Yes' : 'Local Mapping Snapshot' ?></strong></small>
         </div>
         <div class="d-flex gap-2">

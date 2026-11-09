@@ -350,6 +350,7 @@ class ZohoSyncController extends BaseController
 
     protected function respondSyncResult(array $res, string $defaultSuccessTitle)
     {
+        $failedCount = (int) ($res['failed_count'] ?? 0);
         $summaryMsg = sprintf(
             '%s — Processed: %d | Created: %d | Updated: %d | Skipped: %d | Conflicts: %d | Failed: %d',
             $defaultSuccessTitle,
@@ -358,18 +359,24 @@ class ZohoSyncController extends BaseController
             (int) ($res['updated_count'] ?? 0),
             (int) ($res['skipped_count'] ?? 0),
             (int) ($res['conflict_count'] ?? 0),
-            (int) ($res['failed_count'] ?? 0)
+            $failedCount
         );
 
+        if (!empty($res['message'])) {
+            $summaryMsg .= ' (' . $res['message'] . ')';
+        }
+
         if ($this->request->isAJAX()) {
-            $res['summary_message'] = !empty($res['success']) ? $summaryMsg : ($res['message'] ?? $summaryMsg);
+            $res['summary_message'] = $summaryMsg;
             return $this->response->setJSON($res);
         }
 
-        if (!empty($res['success'])) {
+        if (!empty($res['success']) && $failedCount === 0) {
             return redirect()->to('settings/integrations/zoho/sync')->with('success', $summaryMsg);
         }
-        return redirect()->to('settings/integrations/zoho/sync')->with('error', $res['message'] ?? $summaryMsg);
+
+        // If all modules failed or an explicit error occurred
+        return redirect()->to('settings/integrations/zoho/sync')->with('error', $summaryMsg);
     }
 }
 

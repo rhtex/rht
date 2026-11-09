@@ -88,6 +88,12 @@ class ZohoSettingsController extends BaseController
         $userId = (int) (session('user_id') ?? 0) ?: null;
         $this->settingModel->saveConfig($input, $userId);
 
+        $savedConfig = $this->settingModel->getConfig(false);
+        if (!empty($savedConfig['has_client_id']) && !empty($savedConfig['has_client_secret']) && empty($savedConfig['has_refresh_token'])) {
+            return redirect()->to('settings/integrations/zoho')
+                ->with('success', 'Zoho credentials saved! Now click "Connect to Zoho Books (OAuth 2.0)" on the right panel to grant access and generate your Refresh Token.');
+        }
+
         return redirect()->to('settings/integrations/zoho')
             ->with('success', 'Zoho Books configuration saved securely.');
     }
@@ -95,6 +101,16 @@ class ZohoSettingsController extends BaseController
     public function connect()
     {
         try {
+            $config = $this->settingModel->getConfig(true);
+            if (empty($config['client_id'])) {
+                return redirect()->to('settings/integrations/zoho')
+                    ->with('error', 'Please enter your Zoho Client ID and Client Secret in the form, then click "Save Configuration" before clicking Connect.');
+            }
+            if (empty($config['client_secret'])) {
+                return redirect()->to('settings/integrations/zoho')
+                    ->with('error', 'Please enter your Zoho Client Secret in the form, then click "Save Configuration" before clicking Connect.');
+            }
+
             $state = bin2hex(random_bytes(16));
             session()->set('zoho_oauth_state', $state);
             $authUrl = $this->oauthService->getAuthorizationUrl($state);

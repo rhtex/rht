@@ -237,7 +237,16 @@
                         <?php endif; ?>
 
                         <tr class="table-primary"><td colspan="6" class="text-end fw-bold fs-5">Total:</td><td class="text-end fw-bold fs-5">₹<?= number_format($invoice['total_amount'], 2) ?></td></tr>
-                        <tr class="table-light"><td colspan="6" class="text-end">Amount Paid:</td><td class="text-end text-success fw-semibold">₹<?= number_format($invoice['paid_amount'], 2) ?></td></tr>
+                        <?php 
+                        $totalCredits = !empty($invoice['credit_notes']) ? array_sum(array_column($invoice['credit_notes'], 'total_amount')) : 0;
+                        $totalReceipts = !empty($invoice['payments']) ? array_sum(array_column($invoice['payments'], 'amount')) : 0;
+                        ?>
+                        <?php if ($totalReceipts > 0): ?>
+                            <tr class="table-light"><td colspan="6" class="text-end">Payments Received:</td><td class="text-end text-success fw-semibold">₹<?= number_format($totalReceipts, 2) ?></td></tr>
+                        <?php endif; ?>
+                        <?php if ($totalCredits > 0): ?>
+                            <tr class="table-light"><td colspan="6" class="text-end">Credits Applied (CN):</td><td class="text-end text-danger fw-semibold">₹<?= number_format($totalCredits, 2) ?></td></tr>
+                        <?php endif; ?>
                         <tr class="table-warning"><td colspan="6" class="text-end fw-bold">Balance Due:</td><td class="text-end fw-bold text-danger">₹<?= number_format($invoice['balance'], 2) ?></td></tr>
                     </tfoot>
                 </table>
@@ -248,8 +257,11 @@
     <!-- Receipts / Payments -->
     <?php if (!empty($invoice['payments'])): ?>
         <div class="card card-outline card-success mb-3 shadow-none border">
-            <div class="card-header py-2 bg-light">
-                <h6 class="card-title m-0 fw-bold"><i class="fas fa-receipt text-success me-1"></i> Payments & Receipts (<?= count($invoice['payments']) ?>)</h6>
+            <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
+                <h6 class="card-title m-0 fw-bold"><i class="fas fa-receipt text-success me-1"></i> Receipts & Payments (<?= count($invoice['payments']) ?>)</h6>
+                <span class="badge bg-success-subtle text-success border border-success-subtle small">
+                    ₹<?= number_format(array_sum(array_column($invoice['payments'], 'amount')), 2) ?>
+                </span>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -278,8 +290,58 @@
                                         echo ($ded > 0) ? '₹' . number_format($ded, 2) : '-';
                                         ?>
                                     </td>
-                                    <td class="text-end fw-bold">₹<?= number_format($payment['amount'] + $ded, 2) ?></td>
+                                    <td class="text-end fw-bold text-success">₹<?= number_format($payment['amount'] + $ded, 2) ?></td>
                                     <td><?= esc($payment['reference_number']) ?: '-' ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- Credit Notes / Returns -->
+    <?php if (!empty($invoice['credit_notes'])): ?>
+        <div class="card card-outline card-warning mb-3 shadow-none border">
+            <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
+                <h6 class="card-title m-0 fw-bold"><i class="fas fa-undo text-warning me-1"></i> Credit Notes / Returns (<?= count($invoice['credit_notes']) ?>)</h6>
+                <span class="badge bg-warning-subtle text-dark border border-warning-subtle small">
+                    ₹<?= number_format(array_sum(array_column($invoice['credit_notes'], 'total_amount')), 2) ?>
+                </span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Credit Note #</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th class="text-end">Total Credited</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($invoice['credit_notes'] as $cn): ?>
+                                <tr>
+                                    <td class="fw-bold">
+                                        <a href="<?= site_url('sales_returns/view/' . $cn['id']) ?>?mode=single" class="text-primary text-decoration-none">
+                                            <?= esc($cn['return_number']) ?>
+                                        </a>
+                                    </td>
+                                    <td><?= date('d/m/Y', strtotime($cn['return_date'])) ?></td>
+                                    <td>
+                                        <span class="badge bg-<?= $cn['status'] == 'Closed' ? 'success' : ($cn['status'] == 'Void' ? 'danger' : 'warning text-dark') ?>" style="font-size: 0.65rem;">
+                                            <?= esc($cn['status']) ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-end fw-bold text-danger">₹<?= number_format($cn['total_amount'], 2) ?></td>
+                                    <td class="text-center">
+                                        <a href="<?= site_url('sales_returns/view/' . $cn['id']) ?>?mode=single" class="btn btn-xs btn-outline-primary py-0 px-1" title="View Credit Note" target="_blank">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

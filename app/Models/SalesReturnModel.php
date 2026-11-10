@@ -90,8 +90,10 @@ class SalesReturnModel extends Model
      */
     public function getReturnById($id)
     {
-        $return = $this->select('sales_returns.*, customers.name as customer_name, customers.phone as customer_phone, customers.gstin as customer_gstin, invoices.invoice_number')
+        $return = $this->select('sales_returns.*, customers.name as customer_name, customers.contact_person as customer_contact_person, customers.phone as customer_phone, customers.email as customer_email, customers.gstin as customer_gstin, customers.gst_type as customer_gst_type, addresses.address_line1 as customer_address1, addresses.address_line2 as customer_address2, addresses.city as customer_city, addresses.pincode as customer_pincode, states.id as customer_state_id, states.name as customer_state, invoices.invoice_number, invoices.invoice_date, invoices.total_amount as invoice_total_amount')
             ->join('customers', 'customers.id = sales_returns.customer_id', 'left')
+            ->join('addresses', 'addresses.owner_id = customers.id AND addresses.owner_type = "customer" AND addresses.address_type = "billing" AND addresses.is_active = 1', 'left')
+            ->join('states', 'states.id = addresses.state_id', 'left')
             ->join('invoices', 'invoices.id = sales_returns.invoice_id', 'left')
             ->find($id);
 

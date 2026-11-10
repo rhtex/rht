@@ -138,44 +138,6 @@
         </div>
     </div>
 
-    <!-- Delivery History Timeline -->
-    <div class="card card-outline card-info mt-3">
-        <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-history"></i> Delivery History</h3>
-            <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                </button>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="timeline-v2">
-                <?php if (empty($history)): ?>
-                    <p class="text-muted text-center p-3">No tracking history available yet.</p>
-                <?php else: ?>
-                    <?php foreach ($history as $h): ?>
-                        <div class="timeline-item">
-                            <div class="timeline-date"><?= date('d/m/Y H:i', strtotime($h['created_at'])) ?> by <?= esc($h['user_name'] ?: 'System') ?></div>
-                            <div class="timeline-content">
-                                <span class="timeline-status text-primary"><?= esc($h['status']) ?></span>
-                                <div class="mt-1"><?= esc($h['description']) ?></div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-
-    <style>
-    .timeline-v2 { position: relative; padding: 10px 0; }
-    .timeline-item { padding: 10px 0 10px 40px; position: relative; border-left: 2px solid #e9ecef; margin-left: 20px; }
-    .timeline-item::before { content: ''; position: absolute; left: -9px; top: 15px; width: 16px; height: 16px; border-radius: 50%; background: #007bff; border: 3px solid #fff; }
-    .timeline-date { font-size: 0.85rem; color: #6c757d; margin-bottom: 5px; }
-    .timeline-content { background: #f8f9fa; padding: 10px 15px; border-radius: 8px; }
-    .timeline-status { font-weight: 600; color: #343a40; }
-    </style>
-
     <!-- Agent Commission Information -->
     <?php if (!empty($invoice['agent_id']) && !empty($agent)): ?>
     <div class="card card-outline card-info">
@@ -330,73 +292,183 @@
                     <?php endif; ?>
 
                     <tr class="table-primary"><td colspan="6" class="text-end fw-bold fs-5">Total:</td><td class="text-end fw-bold fs-5">₹<?= number_format($invoice['total_amount'], 2) ?></td></tr>
-                    <tr class="table-light"><td colspan="6" class="text-end">Amount Paid:</td><td class="text-end">₹<?= number_format($invoice['paid_amount'], 2) ?></td></tr>
+                    <?php 
+                    $totalCredits = !empty($invoice['credit_notes']) ? array_sum(array_column($invoice['credit_notes'], 'total_amount')) : 0;
+                    $totalReceipts = !empty($invoice['payments']) ? array_sum(array_column($invoice['payments'], 'amount')) : 0;
+                    ?>
+                    <?php if ($totalReceipts > 0): ?>
+                        <tr class="table-light"><td colspan="6" class="text-end">Payments Received:</td><td class="text-end text-success fw-semibold">₹<?= number_format($totalReceipts, 2) ?></td></tr>
+                    <?php endif; ?>
+                    <?php if ($totalCredits > 0): ?>
+                        <tr class="table-light"><td colspan="6" class="text-end">Credits Applied (CN):</td><td class="text-end text-danger fw-semibold">₹<?= number_format($totalCredits, 2) ?></td></tr>
+                    <?php endif; ?>
                     <tr class="table-info"><td colspan="6" class="text-end fw-bold">Balance Due:</td><td class="text-end fw-bold">₹<?= number_format($invoice['balance'], 2) ?></td></tr>
                 </tfoot>
             </table>
         </div>
     </div>
 
-    <!-- Payment History -->
+    <!-- Receipts / Payment History -->
     <?php if (!empty($invoice['payments'])): ?>
-    <div class="card card-outline card-success">
-        <div class="card-header">
-            <h3 class="card-title">Receipt History</h3>
+    <div class="card card-outline card-success mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0"><i class="fas fa-receipt me-2"></i>Receipt History (<?= count($invoice['payments']) ?>)</h3>
+            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                Total Receipts: ₹<?= number_format(array_sum(array_column($invoice['payments'], 'amount')), 2) ?>
+            </span>
         </div>
         <div class="card-body p-0">
-            <table class="table table-striped">
-                <thead class="table-light">
-                    <tr>
-                        <th>Receipt #</th>
-                        <th>Date</th>
-                        <th>Mode</th>
-                        <th>Cash/Bank</th>
-                        <th>Deductions</th>
-                        <th>Total Settlement</th>
-                        <th>Reference</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($invoice['payments'] as $payment): ?>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
-                            <td><?= esc($payment['payment_number']) ?></td>
-                            <td><?= date('d/m/Y', strtotime($payment['payment_date'])) ?></td>
-                            <td><?= esc($payment['payment_mode']) ?></td>
-                            <td>₹<?= number_format($payment['amount'], 2) ?></td>
-                            <td class="text-danger">
-                                <?php 
-                                $ded = ($payment['discount_amount'] ?? 0) + ($payment['mahimai_amount'] ?? 0) + ($payment['postal_charges'] ?? 0);
-                                if ($ded > 0): 
-                                ?>
-                                    ₹<?= number_format($ded, 2) ?>
-                                <?php else: ?>
-                                    -
-                                <?php endif; ?>
-                            </td>
-                            <td class="fw-bold">₹<?= number_format($payment['amount'] + $ded, 2) ?></td>
-                            <td><?= esc($payment['reference_number']) ?: '-' ?></td>
+                            <th>Receipt #</th>
+                            <th>Date</th>
+                            <th>Mode</th>
+                            <th class="text-end">Cash/Bank Amount</th>
+                            <th class="text-end">Deductions</th>
+                            <th class="text-end">Total Settlement</th>
+                            <th>Reference</th>
+                            <th>Notes</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($invoice['payments'] as $payment): ?>
+                            <tr>
+                                <td class="fw-bold text-primary"><?= esc($payment['payment_number']) ?></td>
+                                <td><?= date('d/m/Y', strtotime($payment['payment_date'])) ?></td>
+                                <td><span class="badge bg-light text-dark border"><?= esc($payment['payment_mode']) ?></span></td>
+                                <td class="text-end fw-semibold">₹<?= number_format($payment['amount'], 2) ?></td>
+                                <td class="text-end text-danger">
+                                    <?php 
+                                    $ded = ($payment['discount_amount'] ?? 0) + ($payment['mahimai_amount'] ?? 0) + ($payment['postal_charges'] ?? 0);
+                                    if ($ded > 0): 
+                                    ?>
+                                        ₹<?= number_format($ded, 2) ?>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-end fw-bold text-success">₹<?= number_format($payment['amount'] + $ded, 2) ?></td>
+                                <td><?= esc($payment['reference_number']) ?: '-' ?></td>
+                                <td class="small text-muted"><?= esc($payment['notes']) ?: '-' ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- Credit Note / Return History -->
+    <?php if (!empty($invoice['credit_notes'])): ?>
+    <div class="card card-outline card-warning mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0"><i class="fas fa-undo me-2"></i>Credit Note / Sales Return History (<?= count($invoice['credit_notes']) ?>)</h3>
+            <span class="badge bg-warning-subtle text-dark border border-warning-subtle">
+                Total Credited: ₹<?= number_format(array_sum(array_column($invoice['credit_notes'], 'total_amount')), 2) ?>
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Credit Note #</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                            <th class="text-end">Subtotal</th>
+                            <th class="text-end">Tax Amount</th>
+                            <th class="text-end">Total Credited</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($invoice['credit_notes'] as $cn): ?>
+                            <tr>
+                                <td class="fw-bold">
+                                    <a href="<?= site_url('sales_returns/view/' . $cn['id']) ?>?mode=single" class="text-primary text-decoration-none">
+                                        <?= esc($cn['return_number']) ?>
+                                    </a>
+                                </td>
+                                <td><?= date('d/m/Y', strtotime($cn['return_date'])) ?></td>
+                                <td>
+                                    <span class="badge bg-<?= $cn['status'] == 'Closed' ? 'success' : ($cn['status'] == 'Void' ? 'danger' : 'warning text-dark') ?>">
+                                        <?= esc($cn['status']) ?>
+                                    </span>
+                                </td>
+                                <td><?= esc($cn['reason']) ?: '<span class="text-muted">-</span>' ?></td>
+                                <td class="text-end">₹<?= number_format($cn['subtotal'] ?? 0, 2) ?></td>
+                                <td class="text-end">₹<?= number_format($cn['tax_amount'] ?? 0, 2) ?></td>
+                                <td class="text-end fw-bold text-danger">₹<?= number_format($cn['total_amount'], 2) ?></td>
+                                <td class="text-center">
+                                    <a href="<?= site_url('sales_returns/view/' . $cn['id']) ?>?mode=single" class="btn btn-xs btn-outline-primary py-0 px-2" title="View Credit Note">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <?php endif; ?>
 
     <!-- Notes & Terms -->
-    <div class="row">
+    <div class="row mb-3">
         <div class="col-md-6">
-            <div class="card card-outline card-info">
+            <div class="card card-outline card-info h-100">
                 <div class="card-header"><h3 class="card-title">Notes</h3></div>
                 <div class="card-body"><?= nl2br(esc($invoice['notes'])) ?: 'No notes provided.' ?></div>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card card-outline card-info">
+            <div class="card card-outline card-info h-100">
                 <div class="card-header"><h3 class="card-title">Terms & Conditions</h3></div>
                 <div class="card-body"><?= nl2br(esc($invoice['terms'])) ?: 'Standard terms apply.' ?></div>
             </div>
         </div>
     </div>
+
+    <!-- Delivery History Timeline -->
+    <div class="card card-outline card-info mb-3">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-history me-1"></i> Delivery History</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="timeline-v2">
+                <?php if (empty($history)): ?>
+                    <p class="text-muted text-center p-3 mb-0">No tracking history available yet.</p>
+                <?php else: ?>
+                    <?php foreach ($history as $h): ?>
+                        <div class="timeline-item">
+                            <div class="timeline-date"><?= date('d/m/Y H:i', strtotime($h['created_at'])) ?> by <?= esc($h['user_name'] ?: 'System') ?></div>
+                            <div class="timeline-content">
+                                <span class="timeline-status text-primary"><?= esc($h['status']) ?></span>
+                                <div class="mt-1"><?= esc($h['description']) ?></div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    .timeline-v2 { position: relative; padding: 10px 0; }
+    .timeline-item { padding: 10px 0 10px 40px; position: relative; border-left: 2px solid #e9ecef; margin-left: 20px; }
+    .timeline-item::before { content: ''; position: absolute; left: -9px; top: 15px; width: 16px; height: 16px; border-radius: 50%; background: #007bff; border: 3px solid #fff; }
+    .timeline-date { font-size: 0.85rem; color: #6c757d; margin-bottom: 5px; }
+    .timeline-content { background: #f8f9fa; padding: 10px 15px; border-radius: 8px; }
+    .timeline-status { font-weight: 600; color: #343a40; }
+    </style>
 </div>
 <?= $this->endSection() ?>

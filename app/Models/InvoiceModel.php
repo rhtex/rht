@@ -166,6 +166,9 @@ class InvoiceModel extends Model
 
             $paymentModel = new \App\Models\InvoicePaymentModel();
             $invoice['payments'] = $paymentModel->where('invoice_id', $id)->orderBy('payment_date', 'DESC')->findAll();
+
+            $salesReturnModel = new \App\Models\SalesReturnModel();
+            $invoice['credit_notes'] = $salesReturnModel->where('invoice_id', $id)->orderBy('return_date', 'DESC')->findAll();
         }
 
         return $invoice;

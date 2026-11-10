@@ -31,8 +31,14 @@
                 <div class="card-body p-2">
                     <table class="table table-sm table-borderless mb-0">
                         <tr><th class="text-muted" width="40%">Customer:</th><td class="fw-bold text-dark"><?= esc($return['customer_name']) ?></td></tr>
+                        <?php if (!empty($return['customer_gstin'])): ?>
+                            <tr><th class="text-muted">GSTIN:</th><td><span class="badge bg-light text-dark border"><?= esc($return['customer_gstin']) ?></span> (<?= esc($return['customer_gst_type'] ?? 'Regular') ?>)</td></tr>
+                        <?php endif; ?>
                         <?php if (!empty($return['customer_phone'])): ?>
                             <tr><th class="text-muted">Phone:</th><td><?= esc($return['customer_phone']) ?></td></tr>
+                        <?php endif; ?>
+                        <?php if (!empty($return['customer_city'])): ?>
+                            <tr><th class="text-muted">City/State:</th><td><?= esc($return['customer_city']) ?><?= !empty($return['customer_state']) ? ', ' . esc($return['customer_state']) : '' ?></td></tr>
                         <?php endif; ?>
                         <?php if (!empty($return['invoice_number'])): ?>
                             <tr><th class="text-muted">Invoice Ref:</th><td><a href="<?= site_url('invoices/view/' . $return['invoice_id']) ?>" class="badge bg-primary text-decoration-none"><?= esc($return['invoice_number']) ?></a></td></tr>
@@ -50,6 +56,14 @@
                     <table class="table table-sm table-borderless mb-0">
                         <tr><th class="text-muted" width="40%">Return Date:</th><td class="fw-semibold"><?= date('d/m/Y', strtotime($return['return_date'])) ?></td></tr>
                         <tr><th class="text-muted">Status:</th><td><span class="badge bg-<?= $return['status'] == 'Open' ? 'warning' : 'success' ?>"><?= esc($return['status']) ?></span></td></tr>
+                        <tr>
+                            <th class="text-muted">Tax Mode:</th>
+                            <td>
+                                <span class="badge <?= !empty($return['is_inter_state']) ? 'bg-info' : 'bg-primary' ?>">
+                                    <?= !empty($return['is_inter_state']) ? 'Inter-State (IGST)' : 'Intra-State (CGST + SGST)' ?>
+                                </span>
+                            </td>
+                        </tr>
                         <tr><th class="text-muted">Total:</th><td class="fw-bold text-primary fs-6">₹<?= number_format($return['total_amount'], 2) ?></td></tr>
                     </table>
                 </div>
@@ -95,9 +109,15 @@
                         <?php endif; ?>
                     </tbody>
                     <tfoot class="table-light">
-                        <tr><td colspan="5" class="text-end fw-semibold">Subtotal:</td><td class="text-end">₹<?= number_format($return['subtotal'], 2) ?></td></tr>
-                        <tr><td colspan="5" class="text-end">Tax Amount:</td><td class="text-end">₹<?= number_format($return['tax_amount'], 2) ?></td></tr>
-                        <tr class="table-primary"><td colspan="5" class="text-end fw-bold fs-5">Total Amount:</td><td class="text-end fw-bold fs-5">₹<?= number_format($return['total_amount'], 2) ?></td></tr>
+                        <tr><td colspan="5" class="text-end fw-semibold">Subtotal (Taxable):</td><td class="text-end">₹<?= number_format($return['subtotal'], 2) ?></td></tr>
+                        <?php if (empty($return['is_inter_state'])): ?>
+                            <tr><td colspan="5" class="text-end text-muted">CGST Amount:</td><td class="text-end">₹<?= number_format($return['tax_amount'] / 2, 2) ?></td></tr>
+                            <tr><td colspan="5" class="text-end text-muted">SGST Amount:</td><td class="text-end">₹<?= number_format($return['tax_amount'] / 2, 2) ?></td></tr>
+                        <?php else: ?>
+                            <tr><td colspan="5" class="text-end text-muted">IGST Amount:</td><td class="text-end">₹<?= number_format($return['tax_amount'], 2) ?></td></tr>
+                        <?php endif; ?>
+                        <tr><td colspan="5" class="text-end fw-semibold">Total GST:</td><td class="text-end">₹<?= number_format($return['tax_amount'], 2) ?></td></tr>
+                        <tr class="table-primary"><td colspan="5" class="text-end fw-bold fs-5">Total Credit Amount:</td><td class="text-end fw-bold fs-5 text-primary">₹<?= number_format($return['total_amount'], 2) ?></td></tr>
                     </tfoot>
                 </table>
             </div>

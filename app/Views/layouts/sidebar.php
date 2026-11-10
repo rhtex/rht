@@ -14,6 +14,8 @@
                 $uri = service('uri');
                 $segment1 = $uri->getTotalSegments() >= 1 ? $uri->getSegment(1) : '';
                 $segment2 = $uri->getTotalSegments() >= 2 ? $uri->getSegment(2) : '';
+                $segment3 = $uri->getTotalSegments() >= 3 ? $uri->getSegment(3) : '';
+                $segment4 = $uri->getTotalSegments() >= 4 ? $uri->getSegment(4) : '';
                 
                 $isSales = in_array($segment1, ['customers', 'quotations', 'sales_orders', 'invoices', 'sales_returns', 'invoice_payments', 'agents', 'agent-payments']);
                 $isPurchases = in_array($segment1, ['vendors', 'bills', 'payments', 'expenses', 'expense_categories']);
@@ -24,6 +26,10 @@
                 $isHR = in_array($segment1, ['employees', 'attendance', 'loans', 'salaries']);
                 $isCalendar = in_array($segment1, ['calendar']);
                 $isAdmin = in_array($segment1, ['users', 'roles', 'modules', 'permissions', 'settings', 'countries', 'states']);
+
+                $isUserMgmt = in_array($segment1, ['users', 'roles', 'modules', 'permissions']);
+                $isSettingsSection = in_array($segment1, ['settings', 'countries', 'states']);
+                $isIntegrations = ($segment1 === 'settings' && $segment2 === 'integrations');
             ?>
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
                 
@@ -508,8 +514,8 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <?php if(in_array('user.view', session('permissions') ?? []) || in_array('role.view', session('permissions') ?? []) || in_array('module.view', session('permissions') ?? []) || in_array('permission.view', session('permissions') ?? [])): ?>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
+                        <li class="nav-item <?= $isUserMgmt ? 'menu-open' : '' ?>">
+                            <a href="#" class="nav-link <?= $isUserMgmt ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-users-cog text-warning"></i>
                                 <p>
                                     <?= lang('App.user_management') ?>
@@ -519,7 +525,7 @@
                             <ul class="nav nav-treeview">
                                 <?php if(in_array('user.view', session('permissions') ?? [])): ?>
                                 <li class="nav-item">
-                                    <a href="<?= site_url('users') ?>" class="nav-link">
+                                    <a href="<?= site_url('users') ?>" class="nav-link <?= $segment1 === 'users' ? 'active' : '' ?>">
                                         <i class="fas fa-users nav-icon text-primary"></i>
                                         <p><?= lang('App.users') ?></p>
                                     </a>
@@ -527,7 +533,7 @@
                                 <?php endif; ?>
                                 <?php if(in_array('role.view', session('permissions') ?? [])): ?>
                                 <li class="nav-item">
-                                    <a href="<?= site_url('roles') ?>" class="nav-link">
+                                    <a href="<?= site_url('roles') ?>" class="nav-link <?= $segment1 === 'roles' ? 'active' : '' ?>">
                                         <i class="fas fa-user-shield nav-icon text-danger"></i>
                                         <p><?= lang('App.roles') ?></p>
                                     </a>
@@ -536,7 +542,7 @@
                                 
                                 <?php if(in_array('module.view', session('permissions') ?? [])): ?>
                                 <li class="nav-item">
-                                    <a href="<?= site_url('modules') ?>" class="nav-link">
+                                    <a href="<?= site_url('modules') ?>" class="nav-link <?= $segment1 === 'modules' ? 'active' : '' ?>">
                                         <i class="fas fa-cubes nav-icon text-success"></i>
                                         <p>Modules</p>
                                     </a>
@@ -545,7 +551,7 @@
 
                                 <?php if(in_array('permission.view', session('permissions') ?? [])): ?>
                                 <li class="nav-item">
-                                    <a href="<?= site_url('permissions') ?>" class="nav-link">
+                                    <a href="<?= site_url('permissions') ?>" class="nav-link <?= $segment1 === 'permissions' ? 'active' : '' ?>">
                                         <i class="fas fa-key nav-icon text-warning"></i>
                                         <p>Permissions</p>
                                     </a>
@@ -556,8 +562,8 @@
                         <?php endif; ?>
 
                         <?php if(in_array('setting.view', session('permissions') ?? []) || in_array('country.view', session('permissions') ?? []) || in_array('state.view', session('permissions') ?? [])): ?>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
+                        <li class="nav-item <?= $isSettingsSection ? 'menu-open' : '' ?>">
+                            <a href="#" class="nav-link <?= $isSettingsSection ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-cogs text-secondary"></i>
                                 <p>
                                     <?= lang('App.settings') ?>
@@ -567,7 +573,7 @@
                             <ul class="nav nav-treeview">
                                 <?php if(in_array('setting.view', session('permissions') ?? [])): ?>
                                 <li class="nav-item">
-                                    <a href="<?= site_url('settings') ?>" class="nav-link">
+                                    <a href="<?= site_url('settings') ?>" class="nav-link <?= ($segment1 === 'settings' && empty($segment2)) ? 'active' : '' ?>">
                                         <i class="fas fa-tools nav-icon text-info"></i>
                                         <p><?= lang("App.app_settings") ?></p>
                                     </a>
@@ -575,7 +581,7 @@
                                 <?php endif; ?>
                                 <?php if(in_array('country.view', session('permissions') ?? [])): ?>
                                 <li class="nav-item">
-                                    <a href="<?= site_url('countries') ?>" class="nav-link">
+                                    <a href="<?= site_url('countries') ?>" class="nav-link <?= $segment1 === 'countries' ? 'active' : '' ?>">
                                         <i class="fas fa-globe nav-icon text-primary"></i>
                                         <p><?= lang("App.countries") ?></p>
                                     </a>
@@ -583,7 +589,7 @@
                                 <?php endif; ?>
                                 <?php if(in_array('state.view', session('permissions') ?? [])): ?>
                                 <li class="nav-item">
-                                    <a href="<?= site_url('states') ?>" class="nav-link">
+                                    <a href="<?= site_url('states') ?>" class="nav-link <?= $segment1 === 'states' ? 'active' : '' ?>">
                                         <i class="fas fa-map nav-icon text-success"></i>
                                         <p><?= lang("App.states") ?></p>
                                     </a>
@@ -594,7 +600,7 @@
                                 
                                 <?php if(in_array('tax.view', session('permissions') ?? [])): ?>
                                 <li class="nav-item">
-                                    <a href="<?= site_url('settings/taxes') ?>" class="nav-link">
+                                    <a href="<?= site_url('settings/taxes') ?>" class="nav-link <?= ($segment1 === 'settings' && $segment2 === 'taxes') ? 'active' : '' ?>">
                                         <i class="fas fa-percent nav-icon text-success"></i>
                                         <p><?= lang("App.taxes") ?></p>
                                     </a>
@@ -602,9 +608,8 @@
                                 <?php endif; ?>
 
                                 <?php if(session('role') === 'admin' || in_array('setting.view', session('permissions') ?? []) || in_array('zoho.view', session('permissions') ?? [])): ?>
-                                <?php $isZohoMenu = ($segment1 === 'settings' && $segment2 === 'integrations'); ?>
-                                <li class="nav-item <?= $isZohoMenu ? 'menu-open' : '' ?>">
-                                    <a href="#" class="nav-link <?= $isZohoMenu ? 'active' : '' ?>">
+                                <li class="nav-item <?= $isIntegrations ? 'menu-open' : '' ?>">
+                                    <a href="#" class="nav-link <?= $isIntegrations ? 'active' : '' ?>">
                                         <i class="fas fa-plug nav-icon text-warning"></i>
                                         <p>
                                             Integrations
@@ -613,25 +618,25 @@
                                     </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item">
-                                            <a href="<?= site_url('settings/integrations/zoho') ?>" class="nav-link">
+                                            <a href="<?= site_url('settings/integrations/zoho') ?>" class="nav-link <?= ($isIntegrations && ($segment4 === '' || empty($segment4))) ? 'active' : '' ?>">
                                                 <i class="fas fa-book-open nav-icon text-info"></i>
                                                 <p>Zoho Books</p>
                                             </a>
                                         </li>
                                         <li class="nav-item">
-                                            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="nav-link">
+                                            <a href="<?= site_url('settings/integrations/zoho/sync') ?>" class="nav-link <?= ($isIntegrations && $segment4 === 'sync') ? 'active' : '' ?>">
                                                 <i class="fas fa-sync-alt nav-icon text-success"></i>
                                                 <p>Zoho Synchronization</p>
                                             </a>
                                         </li>
                                         <li class="nav-item">
-                                            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="nav-link">
+                                            <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="nav-link <?= ($isIntegrations && $segment4 === 'conflicts') ? 'active' : '' ?>">
                                                 <i class="fas fa-code-branch nav-icon text-danger"></i>
                                                 <p>Zoho Conflicts</p>
                                             </a>
                                         </li>
                                         <li class="nav-item">
-                                            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="nav-link">
+                                            <a href="<?= site_url('settings/integrations/zoho/reconciliation') ?>" class="nav-link <?= ($isIntegrations && $segment4 === 'reconciliation') ? 'active' : '' ?>">
                                                 <i class="fas fa-balance-scale nav-icon text-primary"></i>
                                                 <p>Zoho Reconciliation</p>
                                             </a>

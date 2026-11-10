@@ -17,26 +17,35 @@
 
     <!-- Invoice Header -->
     <div class="card card-outline card-primary">
-        <div class="card-header">
-            <h3 class="card-title">Invoice Information</h3>
-            <div class="card-tools">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0">Invoice Information</h3>
+            <div class="card-tools d-flex gap-2 align-items-center ms-auto">
+                <?php if (empty($is_single)): ?>
+                    <a href="<?= site_url('invoices/view/' . $invoice['id']) ?>?mode=single" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark" title="View Full Standalone Page">
+                        <i class="fas fa-expand me-1 text-primary"></i> Full Page View
+                    </a>
+                <?php else: ?>
+                    <a href="<?= site_url('invoices') ?>" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark" title="Back to Split Invoices View">
+                        <i class="fas fa-columns me-1 text-primary"></i> Split View
+                    </a>
+                <?php endif; ?>
                 <?php if ($invoice['status'] == 'Draft'): ?>
                     <a href="<?= site_url('invoices/mark-sent/' . $invoice['id']) ?>" class="btn btn-sm btn-success">
-                        <i class="fas fa-paper-plane"></i> Mark as Sent
+                        <i class="fas fa-paper-plane me-1"></i> Mark as Sent
                     </a>
                 <?php endif; ?>
                 <?php if ($invoice['status'] != 'Void' && $invoice['status'] != 'Paid'): ?>
                     <a href="<?= site_url('invoices/edit/' . $invoice['id']) ?>" class="btn btn-sm btn-warning">
-                        <i class="fas fa-edit"></i> Edit
+                        <i class="fas fa-edit me-1"></i> Edit
                     </a>
                 <?php endif; ?>
                 <?php if ($invoice['balance'] > 0 && $invoice['status'] != 'Void'): ?>
                     <a href="<?= site_url('invoices/payment/' . $invoice['id']) ?>" class="btn btn-sm btn-success">
-                        <i class="fas fa-money-bill"></i> Record Payment
+                        <i class="fas fa-money-bill me-1"></i> Record Payment
                     </a>
                 <?php endif; ?>
-                <a href="<?= site_url('invoices/print/' . $invoice['id']) ?>" target="_blank" class="btn btn-sm btn-info">
-                    <i class="fas fa-print"></i> Print
+                <a href="<?= site_url('invoices/print/' . $invoice['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white">
+                    <i class="fas fa-print me-1"></i> Print
                 </a>
             </div>
         </div>
@@ -221,7 +230,7 @@
                 <thead class="table-light">
                     <tr>
                         <th width="5%">#</th>
-                        <th width="40%">Description</th>
+                        <th width="40%">Item & Description</th>
                         <th>HSN Code</th>
                         <th>Quantity</th>
                         <th>Rate</th>
@@ -233,8 +242,13 @@
                     <?php foreach ($invoice['items'] as $index => $item): ?>
                         <tr>
                             <td><?= $index + 1 ?></td>
-                            <td><?= esc($item['description']) ?></td>
-                            <td><?= esc($item['hsn_code']) ?: '-' ?></td>
+                            <td>
+                                <strong><?= esc(!empty($item['product_name']) ? $item['product_name'] : ($item['description'] ?? '-')) ?></strong>
+                                <?php if (!empty($item['description']) && !empty($item['product_name']) && $item['description'] !== $item['product_name']): ?>
+                                    <br><small class="text-muted"><?= esc($item['description']) ?></small>
+                                <?php endif; ?>
+                            </td>
+                            <td><?= esc(!empty($item['hsn_code']) ? $item['hsn_code'] : ($item['product_hsn'] ?? '-')) ?></td>
                             <td><?= $item['quantity'] ?></td>
                             <td>₹<?= number_format($item['rate'], 2) ?></td>
                             <td><?= $item['tax_percentage'] ?>%</td>

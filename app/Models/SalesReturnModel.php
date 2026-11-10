@@ -62,7 +62,15 @@ class SalesReturnModel extends Model
             $builder->where('sales_returns.return_date <=', $filters['date_to']);
         }
 
-        return $builder->orderBy('sales_returns.return_date', 'DESC')->findAll();
+        $builder->orderBy('sales_returns.return_date', 'DESC')->orderBy('sales_returns.id', 'DESC');
+
+        if (isset($filters['limit'])) {
+            $limit = (int) $filters['limit'];
+            $offset = (int) ($filters['offset'] ?? 0);
+            return $builder->findAll($limit, $offset);
+        }
+
+        return $builder->findAll();
     }
 
     /**
@@ -75,6 +83,24 @@ class SalesReturnModel extends Model
             ->where('sales_returns.customer_id', $customerId)
             ->orderBy('sales_returns.return_date', 'DESC')
             ->findAll();
+    }
+
+    /**
+     * Get return by ID with items, customer and invoice details
+     */
+    public function getReturnById($id)
+    {
+        $return = $this->select('sales_returns.*, customers.name as customer_name, customers.phone as customer_phone, customers.gstin as customer_gstin, invoices.invoice_number')
+            ->join('customers', 'customers.id = sales_returns.customer_id', 'left')
+            ->join('invoices', 'invoices.id = sales_returns.invoice_id', 'left')
+            ->find($id);
+
+        if ($return) {
+            $itemModel = new \App\Models\SalesReturnItemModel();
+            $return['items'] = $itemModel->getItemsByReturn($id);
+        }
+
+        return $return;
     }
 
     /**

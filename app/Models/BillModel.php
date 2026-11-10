@@ -81,7 +81,15 @@ class BillModel extends Model
             $builder->where('bills.bill_date <=', $filters['date_to']);
         }
 
-        return $builder->orderBy('bills.created_at', 'DESC')->findAll();
+        $builder->orderBy('bills.bill_date', 'DESC')->orderBy('bills.id', 'DESC');
+
+        if (isset($filters['limit'])) {
+            $limit = (int) $filters['limit'];
+            $offset = (int) ($filters['offset'] ?? 0);
+            return $builder->findAll($limit, $offset);
+        }
+
+        return $builder->findAll();
     }
 
     /**
@@ -97,7 +105,7 @@ class BillModel extends Model
 
         if ($bill) {
             $itemModel = new \App\Models\BillItemModel();
-            $bill['items'] = $itemModel->where('bill_id', $id)->findAll();
+            $bill['items'] = $itemModel->getItemsByBill($id);
 
             $paymentModel = new \App\Models\PaymentModel();
             $bill['payments'] = $paymentModel->where('bill_id', $id)->orderBy('payment_date', 'DESC')->findAll();

@@ -23,10 +23,13 @@ class InvoiceItemModel extends Model
     protected $updatedField  = 'updated_at';
 
     /**
-     * Get items by invoice ID
+     * Get items by invoice ID with product details
      */
     public function getItemsByInvoice($invoiceId)
     {
-        return $this->where('invoice_id', $invoiceId)->findAll();
+        return $this->select('invoice_items.*, products.product_name, products.barcode, products.hsn_code as product_hsn')
+            ->join('products', 'products.id = invoice_items.product_id', 'left')
+            ->where('invoice_items.invoice_id', $invoiceId)
+            ->findAll();
     }
 }

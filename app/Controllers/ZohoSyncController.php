@@ -78,7 +78,8 @@ class ZohoSyncController extends BaseController
      */
     public function syncFromZoho()
     {
-        @set_time_limit(300);
+        @ini_set('max_execution_time', '0');
+        @set_time_limit(0);
         $module      = $this->request->getPost('module') ?: $this->request->getGet('module');
         $incremental = (bool) $this->request->getPost('incremental');
         $userId      = (int) (session('user_id') ?? 0) ?: null;
@@ -92,7 +93,8 @@ class ZohoSyncController extends BaseController
      */
     public function syncToZoho()
     {
-        @set_time_limit(300);
+        @ini_set('max_execution_time', '0');
+        @set_time_limit(0);
         $module = $this->request->getPost('module') ?: $this->request->getGet('module');
         $userId = (int) (session('user_id') ?? 0) ?: null;
 
@@ -105,7 +107,8 @@ class ZohoSyncController extends BaseController
      */
     public function fullSync()
     {
-        @set_time_limit(300);
+        @ini_set('max_execution_time', '0');
+        @set_time_limit(0);
         $module = $this->request->getPost('module') ?: $this->request->getGet('module');
         $userId = (int) (session('user_id') ?? 0) ?: null;
 
@@ -118,7 +121,8 @@ class ZohoSyncController extends BaseController
      */
     public function syncModule()
     {
-        @set_time_limit(300);
+        @ini_set('max_execution_time', '0');
+        @set_time_limit(0);
         $module    = (string) ($this->request->getPost('module') ?: $this->request->getGet('module'));
         $direction = (string) ($this->request->getPost('direction') ?: 'bidirectional');
         $userId    = (int) (session('user_id') ?? 0) ?: null;
@@ -141,7 +145,8 @@ class ZohoSyncController extends BaseController
      */
     public function syncSelectedRecords()
     {
-        @set_time_limit(300);
+        @ini_set('max_execution_time', '0');
+        @set_time_limit(0);
         $module    = (string) $this->request->getPost('module');
         $recordIds = $this->request->getPost('record_ids');
         $userId    = (int) (session('user_id') ?? 0) ?: null;

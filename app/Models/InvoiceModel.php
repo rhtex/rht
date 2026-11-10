@@ -141,7 +141,12 @@ class InvoiceModel extends Model
             $builder->where('invoices.invoice_date <=', $filters['date_to']);
         }
 
-        return $builder->orderBy('invoices.created_at', 'DESC')->findAll();
+        $limit = $filters['limit'] ?? 100;
+        $offset = $filters['offset'] ?? 0;
+
+        return $builder->orderBy('invoices.invoice_date', 'DESC')
+            ->orderBy('invoices.id', 'DESC')
+            ->findAll($limit, $offset);
     }
 
     /**
@@ -157,7 +162,7 @@ class InvoiceModel extends Model
 
         if ($invoice) {
             $itemModel = new \App\Models\InvoiceItemModel();
-            $invoice['items'] = $itemModel->where('invoice_id', $id)->findAll();
+            $invoice['items'] = $itemModel->getItemsByInvoice($id);
 
             $paymentModel = new \App\Models\InvoicePaymentModel();
             $invoice['payments'] = $paymentModel->where('invoice_id', $id)->orderBy('payment_date', 'DESC')->findAll();

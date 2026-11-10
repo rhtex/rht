@@ -23,11 +23,14 @@ class BillItemModel extends Model
     protected $updatedField  = 'updated_at';
 
     /**
-     * Get items by bill ID
+     * Get items by bill ID with product details
      */
     public function getItemsByBill($billId)
     {
-        return $this->where('bill_id', $billId)->findAll();
+        return $this->select('bill_items.*, products.product_name, products.barcode, products.hsn_code as product_hsn')
+            ->join('products', 'products.id = bill_items.product_id', 'left')
+            ->where('bill_items.bill_id', $billId)
+            ->findAll();
     }
 
     /**

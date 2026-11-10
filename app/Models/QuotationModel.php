@@ -80,7 +80,15 @@ class QuotationModel extends Model
             $builder->where('quotations.quotation_date <=', $filters['date_to']);
         }
 
-        return $builder->orderBy('quotations.created_at', 'DESC')->findAll();
+        $builder->orderBy('quotations.quotation_date', 'DESC')->orderBy('quotations.id', 'DESC');
+
+        if (isset($filters['limit'])) {
+            $limit = (int) $filters['limit'];
+            $offset = (int) ($filters['offset'] ?? 0);
+            return $builder->findAll($limit, $offset);
+        }
+
+        return $builder->findAll();
     }
 
     public function getQuotationById($id)
@@ -96,7 +104,7 @@ class QuotationModel extends Model
 
         if ($quotation) {
             $itemModel = new \App\Models\QuotationItemModel();
-            $quotation['items'] = $itemModel->where('quotation_id', $id)->findAll();
+            $quotation['items'] = $itemModel->getItemsByQuotation($id);
         }
 
         return $quotation;

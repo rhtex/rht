@@ -255,48 +255,103 @@ class CustomerPaymentSyncService extends AbstractModuleSyncService
         }
 
         return ZohoSyncContext::runAsZoho(function () use ($zohoPay, $zohoId, $localPayment, $localCustomerId, $normalizedZoho) {
-            $localInvoiceId = $localPayment['invoice_id'] ?? null;
-            $discountAmount = 0.0;
+            $invoices = $zohoPay['invoices'] ?? [];
+            if (!empty($invoices)) {
+                $totalInvs = count($invoices);
+                $first = true;
+                foreach ($invoices as $invItem) {
+                    $zInvId         = (string) ($invItem['invoice_id'] ?? '');
+                    $discountAmount = (float) ($invItem['discount_amount'] ?? 0);
+                    $amtApplied     = (float) ($invItem['amount_applied'] ?? 0);
+                    $invMap         = $this->mappingModel->findByZoho('invoices', $zInvId);
+                    $targetInvId    = $invMap ? (int) $invMap['local_record_id'] : null;
 
-            if (!empty($zohoPay['invoices'][0]['invoice_id'])) {
-                $zInvId       = (string) $zohoPay['invoices'][0]['invoice_id'];
-                $discountAmount = (float) ($zohoPay['invoices'][0]['discount_amount'] ?? 0);
-                $invMap       = $this->mappingModel->findByZoho('invoices', $zInvId);
-                if ($invMap) {
-                    $localInvoiceId = (int) $invMap['local_record_id'];
+                    if ($first) {
+                        $payData = [
+                            'invoice_id'       => $targetInvId,
+                            'customer_id'      => $localCustomerId,
+                            'payment_type'     => $targetInvId ? 'invoice_payment' : 'customer_advance',
+                            'payment_number'   => trim((string) ($zohoPay['payment_number'] ?? ($localPayment['payment_number'] ?? $this->paymentModel->generatePaymentNumber()))),
+                            'payment_date'     => $zohoPay['date'] ?? date('Y-m-d'),
+                            'payment_mode'     => $zohoPay['payment_mode'] ?? ($localPayment['payment_mode'] ?? 'Bank Transfer'),
+                            'amount'           => ($totalInvs > 1) ? $amtApplied : (float) ($zohoPay['amount'] ?? 0),
+                            'unapplied_amount' => (float) ($zohoPay['unused_amount'] ?? ($targetInvId ? 0.0 : (float) ($zohoPay['amount'] ?? 0))),
+                            'discount_amount'  => $discountAmount ?: ($localPayment['discount_amount'] ?? 0),
+                            'reference_number' => $zohoPay['reference_number'] ?? null,
+                            'notes'            => $zohoPay['description'] ?? ($localPayment['notes'] ?? null),
+                        ];
+
+                        if ($localPayment) {
+                            $localId = (int) $localPayment['id'];
+                            $this->paymentModel->skipValidation(true)->update($localId, $payData);
+                            $action = 'UPDATED';
+                        } else {
+                            $localId = (int) $this->paymentModel->skipValidation(true)->insert($payData, true);
+                            $action = 'CREATED';
+                        }
+
+                        if ($targetInvId) {
+                            $this->recalculateLocalInvoiceBalance($targetInvId);
+                        }
+                        $first = false;
+                    } else {
+                        // Additional invoice allocations for multi-invoice payments
+                        if ($targetInvId) {
+                            $splitNum = trim((string) ($zohoPay['payment_number'] ?? '')) . '-' . $targetInvId;
+                            $existingSplit = $this->paymentModel
+                                ->where('payment_number', $splitNum)
+                                ->first();
+
+                            $splitData = [
+                                'invoice_id'       => $targetInvId,
+                                'customer_id'      => $localCustomerId,
+                                'payment_type'     => 'invoice_payment',
+                                'payment_number'   => $splitNum,
+                                'payment_date'     => $zohoPay['date'] ?? date('Y-m-d'),
+                                'payment_mode'     => $zohoPay['payment_mode'] ?? 'Bank Transfer',
+                                'amount'           => $amtApplied,
+                                'unapplied_amount' => 0.0,
+                                'discount_amount'  => $discountAmount,
+                                'reference_number' => $zohoPay['reference_number'] ?? null,
+                                'notes'            => $zohoPay['description'] ?? 'Multi-invoice split payment',
+                            ];
+
+                            if ($existingSplit) {
+                                $this->paymentModel->skipValidation(true)->update($existingSplit['id'], $splitData);
+                            } else {
+                                $this->paymentModel->skipValidation(true)->insert($splitData);
+                            }
+
+                            $this->recalculateLocalInvoiceBalance($targetInvId);
+                        }
+                    }
                 }
-            }
-
-            $amount          = (float) ($zohoPay['amount'] ?? 0);
-            $unappliedAmount = (float) ($zohoPay['unused_amount'] ?? ($localInvoiceId ? 0.0 : $amount));
-            $paymentType     = $localInvoiceId ? 'invoice_payment' : 'customer_advance';
-
-            $payData = [
-                'invoice_id'       => $localInvoiceId,
-                'customer_id'      => $localCustomerId,
-                'payment_type'     => $paymentType,
-                'payment_number'   => trim((string) ($zohoPay['payment_number'] ?? ($localPayment['payment_number'] ?? $this->paymentModel->generatePaymentNumber()))),
-                'payment_date'     => $zohoPay['date'] ?? date('Y-m-d'),
-                'payment_mode'     => $zohoPay['payment_mode'] ?? ($localPayment['payment_mode'] ?? 'Bank Transfer'),
-                'amount'           => $amount,
-                'unapplied_amount' => $unappliedAmount,
-                'discount_amount'  => $discountAmount ?: ($localPayment['discount_amount'] ?? 0),
-                'reference_number' => $zohoPay['reference_number'] ?? null,
-                'notes'            => $zohoPay['description'] ?? ($localPayment['notes'] ?? null),
-            ];
-
-            if ($localPayment) {
-                $localId = (int) $localPayment['id'];
-                $this->paymentModel->skipValidation(true)->update($localId, $payData);
-                $action = 'UPDATED';
             } else {
-                $localId = (int) $this->paymentModel->skipValidation(true)->insert($payData, true);
-                $action = 'CREATED';
-            }
+                $amount          = (float) ($zohoPay['amount'] ?? 0);
+                $unappliedAmount = (float) ($zohoPay['unused_amount'] ?? $amount);
 
-            // Recalculate linked local invoice paid_amount & balance
-            if ($localInvoiceId) {
-                $this->recalculateLocalInvoiceBalance($localInvoiceId);
+                $payData = [
+                    'invoice_id'       => null,
+                    'customer_id'      => $localCustomerId,
+                    'payment_type'     => 'customer_advance',
+                    'payment_number'   => trim((string) ($zohoPay['payment_number'] ?? ($localPayment['payment_number'] ?? $this->paymentModel->generatePaymentNumber()))),
+                    'payment_date'     => $zohoPay['date'] ?? date('Y-m-d'),
+                    'payment_mode'     => $zohoPay['payment_mode'] ?? ($localPayment['payment_mode'] ?? 'Bank Transfer'),
+                    'amount'           => $amount,
+                    'unapplied_amount' => $unappliedAmount,
+                    'discount_amount'  => 0.0,
+                    'reference_number' => $zohoPay['reference_number'] ?? null,
+                    'notes'            => $zohoPay['description'] ?? ($localPayment['notes'] ?? null),
+                ];
+
+                if ($localPayment) {
+                    $localId = (int) $localPayment['id'];
+                    $this->paymentModel->skipValidation(true)->update($localId, $payData);
+                    $action = 'UPDATED';
+                } else {
+                    $localId = (int) $this->paymentModel->skipValidation(true)->insert($payData, true);
+                    $action = 'CREATED';
+                }
             }
 
             $updated         = $this->paymentModel->find($localId);
@@ -338,6 +393,7 @@ class CustomerPaymentSyncService extends AbstractModuleSyncService
 
         $payload = [
             'customer_id'      => $zohoCustomerId,
+            'payment_number'   => (string) ($payment['payment_number'] ?? ''),
             'payment_mode'     => (string) ($payment['payment_mode'] ?: 'Bank Transfer'),
             'amount'           => $amount,
             'date'             => $payment['payment_date'],
@@ -378,13 +434,19 @@ class CustomerPaymentSyncService extends AbstractModuleSyncService
                 + (float) ($p['postal_charges'] ?? 0);
         }
 
+        // Deduct credit notes (sales returns) applied to this invoice
+        $db = \Config\Database::connect();
+        $retRow = $db->table('sales_returns')->where('invoice_id', $invoiceId)->select('COALESCE(SUM(total_amount), 0) as total_returns')->get()->getRowArray();
+        $totalReturns = (float) ($retRow['total_returns'] ?? 0);
+
         $total   = (float) ($inv['total_amount'] ?? 0);
-        $balance = max(0.0, round($total - $totalSettled, 2));
+        $totalDeductions = $totalSettled + $totalReturns;
+        $balance = max(0.0, round($total - $totalDeductions, 2));
         $status  = $inv['status'];
         if ($status !== 'Void') {
             if ($balance <= 0.009) {
                 $status = 'Paid';
-            } elseif ($totalSettled > 0) {
+            } elseif ($totalDeductions > 0) {
                 $status = 'Partially Paid';
             } else {
                 $status = 'Open';
@@ -392,7 +454,7 @@ class CustomerPaymentSyncService extends AbstractModuleSyncService
         }
 
         $this->invoiceModel->skipValidation(true)->update($invoiceId, [
-            'paid_amount' => round($totalSettled, 2),
+            'paid_amount' => round($totalDeductions, 2),
             'balance'     => $balance,
             'status'      => $status,
         ]);

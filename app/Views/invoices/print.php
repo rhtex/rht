@@ -170,7 +170,7 @@
             <thead>
                 <tr>
                     <th width="5%">#</th>
-                    <th width="45%">Description</th>
+                    <th width="45%">Item & Description</th>
                     <th width="10%">HSN</th>
                     <th width="10%">Qty</th>
                     <th width="15%">Rate</th>
@@ -181,8 +181,13 @@
                 <?php foreach ($invoice['items'] as $index => $item): ?>
                     <tr>
                         <td><?= $index + 1 ?></td>
-                        <td><?= esc($item['description']) ?></td>
-                        <td><?= esc($item['hsn_code']) ?></td>
+                        <td>
+                            <strong><?= esc(!empty($item['product_name']) ? $item['product_name'] : ($item['description'] ?? '-')) ?></strong>
+                            <?php if (!empty($item['description']) && !empty($item['product_name']) && $item['description'] !== $item['product_name']): ?>
+                                <br><small style="color: #6c757d; font-size: 8pt;"><?= esc($item['description']) ?></small>
+                            <?php endif; ?>
+                        </td>
+                        <td><?= esc(!empty($item['hsn_code']) ? $item['hsn_code'] : ($item['product_hsn'] ?? '')) ?></td>
                         <td><?= $item['quantity'] + 0 ?></td>
                         <td><?= number_format($item['rate'], 2) ?></td>
                         <td class="text-right"><?= number_format($item['quantity'] * $item['rate'], 2) ?></td>

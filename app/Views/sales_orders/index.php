@@ -9,6 +9,10 @@
     </div>
     <div class="col-sm-6 text-end">
         <div class="d-inline-flex gap-2 align-items-center">
+            <!-- View Mode Toggle: Split View vs Full List View -->
+            <button type="button" id="btnToggleSplit" class="btn btn-sm btn-outline-primary fw-semibold shadow-sm" title="Toggle between Split View and Full View">
+                <i class="fas fa-expand me-1" id="splitToggleIcon"></i> <span id="splitToggleText">Full View</span>
+            </button>
             <a href="<?= site_url('sales_orders') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
@@ -48,22 +52,22 @@
         </a>
     </div>
     <div class="col-xl-3 col-sm-6">
-        <div class="bt-stat bt-g-teal" style="cursor:default;">
-            <i class="fas fa-file-invoice bt-stat-icon"></i>
+        <a href="<?= site_url('sales_orders') ?>" class="bt-stat bt-g-amber text-decoration-none">
+            <i class="fas fa-file-invoice-dollar bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['converted_count'] ?? 0) ?></div>
-            <div class="bt-stat-label">Converted to Invoice</div>
+            <div class="bt-stat-label">Invoiced Orders</div>
             <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total']) && $stats['total'] > 0) ? min(100, round(($stats['converted_count'] / $stats['total']) * 100)) : 0 ?>%"></div></div>
-        </div>
+        </a>
     </div>
 </div>
 
 <!-- Filter Card -->
 <div class="card card-outline card-primary mb-3 shadow-sm">
     <div class="card-header py-2">
-        <h3 class="card-title fw-bold"><i class="fas fa-filter me-1"></i> Filter Orders</h3>
+        <h3 class="card-title fw-bold"><i class="fas fa-filter me-1"></i> Filter Sales Orders</h3>
     </div>
     <div class="card-body">
-        <form method="get" class="row g-2 align-items-end">
+        <form method="get" class="row g-2 align-items-end" id="orderFilterForm">
             <div class="col-md-2 col-sm-6">
                 <label class="form-label">Order #</label>
                 <input type="text" name="sales_order_number" class="form-control" placeholder="Search Order #" value="<?= esc($filters['sales_order_number'] ?? '') ?>">
@@ -105,100 +109,422 @@
     </div>
 </div>
 
-<!-- Orders Table -->
-<div class="card card-outline card-secondary shadow-sm">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="min-width: 130px;">Order #</th>
-                        <th style="min-width: 200px;">Customer</th>
-                        <th style="min-width: 100px;">Order Date</th>
-                        <th style="min-width: 110px;">Shipment Date</th>
-                        <th class="text-end" style="min-width: 110px;">Total</th>
-                        <th class="text-center" style="min-width: 100px;">Status</th>
-                        <th class="text-center" style="min-width: 150px;">Invoice Status</th>
-                        <th class="text-end" style="min-width: 140px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($orders)): ?>
-                        <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">
-                                <i class="fas fa-shopping-cart fa-2x text-muted mb-2 d-block"></i>
-                                No sales orders found matching the criteria.
-                            </td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($orders as $order): ?>
+<!-- Split View Workspace Layout -->
+<div class="row g-3 align-items-start" id="orderSplitRow">
+    <!-- Center Orders List Column -->
+    <div class="col-lg-5 col-xl-5 transition-col" id="orderListCol">
+        <div class="card card-outline card-secondary shadow-sm mb-3" id="orderListCard">
+            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="orderListCardHeader">
+                <h3 class="card-title fw-bold text-dark m-0"><i class="fas fa-list text-primary me-2"></i>Orders List</h3>
+                <span class="text-muted small">Loaded <strong id="loadedOrdersCount"><?= count($orders) ?></strong> orders</span>
+            </div>
+            <div class="card-body p-0 position-relative" id="orderListBody">
+                <div id="orderListScrollContainer" style="overflow-y: auto; overflow-x: hidden;">
+                    <table class="table table-hover align-middle mb-0 w-100" id="ordersMasterTable" data-no-enhance="true" style="table-layout: fixed;">
+                        <thead class="table-light sticky-top bg-light" style="z-index: 10;">
                             <tr>
-                                <td>
-                                    <a href="<?= site_url('sales_orders/view/' . $order['id']) ?>" class="fw-bold text-primary text-decoration-none">
-                                        <?= esc($order['sales_order_number']) ?>
-                                    </a>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="rounded-circle bg-primary-subtle text-primary fw-bold me-2 d-flex align-items-center justify-content-center" style="width:34px;height:34px;min-width:34px;font-size:0.85rem;">
-                                            <?= strtoupper(substr($order['customer_name'] ?? 'C', 0, 1)) ?>
-                                        </div>
-                                        <div>
-                                            <span class="fw-semibold text-dark"><?= esc($order['customer_name']) ?></span>
-                                            <?php if (!empty($order['customer_city'])): ?>
-                                                <br><small class="text-muted"><i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($order['customer_city']) ?></small>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><?= date('d/m/Y', strtotime($order['order_date'])) ?></td>
-                                <td><?= $order['shipment_date'] ? date('d/m/Y', strtotime($order['shipment_date'])) : '<span class="text-muted">-</span>' ?></td>
-                                <td class="text-end fw-bold">₹<?= number_format($order['total_amount'], 2) ?></td>
-                                <td class="text-center">
-                                    <?php
-                                    $colors = ['Draft'=>'secondary','Confirmed'=>'primary','Closed'=>'success','Void'=>'dark'];
-                                    $color = $colors[$order['status']] ?? 'secondary';
-                                    ?>
-                                    <span class="badge text-bg-<?= $color ?> px-2 py-1"><?= $order['status'] ?></span>
-                                </td>
-                                <td class="text-center">
-                                    <?php if (!empty($order['converted_to_invoice_id'])): ?>
-                                        <a href="<?= site_url('invoices/view/' . $order['converted_to_invoice_id']) ?>" class="badge bg-success text-decoration-none" title="View Converted Invoice">
-                                            <i class="fas fa-check-circle me-1"></i> <?= !empty($order['converted_invoice_number']) ? esc($order['converted_invoice_number']) : 'Invoice #' . $order['converted_to_invoice_id'] ?>
-                                        </a>
-                                    <?php else: ?>
-                                        <span class="badge bg-light text-danger border border-danger-subtle small fw-semibold">
-                                            <i class="fas fa-hourglass-half me-1"></i> Not Converted
-                                        </span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-end">
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="<?= site_url('sales_orders/view/' . $order['id']) ?>" class="btn btn-outline-primary" title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <?php if (empty($order['converted_to_invoice_id']) && $order['status'] != 'Void' && $order['status'] != 'Closed'): ?>
-                                            <a href="<?= site_url('sales_orders/convert/' . $order['id']) ?>" class="btn btn-outline-success" title="Convert to Invoice">
-                                                <i class="fas fa-file-invoice"></i> Convert
-                                            </a>
-                                            <a href="<?= site_url('sales_orders/edit/' . $order['id']) ?>" class="btn btn-outline-warning" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="<?= site_url('sales_orders/delete/' . $order['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Delete this order?')" title="Delete">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        <?php endif; ?>
-                                        <a href="<?= site_url('sales_orders/print/' . $order['id']) ?>" target="_blank" class="btn btn-outline-secondary" title="Print">
-                                            <i class="fas fa-print"></i>
-                                        </a>
-                                    </div>
-                                </td>
+                                <th style="width: 32%;">Order #</th>
+                                <th style="width: 38%;">Customer</th>
+                                <th class="text-end" style="width: 20%;">Total</th>
+                                <th class="text-center" style="width: 10%;"></th>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        </thead>
+                        <tbody id="ordersMasterTbody">
+                            <?php if (empty($orders)): ?>
+                                <tr id="noOrdersRow">
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3 d-block opacity-50"></i>
+                                        No sales orders found matching criteria.
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($orders as $idx => $order): ?>
+                                    <?php
+                                    $statusColors = [
+                                        'Draft'     => 'secondary',
+                                        'Confirmed' => 'primary',
+                                        'Closed'    => 'success',
+                                        'Void'      => 'dark'
+                                    ];
+                                    $color = $statusColors[$order['status']] ?? 'secondary';
+                                    ?>
+                                    <tr class="order-row cursor-pointer <?= $idx === 0 ? 'table-active border-primary' : '' ?>" 
+                                        data-id="<?= $order['id'] ?>"
+                                        id="order-row-<?= $order['id'] ?>"
+                                        style="cursor: pointer;">
+                                        <td class="text-truncate">
+                                            <div class="fw-bold text-primary text-truncate"><?= esc($order['sales_order_number']) ?></div>
+                                            <small class="text-muted d-block"><?= date('d/m/Y', strtotime($order['order_date'])) ?></small>
+                                            <span class="badge text-bg-<?= $color ?>" style="font-size:0.68rem;"><?= esc($order['status']) ?></span>
+                                            <?php if (!empty($order['converted_to_invoice_id'])): ?>
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:0.65rem;">
+                                                    <i class="fas fa-check-double me-1"></i>Invoiced
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-truncate">
+                                            <div class="fw-semibold text-dark text-truncate" title="<?= esc($order['customer_name']) ?>"><?= esc($order['customer_name']) ?></div>
+                                            <small class="text-muted d-block text-truncate">
+                                                <?= !empty($order['customer_city']) ? esc($order['customer_city']) : '-' ?>
+                                            </small>
+                                        </td>
+                                        <td class="text-end text-nowrap">
+                                            <div class="fw-bold text-dark fs-6">₹<?= number_format($order['total_amount'], 2) ?></div>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="<?= site_url('sales_orders/view/' . $order['id']) ?>?mode=single" class="btn btn-sm btn-light border p-1" title="Open Standalone Page">
+                                                <i class="fas fa-external-link-alt text-muted"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+
+                    <!-- Infinite Scroll Spinner -->
+                    <div id="infiniteScrollSpinner" class="text-center py-2 bg-light border-top" style="display: none;">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                        <small class="text-muted fw-semibold">Loading 20 more orders...</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side Order View Column -->
+    <div class="col-lg-7 col-xl-7 transition-col" id="orderDetailCol">
+        <div class="card card-outline card-primary shadow-sm mb-3" id="orderDetailCard">
+            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="orderDetailCardHeader">
+                <h5 class="card-title fw-bold text-dark m-0" id="detailPaneTitle">
+                    <i class="fas fa-eye text-primary me-2"></i>Sales Order Details
+                </h5>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="#" id="btnOpenSinglePage" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark" target="_blank" title="Open in standalone full page">
+                        <i class="fas fa-external-link-alt me-1 text-primary"></i> Single Page View
+                    </a>
+                </div>
+            </div>
+            <!-- Order Details Container: natural height, no inner scroll -->
+            <div class="card-body p-3" id="orderDetailContainer" style="overflow: visible;">
+                <div class="text-center py-5 text-muted" id="detailPlaceholder">
+                    <div class="spinner-border text-primary mb-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="text-muted">Loading order details...</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+.order-row {
+    transition: background-color 0.15s ease-in-out;
+}
+.order-row:hover {
+    background-color: #f1f5f9 !important;
+}
+.order-row.table-active {
+    background-color: #e0f2fe !important;
+    border-left: 4px solid #0284c7 !important;
+}
+.transition-col {
+    transition: all 0.25s ease-in-out;
+}
+</style>
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const listCol = document.getElementById('orderListCol');
+    const detailCol = document.getElementById('orderDetailCol');
+    const splitBtn = document.getElementById('btnToggleSplit');
+    const splitText = document.getElementById('splitToggleText');
+    const splitIcon = document.getElementById('splitToggleIcon');
+    const container = document.getElementById('orderDetailContainer');
+    const fullPageBtn = document.getElementById('btnOpenSinglePage');
+    const scrollContainer = document.getElementById('orderListScrollContainer');
+    const tbody = document.getElementById('ordersMasterTbody');
+    const spinner = document.getElementById('infiniteScrollSpinner');
+    const countBadge = document.getElementById('loadedOrdersCount');
+
+    let isSplitOn = true;
+    let activeOrderId = null;
+    let currentOffset = document.querySelectorAll('.order-row').length;
+    let isLoadingMore = false;
+    let hasMoreRows = true;
+
+    // Load order details via AJAX into the right pane
+    window.loadOrderDetail = function(orderId) {
+        if (!orderId) return;
+        activeOrderId = orderId;
+
+        document.querySelectorAll('.order-row').forEach(r => r.classList.remove('table-active', 'border-primary'));
+        const activeRow = document.getElementById('order-row-' + orderId);
+        if (activeRow) {
+            activeRow.classList.add('table-active');
+        }
+
+        if (fullPageBtn) {
+            fullPageBtn.href = '<?= site_url('sales_orders/view/') ?>' + orderId + '?mode=single';
+        }
+
+        if (scrollContainer) {
+            scrollContainer.style.height = '';
+            scrollContainer.style.maxHeight = '';
+        }
+
+        container.innerHTML = `
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border text-primary mb-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="text-muted">Loading order #${orderId}...</div>
+            </div>
+        `;
+
+        fetch('<?= site_url('sales_orders/view/') ?>' + orderId + '?ajax=1', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html, */*'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status + ': Order details could not be loaded.');
+            return response.text();
+        })
+        .then(html => {
+            if (html.includes('login-box') || html.includes('Sign in to start your session')) {
+                container.innerHTML = `
+                    <div class="alert alert-warning m-3">
+                        <i class="fas fa-sign-in-alt me-2"></i> Your session has expired. Please <a href="<?= site_url('login') ?>" target="_blank" class="alert-link">log in again</a> and refresh this page.
+                    </div>
+                `;
+                return;
+            }
+            container.innerHTML = html;
+            requestAnimationFrame(() => {
+                syncPaneHeights();
+            });
+        })
+        .catch(err => {
+            container.innerHTML = `
+                <div class="alert alert-danger m-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i> ${err.message}
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="loadOrderDetail(${orderId})">
+                            <i class="fas fa-redo me-1"></i> Retry
+                        </button>
+                    </div>
+                </div>
+            `;
+            requestAnimationFrame(() => {
+                syncPaneHeights();
+            });
+        });
+    };
+
+    // Calculate height of 20 table rows dynamically
+    function getTwentyRowsHeight() {
+        const rows = tbody.querySelectorAll('.order-row');
+        if (rows.length > 0) {
+            let total = 0;
+            const count = Math.min(20, rows.length);
+            for (let i = 0; i < count; i++) {
+                total += rows[i].offsetHeight || 48;
+            }
+            if (rows.length < 20) {
+                const avg = total / rows.length;
+                total += avg * (20 - rows.length);
+            }
+            const thead = document.querySelector('#ordersMasterTable thead');
+            const theadH = thead ? thead.offsetHeight : 42;
+            return Math.ceil(total + theadH + 4);
+        }
+        return 980;
+    }
+
+    // Synchronize heights:
+    // Expands when detail is taller, shrinks back to natural height (minimum 20 rows)
+    function syncPaneHeights() {
+        if (!isSplitOn) {
+            if (scrollContainer) {
+                scrollContainer.style.height = '';
+                scrollContainer.style.maxHeight = '';
+                scrollContainer.style.overflowY = 'visible';
+            }
+            return;
+        }
+
+        const detailCard = document.getElementById('orderDetailCard');
+        const detailContainer = document.getElementById('orderDetailContainer');
+        const listHeader = document.getElementById('orderListCardHeader');
+        if (!scrollContainer) return;
+
+        const minHeight = getTwentyRowsHeight();
+
+        let targetScrollHeight = minHeight;
+        if (detailCard && detailContainer) {
+            const listHeaderHeight = listHeader ? listHeader.offsetHeight : 45;
+            const detailCardHeader = document.getElementById('orderDetailCardHeader');
+            const detailHeaderHeight = detailCardHeader ? detailCardHeader.offsetHeight : 45;
+            const detailContentHeight = detailContainer.scrollHeight || detailContainer.offsetHeight || 0;
+            const naturalDetailCardHeight = detailHeaderHeight + detailContentHeight;
+
+            targetScrollHeight = Math.max(minHeight, naturalDetailCardHeight - listHeaderHeight);
+        }
+
+        scrollContainer.style.height = targetScrollHeight + 'px';
+        scrollContainer.style.maxHeight = targetScrollHeight + 'px';
+        scrollContainer.style.overflowY = 'auto';
+    }
+
+    // Watch for detail content size changes
+    if (window.ResizeObserver) {
+        let isSyncing = false;
+        const resizeObserver = new ResizeObserver(() => {
+            if (isSyncing) return;
+            isSyncing = true;
+            syncPaneHeights();
+            setTimeout(() => { isSyncing = false; }, 50);
+        });
+        const detailContainerEl = document.getElementById('orderDetailContainer');
+        if (detailContainerEl) {
+            resizeObserver.observe(detailContainerEl);
+        }
+    }
+
+    window.addEventListener('resize', syncPaneHeights);
+    syncPaneHeights();
+
+    // Attach row click listeners
+    function bindRowClicks(scope) {
+        const rowsToBind = (scope || document).querySelectorAll('.order-row:not([data-bound])');
+        rowsToBind.forEach(row => {
+            row.setAttribute('data-bound', '1');
+            row.addEventListener('click', function(e) {
+                const id = this.getAttribute('data-id');
+                if (isSplitOn) {
+                    loadOrderDetail(id);
+                } else {
+                    window.location.href = '<?= site_url('sales_orders/view/') ?>' + id + '?mode=single';
+                }
+            });
+        });
+    }
+
+    bindRowClicks(tbody);
+
+    // Auto-load first order on page load
+    const initialRows = document.querySelectorAll('.order-row');
+    if (initialRows.length > 0) {
+        const firstId = initialRows[0].getAttribute('data-id');
+        loadOrderDetail(firstId);
+    } else {
+        container.innerHTML = '<div class="text-center py-5 text-muted">No sales orders found.</div>';
+    }
+
+    // Infinite scroll handler
+    if (scrollContainer) {
+        scrollContainer.addEventListener('scroll', function() {
+            if (isLoadingMore || !hasMoreRows) return;
+            const distanceToBottom = scrollContainer.scrollHeight - (scrollContainer.scrollTop + scrollContainer.clientHeight);
+            if (distanceToBottom <= 100) {
+                loadMoreOrders();
+            }
+        });
+    }
+
+    function loadMoreOrders() {
+        if (isLoadingMore || !hasMoreRows) return;
+        isLoadingMore = true;
+        if (spinner) spinner.style.display = 'block';
+
+        const filterForm = document.getElementById('orderFilterForm');
+        const params = new URLSearchParams(filterForm ? new FormData(filterForm) : []);
+        params.set('load_more', '1');
+        params.set('offset', currentOffset);
+        params.set('limit', '20');
+
+        fetch('<?= site_url('sales_orders') ?>?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html, */*'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network error: ' + response.status);
+            return response.text();
+        })
+        .then(html => {
+            if (!html || html.trim() === '') {
+                hasMoreRows = false;
+                if (spinner) {
+                    spinner.innerHTML = '<small class="text-muted"><i class="fas fa-check-circle me-1 text-success"></i>All orders loaded.</small>';
+                    spinner.style.display = 'block';
+                }
+            } else {
+                tbody.insertAdjacentHTML('beforeend', html);
+                const newlyAdded = tbody.querySelectorAll('.order-row:not([data-bound])');
+                currentOffset += newlyAdded.length;
+                if (countBadge) {
+                    countBadge.textContent = document.querySelectorAll('.order-row').length;
+                }
+                bindRowClicks(tbody);
+                syncPaneHeights();
+
+                if (newlyAdded.length < 20) {
+                    hasMoreRows = false;
+                    if (spinner) {
+                        spinner.innerHTML = '<small class="text-muted"><i class="fas fa-check-circle me-1 text-success"></i>All orders loaded.</small>';
+                        spinner.style.display = 'block';
+                    }
+                } else if (spinner) {
+                    spinner.style.display = 'none';
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Error loading more orders:', err);
+            if (spinner) {
+                spinner.innerHTML = `<small class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Failed to load more (${err.message}). <a href="javascript:void(0)" onclick="loadMoreOrders()" class="fw-bold">Retry</a></small>`;
+                spinner.style.display = 'block';
+            }
+        })
+        .finally(() => {
+            isLoadingMore = false;
+        });
+    }
+
+    // Toggle View Mode: Split View (Default) <-> Full View
+    if (splitBtn) {
+        splitBtn.addEventListener('click', function() {
+            isSplitOn = !isSplitOn;
+            if (isSplitOn) {
+                listCol.className = 'col-lg-5 col-xl-5 transition-col';
+                detailCol.style.display = 'block';
+                splitText.textContent = 'Full View';
+                splitIcon.className = 'fas fa-expand me-1';
+                splitBtn.classList.remove('btn-primary');
+                splitBtn.classList.add('btn-outline-primary');
+                if (activeOrderId) {
+                    loadOrderDetail(activeOrderId);
+                } else {
+                    syncPaneHeights();
+                }
+            } else {
+                listCol.className = 'col-12 transition-col';
+                detailCol.style.display = 'none';
+                splitText.textContent = 'Split View';
+                splitIcon.className = 'fas fa-columns me-1';
+                splitBtn.classList.remove('btn-outline-primary');
+                splitBtn.classList.add('btn-primary');
+                syncPaneHeights();
+            }
+        });
+    }
+});
+</script>
 <?= $this->endSection() ?>

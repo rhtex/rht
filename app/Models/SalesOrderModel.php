@@ -80,7 +80,15 @@ class SalesOrderModel extends Model
             $builder->where('sales_orders.order_date <=', $filters['date_to']);
         }
 
-        return $builder->orderBy('sales_orders.created_at', 'DESC')->findAll();
+        $builder->orderBy('sales_orders.order_date', 'DESC')->orderBy('sales_orders.id', 'DESC');
+
+        if (isset($filters['limit'])) {
+            $limit = (int) $filters['limit'];
+            $offset = (int) ($filters['offset'] ?? 0);
+            return $builder->findAll($limit, $offset);
+        }
+
+        return $builder->findAll();
     }
 
     public function getOrderById($id)
@@ -94,7 +102,7 @@ class SalesOrderModel extends Model
 
         if ($order) {
             $itemModel = new \App\Models\SalesOrderItemModel();
-            $order['items'] = $itemModel->where('sales_order_id', $id)->findAll();
+            $order['items'] = $itemModel->getItemsByOrder($id);
         }
 
         return $order;

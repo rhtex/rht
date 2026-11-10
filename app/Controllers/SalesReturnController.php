@@ -34,10 +34,57 @@ class SalesReturnController extends BaseController
             'date_to' => $this->request->getGet('date_to'),
         ];
 
+        // Overall aggregate stats
+        $summaryBuilder = $this->returnModel->select('COUNT(*) as total_count, COALESCE(SUM(total_amount), 0) as total_amount');
+        if (!empty($filters['customer_id'])) {
+            $summaryBuilder->where('customer_id', $filters['customer_id']);
+        }
+        if (!empty($filters['status'])) {
+            $summaryBuilder->where('status', $filters['status']);
+        }
+        if (!empty($filters['date_from'])) {
+            $summaryBuilder->where('return_date >=', $filters['date_from']);
+        }
+        if (!empty($filters['date_to'])) {
+            $summaryBuilder->where('return_date <=', $filters['date_to']);
+        }
+        $totals = $summaryBuilder->first();
+
+        // If AJAX request asking for more rows (infinite scroll)
+        if ($this->request->isAJAX() && $this->request->getGet('load_more') == 1) {
+            $offset = max(0, (int) ($this->request->getGet('offset') ?? 0));
+            $limit  = max(1, (int) ($this->request->getGet('limit') ?? 20));
+            $filters['offset'] = $offset;
+            $filters['limit']  = $limit;
+
+            $moreReturns = $this->returnModel->getReturnsWithFilters($filters);
+            return view('sales_returns/list_rows', ['returns' => $moreReturns]);
+        }
+
+        // Default initial load: 50 credit notes
+        $filters['offset'] = 0;
+        $filters['limit']  = 50;
+
         $data['returns'] = $this->returnModel->getReturnsWithFilters($filters);
         $data['customers'] = $this->customerModel->where('status', 'active')->orderBy('name', 'ASC')->findAll();
         $data['title'] = 'Sales Returns (Credit Notes)';
         $data['filters'] = $filters;
+
+        $stats = [
+            'total'         => (int) ($totals['total_count'] ?? count($data['returns'])),
+            'total_amount'  => (float) ($totals['total_amount'] ?? 0),
+            'open_count'    => 0,
+            'closed_count'  => 0,
+        ];
+        foreach ($data['returns'] as $r) {
+            $st = $r['status'] ?? '';
+            if ($st === 'Open') {
+                $stats['open_count']++;
+            } elseif ($st === 'Closed') {
+                $stats['closed_count']++;
+            }
+        }
+        $data['stats'] = $stats;
 
         return view('sales_returns/index', $data);
     }
@@ -117,17 +164,24 @@ class SalesReturnController extends BaseController
 
     public function view($id)
     {
-        $data['return'] = $this->returnModel->select('sales_returns.*, customers.name as customer_name, invoices.invoice_number')
-            ->join('customers', 'customers.id = sales_returns.customer_id')
-            ->join('invoices', 'invoices.id = sales_returns.invoice_id', 'left')
-            ->find($id);
+        $data['return'] = $this->returnModel->getReturnById($id);
 
         if (!$data['return']) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(404)->setJSON(['error' => 'Return not found.']);
+            }
             return redirect()->to('sales_returns')->with('error', 'Return not found.');
         }
 
-        $data['items'] = $this->itemModel->where('sales_return_id', $id)->findAll();
+        $data['items'] = $data['return']['items'] ?? [];
         $data['title'] = 'Sales Return Details - ' . $data['return']['return_number'];
+
+        // AJAX request for side panel view
+        if ($this->request->isAJAX() || $this->request->getGet('ajax') == 1) {
+            return view('sales_returns/detail_pane', $data);
+        }
+
+        $data['is_single'] = ($this->request->getGet('mode') === 'single');
 
         return view('sales_returns/view', $data);
     }

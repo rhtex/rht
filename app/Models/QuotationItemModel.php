@@ -21,4 +21,15 @@ class QuotationItemModel extends Model
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
+
+    /**
+     * Get items by quotation ID with product details
+     */
+    public function getItemsByQuotation($quotationId)
+    {
+        return $this->select('quotation_items.*, products.product_name, products.barcode, products.hsn_code as product_hsn')
+            ->join('products', 'products.id = quotation_items.product_id', 'left')
+            ->where('quotation_items.quotation_id', $quotationId)
+            ->findAll();
+    }
 }

@@ -17,9 +17,12 @@
 
     <!-- Bill Header Card -->
     <div class="card card-outline card-primary shadow-sm mb-3">
-        <div class="card-header">
-            <h3 class="card-title fw-bold"><i class="fas fa-file-invoice-dollar me-1"></i> Bill Information</h3>
-            <div class="card-tools d-flex gap-2">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title fw-bold mb-0"><i class="fas fa-file-invoice-dollar me-1"></i> Bill Information</h3>
+            <div class="card-tools d-flex gap-2 align-items-center ms-auto">
+                <a href="<?= site_url('bills') ?>" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark" title="Back to Split Bills View">
+                    <i class="fas fa-columns me-1 text-primary"></i> Split View
+                </a>
                 <?php if ($bill['status'] == 'Draft'): ?>
                     <a href="<?= site_url('bills/mark-open/' . $bill['id']) ?>" class="btn btn-sm btn-success" onclick="return confirm('Mark this bill as Open?');">
                         <i class="fas fa-check-circle me-1"></i> Mark as Open
@@ -117,8 +120,13 @@
                         <?php foreach ($bill['items'] as $index => $item): ?>
                             <tr>
                                 <td class="text-center fw-bold text-muted"><?= $index + 1 ?></td>
-                                <td><?= esc($item['description']) ?></td>
-                                <td><?= esc($item['hsn_code']) ?: '-' ?></td>
+                                <td>
+                                    <strong><?= esc(!empty($item['product_name']) ? $item['product_name'] : ($item['description'] ?? '-')) ?></strong>
+                                    <?php if (!empty($item['description']) && !empty($item['product_name']) && $item['description'] !== $item['product_name']): ?>
+                                        <br><small class="text-muted"><?= esc($item['description']) ?></small>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= esc(!empty($item['hsn_code']) ? $item['hsn_code'] : ($item['product_hsn'] ?? '-')) ?></td>
                                 <td class="text-center fw-bold"><?= $item['quantity'] + 0 ?></td>
                                 <td class="text-end">₹<?= number_format($item['rate'], 2) ?></td>
                                 <td class="text-center"><span class="badge bg-light text-dark border"><?= $item['tax_percentage'] + 0 ?>%</span></td>

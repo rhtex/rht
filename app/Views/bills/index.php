@@ -1,19 +1,23 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= esc($title) ?><?= $this->endSection() ?>
+<?= $this->section('title') ?>Purchase Bills<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-3 align-items-center">
     <div class="col-sm-6">
-        <h1 class="m-0"><i class="fas fa-file-invoice text-primary me-2"></i><?= esc($title) ?></h1>
+        <h1 class="m-0"><i class="fas fa-file-invoice-dollar text-primary me-2"></i>Purchase Bills</h1>
     </div>
     <div class="col-sm-6 text-end">
         <div class="d-inline-flex gap-2 align-items-center">
+            <!-- View Mode Toggle: Split View vs Full List View -->
+            <button type="button" id="btnToggleSplit" class="btn btn-sm btn-outline-primary fw-semibold shadow-sm" title="Toggle between Split View and Full View">
+                <i class="fas fa-expand me-1" id="splitToggleIcon"></i> <span id="splitToggleText">Full View</span>
+            </button>
             <a href="<?= site_url('bills') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
             <a href="<?= site_url('bills/create') ?>" class="btn btn-sm btn-primary">
-                <i class="fas fa-plus me-1"></i> New Purchase Bill
+                <i class="fas fa-plus me-1"></i> New Bill
             </a>
         </div>
     </div>
@@ -25,7 +29,7 @@
 <div class="row g-3 mb-3">
     <div class="col-xl-3 col-sm-6">
         <a href="<?= site_url('bills') ?>" class="bt-stat bt-g-blue text-decoration-none <?= empty($filters['status']) ? 'active' : '' ?>">
-            <i class="fas fa-file-invoice bt-stat-icon"></i>
+            <i class="fas fa-file-invoice-dollar bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['total'] ?? count($bills)) ?></div>
             <div class="bt-stat-label">Total Bills</div>
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
@@ -51,7 +55,7 @@
         <a href="<?= site_url('bills?status=Open') ?>" class="bt-stat bt-g-amber text-decoration-none <?= in_array($filters['status'] ?? '', ['Open', 'Overdue', 'Partially Paid']) ? 'active' : '' ?>">
             <i class="fas fa-clock bt-stat-icon"></i>
             <div class="bt-stat-num">₹<?= number_format($stats['balance'] ?? 0, 2) ?></div>
-            <div class="bt-stat-label">Payable Balance</div>
+            <div class="bt-stat-label">Outstanding Balance</div>
             <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total_amount']) && $stats['total_amount'] > 0) ? min(100, round(($stats['balance'] / $stats['total_amount']) * 100)) : 0 ?>%"></div></div>
         </a>
     </div>
@@ -60,12 +64,12 @@
 <!-- Filter Card -->
 <div class="card card-outline card-primary mb-3 shadow-sm">
     <div class="card-header py-2">
-        <h3 class="card-title fw-bold"><i class="fas fa-filter me-1"></i> Filter Purchase Bills</h3>
+        <h3 class="card-title fw-bold"><i class="fas fa-filter me-1"></i> Filter Bills</h3>
     </div>
     <div class="card-body">
-        <form method="get" class="row g-2 align-items-end">
+        <form method="get" class="row g-2 align-items-end" id="billFilterForm">
             <div class="col-md-2 col-sm-6">
-                <label class="form-label">Bill # / Ref #</label>
+                <label class="form-label">Bill #</label>
                 <input type="text" name="bill_number" class="form-control" placeholder="Search Bill #" value="<?= esc($filters['bill_number'] ?? '') ?>">
             </div>
             <div class="col-md-3 col-sm-6">
@@ -83,12 +87,12 @@
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select">
                     <option value="">All Statuses</option>
-                    <option value="Draft" <?= (($filters['status'] ?? '') == 'Draft') ? 'selected' : '' ?>>Draft</option>
-                    <option value="Open" <?= (($filters['status'] ?? '') == 'Open') ? 'selected' : '' ?>>Open</option>
-                    <option value="Paid" <?= (($filters['status'] ?? '') == 'Paid') ? 'selected' : '' ?>>Paid</option>
-                    <option value="Partially Paid" <?= (($filters['status'] ?? '') == 'Partially Paid') ? 'selected' : '' ?>>Partially Paid</option>
-                    <option value="Overdue" <?= (($filters['status'] ?? '') == 'Overdue') ? 'selected' : '' ?>>Overdue</option>
-                    <option value="Void" <?= (($filters['status'] ?? '') == 'Void') ? 'selected' : '' ?>>Void</option>
+                    <option value="Draft" <?= (isset($filters['status']) && $filters['status'] == 'Draft') ? 'selected' : '' ?>>Draft</option>
+                    <option value="Open" <?= (isset($filters['status']) && $filters['status'] == 'Open') ? 'selected' : '' ?>>Open</option>
+                    <option value="Paid" <?= (isset($filters['status']) && $filters['status'] == 'Paid') ? 'selected' : '' ?>>Paid</option>
+                    <option value="Partially Paid" <?= (isset($filters['status']) && $filters['status'] == 'Partially Paid') ? 'selected' : '' ?>>Partially Paid</option>
+                    <option value="Overdue" <?= (isset($filters['status']) && $filters['status'] == 'Overdue') ? 'selected' : '' ?>>Overdue</option>
+                    <option value="Void" <?= (isset($filters['status']) && $filters['status'] == 'Void') ? 'selected' : '' ?>>Void</option>
                 </select>
             </div>
             <div class="col-md-2 col-sm-4">
@@ -107,64 +111,36 @@
     </div>
 </div>
 
-<!-- Bills Table -->
-<div class="card card-outline card-secondary shadow-sm">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="min-width: 140px;">Bill #</th>
-                        <th style="min-width: 200px;">Vendor</th>
-                        <th style="min-width: 110px;">Bill Date</th>
-                        <th style="min-width: 110px;">Due Date</th>
-                        <th class="text-end" style="min-width: 110px;">Total Amount</th>
-                        <th class="text-end" style="min-width: 110px;">Paid</th>
-                        <th class="text-end" style="min-width: 110px;">Balance</th>
-                        <th class="text-center" style="min-width: 100px;">Status</th>
-                        <th class="text-end" style="min-width: 130px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($bills)): ?>
-                        <tr>
-                            <td colspan="9" class="text-center py-4 text-muted">
-                                <i class="fas fa-file-invoice fa-2x text-muted mb-2 d-block"></i>
-                                No purchase bills found matching the criteria.
-                            </td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($bills as $b): ?>
+<!-- Split View Workspace Layout -->
+<div class="row g-3 align-items-start" id="billSplitRow">
+    <!-- Center Bills List Column -->
+    <div class="col-lg-5 col-xl-5 transition-col" id="billListCol">
+        <div class="card card-outline card-secondary shadow-sm mb-3" id="billListCard">
+            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="billListCardHeader">
+                <h3 class="card-title fw-bold text-dark m-0"><i class="fas fa-list text-primary me-2"></i>Bills List</h3>
+                <span class="text-muted small">Loaded <strong id="loadedBillsCount"><?= count($bills) ?></strong> bills</span>
+            </div>
+            <div class="card-body p-0 position-relative" id="billListBody">
+                <div id="billListScrollContainer" style="overflow-y: auto; overflow-x: hidden;">
+                    <table class="table table-hover align-middle mb-0 w-100" id="billsMasterTable" data-no-enhance="true" style="table-layout: fixed;">
+                        <thead class="table-light sticky-top bg-light" style="z-index: 10;">
                             <tr>
-                                <td>
-                                    <a href="<?= site_url('bills/view/' . $b['id']) ?>" class="fw-bold text-primary text-decoration-none">
-                                        <?= esc($b['bill_number']) ?>
-                                    </a>
-                                    <?php if (!empty($b['reference_number'])): ?>
-                                        <br><small class="text-muted">Ref: <?= esc($b['reference_number']) ?></small>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="rounded-circle bg-warning-subtle text-warning-emphasis fw-bold me-2 d-flex align-items-center justify-content-center" style="width:34px;height:34px;min-width:34px;font-size:0.85rem;">
-                                            <?= strtoupper(substr($b['vendor_name'] ?? 'V', 0, 1)) ?>
-                                        </div>
-                                        <div>
-                                            <span class="fw-semibold text-dark"><?= esc($b['vendor_name']) ?></span>
-                                            <?php if (!empty($b['vendor_city'])): ?>
-                                                <br><small class="text-muted"><i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($b['vendor_city']) ?></small>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><?= date('d/m/Y', strtotime($b['bill_date'])) ?></td>
-                                <td><?= date('d/m/Y', strtotime($b['due_date'])) ?></td>
-                                <td class="text-end fw-bold">₹<?= number_format($b['total_amount'], 2) ?></td>
-                                <td class="text-end text-success fw-semibold">₹<?= number_format($b['paid_amount'], 2) ?></td>
-                                <td class="text-end <?= ($b['balance'] > 0) ? 'text-danger fw-bold' : 'text-muted' ?>">
-                                    ₹<?= number_format($b['balance'], 2) ?>
-                                </td>
-                                <td class="text-center">
+                                <th style="width: 32%;">Bill #</th>
+                                <th style="width: 38%;">Vendor</th>
+                                <th class="text-end" style="width: 20%;">Total</th>
+                                <th class="text-center" style="width: 10%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="billsMasterTbody">
+                            <?php if (empty($bills)): ?>
+                                <tr id="noBillsRow">
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3 d-block opacity-50"></i>
+                                        No purchase bills found matching criteria.
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($bills as $idx => $b): ?>
                                     <?php
                                     $statusColors = [
                                         'Draft'          => 'secondary',
@@ -176,26 +152,379 @@
                                     ];
                                     $color = $statusColors[$b['status']] ?? 'secondary';
                                     ?>
-                                    <span class="badge text-bg-<?= $color ?> px-2 py-1"><?= $b['status'] ?></span>
-                                </td>
-                                <td class="text-end">
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="<?= site_url('bills/view/' . $b['id']) ?>" class="btn btn-outline-primary" title="View"><i class="fas fa-eye"></i></a>
-                                        <?php if ($b['status'] != 'Void' && $b['status'] != 'Paid'): ?>
-                                            <a href="<?= site_url('bills/edit/' . $b['id']) ?>" class="btn btn-outline-warning" title="Edit"><i class="fas fa-edit"></i></a>
-                                        <?php endif; ?>
-                                        <?php if ($b['balance'] > 0 && $b['status'] != 'Void'): ?>
-                                            <a href="<?= site_url('bills/payment/' . $b['id']) ?>" class="btn btn-outline-success" title="Record Payment"><i class="fas fa-money-bill-wave"></i></a>
-                                        <?php endif; ?>
-                                        <a href="<?= site_url('bills/print/' . $b['id']) ?>" target="_blank" class="btn btn-outline-secondary" title="Print"><i class="fas fa-print"></i></a>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                                    <tr class="bill-row cursor-pointer <?= $idx === 0 ? 'table-active border-primary' : '' ?>" 
+                                        data-id="<?= $b['id'] ?>"
+                                        id="bill-row-<?= $b['id'] ?>"
+                                        style="cursor: pointer;">
+                                        <td class="text-truncate">
+                                            <div class="fw-bold text-primary text-truncate"><?= esc($b['bill_number']) ?></div>
+                                            <small class="text-muted d-block"><?= date('d/m/Y', strtotime($b['bill_date'])) ?></small>
+                                            <span class="badge text-bg-<?= $color ?>" style="font-size:0.68rem;"><?= esc($b['status']) ?></span>
+                                        </td>
+                                        <td class="text-truncate">
+                                            <div class="fw-semibold text-dark text-truncate" title="<?= esc($b['vendor_name']) ?>"><?= esc($b['vendor_name']) ?></div>
+                                            <small class="text-muted d-block text-truncate">
+                                                <?= !empty($b['vendor_city']) ? esc($b['vendor_city']) : '-' ?>
+                                            </small>
+                                        </td>
+                                        <td class="text-end text-nowrap">
+                                            <div class="fw-bold text-dark fs-6">₹<?= number_format($b['total_amount'], 2) ?></div>
+                                            <small class="text-danger d-block">Bal: ₹<?= number_format($b['balance'], 2) ?></small>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="<?= site_url('bills/view/' . $b['id']) ?>?mode=single" class="btn btn-sm btn-light border p-1" title="Open Standalone Page">
+                                                <i class="fas fa-external-link-alt text-muted"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+
+                    <!-- Infinite Scroll Spinner -->
+                    <div id="infiniteScrollSpinner" class="text-center py-2 bg-light border-top" style="display: none;">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                        <small class="text-muted fw-semibold">Loading 20 more bills...</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side Bill View Column -->
+    <div class="col-lg-7 col-xl-7 transition-col" id="billDetailCol">
+        <div class="card card-outline card-primary shadow-sm mb-3" id="billDetailCard">
+            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="billDetailCardHeader">
+                <h5 class="card-title fw-bold text-dark m-0" id="detailPaneTitle">
+                    <i class="fas fa-eye text-primary me-2"></i>Bill Details
+                </h5>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="#" id="btnOpenSinglePage" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark" target="_blank" title="Open in standalone full page">
+                        <i class="fas fa-external-link-alt me-1 text-primary"></i> Single Page View
+                    </a>
+                </div>
+            </div>
+            <!-- Bill Details Container: natural height, no inner scroll -->
+            <div class="card-body p-3" id="billDetailContainer" style="overflow: visible;">
+                <div class="text-center py-5 text-muted" id="detailPlaceholder">
+                    <div class="spinner-border text-primary mb-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="text-muted">Loading bill details...</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+.bill-row {
+    transition: background-color 0.15s ease-in-out;
+}
+.bill-row:hover {
+    background-color: #f1f5f9 !important;
+}
+.bill-row.table-active {
+    background-color: #e0f2fe !important;
+    border-left: 4px solid #0284c7 !important;
+}
+.transition-col {
+    transition: all 0.25s ease-in-out;
+}
+</style>
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const listCol = document.getElementById('billListCol');
+    const detailCol = document.getElementById('billDetailCol');
+    const splitBtn = document.getElementById('btnToggleSplit');
+    const splitText = document.getElementById('splitToggleText');
+    const splitIcon = document.getElementById('splitToggleIcon');
+    const container = document.getElementById('billDetailContainer');
+    const fullPageBtn = document.getElementById('btnOpenSinglePage');
+    const scrollContainer = document.getElementById('billListScrollContainer');
+    const tbody = document.getElementById('billsMasterTbody');
+    const spinner = document.getElementById('infiniteScrollSpinner');
+    const countBadge = document.getElementById('loadedBillsCount');
+
+    let isSplitOn = true;
+    let activeBillId = null;
+    let currentOffset = document.querySelectorAll('.bill-row').length;
+    let isLoadingMore = false;
+    let hasMoreRows = true;
+
+    // Load bill details via AJAX into the right pane
+    window.loadBillDetail = function(billId) {
+        if (!billId) return;
+        activeBillId = billId;
+
+        document.querySelectorAll('.bill-row').forEach(r => r.classList.remove('table-active', 'border-primary'));
+        const activeRow = document.getElementById('bill-row-' + billId);
+        if (activeRow) {
+            activeRow.classList.add('table-active');
+        }
+
+        if (fullPageBtn) {
+            fullPageBtn.href = '<?= site_url('bills/view/') ?>' + billId + '?mode=single';
+        }
+
+        if (scrollContainer) {
+            scrollContainer.style.height = '';
+            scrollContainer.style.maxHeight = '';
+        }
+
+        container.innerHTML = `
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border text-primary mb-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="text-muted">Loading bill #${billId}...</div>
+            </div>
+        `;
+
+        fetch('<?= site_url('bills/view/') ?>' + billId + '?ajax=1', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html, */*'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status + ': Bill details could not be loaded.');
+            return response.text();
+        })
+        .then(html => {
+            if (html.includes('login-box') || html.includes('Sign in to start your session')) {
+                container.innerHTML = `
+                    <div class="alert alert-warning m-3">
+                        <i class="fas fa-sign-in-alt me-2"></i> Your session has expired. Please <a href="<?= site_url('login') ?>" target="_blank" class="alert-link">log in again</a> and refresh this page.
+                    </div>
+                `;
+                return;
+            }
+            container.innerHTML = html;
+            requestAnimationFrame(() => {
+                syncPaneHeights();
+            });
+        })
+        .catch(err => {
+            container.innerHTML = `
+                <div class="alert alert-danger m-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i> ${err.message}
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="loadBillDetail(${billId})">
+                            <i class="fas fa-redo me-1"></i> Retry
+                        </button>
+                    </div>
+                </div>
+            `;
+            requestAnimationFrame(() => {
+                syncPaneHeights();
+            });
+        });
+    };
+
+    // Calculate height of 20 table rows dynamically
+    function getTwentyRowsHeight() {
+        const rows = tbody.querySelectorAll('.bill-row');
+        if (rows.length > 0) {
+            let total = 0;
+            const count = Math.min(20, rows.length);
+            for (let i = 0; i < count; i++) {
+                total += rows[i].offsetHeight || 48;
+            }
+            if (rows.length < 20) {
+                const avg = total / rows.length;
+                total += avg * (20 - rows.length);
+            }
+            const thead = document.querySelector('#billsMasterTable thead');
+            const theadH = thead ? thead.offsetHeight : 42;
+            return Math.ceil(total + theadH + 4);
+        }
+        return 980;
+    }
+
+    // Synchronize heights:
+    // Expands when detail is taller, shrinks back to natural height (minimum 20 rows)
+    function syncPaneHeights() {
+        if (!isSplitOn) {
+            if (scrollContainer) {
+                scrollContainer.style.height = '';
+                scrollContainer.style.maxHeight = '';
+                scrollContainer.style.overflowY = 'visible';
+            }
+            return;
+        }
+
+        const detailCard = document.getElementById('billDetailCard');
+        const detailContainer = document.getElementById('billDetailContainer');
+        const listHeader = document.getElementById('billListCardHeader');
+        if (!scrollContainer) return;
+
+        const minHeight = getTwentyRowsHeight();
+
+        let targetScrollHeight = minHeight;
+        if (detailCard && detailContainer) {
+            const listHeaderHeight = listHeader ? listHeader.offsetHeight : 45;
+            const detailCardHeader = document.getElementById('billDetailCardHeader');
+            const detailHeaderHeight = detailCardHeader ? detailCardHeader.offsetHeight : 45;
+            const detailContentHeight = detailContainer.scrollHeight || detailContainer.offsetHeight || 0;
+            const naturalDetailCardHeight = detailHeaderHeight + detailContentHeight;
+
+            targetScrollHeight = Math.max(minHeight, naturalDetailCardHeight - listHeaderHeight);
+        }
+
+        scrollContainer.style.height = targetScrollHeight + 'px';
+        scrollContainer.style.maxHeight = targetScrollHeight + 'px';
+        scrollContainer.style.overflowY = 'auto';
+    }
+
+    // Watch for detail content size changes
+    if (window.ResizeObserver) {
+        let isSyncing = false;
+        const resizeObserver = new ResizeObserver(() => {
+            if (isSyncing) return;
+            isSyncing = true;
+            syncPaneHeights();
+            setTimeout(() => { isSyncing = false; }, 50);
+        });
+        const detailContainerEl = document.getElementById('billDetailContainer');
+        if (detailContainerEl) {
+            resizeObserver.observe(detailContainerEl);
+        }
+    }
+
+    window.addEventListener('resize', syncPaneHeights);
+    syncPaneHeights();
+
+    // Attach row click listeners
+    function bindRowClicks(scope) {
+        const rowsToBind = (scope || document).querySelectorAll('.bill-row:not([data-bound])');
+        rowsToBind.forEach(row => {
+            row.setAttribute('data-bound', '1');
+            row.addEventListener('click', function(e) {
+                const id = this.getAttribute('data-id');
+                if (isSplitOn) {
+                    loadBillDetail(id);
+                } else {
+                    window.location.href = '<?= site_url('bills/view/') ?>' + id + '?mode=single';
+                }
+            });
+        });
+    }
+
+    bindRowClicks(tbody);
+
+    // Auto-load first bill on page load
+    const initialRows = document.querySelectorAll('.bill-row');
+    if (initialRows.length > 0) {
+        const firstId = initialRows[0].getAttribute('data-id');
+        loadBillDetail(firstId);
+    } else {
+        container.innerHTML = '<div class="text-center py-5 text-muted">No purchase bills found.</div>';
+    }
+
+    // Infinite scroll handler
+    if (scrollContainer) {
+        scrollContainer.addEventListener('scroll', function() {
+            if (isLoadingMore || !hasMoreRows) return;
+            const distanceToBottom = scrollContainer.scrollHeight - (scrollContainer.scrollTop + scrollContainer.clientHeight);
+            if (distanceToBottom <= 100) {
+                loadMoreBills();
+            }
+        });
+    }
+
+    function loadMoreBills() {
+        if (isLoadingMore || !hasMoreRows) return;
+        isLoadingMore = true;
+        if (spinner) spinner.style.display = 'block';
+
+        const filterForm = document.getElementById('billFilterForm');
+        const params = new URLSearchParams(filterForm ? new FormData(filterForm) : []);
+        params.set('load_more', '1');
+        params.set('offset', currentOffset);
+        params.set('limit', '20');
+
+        fetch('<?= site_url('bills') ?>?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html, */*'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network error: ' + response.status);
+            return response.text();
+        })
+        .then(html => {
+            if (!html || html.trim() === '') {
+                hasMoreRows = false;
+                if (spinner) {
+                    spinner.innerHTML = '<small class="text-muted"><i class="fas fa-check-circle me-1 text-success"></i>All bills loaded.</small>';
+                    spinner.style.display = 'block';
+                }
+            } else {
+                tbody.insertAdjacentHTML('beforeend', html);
+                const newlyAdded = tbody.querySelectorAll('.bill-row:not([data-bound])');
+                currentOffset += newlyAdded.length;
+                if (countBadge) {
+                    countBadge.textContent = document.querySelectorAll('.bill-row').length;
+                }
+                bindRowClicks(tbody);
+                syncPaneHeights();
+
+                if (newlyAdded.length < 20) {
+                    hasMoreRows = false;
+                    if (spinner) {
+                        spinner.innerHTML = '<small class="text-muted"><i class="fas fa-check-circle me-1 text-success"></i>All bills loaded.</small>';
+                        spinner.style.display = 'block';
+                    }
+                } else if (spinner) {
+                    spinner.style.display = 'none';
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Error loading more bills:', err);
+            if (spinner) {
+                spinner.innerHTML = `<small class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Failed to load more (${err.message}). <a href="javascript:void(0)" onclick="loadMoreBills()" class="fw-bold">Retry</a></small>`;
+                spinner.style.display = 'block';
+            }
+        })
+        .finally(() => {
+            isLoadingMore = false;
+        });
+    }
+
+    // Toggle View Mode: Split View (Default) <-> Full View
+    if (splitBtn) {
+        splitBtn.addEventListener('click', function() {
+            isSplitOn = !isSplitOn;
+            if (isSplitOn) {
+                listCol.className = 'col-lg-5 col-xl-5 transition-col';
+                detailCol.style.display = 'block';
+                splitText.textContent = 'Full View';
+                splitIcon.className = 'fas fa-expand me-1';
+                splitBtn.classList.remove('btn-primary');
+                splitBtn.classList.add('btn-outline-primary');
+                if (activeBillId) {
+                    loadBillDetail(activeBillId);
+                } else {
+                    syncPaneHeights();
+                }
+            } else {
+                listCol.className = 'col-12 transition-col';
+                detailCol.style.display = 'none';
+                splitText.textContent = 'Split View';
+                splitIcon.className = 'fas fa-columns me-1';
+                splitBtn.classList.remove('btn-outline-primary');
+                splitBtn.classList.add('btn-primary');
+                syncPaneHeights();
+            }
+        });
+    }
+});
+</script>
 <?= $this->endSection() ?>

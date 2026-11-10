@@ -17,10 +17,13 @@
 <div class="row">
     <div class="col-md-12">
         <div class="card card-outline card-primary shadow-sm mb-4">
-            <div class="card-header bg-white">
-                <h3 class="card-title fw-bold">Return Information</h3>
-                <div class="card-tools">
-                    <span class="badge bg-<?= $return['status'] == 'Open' ? 'info' : ($return['status'] == 'Void' ? 'danger' : 'success') ?> fs-6">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h3 class="card-title fw-bold mb-0">Return Information</h3>
+                <div class="card-tools d-flex gap-2 align-items-center ms-auto">
+                    <a href="<?= site_url('sales_returns') ?>" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark" title="Back to Split Sales Returns View">
+                        <i class="fas fa-columns me-1 text-primary"></i> Split View
+                    </a>
+                    <span class="badge bg-<?= $return['status'] == 'Open' ? 'warning' : ($return['status'] == 'Void' ? 'danger' : 'success') ?> fs-6">
                         <?= esc($return['status']) ?>
                     </span>
                 </div>
@@ -54,7 +57,12 @@
                         <tbody>
                             <?php foreach($items as $item): ?>
                             <tr>
-                                <td><?= esc($item['description']) ?></td>
+                                <td>
+                                    <strong><?= esc(!empty($item['product_name']) ? $item['product_name'] : ($item['description'] ?? '-')) ?></strong>
+                                    <?php if (!empty($item['description']) && !empty($item['product_name']) && $item['description'] !== $item['product_name']): ?>
+                                        <br><small class="text-muted"><?= esc($item['description']) ?></small>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="text-center"><?= number_format($item['quantity'], 2) ?></td>
                                 <td class="text-end">₹<?= number_format($item['rate'], 2) ?></td>
                                 <td class="text-center"><?= number_format($item['tax_percentage'], 2) ?>%</td>

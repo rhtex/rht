@@ -49,9 +49,41 @@ class InvoiceController extends BaseController
             'customer_id'    => $this->request->getGet('customer_id'),
             'status'         => $this->request->getGet('status'),
             'date_from'      => $this->request->getGet('date_from'),
-            'so_number'         => $this->request->getGet('so_number'),
+            'so_number'      => $this->request->getGet('so_number'),
             'date_to'        => $this->request->getGet('date_to'),
+            'limit'          => 100,
         ];
+
+        // Overall Aggregate stats across all invoices (or filtered)
+        $summaryBuilder = $this->invoiceModel->select('COUNT(*) as total_count, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(SUM(paid_amount), 0) as paid_amount, COALESCE(SUM(balance), 0) as balance');
+        if (!empty($filters['customer_id'])) {
+            $summaryBuilder->where('customer_id', $filters['customer_id']);
+        }
+        if (!empty($filters['status'])) {
+            $summaryBuilder->where('status', $filters['status']);
+        }
+        if (!empty($filters['date_from'])) {
+            $summaryBuilder->where('invoice_date >=', $filters['date_from']);
+        }
+        if (!empty($filters['date_to'])) {
+            $summaryBuilder->where('invoice_date <=', $filters['date_to']);
+        }
+        $totals = $summaryBuilder->first();
+
+        // If AJAX request asking for more rows (infinite scroll)
+        if ($this->request->isAJAX() && $this->request->getGet('load_more') == 1) {
+            $offset = max(0, (int) ($this->request->getGet('offset') ?? 0));
+            $limit  = max(1, (int) ($this->request->getGet('limit') ?? 20));
+            $filters['offset'] = $offset;
+            $filters['limit']  = $limit;
+
+            $moreInvoices = $this->invoiceModel->getInvoicesWithCustomer($filters);
+            return view('invoices/list_rows', ['invoices' => $moreInvoices]);
+        }
+
+        // Default initial load: 50 invoices
+        $filters['offset'] = 0;
+        $filters['limit']  = 50;
 
         $data['invoices'] = $this->invoiceModel->getInvoicesWithCustomer($filters);
         $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
@@ -59,18 +91,15 @@ class InvoiceController extends BaseController
         $data['title'] = 'Invoices';
 
         $stats = [
-            'total'        => count($data['invoices']),
-            'total_amount' => 0.0,
-            'paid_amount'  => 0.0,
-            'balance'      => 0.0,
-            'paid_count'   => 0,
-            'open_count'   => 0,
-            'overdue_count'=> 0,
+            'total'         => (int) ($totals['total_count'] ?? count($data['invoices'])),
+            'total_amount'  => (float) ($totals['total_amount'] ?? 0),
+            'paid_amount'   => (float) ($totals['paid_amount'] ?? 0),
+            'balance'       => (float) ($totals['balance'] ?? 0),
+            'paid_count'    => 0,
+            'open_count'    => 0,
+            'overdue_count' => 0,
         ];
         foreach ($data['invoices'] as $inv) {
-            $stats['total_amount'] += (float) ($inv['total_amount'] ?? 0);
-            $stats['paid_amount']  += (float) ($inv['paid_amount'] ?? 0);
-            $stats['balance']      += (float) ($inv['balance'] ?? 0);
             $st = $inv['status'] ?? '';
             if ($st === 'Paid') {
                 $stats['paid_count']++;
@@ -271,7 +300,24 @@ class InvoiceController extends BaseController
     {
         $data['invoice'] = $this->invoiceModel->getInvoiceById($id);
         if (!$data['invoice']) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(404)->setJSON(['error' => 'Invoice not found.']);
+            }
             return redirect()->to('invoices')->with('error', 'Invoice not found.');
+        }
+
+        // Auto-backfill items from Zoho Books if line items are missing but invoice is mapped to Zoho
+        if (empty($data['invoice']['items'])) {
+            try {
+                $invSync = new \App\Services\Zoho\Modules\InvoiceSyncService();
+                $pullRes = $invSync->pullSingleInvoiceFromZoho((int) $id);
+                if (!empty($pullRes['success'])) {
+                    // Reload fresh invoice data including items
+                    $data['invoice'] = $this->invoiceModel->getInvoiceById($id);
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'InvoiceController::view on-demand Zoho sync error: ' . $e->getMessage());
+            }
         }
 
         // Load agent information if agent is assigned
@@ -288,6 +334,15 @@ class InvoiceController extends BaseController
         $data['linked_quotation'] = $quotationModel->where('converted_to_invoice_id', $id)->first();
 
         $data['title'] = 'Invoice #' . $data['invoice']['invoice_number'];
+
+        // AJAX request for side panel view
+        if ($this->request->isAJAX() || $this->request->getGet('ajax') == 1) {
+            return view('invoices/detail_pane', $data);
+        }
+
+        // Check if single standalone view is requested
+        $data['is_single'] = ($this->request->getGet('mode') === 'single');
+
         return view('invoices/view', $data);
     }
 
@@ -628,6 +683,19 @@ class InvoiceController extends BaseController
         $data['invoice'] = $this->invoiceModel->getInvoiceById($id);
         if (!$data['invoice'])
             return 'Invoice not found';
+
+        // Auto-backfill items from Zoho Books if line items are missing but invoice is mapped to Zoho
+        if (empty($data['invoice']['items'])) {
+            try {
+                $invSync = new \App\Services\Zoho\Modules\InvoiceSyncService();
+                $pullRes = $invSync->pullSingleInvoiceFromZoho((int) $id);
+                if (!empty($pullRes['success'])) {
+                    $data['invoice'] = $this->invoiceModel->getInvoiceById($id);
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'InvoiceController::print on-demand Zoho sync error: ' . $e->getMessage());
+            }
+        }
 
         $data['company_name'] = get_setting('app_name', 'RasiDev');
         $data['company_address'] = get_setting('company_address', '');

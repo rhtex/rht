@@ -337,6 +337,7 @@ class VendorPaymentSyncService extends AbstractModuleSyncService
 
         $payload = [
             'vendor_id'        => $zohoVendorId,
+            'payment_number'   => (string) ($payment['payment_number'] ?? ''),
             'payment_mode'     => (string) ($payment['payment_mode'] ?: 'Bank Transfer'),
             'amount'           => $amount,
             'date'             => $payment['payment_date'],

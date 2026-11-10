@@ -42,24 +42,58 @@ class BillController extends BaseController
             'date_to'     => $this->request->getGet('date_to'),
         ];
 
+        // Overall aggregate stats
+        $summaryBuilder = $this->billModel->select('COUNT(*) as total_count, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(SUM(paid_amount), 0) as paid_amount, COALESCE(SUM(balance), 0) as balance');
+        if (!empty($filters['bill_number'])) {
+            $summaryBuilder->groupStart()
+                ->like('bills.bill_number', trim($filters['bill_number']))
+                ->orLike('bills.reference_number', trim($filters['bill_number']))
+                ->groupEnd();
+        }
+        if (!empty($filters['vendor_id'])) {
+            $summaryBuilder->where('vendor_id', $filters['vendor_id']);
+        }
+        if (!empty($filters['status'])) {
+            $summaryBuilder->where('status', $filters['status']);
+        }
+        if (!empty($filters['date_from'])) {
+            $summaryBuilder->where('bill_date >=', $filters['date_from']);
+        }
+        if (!empty($filters['date_to'])) {
+            $summaryBuilder->where('bill_date <=', $filters['date_to']);
+        }
+        $totals = $summaryBuilder->first();
+
+        // If AJAX request asking for more rows (infinite scroll)
+        if ($this->request->isAJAX() && $this->request->getGet('load_more') == 1) {
+            $offset = max(0, (int) ($this->request->getGet('offset') ?? 0));
+            $limit  = max(1, (int) ($this->request->getGet('limit') ?? 20));
+            $filters['offset'] = $offset;
+            $filters['limit']  = $limit;
+
+            $moreBills = $this->billModel->getBillsWithVendor($filters);
+            return view('bills/list_rows', ['bills' => $moreBills]);
+        }
+
+        // Default initial load: 50 bills
+        $filters['offset'] = 0;
+        $filters['limit']  = 50;
+
         $data['bills'] = $this->billModel->getBillsWithVendor($filters);
         $data['vendors'] = $this->vendorModel->findAll();
         $data['filters'] = $filters;
         $data['title'] = 'Purchase Bills';
 
         $stats = [
-            'total'        => count($data['bills']),
-            'total_amount' => 0.0,
-            'paid_amount'  => 0.0,
-            'balance'      => 0.0,
-            'paid_count'   => 0,
-            'open_count'   => 0,
-            'overdue_count'=> 0,
+            'total'         => (int) ($totals['total_count'] ?? count($data['bills'])),
+            'total_amount'  => (float) ($totals['total_amount'] ?? 0),
+            'paid_amount'   => (float) ($totals['paid_amount'] ?? 0),
+            'balance'       => (float) ($totals['balance'] ?? 0),
+            'paid_count'    => 0,
+            'open_count'    => 0,
+            'overdue_count' => 0,
         ];
         foreach ($data['bills'] as $b) {
-            $stats['total_amount'] += (float) ($b['total_amount'] ?? 0);
-            $stats['paid_amount']  += (float) ($b['paid_amount'] ?? 0);
-            $stats['balance']      += (float) ($b['balance'] ?? 0);
             $st = $b['status'] ?? '';
             if ($st === 'Paid') {
                 $stats['paid_count']++;
@@ -221,10 +255,21 @@ class BillController extends BaseController
         $data['bill'] = $this->billModel->getBillById($id);
 
         if (!$data['bill']) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(404)->setJSON(['error' => 'Bill not found.']);
+            }
             return redirect()->to('bills')->with('error', 'Bill not found.');
         }
 
         $data['title'] = 'Bill #' . $data['bill']['bill_number'];
+
+        // AJAX request for side panel view
+        if ($this->request->isAJAX() || $this->request->getGet('ajax') == 1) {
+            return view('bills/detail_pane', $data);
+        }
+
+        $data['is_single'] = ($this->request->getGet('mode') === 'single');
+
         return view('bills/view', $data);
     }
 

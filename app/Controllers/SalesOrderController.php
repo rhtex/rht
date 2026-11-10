@@ -41,20 +41,53 @@ class SalesOrderController extends BaseController
             'date_to'            => $this->request->getGet('date_to'),
         ];
 
+        // Overall Aggregate stats across all matching orders
+        $summaryBuilder = $this->orderModel->select('COUNT(*) as total_count, COALESCE(SUM(total_amount), 0) as total_amount');
+        if (!empty($filters['sales_order_number'])) {
+            $summaryBuilder->like('sales_order_number', trim($filters['sales_order_number']));
+        }
+        if (!empty($filters['customer_id'])) {
+            $summaryBuilder->where('customer_id', $filters['customer_id']);
+        }
+        if (!empty($filters['status'])) {
+            $summaryBuilder->where('status', $filters['status']);
+        }
+        if (!empty($filters['date_from'])) {
+            $summaryBuilder->where('order_date >=', $filters['date_from']);
+        }
+        if (!empty($filters['date_to'])) {
+            $summaryBuilder->where('order_date <=', $filters['date_to']);
+        }
+        $totals = $summaryBuilder->first();
+
+        // If AJAX request asking for more rows (infinite scroll)
+        if ($this->request->isAJAX() && $this->request->getGet('load_more') == 1) {
+            $offset = max(0, (int) ($this->request->getGet('offset') ?? 0));
+            $limit  = max(1, (int) ($this->request->getGet('limit') ?? 20));
+            $filters['offset'] = $offset;
+            $filters['limit']  = $limit;
+
+            $moreOrders = $this->orderModel->getOrdersWithCustomer($filters);
+            return view('sales_orders/list_rows', ['orders' => $moreOrders]);
+        }
+
+        // Default initial load: 50 orders
+        $filters['offset'] = 0;
+        $filters['limit']  = 50;
+
         $data['orders'] = $this->orderModel->getOrdersWithCustomer($filters);
         $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
         $data['filters'] = $filters;
         $data['title'] = 'Sales Orders';
 
         $stats = [
-            'total'           => count($data['orders']),
-            'total_amount'    => 0.0,
+            'total'           => (int) ($totals['total_count'] ?? count($data['orders'])),
+            'total_amount'    => (float) ($totals['total_amount'] ?? 0),
             'confirmed_count' => 0,
             'converted_count' => 0,
             'draft_count'     => 0,
         ];
         foreach ($data['orders'] as $ord) {
-            $stats['total_amount'] += (float) ($ord['total_amount'] ?? 0);
             $st = $ord['status'] ?? '';
             if ($st === 'Confirmed') {
                 $stats['confirmed_count']++;
@@ -196,6 +229,9 @@ class SalesOrderController extends BaseController
     {
         $data['order'] = $this->orderModel->getOrderById($id);
         if (!$data['order']) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(404)->setJSON(['error' => 'Order not found.']);
+            }
             return redirect()->to('sales_orders')->with('error', 'Order not found.');
         }
 
@@ -204,6 +240,14 @@ class SalesOrderController extends BaseController
         }
 
         $data['title'] = 'Sales Order #' . $data['order']['sales_order_number'];
+
+        // AJAX request for side panel view
+        if ($this->request->isAJAX() || $this->request->getGet('ajax') == 1) {
+            return view('sales_orders/detail_pane', $data);
+        }
+
+        $data['is_single'] = ($this->request->getGet('mode') === 'single');
+
         return view('sales_orders/view', $data);
     }
 

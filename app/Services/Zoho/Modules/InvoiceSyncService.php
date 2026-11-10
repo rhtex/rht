@@ -376,10 +376,15 @@ class InvoiceSyncService extends AbstractModuleSyncService
                 $qty      = (float) ($li['quantity'] ?? 1);
                 $rate     = (float) ($li['rate'] ?? 0);
 
+                $desc = trim((string)($li['description'] ?? ''));
+                if ($desc === '') {
+                    $desc = trim((string)($li['name'] ?? ''));
+                }
+
                 $this->itemModel->insert([
                     'invoice_id'     => $localId,
                     'product_id'     => $prodId,
-                    'description'    => $li['description'] ?? ($li['name'] ?? ''),
+                    'description'    => $desc,
                     'hsn_code'       => $li['hsn_or_sac'] ?? null,
                     'quantity'       => $qty,
                     'rate'           => $rate,
@@ -509,6 +514,51 @@ class InvoiceSyncService extends AbstractModuleSyncService
             'total_amount'    => round((float) ($z['total'] ?? 0), 2),
             'items_count'     => isset($z['line_items']) && is_array($z['line_items']) ? count($z['line_items']) : 0,
         ];
+    }
+
+    /**
+     * Pull a single invoice's details and line items directly from Zoho Books.
+     * Guaranteed to populate line items and updated metadata locally.
+     */
+    public function pullSingleInvoiceFromZoho(int $localInvoiceId): array
+    {
+        $mapping = $this->mappingModel->findByLocal('invoices', $localInvoiceId);
+        $zohoId  = !empty($mapping['zoho_record_id']) ? (string) $mapping['zoho_record_id'] : '';
+
+        if ($zohoId === '') {
+            // Check if we can find mapping by invoice number
+            $inv = $this->invoiceModel->find($localInvoiceId);
+            if ($inv && !empty($inv['invoice_number'])) {
+                $byNum = $this->mappingModel->where('module', 'invoices')
+                    ->where('zoho_record_number', trim($inv['invoice_number']))
+                    ->first();
+                if ($byNum && !empty($byNum['zoho_record_id'])) {
+                    $zohoId = (string) $byNum['zoho_record_id'];
+                }
+            }
+        }
+
+        if ($zohoId === '') {
+            return ['success' => false, 'message' => "No Zoho mapping found for local invoice #{$localInvoiceId}."];
+        }
+
+        $detailRes = $this->client->get("/invoices/{$zohoId}", [], [
+            'module'         => 'invoices',
+            'local_record_id'=> $localInvoiceId,
+            'zoho_record_id' => $zohoId,
+            'direction'      => 'FROM_ZOHO',
+            'operation'      => 'GET_SINGLE_INVOICE_DETAIL',
+        ]);
+
+        if (empty($detailRes['success']) || empty($detailRes['data']['invoice'])) {
+            return [
+                'success' => false,
+                'message' => $detailRes['message'] ?? 'Failed to fetch invoice details from Zoho Books.',
+            ];
+        }
+
+        $zohoInv = $detailRes['data']['invoice'];
+        return $this->applyZohoRecordToLocal($zohoInv, true);
     }
 }
 

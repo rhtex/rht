@@ -17,20 +17,23 @@
 
     <!-- Order Header Card -->
     <div class="card card-outline card-primary">
-        <div class="card-header">
-            <h3 class="card-title">Order Information</h3>
-            <div class="card-tools">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0">Order Information</h3>
+            <div class="card-tools d-flex gap-2 align-items-center ms-auto">
+                <a href="<?= site_url('sales_orders') ?>" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark" title="Back to Split Sales Orders View">
+                    <i class="fas fa-columns me-1 text-primary"></i> Split View
+                </a>
                 <?php if (!empty($order['converted_to_invoice_id'])): ?>
                     <a href="<?= site_url('invoices/view/' . $order['converted_to_invoice_id']) ?>" class="btn btn-sm btn-success">
-                        <i class="fas fa-file-invoice"></i> View Invoice <?= !empty($order['converted_invoice_number']) ? '(' . esc($order['converted_invoice_number']) . ')' : '' ?>
+                        <i class="fas fa-file-invoice me-1"></i> View Invoice <?= !empty($order['converted_invoice_number']) ? '(' . esc($order['converted_invoice_number']) . ')' : '' ?>
                     </a>
                 <?php else: ?>
                     <a href="<?= site_url('sales_orders/convert/' . $order['id']) ?>" class="btn btn-sm btn-primary">
-                        <i class="fas fa-file-invoice-dollar"></i> Convert to Invoice
+                        <i class="fas fa-file-invoice-dollar me-1"></i> Convert to Invoice
                     </a>
-                    <a href="<?= site_url('sales_orders/edit/' . $order['id']) ?>" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Edit</a>
+                    <a href="<?= site_url('sales_orders/edit/' . $order['id']) ?>" class="btn btn-sm btn-warning"><i class="fas fa-edit me-1"></i> Edit</a>
                 <?php endif; ?>
-                <a href="<?= site_url('sales_orders/print/' . $order['id']) ?>" target="_blank" class="btn btn-sm btn-info"><i class="fas fa-print"></i> Print</a>
+                <a href="<?= site_url('sales_orders/print/' . $order['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white"><i class="fas fa-print me-1"></i> Print</a>
             </div>
         </div>
         <div class="card-body">
@@ -142,8 +145,13 @@
                     <?php foreach ($order['items'] as $index => $item): ?>
                         <tr>
                             <td><?= $index + 1 ?></td>
-                            <td><?= esc($item['description']) ?></td>
-                            <td><?= esc($item['hsn_code']) ?: '-' ?></td>
+                            <td>
+                                <strong><?= esc(!empty($item['product_name']) ? $item['product_name'] : ($item['description'] ?? '-')) ?></strong>
+                                <?php if (!empty($item['description']) && !empty($item['product_name']) && $item['description'] !== $item['product_name']): ?>
+                                    <br><small class="text-muted"><?= esc($item['description']) ?></small>
+                                <?php endif; ?>
+                            </td>
+                            <td><?= esc(!empty($item['hsn_code']) ? $item['hsn_code'] : ($item['product_hsn'] ?? '-')) ?></td>
                             <td><?= $item['quantity'] + 0 ?></td>
                             <td>₹<?= number_format($item['rate'], 2) ?></td>
                             <td><?= $item['tax_percentage'] + 0 ?>%</td>

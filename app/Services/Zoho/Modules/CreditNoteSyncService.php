@@ -301,6 +301,11 @@ class CreditNoteSyncService extends AbstractModuleSyncService
                 if ($invMap) {
                     $localInvoiceId = (int) $invMap['local_record_id'];
                 }
+            } elseif (!empty($zohoCn['invoices_credited'][0]['invoice_id'])) {
+                $invMap = $this->mappingModel->findByZoho('invoices', (string) $zohoCn['invoices_credited'][0]['invoice_id']);
+                if ($invMap) {
+                    $localInvoiceId = (int) $invMap['local_record_id'];
+                }
             }
 
             $returnData = [

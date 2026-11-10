@@ -27,37 +27,48 @@
 <?= $this->section('content') ?>
 <!-- Summary Stat Cards -->
 <div class="row g-3 mb-3">
+    <!-- Total Outstanding Receivables (current and Due) -->
     <div class="col-xl-3 col-sm-6">
-        <a href="<?= site_url('invoices') ?>" class="bt-stat bt-g-blue text-decoration-none <?= empty($filters['status']) ? 'active' : '' ?>">
-            <i class="fas fa-file-invoice bt-stat-icon"></i>
-            <div class="bt-stat-num"><?= number_format($stats['total'] ?? count($invoices)) ?></div>
-            <div class="bt-stat-label">Total Invoices</div>
+        <a href="<?= site_url('invoices?status=Open') ?>" class="bt-stat bt-g-blue text-decoration-none <?= in_array($filters['status'] ?? '', ['Open', 'Overdue', 'Partially Paid']) ? 'active' : '' ?>">
+            <i class="fas fa-hand-holding-usd bt-stat-icon"></i>
+            <div class="bt-stat-num">₹<?= number_format($stats['total_receivables'] ?? 0, 2) ?></div>
+            <div class="bt-stat-label">Total Outstanding Receivables</div>
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </a>
     </div>
+
+    <!-- Overdue Invoice Amount -->
+    <div class="col-xl-3 col-sm-6">
+        <a href="<?= site_url('invoices?status=Overdue') ?>" class="bt-stat bt-g-red text-decoration-none <?= ($filters['status'] ?? '') === 'Overdue' ? 'active' : '' ?>">
+            <i class="fas fa-exclamation-triangle bt-stat-icon"></i>
+            <div class="bt-stat-num">₹<?= number_format($stats['overdue_amount'] ?? 0, 2) ?></div>
+            <div class="bt-stat-label">Overdue Invoice Amount (<?= $stats['overdue_count'] ?? 0 ?>)</div>
+            <div class="progress">
+                <div class="progress-bar" style="width:<?= (!empty($stats['total_receivables']) && $stats['total_receivables'] > 0) ? min(100, round(($stats['overdue_amount'] / $stats['total_receivables']) * 100)) : 0 ?>%"></div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Current Invoice Amount -->
+    <div class="col-xl-3 col-sm-6">
+        <a href="<?= site_url('invoices?status=Open') ?>" class="bt-stat bt-g-green text-decoration-none">
+            <i class="fas fa-calendar-check bt-stat-icon"></i>
+            <div class="bt-stat-num">₹<?= number_format($stats['current_amount'] ?? 0, 2) ?></div>
+            <div class="bt-stat-label">Current Invoice Amount (<?= $stats['current_count'] ?? 0 ?>)</div>
+            <div class="progress">
+                <div class="progress-bar" style="width:<?= (!empty($stats['total_receivables']) && $stats['total_receivables'] > 0) ? min(100, round(($stats['current_amount'] / $stats['total_receivables']) * 100)) : 0 ?>%"></div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Average No. of Days for Getting Paid -->
     <div class="col-xl-3 col-sm-6">
         <div class="bt-stat bt-g-purple" style="cursor:default;">
-            <i class="fas fa-coins bt-stat-icon"></i>
-            <div class="bt-stat-num">₹<?= number_format($stats['total_amount'] ?? 0, 2) ?></div>
-            <div class="bt-stat-label">Total Invoiced</div>
+            <i class="fas fa-stopwatch bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= (int) ($stats['avg_days_to_pay'] ?? 0) ?> <span style="font-size: 0.72rem; font-weight: normal;">Days</span></div>
+            <div class="bt-stat-label">Avg. Days for Getting Paid</div>
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
-    </div>
-    <div class="col-xl-3 col-sm-6">
-        <a href="<?= site_url('invoices?status=Paid') ?>" class="bt-stat bt-g-green text-decoration-none <?= ($filters['status'] ?? '') === 'Paid' ? 'active' : '' ?>">
-            <i class="fas fa-check-circle bt-stat-icon"></i>
-            <div class="bt-stat-num">₹<?= number_format($stats['paid_amount'] ?? 0, 2) ?></div>
-            <div class="bt-stat-label">Paid (<?= $stats['paid_count'] ?? 0 ?> Invoices)</div>
-            <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total_amount']) && $stats['total_amount'] > 0) ? min(100, round(($stats['paid_amount'] / $stats['total_amount']) * 100)) : 0 ?>%"></div></div>
-        </a>
-    </div>
-    <div class="col-xl-3 col-sm-6">
-        <a href="<?= site_url('invoices?status=Open') ?>" class="bt-stat bt-g-amber text-decoration-none <?= in_array($filters['status'] ?? '', ['Open', 'Overdue', 'Partially Paid']) ? 'active' : '' ?>">
-            <i class="fas fa-clock bt-stat-icon"></i>
-            <div class="bt-stat-num">₹<?= number_format($stats['balance'] ?? 0, 2) ?></div>
-            <div class="bt-stat-label">Outstanding Balance</div>
-            <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total_amount']) && $stats['total_amount'] > 0) ? min(100, round(($stats['balance'] / $stats['total_amount']) * 100)) : 0 ?>%"></div></div>
-        </a>
     </div>
 </div>
 

@@ -447,72 +447,83 @@ code {
     color: #fff !important;
 }
 
-/* Stat cards */
+/* Stat cards (Clean neutral styling with subtle borders & soft hover) */
 .bt-stat {
     position: relative;
     overflow: hidden;
-    border: 0;
-    border-radius: 14px;
-    color: #fff !important;
-    padding: 16px 18px 14px;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px;
+    background: #ffffff !important;
+    color: #1e293b !important;
+    padding: 7px 12px 7px;
     height: 100%;
     cursor: pointer;
     text-decoration: none !important;
     display: block;
-    transition: transform .18s ease, box-shadow .18s ease;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .04);
 }
 .bt-stat:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 26px rgba(0, 0, 0, .15);
-    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
 }
 .bt-stat.active {
-    outline: 3px solid rgba(255, 255, 255, .9);
-    outline-offset: -6px;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 1px #3b82f6, 0 4px 10px rgba(59, 130, 246, .12);
+    outline: none !important;
 }
 .bt-stat .bt-stat-icon {
     position: absolute;
-    right: 14px;
-    top: 12px;
-    font-size: 40px;
-    opacity: .22;
+    right: 10px;
+    top: 8px;
+    font-size: 20px;
+    color: #94a3b8 !important;
+    opacity: .35;
     pointer-events: none;
 }
 .bt-stat .bt-stat-num {
-    font-size: 1.85rem;
-    font-weight: 800;
+    font-size: 0.90rem;
+    font-weight: 700;
     line-height: 1.1;
     margin-bottom: 2px;
+    color: #0f172a !important;
 }
 .bt-stat .bt-stat-label {
-    font-size: .78rem;
+    font-size: .56rem;
     text-transform: uppercase;
-    letter-spacing: .5px;
+    letter-spacing: .35px;
     font-weight: 700;
-    opacity: .95;
+    color: #64748b !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .bt-stat .progress {
-    height: 4px;
-    background: rgba(255, 255, 255, .25);
-    margin-top: 8px;
-    border-radius: 4px;
+    height: 2px;
+    background: #e2e8f0;
+    margin-top: 5px;
+    border-radius: 2px;
 }
-.bt-stat .progress-bar { background: #fff; }
+.bt-stat .progress-bar { background: #64748b; }
 
-/* Vibrant Gradient Presets */
-.bt-g-blue   { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
-.bt-g-indigo { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
-.bt-g-slate  { background: linear-gradient(135deg, #64748b, #94a3b8); }
-.bt-g-green  { background: linear-gradient(135deg, #10b981, #059669); }
-.bt-g-emerald{ background: linear-gradient(135deg, #059669, #10b981); }
-.bt-g-red    { background: linear-gradient(135deg, #ef4444, #f97316); }
-.bt-g-rose   { background: linear-gradient(135deg, #e11d48, #fb7185); }
-.bt-g-amber  { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
-.bt-g-purple { background: linear-gradient(135deg, #8b5cf6, #d946ef); }
-.bt-g-teal   { background: linear-gradient(135deg, #14b8a6, #22d3ee); }
-.bt-g-cyan   { background: linear-gradient(135deg, #06b6d4, #3b82f6); }
-.bt-g-dark   { background: linear-gradient(135deg, #1e293b, #334155); }
+/* Vibrant Gradient Presets - Neutralized for clean, border-defined look */
+.bt-g-blue,
+.bt-g-indigo,
+.bt-g-slate,
+.bt-g-green,
+.bt-g-emerald,
+.bt-g-red,
+.bt-g-rose,
+.bt-g-amber,
+.bt-g-purple,
+.bt-g-teal,
+.bt-g-cyan,
+.bt-g-dark {
+    background: #ffffff !important;
+    color: #1e293b !important;
+}
 
 /* Main polished card wrapper */
 .bt-card {

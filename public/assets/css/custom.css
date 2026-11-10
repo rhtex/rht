@@ -329,6 +329,31 @@ h4,
     color: #cbd5e1 !important;
 }
 
+/* Light / White Card Headers: Allow clean crisp light styling with dark text */
+.card-header.bg-white,
+.card-header.bg-light {
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.card-header.bg-light {
+    background: #f8fafc !important;
+}
+
+.card-header.bg-white .card-title,
+.card-header.bg-light .card-title,
+.card-header.bg-white h1, .card-header.bg-white h2, .card-header.bg-white h3,
+.card-header.bg-white h4, .card-header.bg-white h5, .card-header.bg-white h6,
+.card-header.bg-light h1, .card-header.bg-light h2, .card-header.bg-light h3,
+.card-header.bg-light h4, .card-header.bg-light h5, .card-header.bg-light h6 {
+    color: #1e293b !important;
+}
+
+.card-header.bg-white .text-muted,
+.card-header.bg-light .text-muted {
+    color: #64748b !important;
+}
+
 /* Delete Button styling for Received Receipts card */
 .btn-outline-danger.btn-danger-bg {
     background-color: #dc3545 !important;

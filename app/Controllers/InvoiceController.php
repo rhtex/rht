@@ -55,7 +55,17 @@ class InvoiceController extends BaseController
         ];
 
         // Overall Aggregate stats across all invoices (or filtered)
-        $summaryBuilder = $this->invoiceModel->select('COUNT(*) as total_count, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(SUM(paid_amount), 0) as paid_amount, COALESCE(SUM(balance), 0) as balance');
+        $summaryBuilder = $this->invoiceModel->select('
+            COUNT(*) as total_count,
+            COALESCE(SUM(total_amount), 0) as total_amount,
+            COALESCE(SUM(paid_amount), 0) as paid_amount,
+            COALESCE(SUM(balance), 0) as total_receivables,
+            COALESCE(SUM(CASE WHEN due_date < CURDATE() AND balance > 0 THEN balance ELSE 0 END), 0) as overdue_amount,
+            COALESCE(SUM(CASE WHEN due_date >= CURDATE() AND balance > 0 THEN balance ELSE 0 END), 0) as current_amount,
+            COUNT(CASE WHEN due_date < CURDATE() AND balance > 0 THEN 1 END) as overdue_count,
+            COUNT(CASE WHEN due_date >= CURDATE() AND balance > 0 THEN 1 END) as current_count
+        ')->where('status !=', 'Void');
+
         if (!empty($filters['customer_id'])) {
             $summaryBuilder->where('customer_id', $filters['customer_id']);
         }
@@ -69,6 +79,25 @@ class InvoiceController extends BaseController
             $summaryBuilder->where('invoice_date <=', $filters['date_to']);
         }
         $totals = $summaryBuilder->first();
+
+        // Calculate Average No. of Days for Getting Paid
+        $db = \Config\Database::connect();
+        $avgDaysQuery = $db->table('invoice_payments p')
+            ->select('ROUND(AVG(DATEDIFF(p.payment_date, i.invoice_date))) as avg_days')
+            ->join('invoices i', 'i.id = p.invoice_id')
+            ->where('p.payment_date >=', 'i.invoice_date', false)
+            ->where('i.status !=', 'Void');
+        if (!empty($filters['customer_id'])) {
+            $avgDaysQuery->where('i.customer_id', $filters['customer_id']);
+        }
+        if (!empty($filters['date_from'])) {
+            $avgDaysQuery->where('p.payment_date >=', $filters['date_from']);
+        }
+        if (!empty($filters['date_to'])) {
+            $avgDaysQuery->where('p.payment_date <=', $filters['date_to']);
+        }
+        $avgDaysRow = $avgDaysQuery->get()->getRowArray();
+        $avgDaysToPay = !empty($avgDaysRow['avg_days']) ? (int) $avgDaysRow['avg_days'] : 0;
 
         // If AJAX request asking for more rows (infinite scroll)
         if ($this->request->isAJAX() && $this->request->getGet('load_more') == 1) {
@@ -91,24 +120,17 @@ class InvoiceController extends BaseController
         $data['title'] = 'Invoices';
 
         $stats = [
-            'total'         => (int) ($totals['total_count'] ?? count($data['invoices'])),
-            'total_amount'  => (float) ($totals['total_amount'] ?? 0),
-            'paid_amount'   => (float) ($totals['paid_amount'] ?? 0),
-            'balance'       => (float) ($totals['balance'] ?? 0),
-            'paid_count'    => 0,
-            'open_count'    => 0,
-            'overdue_count' => 0,
+            'total_receivables' => (float) ($totals['total_receivables'] ?? 0),
+            'overdue_amount'    => (float) ($totals['overdue_amount'] ?? 0),
+            'current_amount'    => (float) ($totals['current_amount'] ?? 0),
+            'avg_days_to_pay'   => $avgDaysToPay,
+            'overdue_count'     => (int) ($totals['overdue_count'] ?? 0),
+            'current_count'     => (int) ($totals['current_count'] ?? 0),
+            'total'             => (int) ($totals['total_count'] ?? count($data['invoices'])),
+            'total_amount'      => (float) ($totals['total_amount'] ?? 0),
+            'paid_amount'       => (float) ($totals['paid_amount'] ?? 0),
+            'balance'           => (float) ($totals['total_receivables'] ?? 0),
         ];
-        foreach ($data['invoices'] as $inv) {
-            $st = $inv['status'] ?? '';
-            if ($st === 'Paid') {
-                $stats['paid_count']++;
-            } elseif ($st === 'Overdue') {
-                $stats['overdue_count']++;
-            } elseif ($st === 'Open' || $st === 'Partially Paid') {
-                $stats['open_count']++;
-            }
-        }
         $data['stats'] = $stats;
 
         return view('invoices/index', $data);

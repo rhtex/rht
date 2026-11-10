@@ -762,4 +762,16 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
         $routes->get('reconciliation', 'ZohoSyncController::reconciliation');
         $routes->get('logs', 'ZohoSyncController::logs');
     });
+
+    // Database Backup Routes
+    $routes->group('settings/backup', ['filter' => 'permission:setting.view'], function ($routes) {
+        $routes->get('', 'BackupController::index');
+        $routes->post('create', 'BackupController::create', ['filter' => 'permission:setting.edit']);
+        $routes->get('download/(:segment)', 'BackupController::download/$1');
+        $routes->post('restore/(:segment)', 'BackupController::restore/$1', ['filter' => 'permission:setting.edit']);
+        $routes->post('email/(:segment)', 'BackupController::email/$1', ['filter' => 'permission:setting.edit']);
+        $routes->post('gdrive/(:segment)', 'BackupController::gdrive/$1', ['filter' => 'permission:setting.edit']);
+        $routes->post('delete/(:segment)', 'BackupController::delete/$1', ['filter' => 'permission:setting.edit']);
+        $routes->post('config', 'BackupController::updateConfig', ['filter' => 'permission:setting.edit']);
+    });
 });

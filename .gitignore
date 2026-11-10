@@ -124,3 +124,9 @@ _modules/*
 
 /results/
 /phpunit*.xml
+
+# Database Backups
+backup/*.sql
+backup/*.zip
+backup/*.gz
+!backup/.gitkeep

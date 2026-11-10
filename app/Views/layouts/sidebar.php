@@ -644,6 +644,15 @@
                                     </ul>
                                 </li>
                                 <?php endif; ?>
+
+                                <?php if(in_array('setting.view', session('permissions') ?? []) || session('role') === 'admin'): ?>
+                                <li class="nav-item">
+                                    <a href="<?= site_url('settings/backup') ?>" class="nav-link <?= ($segment1 === 'settings' && $segment2 === 'backup') ? 'active' : '' ?>">
+                                        <i class="fas fa-database nav-icon text-warning"></i>
+                                        <p>Database Backup</p>
+                                    </a>
+                                </li>
+                                <?php endif; ?>
                             </ul>
                         </li>
                         <?php endif; ?>

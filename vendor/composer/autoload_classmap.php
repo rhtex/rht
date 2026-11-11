@@ -6,13 +6,16 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Commands\\BackfillInvoiceItems' => $baseDir . '/app/Commands/BackfillInvoiceItems.php',
     'App\\Commands\\CheckPermissions' => $baseDir . '/app/Commands/CheckPermissions.php',
+    'App\\Commands\\DatabaseBackupCommand' => $baseDir . '/app/Commands/DatabaseBackupCommand.php',
     'App\\Commands\\ZohoSyncCommand' => $baseDir . '/app/Commands/ZohoSyncCommand.php',
     'App\\Controllers\\AgentController' => $baseDir . '/app/Controllers/AgentController.php',
     'App\\Controllers\\AgentPaymentController' => $baseDir . '/app/Controllers/AgentPaymentController.php',
     'App\\Controllers\\ApiController' => $baseDir . '/app/Controllers/ApiController.php',
     'App\\Controllers\\AttendanceController' => $baseDir . '/app/Controllers/AttendanceController.php',
     'App\\Controllers\\AuthController' => $baseDir . '/app/Controllers/AuthController.php',
+    'App\\Controllers\\BackupController' => $baseDir . '/app/Controllers/BackupController.php',
     'App\\Controllers\\BankAccountController' => $baseDir . '/app/Controllers/BankAccountController.php',
     'App\\Controllers\\BankTransactionController' => $baseDir . '/app/Controllers/BankTransactionController.php',
     'App\\Controllers\\BaseController' => $baseDir . '/app/Controllers/BaseController.php',
@@ -179,6 +182,7 @@ return array(
     'App\\Models\\Zoho\\ZohoSyncQueueModel' => $baseDir . '/app/Models/Zoho/ZohoSyncQueueModel.php',
     'App\\Services\\AuthService' => $baseDir . '/app/Services/AuthService.php',
     'App\\Services\\BulkUploadService' => $baseDir . '/app/Services/BulkUploadService.php',
+    'App\\Services\\DatabaseBackupService' => $baseDir . '/app/Services/DatabaseBackupService.php',
     'App\\Services\\ImageUploadService' => $baseDir . '/app/Services/ImageUploadService.php',
     'App\\Services\\Zoho\\Modules\\AbstractModuleSyncService' => $baseDir . '/app/Services/Zoho/Modules/AbstractModuleSyncService.php',
     'App\\Services\\Zoho\\Modules\\BillSyncService' => $baseDir . '/app/Services/Zoho/Modules/BillSyncService.php',

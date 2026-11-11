@@ -246,13 +246,16 @@ class ComposerStaticInit657ac079313fab046eb8c29fe1d6992b
     );
 
     public static $classMap = array (
+        'App\\Commands\\BackfillInvoiceItems' => __DIR__ . '/../..' . '/app/Commands/BackfillInvoiceItems.php',
         'App\\Commands\\CheckPermissions' => __DIR__ . '/../..' . '/app/Commands/CheckPermissions.php',
+        'App\\Commands\\DatabaseBackupCommand' => __DIR__ . '/../..' . '/app/Commands/DatabaseBackupCommand.php',
         'App\\Commands\\ZohoSyncCommand' => __DIR__ . '/../..' . '/app/Commands/ZohoSyncCommand.php',
         'App\\Controllers\\AgentController' => __DIR__ . '/../..' . '/app/Controllers/AgentController.php',
         'App\\Controllers\\AgentPaymentController' => __DIR__ . '/../..' . '/app/Controllers/AgentPaymentController.php',
         'App\\Controllers\\ApiController' => __DIR__ . '/../..' . '/app/Controllers/ApiController.php',
         'App\\Controllers\\AttendanceController' => __DIR__ . '/../..' . '/app/Controllers/AttendanceController.php',
         'App\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Controllers/AuthController.php',
+        'App\\Controllers\\BackupController' => __DIR__ . '/../..' . '/app/Controllers/BackupController.php',
         'App\\Controllers\\BankAccountController' => __DIR__ . '/../..' . '/app/Controllers/BankAccountController.php',
         'App\\Controllers\\BankTransactionController' => __DIR__ . '/../..' . '/app/Controllers/BankTransactionController.php',
         'App\\Controllers\\BaseController' => __DIR__ . '/../..' . '/app/Controllers/BaseController.php',
@@ -419,6 +422,7 @@ class ComposerStaticInit657ac079313fab046eb8c29fe1d6992b
         'App\\Models\\Zoho\\ZohoSyncQueueModel' => __DIR__ . '/../..' . '/app/Models/Zoho/ZohoSyncQueueModel.php',
         'App\\Services\\AuthService' => __DIR__ . '/../..' . '/app/Services/AuthService.php',
         'App\\Services\\BulkUploadService' => __DIR__ . '/../..' . '/app/Services/BulkUploadService.php',
+        'App\\Services\\DatabaseBackupService' => __DIR__ . '/../..' . '/app/Services/DatabaseBackupService.php',
         'App\\Services\\ImageUploadService' => __DIR__ . '/../..' . '/app/Services/ImageUploadService.php',
         'App\\Services\\Zoho\\Modules\\AbstractModuleSyncService' => __DIR__ . '/../..' . '/app/Services/Zoho/Modules/AbstractModuleSyncService.php',
         'App\\Services\\Zoho\\Modules\\BillSyncService' => __DIR__ . '/../..' . '/app/Services/Zoho/Modules/BillSyncService.php',

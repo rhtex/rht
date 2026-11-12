@@ -142,10 +142,29 @@ class DatabaseBackupService
     }
 
     /**
+     * Check if shell execution functions (exec, proc_open, etc.) are available on the server
+     */
+    protected function isExecAvailable(): bool
+    {
+        if (!function_exists('exec')) {
+            return false;
+        }
+
+        $disabled = explode(',', (string) ini_get('disable_functions'));
+        $disabled = array_map('trim', array_map('strtolower', $disabled));
+
+        return !in_array('exec', $disabled, true);
+    }
+
+    /**
      * Dump database using mysqldump binary
      */
     protected function dumpViaMysqldump(string $targetFile, array &$stats): bool
     {
+        if (!$this->isExecAvailable()) {
+            return false;
+        }
+
         $dbConfig = config('Database');
         $default  = $dbConfig->default;
 
@@ -562,49 +581,54 @@ class DatabaseBackupService
 
         $log("Connecting to target database `{$database}`...", 45);
 
-        // Try native mysql CLI first
-        $candidates = [
-            'd:\\xampp\\mysql\\bin\\mysql.exe',
-            'c:\\xampp\\mysql\\bin\\mysql.exe',
-            '/usr/bin/mysql',
-            '/usr/local/bin/mysql',
-            'mysql',
-        ];
+        // Check if native CLI execution is permitted on this hosting/server (e.g. cPanel often disables exec)
+        $canExec = $this->isExecAvailable();
 
-        $mysqlBinary = null;
-        foreach ($candidates as $cand) {
-            if (file_exists($cand) || (PHP_OS_FAMILY !== 'Windows' && @is_executable($cand))) {
-                $mysqlBinary = $cand;
-                break;
+        if ($canExec) {
+            // Try native mysql CLI first
+            $candidates = [
+                'd:\\xampp\\mysql\\bin\\mysql.exe',
+                'c:\\xampp\\mysql\\bin\\mysql.exe',
+                '/usr/bin/mysql',
+                '/usr/local/bin/mysql',
+                'mysql',
+            ];
+
+            $mysqlBinary = null;
+            foreach ($candidates as $cand) {
+                if (file_exists($cand) || (PHP_OS_FAMILY !== 'Windows' && @is_executable($cand))) {
+                    $mysqlBinary = $cand;
+                    break;
+                }
             }
+
+            if ($mysqlBinary) {
+                $log("Executing high-speed MySQL restore engine...", 55);
+                $passArg = !empty($pass) ? '--password=' . escapeshellarg($pass) : '';
+                $cmd = sprintf(
+                    '%s --user=%s %s --host=%s --port=%s %s < %s 2>&1',
+                    escapeshellarg($mysqlBinary),
+                    escapeshellarg($user),
+                    $passArg,
+                    escapeshellarg($host),
+                    escapeshellarg((string) $port),
+                    escapeshellarg($database),
+                    escapeshellarg($sqlFilePath)
+                );
+                @exec($cmd, $output, $returnVar);
+                if ($returnVar === 0) {
+                    $restoreSuccess = true;
+                    $log("All database tables, routines, and data imported successfully via MySQL CLI.", 85);
+                } else {
+                    $cliErr = !empty($output) ? implode(' ', array_slice($output, 0, 3)) : "exit code {$returnVar}";
+                    $log("Native CLI notice: {$cliErr}. Switching to PHP transaction runner...", 60);
+                }
+            }
+        } else {
+            $log("Shell execution disabled by hosting environment (cPanel). Using pure PHP SQL restore engine...", 55);
         }
 
-        $restoreSuccess = false;
-
-        if ($mysqlBinary) {
-            $log("Executing high-speed MySQL restore engine...", 55);
-            $passArg = !empty($pass) ? '--password=' . escapeshellarg($pass) : '';
-            $cmd = sprintf(
-                '%s --user=%s %s --host=%s --port=%s %s < %s 2>&1',
-                escapeshellarg($mysqlBinary),
-                escapeshellarg($user),
-                $passArg,
-                escapeshellarg($host),
-                escapeshellarg((string) $port),
-                escapeshellarg($database),
-                escapeshellarg($sqlFilePath)
-            );
-            @exec($cmd, $output, $returnVar);
-            if ($returnVar === 0) {
-                $restoreSuccess = true;
-                $log("All database tables, routines, and data imported successfully via MySQL CLI.", 85);
-            } else {
-                $cliErr = !empty($output) ? implode(' ', array_slice($output, 0, 3)) : "exit code {$returnVar}";
-                $log("Native CLI notice: {$cliErr}. Switching to PHP transaction runner...", 60);
-            }
-        }
-
-        // Fallback: Line-by-line PHP SQL execution if mysql CLI failed
+        // Fallback: Line-by-line PHP SQL execution if mysql CLI failed or exec() disabled
         if (!$restoreSuccess) {
             $handle = @fopen($sqlFilePath, 'r');
             if (!$handle) {

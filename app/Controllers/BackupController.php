@@ -38,12 +38,13 @@ class BackupController extends BaseController
             }
         }
 
-        // 2. Fetch all physical .sql files in backup/ folder (including external uploads/untracked files)
+        // 2. Fetch all physical .sql and .zip files in backup/ folder
         $scannedFiles = [];
         if (is_dir($backupDir)) {
             $files = scandir($backupDir);
             foreach ($files as $f) {
-                if ($f !== '.' && $f !== '..' && str_ends_with(strtolower($f), '.sql')) {
+                $lower = strtolower($f);
+                if ($f !== '.' && $f !== '..' && (str_ends_with($lower, '.sql') || str_ends_with($lower, '.zip'))) {
                     $scannedFiles[$f] = [
                         'filename'  => $f,
                         'file_size' => filesize($backupDir . $f),
@@ -165,7 +166,7 @@ class BackupController extends BaseController
     }
 
     /**
-     * Restore Database from an uploaded SQL backup file
+     * Restore Database from an uploaded SQL or ZIP backup file
      */
     public function uploadAndRestore()
     {
@@ -174,13 +175,13 @@ class BackupController extends BaseController
 
         $file = $this->request->getFile('backup_file');
         if (!$file || !$file->isValid()) {
-            return redirect()->to('settings/backup')->with('error', 'Please select a valid SQL backup file to upload.');
+            return redirect()->to('settings/backup')->with('error', 'Please select a valid backup file (.zip or .sql) to upload.');
         }
 
         $clientName = $file->getClientName();
         $ext = strtolower($file->getClientExtension());
-        if ($ext !== 'sql') {
-            return redirect()->to('settings/backup')->with('error', 'Invalid file type. Only .sql files are allowed.');
+        if ($ext !== 'sql' && $ext !== 'zip') {
+            return redirect()->to('settings/backup')->with('error', 'Invalid file type. Only compressed .zip or .sql files are allowed.');
         }
 
         $backupDir = $this->backupService->getBackupDir();
@@ -191,7 +192,7 @@ class BackupController extends BaseController
             $file->move($backupDir, $safeName);
             $targetPath = $backupDir . $safeName;
 
-            // Perform restore
+            // Perform restore (DatabaseBackupService will auto-detect .zip, extract .sql and restore)
             $res = $this->backupService->restoreBackup($targetPath);
             if ($res['success']) {
                 // Log in db_backups table
@@ -216,7 +217,7 @@ class BackupController extends BaseController
                     'created_at'    => date('Y-m-d H:i:s'),
                 ]);
 
-                return redirect()->to('settings/backup')->with('success', "Database successfully restored from uploaded file `{$clientName}`!");
+                return redirect()->to('settings/backup')->with('success', "Database successfully restored from `{$clientName}`!");
             }
 
             return redirect()->to('settings/backup')->with('error', "Restore failed: " . ($res['error'] ?? 'Unknown error'));

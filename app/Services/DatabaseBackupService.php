@@ -59,12 +59,33 @@ class DatabaseBackupService
             $this->dumpViaPhp($filePath, $stats);
         }
 
-        $fileSize = file_exists($filePath) ? filesize($filePath) : 0;
+        // 3. Compress into .zip archive if ZipArchive extension is available
+        $zipFilename = preg_replace('/\.sql$/i', '.zip', $filename);
+        $zipFilePath = $this->backupDir . $zipFilename;
+        $finalFilename = $filename;
+        $finalFilePath = $filePath;
+
+        if (class_exists('ZipArchive') && file_exists($filePath) && filesize($filePath) > 0) {
+            $zip = new \ZipArchive();
+            if ($zip->open($zipFilePath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+                $zip->addFile($filePath, $filename);
+                $zip->close();
+
+                // If zip created successfully and is smaller, remove raw .sql and keep .zip
+                if (file_exists($zipFilePath) && filesize($zipFilePath) > 0) {
+                    @unlink($filePath);
+                    $finalFilename = $zipFilename;
+                    $finalFilePath = $zipFilePath;
+                }
+            }
+        }
+
+        $fileSize = file_exists($finalFilePath) ? filesize($finalFilePath) : 0;
 
         // Record in db_backups table
         $backupId = $this->db->table('db_backups')->insert([
-            'filename'      => $filename,
-            'file_path'     => 'backup/' . $filename,
+            'filename'      => $finalFilename,
+            'file_path'     => 'backup/' . $finalFilename,
             'file_size'     => $fileSize,
             'source'        => $source,
             'tables_count'  => $stats['tables'],
@@ -76,14 +97,14 @@ class DatabaseBackupService
         ]);
 
         if (!$backupId) {
-            $backupRow = $this->db->table('db_backups')->where('filename', $filename)->get()->getRowArray();
+            $backupRow = $this->db->table('db_backups')->where('filename', $finalFilename)->get()->getRowArray();
             $backupId = $backupRow['id'] ?? null;
         }
 
         // Handle Automatic Email Dispatch
         $emailResult = null;
         if (get_setting('backup_email_enabled') === '1') {
-            $emailResult = $this->sendBackupByEmail($filePath, $filename);
+            $emailResult = $this->sendBackupByEmail($finalFilePath, $finalFilename);
             $this->db->table('db_backups')->where('id', $backupId)->update([
                 'email_status' => $emailResult['success'] ? 'sent' : 'failed',
                 'email_error'  => $emailResult['success'] ? null : ($emailResult['error'] ?? 'Unknown email error'),
@@ -93,7 +114,7 @@ class DatabaseBackupService
         // Handle Automatic Google Drive Upload
         $gdriveResult = null;
         if (get_setting('backup_gdrive_enabled') === '1') {
-            $gdriveResult = $this->uploadToGoogleDrive($filePath, $filename);
+            $gdriveResult = $this->uploadToGoogleDrive($finalFilePath, $finalFilename);
             $this->db->table('db_backups')->where('id', $backupId)->update([
                 'gdrive_status'  => $gdriveResult['success'] ? 'uploaded' : 'failed',
                 'gdrive_file_id' => $gdriveResult['file_id'] ?? null,
@@ -110,8 +131,8 @@ class DatabaseBackupService
         return [
             'success'       => true,
             'id'            => $backupId,
-            'filename'      => $filename,
-            'file_path'     => $filePath,
+            'filename'      => $finalFilename,
+            'file_path'     => $finalFilePath,
             'file_size'     => $fileSize,
             'tables_count'  => $stats['tables'],
             'rows_count'    => $stats['rows'],
@@ -463,7 +484,7 @@ class DatabaseBackupService
     }
 
     /**
-     * Restore database from a given SQL backup file
+     * Restore database from a given SQL or ZIP backup file
      */
     public function restoreBackup(string $filePath): array
     {
@@ -472,6 +493,48 @@ class DatabaseBackupService
 
         if (!file_exists($filePath)) {
             return ['success' => false, 'error' => 'Backup file does not exist.'];
+        }
+
+        $tempExtractedSql = null;
+        $sqlFilePath = $filePath;
+
+        // If file is a ZIP archive, extract the SQL dump inside
+        if (str_ends_with(strtolower($filePath), '.zip')) {
+            if (!class_exists('ZipArchive')) {
+                return ['success' => false, 'error' => 'PHP ZipArchive extension is required to extract .zip backups.'];
+            }
+
+            $zip = new \ZipArchive();
+            if ($zip->open($filePath) !== true) {
+                return ['success' => false, 'error' => 'Failed to open ZIP archive. File may be corrupted.'];
+            }
+
+            // Find the SQL file inside
+            $sqlEntryName = null;
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $stat = $zip->statIndex($i);
+                if (str_ends_with(strtolower($stat['name']), '.sql')) {
+                    $sqlEntryName = $stat['name'];
+                    break;
+                }
+            }
+
+            if (!$sqlEntryName) {
+                $zip->close();
+                return ['success' => false, 'error' => 'No .sql file found inside the uploaded ZIP archive.'];
+            }
+
+            $extractDir = $this->backupDir . 'temp_' . uniqid() . DIRECTORY_SEPARATOR;
+            @mkdir($extractDir, 0755, true);
+            $zip->extractTo($extractDir, [$sqlEntryName]);
+            $zip->close();
+
+            $sqlFilePath = $extractDir . $sqlEntryName;
+            $tempExtractedSql = $extractDir;
+
+            if (!file_exists($sqlFilePath)) {
+                return ['success' => false, 'error' => 'Could not extract SQL file from ZIP archive.'];
+            }
         }
 
         $dbConfig = config('Database');
@@ -499,6 +562,9 @@ class DatabaseBackupService
             }
         }
 
+        $restoreSuccess = false;
+        $restoreError = null;
+
         if ($mysqlBinary) {
             $passArg = !empty($pass) ? '--password=' . escapeshellarg($pass) : '';
             $cmd = sprintf(
@@ -509,42 +575,66 @@ class DatabaseBackupService
                 escapeshellarg($host),
                 escapeshellarg((string) $port),
                 escapeshellarg($database),
-                escapeshellarg($filePath)
+                escapeshellarg($sqlFilePath)
             );
             @exec($cmd, $output, $returnVar);
             if ($returnVar === 0) {
-                return ['success' => true];
+                $restoreSuccess = true;
             }
         }
 
-        // Fallback: Line-by-line PHP SQL execution
-        $handle = fopen($filePath, 'r');
-        if (!$handle) {
-            return ['success' => false, 'error' => 'Could not read SQL backup file.'];
-        }
-
-        $sql = '';
-        $this->db->query("SET FOREIGN_KEY_CHECKS = 0;");
-
-        while (!feof($handle)) {
-            $line = fgets($handle);
-            $trimmed = trim($line);
-            if ($trimmed === '' || str_starts_with($trimmed, '--') || str_starts_with($trimmed, '/*')) {
-                continue;
+        // Fallback: Line-by-line PHP SQL execution if mysql CLI failed
+        if (!$restoreSuccess) {
+            $handle = @fopen($sqlFilePath, 'r');
+            if (!$handle) {
+                $this->cleanupTempDir($tempExtractedSql);
+                return ['success' => false, 'error' => 'Could not read SQL backup file.'];
             }
-            $sql .= $line;
-            if (str_ends_with($trimmed, ';')) {
-                try {
-                    $this->db->query($sql);
-                } catch (\Throwable $e) {
-                    log_message('error', 'Restore statement error: ' . $e->getMessage());
+
+            $sql = '';
+            $this->db->query("SET FOREIGN_KEY_CHECKS = 0;");
+
+            while (!feof($handle)) {
+                $line = fgets($handle);
+                $trimmed = trim($line);
+                if ($trimmed === '' || str_starts_with($trimmed, '--') || str_starts_with($trimmed, '/*')) {
+                    continue;
                 }
-                $sql = '';
+                $sql .= $line;
+                if (str_ends_with($trimmed, ';')) {
+                    try {
+                        $this->db->query($sql);
+                    } catch (\Throwable $e) {
+                        log_message('error', 'Restore statement error: ' . $e->getMessage());
+                    }
+                    $sql = '';
+                }
             }
+            fclose($handle);
+            $this->db->query("SET FOREIGN_KEY_CHECKS = 1;");
+            $restoreSuccess = true;
         }
-        fclose($handle);
-        $this->db->query("SET FOREIGN_KEY_CHECKS = 1;");
+
+        // Clean up temporary extracted directory if ZIP was used
+        $this->cleanupTempDir($tempExtractedSql);
 
         return ['success' => true];
+    }
+
+    /**
+     * Helper to recursively delete temporary extraction folder
+     */
+    protected function cleanupTempDir(?string $dir): void
+    {
+        if (!$dir || !is_dir($dir)) {
+            return;
+        }
+
+        $files = array_diff(scandir($dir), ['.', '..']);
+        foreach ($files as $file) {
+            $path = $dir . DIRECTORY_SEPARATOR . $file;
+            is_dir($path) ? $this->cleanupTempDir($path) : @unlink($path);
+        }
+        @rmdir($dir);
     }
 }

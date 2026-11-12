@@ -585,7 +585,7 @@ class DatabaseBackupService
             $log("Executing high-speed MySQL restore engine...", 55);
             $passArg = !empty($pass) ? '--password=' . escapeshellarg($pass) : '';
             $cmd = sprintf(
-                '%s --user=%s %s --host=%s --port=%s %s < %s',
+                '%s --user=%s %s --host=%s --port=%s %s < %s 2>&1',
                 escapeshellarg($mysqlBinary),
                 escapeshellarg($user),
                 $passArg,
@@ -597,9 +597,10 @@ class DatabaseBackupService
             @exec($cmd, $output, $returnVar);
             if ($returnVar === 0) {
                 $restoreSuccess = true;
-                $log("All database tables, routines, and data imported successfully.", 90);
+                $log("All database tables, routines, and data imported successfully via MySQL CLI.", 85);
             } else {
-                $log("Native CLI returned exit code {$returnVar}. Switching to PHP transaction runner...", 60);
+                $cliErr = !empty($output) ? implode(' ', array_slice($output, 0, 3)) : "exit code {$returnVar}";
+                $log("Native CLI notice: {$cliErr}. Switching to PHP transaction runner...", 60);
             }
         }
 
@@ -631,12 +632,13 @@ class DatabaseBackupService
                     try {
                         $this->db->query($sql);
                     } catch (\Throwable $e) {
+                        $log("Statement error: " . $e->getMessage(), $lastPct);
                         log_message('error', 'Restore statement error: ' . $e->getMessage());
                     }
                     $sql = '';
 
                     if ($fileSize > 0) {
-                        $currentPct = (int) (65 + (($bytesRead / $fileSize) * 25));
+                        $currentPct = (int) (65 + (($bytesRead / $fileSize) * 20));
                         if ($currentPct > $lastPct && $currentPct % 5 === 0) {
                             $lastPct = $currentPct;
                             $log("Imported " . round($bytesRead / (1024 * 1024), 1) . " MB...", $currentPct);
@@ -649,22 +651,47 @@ class DatabaseBackupService
             $restoreSuccess = true;
         }
 
-        $log("Cleaning up temporary files...", 95);
-        $this->cleanupTempDir($tempExtractedSql);
+        $log("Scanning restored database schema and verifying tables & rows...", 88);
 
+        // Scan all tables in database and verify actual count & rows
         $tables = $this->db->listTables();
         $totalTables = count($tables);
         $totalRows = 0;
+        $tableBreakdown = [];
+
         foreach ($tables as $t) {
-            $totalRows += (int) $this->db->table($t)->countAllResults();
+            try {
+                $cnt = (int) $this->db->table($t)->countAllResults();
+                $totalRows += $cnt;
+                $tableBreakdown[$t] = $cnt;
+            } catch (\Throwable $e) {
+                $tableBreakdown[$t] = 'Error: ' . $e->getMessage();
+                $log("Verification warning on table `{$t}`: " . $e->getMessage(), 90);
+            }
         }
 
-        $log("Restore complete! Total tables: {$totalTables}, Total rows: " . number_format($totalRows) . ".", 100);
+        // Log detailed itemized table breakdown
+        $log("------------------------------------------------------------", 92);
+        $log("RESTORED TABLES & ROW COUNTS AUDIT (" . count($tableBreakdown) . " tables):", 92);
+        foreach ($tableBreakdown as $tbl => $rows) {
+            if (is_numeric($rows)) {
+                $log(sprintf("  + Table `%-35s`: %s rows restored", $tbl, number_format($rows)), 92);
+            } else {
+                $log(sprintf("  ! Table `%-35s`: %s", $tbl, $rows), 92);
+            }
+        }
+        $log("------------------------------------------------------------", 93);
+
+        $log("Cleaning up temporary files...", 95);
+        $this->cleanupTempDir($tempExtractedSql);
+
+        $log("Restore complete! Total tables: {$totalTables}, Total rows restored: " . number_format($totalRows) . ".", 100);
 
         return [
-            'success'      => true,
-            'tables_count' => $totalTables,
-            'rows_count'   => $totalRows,
+            'success'         => true,
+            'tables_count'    => $totalTables,
+            'rows_count'      => $totalRows,
+            'table_breakdown' => $tableBreakdown,
         ];
     }
 

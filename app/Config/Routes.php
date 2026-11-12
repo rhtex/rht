@@ -768,6 +768,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
         $routes->get('', 'BackupController::index');
         $routes->post('create', 'BackupController::create', ['filter' => 'permission:setting.edit']);
         $routes->get('restore-page', 'BackupController::restorePage', ['filter' => 'permission:setting.edit']);
+        $routes->get('restore-log/(:num)', 'BackupController::viewRestoreLog/$1', ['filter' => 'permission:setting.view']);
         $routes->post('upload-restore-ajax', 'BackupController::uploadAndRestoreAjax', ['filter' => 'permission:setting.edit']);
         $routes->post('upload-restore', 'BackupController::uploadAndRestore', ['filter' => 'permission:setting.edit']);
         $routes->get('download/(:segment)', 'BackupController::download/$1');

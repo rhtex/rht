@@ -133,12 +133,13 @@
                             <th>Status</th>
                             <th>Restored By</th>
                             <th>Restored At</th>
+                            <th class="text-center" style="width: 100px;">Audit Log</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($restores)): ?>
                             <tr id="emptyHistoryRow">
-                                <td colspan="9" class="text-center py-4 text-muted">
+                                <td colspan="10" class="text-center py-4 text-muted">
                                     <i class="fas fa-info-circle fa-lg mb-2 d-block"></i>
                                     No database restores have been recorded yet.
                                 </td>
@@ -173,11 +174,39 @@
                                     </td>
                                     <td><?= esc($r['user_name'] ?? 'System / Admin') ?></td>
                                     <td><?= date('d M Y, h:i:s A', strtotime($r['created_at'])) ?></td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-outline-info btn-view-log" data-id="<?= $r['id'] ?>" data-file="<?= esc($r['original_filename'] ?: $r['filename']) ?>" title="View Complete Restore Audit Log">
+                                            <i class="fas fa-file-alt me-1"></i> View
+                                        </button>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Log Modal -->
+    <div class="modal fade" id="restoreLogModal" tabindex="-1" aria-labelledby="restoreLogModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title" id="restoreLogModalLabel">
+                        <i class="fas fa-file-alt text-info me-2"></i>Restore Audit Log
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <pre id="modalLogContent" class="m-0 p-3 bg-dark text-light font-monospace" style="font-size: 13px; max-height: 450px; line-height: 1.6; white-space: pre-wrap; word-break: break-all;"></pre>
+                </div>
+                <div class="modal-footer bg-light">
+                    <a id="btnDownloadLogRaw" href="#" target="_blank" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-external-link-alt me-1"></i> Open Raw Log
+                    </a>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -327,7 +356,39 @@ document.addEventListener('DOMContentLoaded', function() {
             xhr.send(formData);
         });
     }
+
+    // Handle View Audit Log Button Click
+    const logModalElem = document.getElementById('restoreLogModal');
+    const logModal = logModalElem ? new bootstrap.Modal(logModalElem) : null;
+    const modalContent = document.getElementById('modalLogContent');
+    const modalTitle = document.getElementById('restoreLogModalLabel');
+    const btnRaw = document.getElementById('btnDownloadLogRaw');
+
+    document.querySelectorAll('.btn-view-log').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const file = this.getAttribute('data-file');
+
+            modalTitle.innerHTML = `<i class="fas fa-file-alt text-info me-2"></i>Restore Audit Log: <small class="text-warning">${file}</small>`;
+            modalContent.textContent = 'Loading audit log...';
+            btnRaw.href = `<?= site_url('settings/backup/restore-log/') ?>${id}`;
+
+            fetch(`<?= site_url('settings/backup/restore-log/') ?>${id}?json=1`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                modalContent.textContent = data.log || 'No log details available.';
+                if (logModal) logModal.show();
+            })
+            .catch(err => {
+                modalContent.textContent = 'Failed to load log: ' + err;
+                if (logModal) logModal.show();
+            });
+        });
+    });
 });
 </script>
 
 <?= $this->endSection() ?>
+

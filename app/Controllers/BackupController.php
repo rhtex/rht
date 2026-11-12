@@ -190,6 +190,51 @@ class BackupController extends BaseController
     }
 
     /**
+     * View Stored Restore Log (Raw or JSON)
+     */
+    public function viewRestoreLog(int $id)
+    {
+        $db = \Config\Database::connect();
+        $record = $db->table('db_restores')
+            ->select('db_restores.*, users.name as user_name')
+            ->join('users', 'users.id = db_restores.restored_by', 'left')
+            ->where('db_restores.id', $id)
+            ->get()
+            ->getRowArray();
+
+        if (!$record) {
+            return $this->response->setStatusCode(404)->setBody('Restore record not found.');
+        }
+
+        $logPath = null;
+        if (!empty($record['log_file'])) {
+            $logPath = WRITEPATH . 'logs/' . basename($record['log_file']);
+        }
+
+        $logContent = '';
+        if ($logPath && file_exists($logPath)) {
+            $logContent = file_get_contents($logPath);
+        } else {
+            $logContent = "Log file not found on disk.";
+            if (!empty($record['error_message'])) {
+                $logContent .= "\nError Message recorded: " . $record['error_message'];
+            }
+        }
+
+        if ($this->request->isAJAX() || $this->request->getGet('json') === '1') {
+            return $this->response->setJSON([
+                'success' => true,
+                'record'  => $record,
+                'log'     => $logContent,
+            ]);
+        }
+
+        return $this->response
+            ->setHeader('Content-Type', 'text/plain; charset=UTF-8')
+            ->setBody($logContent);
+    }
+
+    /**
      * AJAX Endpoint for Upload & Restore with Log Tracking
      */
     public function uploadAndRestoreAjax()
@@ -229,7 +274,10 @@ class BackupController extends BaseController
         $logCallback("Uploaded file `{$clientName}` verified.", 5);
 
         $backupDir = $this->backupService->getBackupDir();
-        $safeName = 'restore_' . date('Y-m-d_H-i-s') . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $clientName);
+        $timestampStr = date('Y-m-d_H-i-s');
+        $safeName = 'restore_' . $timestampStr . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $clientName);
+        $logFileName = 'restore_' . $timestampStr . '_' . uniqid() . '.log';
+        $logFilePath = WRITEPATH . 'logs/' . $logFileName;
 
         $db = \Config\Database::connect();
         $userId = session()->get('user_id') ? (int) session()->get('user_id') : null;
@@ -240,10 +288,24 @@ class BackupController extends BaseController
             'original_filename' => $clientName,
             'file_size'         => $file->getSize(),
             'status'            => 'in_progress',
+            'log_file'          => $logFileName,
             'restored_by'       => $userId,
             'created_at'        => date('Y-m-d H:i:s'),
         ]);
         $restoreId = $db->insertID();
+
+        // Helper to save log file to disk
+        $saveLogToDisk = function() use (&$logs, $logFilePath, $clientName, $timestampStr) {
+            $content = "============================================================\n";
+            $content .= "DATABASE RESTORE AUDIT LOG\n";
+            $content .= "Timestamp: " . date('Y-m-d H:i:s') . "\n";
+            $content .= "Original File: " . $clientName . "\n";
+            $content .= "============================================================\n\n";
+            foreach ($logs as $l) {
+                $content .= sprintf("[%s] [%3d%%] %s\n", $l['time'], $l['pct'], $l['message']);
+            }
+            @file_put_contents($logFilePath, $content);
+        };
 
         try {
             $file->move($backupDir, $safeName);
@@ -257,12 +319,16 @@ class BackupController extends BaseController
                 $tablesCount = $res['tables_count'] ?? 0;
                 $rowsCount = $res['rows_count'] ?? 0;
 
+                // Save full log to disk
+                $saveLogToDisk();
+
                 // Update restore history
                 $db->table('db_restores')->where('id', $restoreId)->update([
                     'status'           => 'completed',
                     'tables_count'     => $tablesCount,
                     'rows_count'       => $rowsCount,
                     'duration_seconds' => $duration,
+                    'log_file'         => $logFileName,
                     'created_at'       => date('Y-m-d H:i:s'),
                 ]);
 
@@ -286,34 +352,43 @@ class BackupController extends BaseController
                     'tables_count' => $tablesCount,
                     'rows_count'   => $rowsCount,
                     'duration'     => $duration,
+                    'log_file'     => $logFileName,
                     'logs'         => $logs,
                 ]);
             }
 
             $errMsg = $res['error'] ?? 'Unknown restore error';
+            $saveLogToDisk();
+
             $db->table('db_restores')->where('id', $restoreId)->update([
                 'status'           => 'failed',
                 'error_message'    => $errMsg,
+                'log_file'         => $logFileName,
                 'duration_seconds' => round(microtime(true) - $startTime, 2),
             ]);
 
             return $this->response->setJSON([
                 'success' => false,
                 'error'   => $errMsg,
+                'log_file'=> $logFileName,
                 'logs'    => $logs,
             ]);
         } catch (\Throwable $e) {
             log_message('error', 'uploadAndRestoreAjax error: ' . $e->getMessage());
+            $logCallback("Fatal Error: " . $e->getMessage(), 100);
+            $saveLogToDisk();
+
             $db->table('db_restores')->where('id', $restoreId)->update([
                 'status'           => 'failed',
                 'error_message'    => $e->getMessage(),
+                'log_file'         => $logFileName,
                 'duration_seconds' => round(microtime(true) - $startTime, 2),
             ]);
-            $logCallback("Fatal Error: " . $e->getMessage(), 100);
 
             return $this->response->setJSON([
                 'success' => false,
                 'error'   => $e->getMessage(),
+                'log_file'=> $logFileName,
                 'logs'    => $logs,
             ]);
         }

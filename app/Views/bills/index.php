@@ -114,7 +114,7 @@
 <!-- Split View Workspace Layout -->
 <div class="row g-3 align-items-start" id="billSplitRow">
     <!-- Center Bills List Column -->
-    <div class="col-lg-5 col-xl-5 transition-col" id="billListCol">
+    <div class="col-12 col-lg-5 col-xl-5 transition-col" id="billListCol">
         <div class="card card-outline card-secondary shadow-sm mb-3" id="billListCard">
             <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="billListCardHeader">
                 <h3 class="card-title fw-bold text-dark m-0"><i class="fas fa-list text-primary me-2"></i>Bills List</h3>
@@ -192,8 +192,8 @@
         </div>
     </div>
 
-    <!-- Right Side Bill View Column -->
-    <div class="col-lg-7 col-xl-7 transition-col" id="billDetailCol">
+    <!-- Right Side Bill View Column (hidden on mobile) -->
+    <div class="col-lg-7 col-xl-7 transition-col d-none d-lg-block" id="billDetailCol">
         <div class="card card-outline card-primary shadow-sm mb-3" id="billDetailCard">
             <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="billDetailCardHeader">
                 <h5 class="card-title fw-bold text-dark m-0" id="detailPaneTitle">
@@ -250,7 +250,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const spinner = document.getElementById('infiniteScrollSpinner');
     const countBadge = document.getElementById('loadedBillsCount');
 
-    let isSplitOn = true;
+    const isMobile = window.innerWidth < 992;
+    let isSplitOn = !isMobile;
     let activeBillId = null;
     let currentOffset = document.querySelectorAll('.bill-row').length;
     let isLoadingMore = false;
@@ -349,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Synchronize heights:
     // Expands when detail is taller, shrinks back to natural height (minimum 20 rows)
     function syncPaneHeights() {
-        if (!isSplitOn) {
+        if (!isSplitOn || window.innerWidth < 992) {
             if (scrollContainer) {
                 scrollContainer.style.height = '';
                 scrollContainer.style.maxHeight = '';
@@ -405,11 +406,14 @@ document.addEventListener('DOMContentLoaded', function() {
         rowsToBind.forEach(row => {
             row.setAttribute('data-bound', '1');
             row.addEventListener('click', function(e) {
+                if (e.target.closest('a') || e.target.closest('button')) {
+                    return;
+                }
                 const id = this.getAttribute('data-id');
-                if (isSplitOn) {
-                    loadBillDetail(id);
-                } else {
+                if (window.innerWidth < 992 || !isSplitOn) {
                     window.location.href = '<?= site_url('bills/view/') ?>' + id + '?mode=single';
+                } else {
+                    loadBillDetail(id);
                 }
             });
         });
@@ -417,11 +421,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     bindRowClicks(tbody);
 
-    // Auto-load first bill on page load
+    // Auto-load first bill on page load (desktop only)
     const initialRows = document.querySelectorAll('.bill-row');
     if (initialRows.length > 0) {
         const firstId = initialRows[0].getAttribute('data-id');
-        loadBillDetail(firstId);
+        if (window.innerWidth >= 992 && isSplitOn) {
+            loadBillDetail(firstId);
+        }
     } else {
         container.innerHTML = '<div class="text-center py-5 text-muted">No purchase bills found.</div>';
     }
@@ -503,7 +509,8 @@ document.addEventListener('DOMContentLoaded', function() {
         splitBtn.addEventListener('click', function() {
             isSplitOn = !isSplitOn;
             if (isSplitOn) {
-                listCol.className = 'col-lg-5 col-xl-5 transition-col';
+                listCol.className = 'col-12 col-lg-5 col-xl-5 transition-col';
+                detailCol.classList.remove('d-none');
                 detailCol.style.display = 'block';
                 splitText.textContent = 'Full View';
                 splitIcon.className = 'fas fa-expand me-1';
@@ -516,6 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else {
                 listCol.className = 'col-12 transition-col';
+                detailCol.classList.add('d-none');
                 detailCol.style.display = 'none';
                 splitText.textContent = 'Split View';
                 splitIcon.className = 'fas fa-columns me-1';

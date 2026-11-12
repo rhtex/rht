@@ -125,7 +125,7 @@
 <!-- Split View Workspace Layout -->
 <div class="row g-3 align-items-start" id="invoiceSplitRow">
     <!-- Center Invoices List Column -->
-    <div class="col-lg-5 col-xl-5 transition-col" id="invoiceListCol">
+    <div class="col-12 col-lg-5 col-xl-5 transition-col" id="invoiceListCol">
         <div class="card card-outline card-secondary shadow-sm mb-3" id="invoiceListCard">
             <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="invoiceListCardHeader">
                 <h3 class="card-title fw-bold text-dark m-0"><i class="fas fa-list text-primary me-2"></i>Invoice List</h3>
@@ -215,8 +215,8 @@
         </div>
     </div>
 
-    <!-- Right Side Invoice View Column (No scrollbar, full content flows naturally) -->
-    <div class="col-lg-7 col-xl-7 transition-col" id="invoiceDetailCol">
+    <!-- Right Side Invoice View Column (No scrollbar, full content flows naturally; hidden on mobile) -->
+    <div class="col-lg-7 col-xl-7 transition-col d-none d-lg-block" id="invoiceDetailCol">
         <div class="card card-outline card-primary shadow-sm mb-3" id="invoiceDetailCard">
             <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="invoiceDetailCardHeader">
                 <h5 class="card-title fw-bold text-dark m-0" id="detailPaneTitle">
@@ -273,8 +273,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const spinner = document.getElementById('infiniteScrollSpinner');
     const countBadge = document.getElementById('loadedInvoicesCount');
 
-    // Default is split view: ON
-    let isSplitOn = true;
+    // Default is split view: ON for desktop (lg+), OFF for mobile
+    const isMobile = window.innerWidth < 992;
+    let isSplitOn = !isMobile;
     let activeInvoiceId = null;
 
     // Infinite scroll state: initial loaded count is 100 (or initial rows count)
@@ -383,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 3. When an invoice with more items is selected, list height expands to match details.
     // 4. When an invoice with fewer items is selected, list height decreases back to match details or minimum 20 rows.
     function syncPaneHeights() {
-        if (!isSplitOn) {
+        if (!isSplitOn || window.innerWidth < 992) {
             if (scrollContainer) {
                 scrollContainer.style.height = '';
                 scrollContainer.style.maxHeight = '';
@@ -441,11 +442,16 @@ document.addEventListener('DOMContentLoaded', function() {
         rowsToBind.forEach(row => {
             row.setAttribute('data-bound', '1');
             row.addEventListener('click', function(e) {
+                // If user clicks on an interactive element (button, link, input), let it handle its own event
+                if (e.target.closest('a') || e.target.closest('button')) {
+                    return;
+                }
                 const id = this.getAttribute('data-id');
-                if (isSplitOn) {
-                    loadInvoiceDetail(id);
-                } else {
+                // On mobile devices (<992px), open invoice directly in the same tab
+                if (window.innerWidth < 992 || !isSplitOn) {
                     window.location.href = '<?= site_url('invoices/view/') ?>' + id + '?mode=single';
+                } else {
+                    loadInvoiceDetail(id);
                 }
             });
         });
@@ -453,11 +459,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     bindRowClicks(tbody);
 
-    // Auto-load first invoice on page load by default
+    // Auto-load first invoice on page load by default (desktop only)
     const initialRows = document.querySelectorAll('.invoice-row');
     if (initialRows.length > 0) {
         const firstId = initialRows[0].getAttribute('data-id');
-        loadInvoiceDetail(firstId);
+        if (window.innerWidth >= 992 && isSplitOn) {
+            loadInvoiceDetail(firstId);
+        }
     } else {
         container.innerHTML = '<div class="text-center py-5 text-muted">No invoices found.</div>';
     }
@@ -543,7 +551,8 @@ document.addEventListener('DOMContentLoaded', function() {
             isSplitOn = !isSplitOn;
             if (isSplitOn) {
                 // Switch to Split View
-                listCol.className = 'col-lg-5 col-xl-5 transition-col d-flex flex-column';
+                listCol.className = 'col-12 col-lg-5 col-xl-5 transition-col d-flex flex-column';
+                detailCol.classList.remove('d-none');
                 detailCol.style.display = 'flex';
                 splitText.textContent = 'Full View';
                 splitIcon.className = 'fas fa-expand me-1';
@@ -557,6 +566,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 // Switch to Full View (list takes full width 12 cols, detail pane hidden)
                 listCol.className = 'col-12 transition-col';
+                detailCol.classList.add('d-none');
                 detailCol.style.display = 'none';
                 splitText.textContent = 'Split View';
                 splitIcon.className = 'fas fa-columns me-1';

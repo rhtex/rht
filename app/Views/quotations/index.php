@@ -114,7 +114,7 @@
 <!-- Split View Workspace Layout -->
 <div class="row g-3 align-items-start" id="quotationSplitRow">
     <!-- Center Quotations List Column -->
-    <div class="col-lg-5 col-xl-5 transition-col" id="quotationListCol">
+    <div class="col-12 col-lg-5 col-xl-5 transition-col" id="quotationListCol">
         <div class="card card-outline card-secondary shadow-sm mb-3" id="quotationListCard">
             <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="quotationListCardHeader">
                 <h3 class="card-title fw-bold text-dark m-0"><i class="fas fa-list text-primary me-2"></i>Quotations List</h3>
@@ -200,8 +200,8 @@
         </div>
     </div>
 
-    <!-- Right Side Quotation View Column -->
-    <div class="col-lg-7 col-xl-7 transition-col" id="quotationDetailCol">
+    <!-- Right Side Quotation View Column (hidden on mobile) -->
+    <div class="col-lg-7 col-xl-7 transition-col d-none d-lg-block" id="quotationDetailCol">
         <div class="card card-outline card-primary shadow-sm mb-3" id="quotationDetailCard">
             <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="quotationDetailCardHeader">
                 <h5 class="card-title fw-bold text-dark m-0" id="detailPaneTitle">
@@ -258,7 +258,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const spinner = document.getElementById('infiniteScrollSpinner');
     const countBadge = document.getElementById('loadedQuotationsCount');
 
-    let isSplitOn = true;
+    const isMobile = window.innerWidth < 992;
+    let isSplitOn = !isMobile;
     let activeQuotationId = null;
     let currentOffset = document.querySelectorAll('.quotation-row').length;
     let isLoadingMore = false;
@@ -357,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Synchronize heights:
     // Expands when detail is taller, shrinks back to natural height (minimum 20 rows)
     function syncPaneHeights() {
-        if (!isSplitOn) {
+        if (!isSplitOn || window.innerWidth < 992) {
             if (scrollContainer) {
                 scrollContainer.style.height = '';
                 scrollContainer.style.maxHeight = '';
@@ -413,11 +414,14 @@ document.addEventListener('DOMContentLoaded', function() {
         rowsToBind.forEach(row => {
             row.setAttribute('data-bound', '1');
             row.addEventListener('click', function(e) {
+                if (e.target.closest('a') || e.target.closest('button')) {
+                    return;
+                }
                 const id = this.getAttribute('data-id');
-                if (isSplitOn) {
-                    loadQuotationDetail(id);
-                } else {
+                if (window.innerWidth < 992 || !isSplitOn) {
                     window.location.href = '<?= site_url('quotations/view/') ?>' + id + '?mode=single';
+                } else {
+                    loadQuotationDetail(id);
                 }
             });
         });
@@ -425,11 +429,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     bindRowClicks(tbody);
 
-    // Auto-load first quotation on page load
+    // Auto-load first quotation on page load (desktop only)
     const initialRows = document.querySelectorAll('.quotation-row');
     if (initialRows.length > 0) {
         const firstId = initialRows[0].getAttribute('data-id');
-        loadQuotationDetail(firstId);
+        if (window.innerWidth >= 992 && isSplitOn) {
+            loadQuotationDetail(firstId);
+        }
     } else {
         container.innerHTML = '<div class="text-center py-5 text-muted">No quotations found.</div>';
     }
@@ -511,7 +517,8 @@ document.addEventListener('DOMContentLoaded', function() {
         splitBtn.addEventListener('click', function() {
             isSplitOn = !isSplitOn;
             if (isSplitOn) {
-                listCol.className = 'col-lg-5 col-xl-5 transition-col';
+                listCol.className = 'col-12 col-lg-5 col-xl-5 transition-col';
+                detailCol.classList.remove('d-none');
                 detailCol.style.display = 'block';
                 splitText.textContent = 'Full View';
                 splitIcon.className = 'fas fa-expand me-1';
@@ -524,6 +531,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else {
                 listCol.className = 'col-12 transition-col';
+                detailCol.classList.add('d-none');
                 detailCol.style.display = 'none';
                 splitText.textContent = 'Split View';
                 splitIcon.className = 'fas fa-columns me-1';

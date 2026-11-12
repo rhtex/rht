@@ -689,6 +689,7 @@ class BackupController extends BaseController
             'auto_backup' => [
                 'backup_auto_enabled',
                 'backup_cron_time',
+                'backup_retention_days',
             ],
             'email' => [
                 'backup_email_enabled',

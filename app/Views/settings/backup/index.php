@@ -308,6 +308,15 @@
                                     <small class="text-muted">Set the target daily execution time (24-hour format). Midnight is 00:00.</small>
                                 </div>
 
+                                <div class="mb-3">
+                                    <label for="backup_retention_days" class="form-label fw-semibold">Backup Retention Period (Days)</label>
+                                    <div class="input-group" style="max-width: 200px;">
+                                        <input type="number" min="0" max="3650" class="form-control" id="backup_retention_days" name="backup_retention_days" value="<?= esc($settings['backup_retention_days'] ?? '90') ?>" placeholder="90">
+                                        <span class="input-group-text">Days</span>
+                                    </div>
+                                    <small class="text-muted">Automatically deletes server backups older than this number of days (Default: 90 days). Set to <code>0</code> to keep indefinitely.</small>
+                                </div>
+
                                 <div class="alert alert-secondary">
                                     <h6 class="alert-heading fw-bold"><i class="fas fa-info-circle me-1"></i> How Scheduled Auto-Backup Runs</h6>
                                     <p class="mb-2">Automated backups are executed by the CodeIgniter Spark CLI command. It generates full SQL dumps, uploads to Google Drive (if enabled), and sends to email (if enabled).</p>

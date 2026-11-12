@@ -128,6 +128,9 @@ class DatabaseBackupService
             'updated_at'    => date('Y-m-d H:i:s'),
         ]);
 
+        // Clean up older backups based on retention policy
+        $cleanedCount = $this->cleanOldBackups();
+
         return [
             'success'       => true,
             'id'            => $backupId,
@@ -138,7 +141,70 @@ class DatabaseBackupService
             'rows_count'    => $stats['rows'],
             'email'         => $emailResult,
             'gdrive'        => $gdriveResult,
+            'cleaned'       => $cleanedCount,
         ];
+    }
+
+    /**
+     * Clean up local backup files older than configured retention days (default: 90 days)
+     */
+    public function cleanOldBackups(?int $days = null): int
+    {
+        if ($days === null) {
+            $days = (int) get_setting('backup_retention_days', 90);
+        }
+
+        // 0 or negative means keep forever
+        if ($days <= 0) {
+            return 0;
+        }
+
+        $cutoffTimestamp = strtotime("-{$days} days");
+        $cutoffDate = date('Y-m-d H:i:s', $cutoffTimestamp);
+        $deletedCount = 0;
+
+        // 1. Delete physical files in backup/ directory older than cutoff
+        if (is_dir($this->backupDir)) {
+            $files = scandir($this->backupDir);
+            foreach ($files as $f) {
+                if ($f === '.' || $f === '..' || $f === '.gitkeep') {
+                    continue;
+                }
+
+                $filePath = $this->backupDir . $f;
+                if (is_file($filePath)) {
+                    $mtime = filemtime($filePath);
+                    if ($mtime < $cutoffTimestamp) {
+                        @unlink($filePath);
+                        $deletedCount++;
+                    }
+                }
+            }
+        }
+
+        // 2. Remove corresponding records from db_backups table
+        try {
+            $this->db->table('db_backups')
+                ->where('created_at <', $cutoffDate)
+                ->delete();
+        } catch (\Throwable $e) {
+            log_message('error', 'cleanOldBackups db error: ' . $e->getMessage());
+        }
+
+        // 3. Clean physical restore logs in writable/logs/ older than cutoff
+        $logDir = WRITEPATH . 'logs' . DIRECTORY_SEPARATOR;
+        if (is_dir($logDir)) {
+            $logs = glob($logDir . 'restore_*.log');
+            if ($logs) {
+                foreach ($logs as $logFile) {
+                    if (is_file($logFile) && filemtime($logFile) < $cutoffTimestamp) {
+                        @unlink($logFile);
+                    }
+                }
+            }
+        }
+
+        return $deletedCount;
     }
 
     /**

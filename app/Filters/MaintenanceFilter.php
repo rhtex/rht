@@ -36,6 +36,11 @@ class MaintenanceFilter implements FilterInterface
 
         $secret = $data['secret'] ?? '';
 
+        // Allow access to login routes so admin can authenticate
+        $uri = service('uri');
+        $path = trim($uri->getPath(), '/');
+        $isLoginRoute = ($path === 'login' || $path === 'attemptLogin');
+
         // If a logged-in user is NOT an admin, they must NEVER bypass maintenance mode
         $session = session();
         $isLoggedIn = $session->get('isLoggedIn');
@@ -46,6 +51,11 @@ class MaintenanceFilter implements FilterInterface
                 return null; // Admin is authenticated, allow full access
             }
             return $this->renderMaintenanceResponse($data); // Non-admin logged in user is blocked
+        }
+
+        // Allow guests to see login page and post login credentials
+        if ($isLoginRoute) {
+            return null;
         }
 
         // 1. Check for Secret Bypass Query Parameter (e.g. ?bypass=SECRET_TOKEN)

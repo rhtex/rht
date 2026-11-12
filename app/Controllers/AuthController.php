@@ -41,6 +41,23 @@ class AuthController extends BaseController
         if ($user) {
             log_message('error', 'Login Successful for: ' . $email);
             $this->authService->loginUser($user);
+
+            // If user is Admin and maintenance mode is active, set bypass cookie
+            $flagFile = WRITEPATH . 'maintenance.flag';
+            if (file_exists($flagFile)) {
+                $raw = @file_get_contents($flagFile);
+                $maintData = json_decode((string) $raw, true) ?: [];
+                $secret = $maintData['secret'] ?? '';
+                if (!empty($secret) && session()->get('role') === 'admin') {
+                    setcookie('rht_maintenance_bypass', $secret, [
+                        'expires'  => time() + (86400 * 7),
+                        'path'     => '/',
+                        'httponly' => true,
+                        'samesite' => 'Lax',
+                    ]);
+                }
+            }
+
             return redirect()->to('dashboard')->with('success', 'Welcome back!');
         } else {
             log_message('error', 'Login Failed for: ' . $email);

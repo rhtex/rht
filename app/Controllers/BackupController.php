@@ -172,18 +172,95 @@ class BackupController extends BaseController
     {
         $db = \Config\Database::connect();
 
-        // Fetch restore history
-        $restores = $db->table('db_restores')
-            ->select('db_restores.*, users.name as user_name')
-            ->join('users', 'users.id = db_restores.restored_by', 'left')
-            ->orderBy('db_restores.created_at', 'DESC')
-            ->get()
-            ->getResultArray();
+        // 1. Fetch restore history records from db_restores table
+        $dbRecords = [];
+        $recordedLogFiles = [];
+        try {
+            $dbRecords = $db->table('db_restores')
+                ->select('db_restores.*, users.name as user_name')
+                ->join('users', 'users.id = db_restores.restored_by', 'left')
+                ->orderBy('db_restores.created_at', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            foreach ($dbRecords as $r) {
+                if (!empty($r['log_file'])) {
+                    $recordedLogFiles[] = basename($r['log_file']);
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Error reading db_restores table: ' . $e->getMessage());
+        }
+
+        // 2. Scan physical log files in writable/logs/restore_*.log to recover history if database was overwritten
+        $scannedLogEntries = [];
+        $logDir = WRITEPATH . 'logs' . DIRECTORY_SEPARATOR;
+        if (is_dir($logDir)) {
+            $files = glob($logDir . 'restore_*.log');
+            if ($files) {
+                // Sort newest first
+                usort($files, function($a, $b) {
+                    return filemtime($b) - filemtime($a);
+                });
+
+                foreach ($files as $filePath) {
+                    $base = basename($filePath);
+                    if (in_array($base, $recordedLogFiles, true)) {
+                        continue; // Already present in database records
+                    }
+
+                    // Parse header and stats from log file
+                    $content = @file_get_contents($filePath);
+                    $originalFile = $base;
+                    $restoredAt = date('Y-m-d H:i:s', filemtime($filePath));
+                    $status = str_contains($content, 'Restore complete!') ? 'completed' : (str_contains($content, 'Fatal Error:') || str_contains($content, 'Restore Error:') ? 'failed' : 'completed');
+                    $tablesCount = 0;
+                    $rowsCount = 0;
+
+                    if (preg_match('/Original File:\s*([^\r\n]+)/i', $content, $m)) {
+                        $originalFile = trim($m[1]);
+                    }
+                    if (preg_match('/Timestamp:\s*([^\r\n]+)/i', $content, $m)) {
+                        $restoredAt = trim($m[1]);
+                    }
+                    if (preg_match('/Total tables:\s*([0-9]+)/i', $content, $m)) {
+                        $tablesCount = (int) $m[1];
+                    }
+                    if (preg_match('/Total rows(?: restored)?:\s*([0-9,]+)/i', $content, $m)) {
+                        $rowsCount = (int) str_replace(',', '', $m[1]);
+                    }
+
+                    $scannedLogEntries[] = [
+                        'id'                => 'file_' . md5($base),
+                        'filename'          => $base,
+                        'original_filename' => $originalFile,
+                        'file_size'         => filesize($filePath),
+                        'status'            => $status,
+                        'tables_count'      => $tablesCount,
+                        'rows_count'        => $rowsCount,
+                        'duration_seconds'  => 0,
+                        'error_message'     => null,
+                        'log_file'          => $base,
+                        'user_name'         => 'System / Admin',
+                        'created_at'        => $restoredAt,
+                        'is_file_only'      => true,
+                    ];
+                }
+            }
+        }
+
+        // Merge database records and scanned physical log files
+        $allRestores = array_merge($dbRecords, $scannedLogEntries);
+
+        // Sort all by created_at DESC
+        usort($allRestores, function($a, $b) {
+            return strtotime($b['created_at']) - strtotime($a['created_at']);
+        });
 
         $data = [
             'title'    => 'Restore Database from Backup',
             'dbName'   => $db->getDatabase(),
-            'restores' => $restores,
+            'restores' => $allRestores,
         ];
 
         return view('settings/backup/restore', $data);
@@ -192,23 +269,45 @@ class BackupController extends BaseController
     /**
      * View Stored Restore Log (Raw or JSON)
      */
-    public function viewRestoreLog(int $id)
+    public function viewRestoreLog($idOrToken)
     {
         $db = \Config\Database::connect();
-        $record = $db->table('db_restores')
-            ->select('db_restores.*, users.name as user_name')
-            ->join('users', 'users.id = db_restores.restored_by', 'left')
-            ->where('db_restores.id', $id)
-            ->get()
-            ->getRowArray();
+        $record = null;
+        $logPath = null;
 
-        if (!$record) {
-            return $this->response->setStatusCode(404)->setBody('Restore record not found.');
+        // If numeric ID, query db_restores table
+        if (is_numeric($idOrToken)) {
+            $record = $db->table('db_restores')
+                ->select('db_restores.*, users.name as user_name')
+                ->join('users', 'users.id = db_restores.restored_by', 'left')
+                ->where('db_restores.id', (int) $idOrToken)
+                ->get()
+                ->getRowArray();
+
+            if ($record && !empty($record['log_file'])) {
+                $logPath = WRITEPATH . 'logs/' . basename($record['log_file']);
+            }
+        } else {
+            // Check if looking up by file_ md5 token or raw filename
+            $logDir = WRITEPATH . 'logs' . DIRECTORY_SEPARATOR;
+            $files = glob($logDir . 'restore_*.log');
+            if ($files) {
+                foreach ($files as $f) {
+                    $base = basename($f);
+                    if ('file_' . md5($base) === $idOrToken || $base === $idOrToken) {
+                        $logPath = $f;
+                        $record = [
+                            'original_filename' => $base,
+                            'log_file'          => $base,
+                        ];
+                        break;
+                    }
+                }
+            }
         }
 
-        $logPath = null;
-        if (!empty($record['log_file'])) {
-            $logPath = WRITEPATH . 'logs/' . basename($record['log_file']);
+        if (!$record && !$logPath) {
+            return $this->response->setStatusCode(404)->setBody('Restore record not found.');
         }
 
         $logContent = '';

@@ -165,6 +165,68 @@ class BackupController extends BaseController
     }
 
     /**
+     * Restore Database from an uploaded SQL backup file
+     */
+    public function uploadAndRestore()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+
+        $file = $this->request->getFile('backup_file');
+        if (!$file || !$file->isValid()) {
+            return redirect()->to('settings/backup')->with('error', 'Please select a valid SQL backup file to upload.');
+        }
+
+        $clientName = $file->getClientName();
+        $ext = strtolower($file->getClientExtension());
+        if ($ext !== 'sql') {
+            return redirect()->to('settings/backup')->with('error', 'Invalid file type. Only .sql files are allowed.');
+        }
+
+        $backupDir = $this->backupService->getBackupDir();
+        $safeName = 'upload_' . date('Y-m-d_H-i-s') . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $clientName);
+
+        try {
+            // Move uploaded file to backup directory
+            $file->move($backupDir, $safeName);
+            $targetPath = $backupDir . $safeName;
+
+            // Perform restore
+            $res = $this->backupService->restoreBackup($targetPath);
+            if ($res['success']) {
+                // Log in db_backups table
+                $db = \Config\Database::connect();
+                $tables = $db->listTables();
+                $totalRows = 0;
+                foreach ($tables as $t) {
+                    $totalRows += (int) $db->table($t)->countAllResults();
+                }
+
+                $userId = session()->get('user_id') ? (int) session()->get('user_id') : null;
+                $db->table('db_backups')->insert([
+                    'filename'      => $safeName,
+                    'file_path'     => 'backup/' . $safeName,
+                    'file_size'     => file_exists($targetPath) ? filesize($targetPath) : 0,
+                    'source'        => 'manual',
+                    'tables_count'  => count($tables),
+                    'rows_count'    => $totalRows,
+                    'email_status'  => 'disabled',
+                    'gdrive_status' => 'disabled',
+                    'created_by'    => $userId,
+                    'created_at'    => date('Y-m-d H:i:s'),
+                ]);
+
+                return redirect()->to('settings/backup')->with('success', "Database successfully restored from uploaded file `{$clientName}`!");
+            }
+
+            return redirect()->to('settings/backup')->with('error', "Restore failed: " . ($res['error'] ?? 'Unknown error'));
+        } catch (\Throwable $e) {
+            log_message('error', 'uploadAndRestore error: ' . $e->getMessage());
+            return redirect()->to('settings/backup')->with('error', 'Restore error: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Restore Database from a specific SQL backup file
      */
     public function restore(string $idOrFilename)

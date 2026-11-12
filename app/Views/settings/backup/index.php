@@ -314,7 +314,19 @@
                                         <input type="number" min="0" max="3650" class="form-control" id="backup_retention_days" name="backup_retention_days" value="<?= esc($settings['backup_retention_days'] ?? '90') ?>" placeholder="90">
                                         <span class="input-group-text">Days</span>
                                     </div>
-                                    <small class="text-muted">Automatically deletes server backups older than this number of days (Default: 90 days). Set to <code>0</code> to keep indefinitely.</small>
+                                    <small class="text-muted">Automatically deletes local server backups older than this number of days (Default: 90 days). Set to <code>0</code> to keep indefinitely.</small>
+                                </div>
+
+                                <div class="alert alert-info border-0 shadow-sm py-2 px-3 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-lightbulb text-info fa-lg me-2 mt-1"></i>
+                                        <div class="small">
+                                            <strong>Note on Retention & Cloud Storage:</strong>
+                                            <p class="mb-0 text-muted">
+                                                Local server backups older than <strong><?= esc($settings['backup_retention_days'] ?? '90') ?> days</strong> are automatically pruned to prevent exhausting server disk space. If <strong>Google Drive Auto-Upload</strong> is enabled, all backups pushed to Google Drive remain permanently preserved in your cloud storage for compliance, fiscal year audits, and long-term historical records even after local server copies are removed.
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="alert alert-secondary">

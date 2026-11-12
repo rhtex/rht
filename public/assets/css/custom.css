@@ -365,3 +365,167 @@ h4,
     background-color: #bb2d3b !important;
     border-color: #b02a37 !important;
 }
+
+/* ==========================================================================
+   Comprehensive Mobile & Small Devices Optimization
+   ========================================================================== */
+
+/* 1. Global Viewport & Container Overflow Fixes */
+@media (max-width: 991.98px) {
+    /* Prevent root and container horizontal clipping */
+    html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+    }
+
+    .app-wrapper,
+    .app-main,
+    .app-content,
+    .app-content-header,
+    .container-fluid {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+
+    .container-fluid {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    /* Page Header wrap neatly on small screens */
+    .app-content-header .row {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    .app-content-header .col-sm-6 {
+        width: 100% !important;
+        text-align: left !important;
+    }
+    .app-content-header h1 {
+        font-size: 1.1rem !important;
+        flex-wrap: wrap !important;
+    }
+
+    /* Hide redundant split/full view toggle button on mobile */
+    #btnToggleSplit {
+        display: none !important;
+    }
+
+    /* Hide 3rd preview panes across all split views on mobile */
+    #invoiceDetailCol,
+    #billDetailCol,
+    #quotationDetailCol,
+    #orderDetailCol,
+    #returnDetailCol {
+        display: none !important;
+    }
+
+    /* Expand list columns to full width */
+    #invoiceListCol,
+    #billListCol,
+    #quotationListCol,
+    #orderListCol,
+    #returnListCol {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+
+    /* Release fixed heights on mobile so list scrolls naturally with document */
+    #invoiceListScrollContainer,
+    #billListScrollContainer,
+    #quotationListScrollContainer,
+    #orderListScrollContainer,
+    #returnListScrollContainer {
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: visible !important;
+    }
+}
+
+/* 2. Responsive Summary Stat Cards Grid */
+@media (max-width: 767.98px) {
+    /* Ensure summary / top cards wrap nicely into 2 columns on small screens without overlapping */
+    .bt-stat {
+        padding: 6px 8px !important;
+    }
+    .bt-stat .bt-stat-num {
+        font-size: 0.82rem !important;
+    }
+    .bt-stat .bt-stat-label {
+        font-size: 0.52rem !important;
+    }
+    .bt-stat .bt-stat-icon {
+        font-size: 16px !important;
+        right: 6px !important;
+        top: 6px !important;
+    }
+
+    /* Table responsive wrapper scroll cleanly without clipping */
+    .table-responsive {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        margin-bottom: 0.5rem !important;
+        border: 1px solid #eef2f6 !important;
+        border-radius: 6px !important;
+    }
+
+    /* Keep table cells from breaking awkwardly on mobile */
+    .table td, .table th {
+        white-space: normal !important;
+        word-break: normal !important;
+        padding: 6px 8px !important;
+    }
+
+    /* Responsive action buttons inside table rows */
+    .table .btn-group {
+        display: inline-flex !important;
+        flex-wrap: nowrap !important;
+    }
+    .table .btn-group .btn {
+        padding: 2px 6px !important;
+        font-size: 0.70rem !important;
+    }
+
+    /* Filter cards: form controls stack cleanly */
+    .app-content .card .card-body .row > [class*="col-"] {
+        margin-bottom: 8px;
+    }
+
+    /* In split table rows: ensure order/inv numbers and amounts fit cleanly */
+    .invoice-row td,
+    .bill-row td,
+    .quotation-row td,
+    .order-row td,
+    .return-row td {
+        font-size: 0.78rem !important;
+    }
+
+    /* Modal dialogs fit cleanly on mobile */
+    .modal-dialog {
+        margin: 0.5rem !important;
+        max-width: calc(100vw - 1rem) !important;
+    }
+}
+
+/* 3. Extra Small Screen Adjustments (< 576px) */
+@media (max-width: 575.98px) {
+    /* Summary cards: 2 per row cleanly */
+    .row.g-2 > [class*="col-"],
+    .row.g-3 > [class*="col-"] {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+
+    /* Badge sizes */
+    .badge {
+        font-size: 0.65rem !important;
+        padding: 0.25em 0.45em !important;
+    }
+
+    /* Floating / Single action buttons */
+    .btn-sm {
+        padding: 0.25rem 0.45rem !important;
+    }
+}

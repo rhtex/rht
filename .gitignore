@@ -125,8 +125,8 @@ _modules/*
 /results/
 /phpunit*.xml
 
-# Database Backups
+# Database Backups (Track compressed .zip backups only, ignore raw uncompressed .sql)
 backup/*.sql
-backup/*.zip
 backup/*.gz
+!backup/*.zip
 !backup/.gitkeep

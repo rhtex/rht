@@ -581,6 +581,8 @@ class DatabaseBackupService
 
         $log("Connecting to target database `{$database}`...", 45);
 
+        $restoreSuccess = false;
+
         // Check if native CLI execution is permitted on this hosting/server (e.g. cPanel often disables exec)
         $canExec = $this->isExecAvailable();
 

@@ -18,6 +18,15 @@ class MaintenanceFilter implements FilterInterface
 
     public function before(RequestInterface $request, $arguments = null)
     {
+        // Allow Preview mode if explicitly previewing from Admin Settings
+        if ($request->getGet('preview') === '1' && session()->get('role') === 'admin') {
+            return $this->renderMaintenanceResponse([
+                'message'    => 'Preview: System upgrades in progress.',
+                'started_at' => date('d M Y, h:i A'),
+                'duration'   => '15 minutes',
+            ]);
+        }
+
         if (!file_exists($this->flagFile)) {
             return null; // Not in maintenance mode, allow request
         }
@@ -53,7 +62,14 @@ class MaintenanceFilter implements FilterInterface
             return null;
         }
 
-        // Render Maintenance View with HTTP 503
+        return $this->renderMaintenanceResponse($data);
+    }
+
+    /**
+     * Render 503 Maintenance Response
+     */
+    protected function renderMaintenanceResponse(array $data)
+    {
         $response = Services::response();
         $response->setStatusCode(503, 'Service Unavailable');
         $response->setHeader('Retry-After', (string) ($data['retry'] ?? 300));
@@ -73,3 +89,4 @@ class MaintenanceFilter implements FilterInterface
         // No post-processing needed
     }
 }
+

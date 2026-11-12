@@ -652,6 +652,12 @@
                                         <p>Database Backup</p>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="<?= site_url('settings/maintenance') ?>" class="nav-link <?= ($segment1 === 'settings' && $segment2 === 'maintenance') ? 'active' : '' ?>">
+                                        <i class="fas fa-tools nav-icon text-danger"></i>
+                                        <p>Maintenance Mode</p>
+                                    </a>
+                                </li>
                                 <?php endif; ?>
                             </ul>
                         </li>

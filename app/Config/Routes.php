@@ -778,4 +778,10 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
         $routes->post('delete/(:segment)', 'BackupController::delete/$1', ['filter' => 'permission:setting.edit']);
         $routes->post('config', 'BackupController::updateConfig', ['filter' => 'permission:setting.edit']);
     });
+
+    // Maintenance Mode Routes (Web UI Toggle)
+    $routes->group('settings/maintenance', ['filter' => 'permission:setting.view'], function ($routes) {
+        $routes->get('', 'MaintenanceController::index');
+        $routes->post('toggle', 'MaintenanceController::toggle', ['filter' => 'permission:setting.edit']);
+    });
 });

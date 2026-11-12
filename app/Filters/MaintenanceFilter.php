@@ -41,8 +41,11 @@ class MaintenanceFilter implements FilterInterface
         $isLoggedIn = $session->get('isLoggedIn');
         $userRole = strtolower((string) ($session->get('role') ?? ''));
 
-        if ($isLoggedIn && $userRole !== 'admin') {
-            return $this->renderMaintenanceResponse($data);
+        if ($isLoggedIn) {
+            if ($userRole === 'admin') {
+                return null; // Admin is authenticated, allow full access
+            }
+            return $this->renderMaintenanceResponse($data); // Non-admin logged in user is blocked
         }
 
         // 1. Check for Secret Bypass Query Parameter (e.g. ?bypass=SECRET_TOKEN)

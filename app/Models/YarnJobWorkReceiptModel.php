@@ -20,8 +20,10 @@ class YarnJobWorkReceiptModel extends Model
     protected $useTimestamps = false;
 
     protected $validationRules      = [
+        'id' => 'permit_empty|integer',
         'dc_id'          => 'required|integer',
         'receipt_number' => 'required|is_unique[production_yarn_job_work_receipts.receipt_number,id,{id}]',
         'receipt_date'   => 'required|valid_date',
     ];
 }
+

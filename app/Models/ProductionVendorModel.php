@@ -23,6 +23,7 @@ class ProductionVendorModel extends Model
 
     // Validation
     protected $validationRules      = [
+        'id' => 'permit_empty|integer',
         'name'          => 'required|min_length[3]|max_length[100]',
         'business_type' => 'permit_empty|max_length[100]',
         'gst_number'    => 'permit_empty|min_length[15]|max_length[15]|is_unique[production_vendors.gst_number,id,{id}]',
@@ -60,3 +61,4 @@ class ProductionVendorModel extends Model
         return $builder->orderBy('name', 'ASC')->get()->getResultArray();
     }
 }
+

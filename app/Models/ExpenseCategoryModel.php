@@ -17,6 +17,7 @@ class ExpenseCategoryModel extends Model
     protected $updatedField  = 'updated_at';
 
     protected $validationRules = [
+        'id' => 'permit_empty|integer',
         'category_name' => 'required|min_length[3]|is_unique[expense_categories.category_name,id,{id}]',
         'status'        => 'required|in_list[active,inactive]',
     ];
@@ -39,3 +40,4 @@ class ExpenseCategoryModel extends Model
         return $builder->orderBy('category_name', 'ASC')->get()->getResultArray();
     }
 }
+

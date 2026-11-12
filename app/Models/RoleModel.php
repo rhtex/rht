@@ -17,6 +17,8 @@ class RoleModel extends Model
     protected $updatedField  = 'updated_at';
 
     protected $validationRules      = [
+        'id' => 'permit_empty|integer',
         'role_name' => 'required|min_length[3]|is_unique[roles.role_name,id,{id}]',
     ];
 }
+

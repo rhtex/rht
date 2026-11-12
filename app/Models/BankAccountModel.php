@@ -22,6 +22,7 @@ class BankAccountModel extends Model
 
     // Validation
     protected $validationRules      = [
+        'id' => 'permit_empty|integer',
         'bank_name'       => 'required|min_length[2]|max_length[100]',
         'account_number'  => 'required|min_length[5]|max_length[50]|is_unique[bank_accounts.account_number,id,{id}]',
         'ifsc_code'       => 'permit_empty',
@@ -113,3 +114,4 @@ class BankAccountModel extends Model
                     ->first();
     }
 }
+

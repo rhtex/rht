@@ -22,9 +22,11 @@ class CountryModel extends Model
 
     // Validation
     protected $validationRules      = [
+        'id' => 'permit_empty|integer',
         'name' => 'required|min_length[2]|max_length[100]|is_unique[countries.name,id,{id}]',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 }
+

@@ -17,6 +17,7 @@ class PermissionModel extends Model
     protected $updatedField  = 'updated_at';
 
     protected $validationRules = [
+        'id' => 'permit_empty|integer',
         'permission_name' => 'required|min_length[3]',
         'permission_key'  => 'required|is_unique[permissions.permission_key,id,{id}]',
         'module_id'       => 'required|is_not_unique[modules.id]',
@@ -29,3 +30,4 @@ class PermissionModel extends Model
             ->findAll();
     }
 }
+

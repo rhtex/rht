@@ -24,9 +24,11 @@ class ProductionWeaverSettlementModel extends Model
     protected $updatedField  = 'updated_at';
 
     protected $validationRules = [
+        'id' => 'permit_empty|integer',
         'settlement_number' => 'required|is_unique[production_weaver_settlements.settlement_number,id,{id}]',
         'settlement_date'   => 'required|valid_date',
         'weaver_id'         => 'required|integer',
         'status'            => 'in_list[Pending,Paid]',
     ];
 }
+

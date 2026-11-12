@@ -20,8 +20,10 @@ class YarnDyeingReceiptModel extends Model
     protected $updatedField  = 'updated_at';
 
     protected $validationRules      = [
+        'id' => 'permit_empty|integer',
         'dc_id'          => 'required|integer',
         'receipt_number' => 'required|is_unique[production_yarn_dyeing_receipts.receipt_number,id,{id}]',
         'receipt_date'   => 'required|valid_date[Y-m-d]',
     ];
 }
+

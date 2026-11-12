@@ -23,6 +23,7 @@ class WeaverModel extends Model
 
     // Validation
     protected $validationRules      = [
+        'id' => 'permit_empty|integer',
         'name'     => 'required|min_length[3]|max_length[100]',
         'code'     => 'permit_empty|is_unique[weavers.code,id,{id}]',
         'phone'    => 'permit_empty|min_length[10]',
@@ -55,3 +56,4 @@ class WeaverModel extends Model
         return $builder->orderBy('name', 'ASC')->get()->getResultArray();
     }
 }
+

@@ -17,7 +17,9 @@ class ModuleModel extends Model
     protected $updatedField  = 'updated_at';
 
     protected $validationRules = [
+        'id' => 'permit_empty|integer',
         'module_name' => 'required|min_length[3]',
         'module_slug' => 'required|is_unique[modules.module_slug,id,{id}]',
     ];
 }
+

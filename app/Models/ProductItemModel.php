@@ -25,6 +25,7 @@ class ProductItemModel extends Model
     protected $updatedField  = 'updated_at';
 
     protected $validationRules      = [
+        'id' => 'permit_empty|integer',
         'product_id' => 'required|integer',
         'barcode'    => 'required|is_unique[product_items.barcode,id,{id}]',
         'status'     => 'required|in_list[received,available,sold,damaged,returned,rejected]',
@@ -96,3 +97,4 @@ class ProductItemModel extends Model
         return $builder->orderBy('product_items.updated_at', 'DESC')->findAll();
     }
 }
+

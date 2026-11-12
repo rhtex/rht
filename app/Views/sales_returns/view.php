@@ -188,7 +188,8 @@
                         <h6 class="card-title fw-bold mb-0"><i class="fas fa-percentage me-1"></i> GST Breakdown</h6>
                     </div>
                     <div class="card-body p-0">
-                        <table class="table table-sm table-bordered mb-0 align-middle">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0 align-middle">
                             <thead class="table-light text-center small text-uppercase">
                                 <tr>
                                     <th>Rate</th>
@@ -236,6 +237,7 @@
                                 <?php endif; ?>
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>

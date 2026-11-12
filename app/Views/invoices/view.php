@@ -188,7 +188,8 @@
             <h3 class="card-title">Line Items</h3>
         </div>
         <div class="card-body p-0">
-            <table class="table table-striped">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
                 <thead class="table-light">
                     <tr>
                         <th width="5%">#</th>
@@ -305,6 +306,7 @@
                     <tr class="table-info"><td colspan="6" class="text-end fw-bold">Balance Due:</td><td class="text-end fw-bold">₹<?= number_format($invoice['balance'], 2) ?></td></tr>
                 </tfoot>
             </table>
+            </div>
         </div>
     </div>
 

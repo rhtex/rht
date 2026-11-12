@@ -129,7 +129,8 @@
     <div class="card card-outline card-secondary">
         <div class="card-header"><h3 class="card-title">Line Items</h3></div>
         <div class="card-body p-0">
-            <table class="table table-striped">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
                 <thead class="table-light">
                     <tr>
                         <th width="5%">#</th>
@@ -205,6 +206,7 @@
                     <tr class="table-primary"><td colspan="6" class="text-end fw-bold fs-5">Total:</td><td class="text-end fw-bold fs-5">₹<?= number_format($order['total_amount'], 2) ?></td></tr>
                 </tfoot>
             </table>
+            </div>
         </div>
     </div>
 

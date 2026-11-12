@@ -464,11 +464,25 @@ h4,
 
     /* Table responsive wrapper scroll cleanly without clipping */
     .table-responsive {
+        width: 100% !important;
+        max-width: 100% !important;
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch !important;
         margin-bottom: 0.5rem !important;
         border: 1px solid #eef2f6 !important;
         border-radius: 6px !important;
+        display: block !important;
+    }
+
+    /* Force tables inside responsive containers to maintain proper min-width so columns never crunch or overlap */
+    .table-responsive > .table {
+        margin-bottom: 0 !important;
+        min-width: 600px;
+    }
+
+    /* Small helper tables (like 2-column info key-value tables) don't need excessive width */
+    .table-responsive > .table.table-sm.table-borderless {
+        min-width: 100% !important;
     }
 
     /* Keep table cells from breaking awkwardly on mobile */

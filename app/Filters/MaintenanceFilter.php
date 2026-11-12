@@ -36,6 +36,15 @@ class MaintenanceFilter implements FilterInterface
 
         $secret = $data['secret'] ?? '';
 
+        // If a logged-in user is NOT an admin, they must NEVER bypass maintenance mode
+        $session = session();
+        $isLoggedIn = $session->get('isLoggedIn');
+        $userRole = strtolower((string) ($session->get('role') ?? ''));
+
+        if ($isLoggedIn && $userRole !== 'admin') {
+            return $this->renderMaintenanceResponse($data);
+        }
+
         // 1. Check for Secret Bypass Query Parameter (e.g. ?bypass=SECRET_TOKEN)
         $queryBypass = $request->getGet('bypass');
         if (!empty($secret) && $queryBypass === $secret) {

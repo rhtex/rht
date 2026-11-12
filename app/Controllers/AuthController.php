@@ -50,6 +50,15 @@ class AuthController extends BaseController
 
     public function logout()
     {
+        // Clear maintenance bypass cookie upon logout if present
+        if (isset($_COOKIE['rht_maintenance_bypass'])) {
+            setcookie('rht_maintenance_bypass', '', [
+                'expires' => time() - 3600,
+                'path'    => '/',
+            ]);
+            unset($_COOKIE['rht_maintenance_bypass']);
+        }
+
         session()->destroy();
         return redirect()->to('/login');
     }

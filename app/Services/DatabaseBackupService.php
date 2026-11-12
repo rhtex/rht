@@ -485,21 +485,34 @@ class DatabaseBackupService
 
     /**
      * Restore database from a given SQL or ZIP backup file
+     *
+     * @param string $filePath
+     * @param callable|null $logCallback function(string $message, int $pct)
+     * @return array
      */
-    public function restoreBackup(string $filePath): array
+    public function restoreBackup(string $filePath, ?callable $logCallback = null): array
     {
         @set_time_limit(0);
         @ini_set('memory_limit', '512M');
 
+        $log = function(string $msg, int $pct) use ($logCallback) {
+            if ($logCallback && is_callable($logCallback)) {
+                call_user_func($logCallback, $msg, $pct);
+            }
+        };
+
         if (!file_exists($filePath)) {
+            $log("Error: Backup file does not exist on disk.", 0);
             return ['success' => false, 'error' => 'Backup file does not exist.'];
         }
 
+        $log("Validating backup file...", 10);
         $tempExtractedSql = null;
         $sqlFilePath = $filePath;
 
         // If file is a ZIP archive, extract the SQL dump inside
         if (str_ends_with(strtolower($filePath), '.zip')) {
+            $log("Detected ZIP archive. Preparing extraction...", 15);
             if (!class_exists('ZipArchive')) {
                 return ['success' => false, 'error' => 'PHP ZipArchive extension is required to extract .zip backups.'];
             }
@@ -524,6 +537,7 @@ class DatabaseBackupService
                 return ['success' => false, 'error' => 'No .sql file found inside the uploaded ZIP archive.'];
             }
 
+            $log("Extracting `{$sqlEntryName}` from ZIP...", 25);
             $extractDir = $this->backupDir . 'temp_' . uniqid() . DIRECTORY_SEPARATOR;
             @mkdir($extractDir, 0755, true);
             $zip->extractTo($extractDir, [$sqlEntryName]);
@@ -535,6 +549,7 @@ class DatabaseBackupService
             if (!file_exists($sqlFilePath)) {
                 return ['success' => false, 'error' => 'Could not extract SQL file from ZIP archive.'];
             }
+            $log("Extracted SQL file successfully (" . round(filesize($sqlFilePath)/(1024*1024), 2) . " MB).", 35);
         }
 
         $dbConfig = config('Database');
@@ -544,6 +559,8 @@ class DatabaseBackupService
         $pass     = $default['password'] ?? '';
         $database = $default['database'] ?? '';
         $port     = $default['port'] ?? 3306;
+
+        $log("Connecting to target database `{$database}`...", 45);
 
         // Try native mysql CLI first
         $candidates = [
@@ -563,9 +580,9 @@ class DatabaseBackupService
         }
 
         $restoreSuccess = false;
-        $restoreError = null;
 
         if ($mysqlBinary) {
+            $log("Executing high-speed MySQL restore engine...", 55);
             $passArg = !empty($pass) ? '--password=' . escapeshellarg($pass) : '';
             $cmd = sprintf(
                 '%s --user=%s %s --host=%s --port=%s %s < %s',
@@ -580,6 +597,9 @@ class DatabaseBackupService
             @exec($cmd, $output, $returnVar);
             if ($returnVar === 0) {
                 $restoreSuccess = true;
+                $log("All database tables, routines, and data imported successfully.", 90);
+            } else {
+                $log("Native CLI returned exit code {$returnVar}. Switching to PHP transaction runner...", 60);
             }
         }
 
@@ -593,9 +613,15 @@ class DatabaseBackupService
 
             $sql = '';
             $this->db->query("SET FOREIGN_KEY_CHECKS = 0;");
+            $log("Executing SQL statements with Foreign Key checks disabled...", 65);
+
+            $fileSize = filesize($sqlFilePath);
+            $bytesRead = 0;
+            $lastPct = 65;
 
             while (!feof($handle)) {
                 $line = fgets($handle);
+                $bytesRead += strlen($line);
                 $trimmed = trim($line);
                 if ($trimmed === '' || str_starts_with($trimmed, '--') || str_starts_with($trimmed, '/*')) {
                     continue;
@@ -608,6 +634,14 @@ class DatabaseBackupService
                         log_message('error', 'Restore statement error: ' . $e->getMessage());
                     }
                     $sql = '';
+
+                    if ($fileSize > 0) {
+                        $currentPct = (int) (65 + (($bytesRead / $fileSize) * 25));
+                        if ($currentPct > $lastPct && $currentPct % 5 === 0) {
+                            $lastPct = $currentPct;
+                            $log("Imported " . round($bytesRead / (1024 * 1024), 1) . " MB...", $currentPct);
+                        }
+                    }
                 }
             }
             fclose($handle);
@@ -615,10 +649,23 @@ class DatabaseBackupService
             $restoreSuccess = true;
         }
 
-        // Clean up temporary extracted directory if ZIP was used
+        $log("Cleaning up temporary files...", 95);
         $this->cleanupTempDir($tempExtractedSql);
 
-        return ['success' => true];
+        $tables = $this->db->listTables();
+        $totalTables = count($tables);
+        $totalRows = 0;
+        foreach ($tables as $t) {
+            $totalRows += (int) $this->db->table($t)->countAllResults();
+        }
+
+        $log("Restore complete! Total tables: {$totalTables}, Total rows: " . number_format($totalRows) . ".", 100);
+
+        return [
+            'success'      => true,
+            'tables_count' => $totalTables,
+            'rows_count'   => $totalRows,
+        ];
     }
 
     /**

@@ -767,6 +767,8 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->group('settings/backup', ['filter' => 'permission:setting.view'], function ($routes) {
         $routes->get('', 'BackupController::index');
         $routes->post('create', 'BackupController::create', ['filter' => 'permission:setting.edit']);
+        $routes->get('restore-page', 'BackupController::restorePage', ['filter' => 'permission:setting.edit']);
+        $routes->post('upload-restore-ajax', 'BackupController::uploadAndRestoreAjax', ['filter' => 'permission:setting.edit']);
         $routes->post('upload-restore', 'BackupController::uploadAndRestore', ['filter' => 'permission:setting.edit']);
         $routes->get('download/(:segment)', 'BackupController::download/$1');
         $routes->post('restore/(:segment)', 'BackupController::restore/$1', ['filter' => 'permission:setting.edit']);

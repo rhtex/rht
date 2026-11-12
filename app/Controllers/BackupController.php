@@ -166,6 +166,160 @@ class BackupController extends BaseController
     }
 
     /**
+     * Dedicated Database Restore Page with Progress & Restored History
+     */
+    public function restorePage()
+    {
+        $db = \Config\Database::connect();
+
+        // Fetch restore history
+        $restores = $db->table('db_restores')
+            ->select('db_restores.*, users.name as user_name')
+            ->join('users', 'users.id = db_restores.restored_by', 'left')
+            ->orderBy('db_restores.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        $data = [
+            'title'    => 'Restore Database from Backup',
+            'dbName'   => $db->getDatabase(),
+            'restores' => $restores,
+        ];
+
+        return view('settings/backup/restore', $data);
+    }
+
+    /**
+     * AJAX Endpoint for Upload & Restore with Log Tracking
+     */
+    public function uploadAndRestoreAjax()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+
+        $startTime = microtime(true);
+        $logs = [];
+        $logCallback = function(string $msg, int $pct) use (&$logs) {
+            $logs[] = [
+                'time'    => date('H:i:s'),
+                'pct'     => $pct,
+                'message' => $msg,
+            ];
+        };
+
+        $file = $this->request->getFile('backup_file');
+        if (!$file || !$file->isValid()) {
+            return $this->response->setJSON([
+                'success' => false,
+                'error'   => 'Please select a valid backup file (.zip or .sql).',
+                'logs'    => $logs,
+            ]);
+        }
+
+        $clientName = $file->getClientName();
+        $ext = strtolower($file->getClientExtension());
+        if ($ext !== 'sql' && $ext !== 'zip') {
+            return $this->response->setJSON([
+                'success' => false,
+                'error'   => 'Invalid file type. Only compressed .zip or .sql files are allowed.',
+                'logs'    => $logs,
+            ]);
+        }
+
+        $logCallback("Uploaded file `{$clientName}` verified.", 5);
+
+        $backupDir = $this->backupService->getBackupDir();
+        $safeName = 'restore_' . date('Y-m-d_H-i-s') . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $clientName);
+
+        $db = \Config\Database::connect();
+        $userId = session()->get('user_id') ? (int) session()->get('user_id') : null;
+
+        // Insert pending restore record
+        $db->table('db_restores')->insert([
+            'filename'          => $safeName,
+            'original_filename' => $clientName,
+            'file_size'         => $file->getSize(),
+            'status'            => 'in_progress',
+            'restored_by'       => $userId,
+            'created_at'        => date('Y-m-d H:i:s'),
+        ]);
+        $restoreId = $db->insertID();
+
+        try {
+            $file->move($backupDir, $safeName);
+            $targetPath = $backupDir . $safeName;
+
+            // Perform restore with live log callback
+            $res = $this->backupService->restoreBackup($targetPath, $logCallback);
+            $duration = round(microtime(true) - $startTime, 2);
+
+            if ($res['success']) {
+                $tablesCount = $res['tables_count'] ?? 0;
+                $rowsCount = $res['rows_count'] ?? 0;
+
+                // Update restore history
+                $db->table('db_restores')->where('id', $restoreId)->update([
+                    'status'           => 'completed',
+                    'tables_count'     => $tablesCount,
+                    'rows_count'       => $rowsCount,
+                    'duration_seconds' => $duration,
+                    'created_at'       => date('Y-m-d H:i:s'),
+                ]);
+
+                // Also track in db_backups so it appears in the backup pool
+                $db->table('db_backups')->insert([
+                    'filename'      => $safeName,
+                    'file_path'     => 'backup/' . $safeName,
+                    'file_size'     => file_exists($targetPath) ? filesize($targetPath) : 0,
+                    'source'        => 'manual',
+                    'tables_count'  => $tablesCount,
+                    'rows_count'    => $rowsCount,
+                    'email_status'  => 'disabled',
+                    'gdrive_status' => 'disabled',
+                    'created_by'    => $userId,
+                    'created_at'    => date('Y-m-d H:i:s'),
+                ]);
+
+                return $this->response->setJSON([
+                    'success'      => true,
+                    'message'      => "Database successfully restored from `{$clientName}` in {$duration}s!",
+                    'tables_count' => $tablesCount,
+                    'rows_count'   => $rowsCount,
+                    'duration'     => $duration,
+                    'logs'         => $logs,
+                ]);
+            }
+
+            $errMsg = $res['error'] ?? 'Unknown restore error';
+            $db->table('db_restores')->where('id', $restoreId)->update([
+                'status'           => 'failed',
+                'error_message'    => $errMsg,
+                'duration_seconds' => round(microtime(true) - $startTime, 2),
+            ]);
+
+            return $this->response->setJSON([
+                'success' => false,
+                'error'   => $errMsg,
+                'logs'    => $logs,
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'uploadAndRestoreAjax error: ' . $e->getMessage());
+            $db->table('db_restores')->where('id', $restoreId)->update([
+                'status'           => 'failed',
+                'error_message'    => $e->getMessage(),
+                'duration_seconds' => round(microtime(true) - $startTime, 2),
+            ]);
+            $logCallback("Fatal Error: " . $e->getMessage(), 100);
+
+            return $this->response->setJSON([
+                'success' => false,
+                'error'   => $e->getMessage(),
+                'logs'    => $logs,
+            ]);
+        }
+    }
+
+    /**
      * Restore Database from an uploaded SQL or ZIP backup file
      */
     public function uploadAndRestore()

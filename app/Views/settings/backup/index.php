@@ -8,9 +8,9 @@
         <h1 class="m-0"><i class="fas fa-database text-warning me-2"></i>Database Backup & Restore</h1>
     </div>
     <div class="col-sm-6 text-sm-end mt-2 mt-sm-0">
-        <button type="button" class="btn btn-warning me-1" data-bs-toggle="modal" data-bs-target="#uploadRestoreModal">
-            <i class="fas fa-file-archive me-1"></i> Upload & Restore (.zip / .sql)
-        </button>
+        <a href="<?= site_url('settings/backup/restore-page') ?>" class="btn btn-warning me-1">
+            <i class="fas fa-undo me-1"></i> Restore Console (.zip / .sql)
+        </a>
         <form action="<?= site_url('settings/backup/create') ?>" method="post" class="d-inline" id="manualBackupForm">
             <?= csrf_field() ?>
             <button type="submit" class="btn btn-primary" id="btnCreateBackup">

@@ -38,6 +38,7 @@ class Filters extends BaseFilters
         'permission' => \App\Filters\PermissionFilter::class,
         'apiauth' => \App\Filters\ApiAuth::class,
         'language' => \App\Filters\LanguageFilter::class,
+        'maintenance' => \App\Filters\MaintenanceFilter::class,
     ];
 
     /**
@@ -55,9 +56,10 @@ class Filters extends BaseFilters
      */
     public array $required = [
         'before' => [
-            'forcehttps', // Force Global Secure Requests
+            'maintenance', // Check Maintenance Mode First (Before all routes and DB access)
+            'forcehttps',  // Force Global Secure Requests
             // 'pagecache',  // Web Page Caching
-            'language',   // Language Setter
+            'language',    // Language Setter
         ],
         'after' => [
             // 'pagecache',   // Web Page Caching

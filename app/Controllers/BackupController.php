@@ -88,6 +88,9 @@ class BackupController extends BaseController
      */
     public function create()
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+
         try {
             $userId = session()->get('user_id') ? (int) session()->get('user_id') : null;
             $res = $this->backupService->createBackup('manual', $userId);
@@ -112,31 +115,70 @@ class BackupController extends BaseController
     }
 
     /**
+     * Resolve backup file path and filename from ID or raw filename
+     */
+    protected function resolveBackupFile(string $idOrFilename): ?array
+    {
+        $backupDir = $this->backupService->getBackupDir();
+        $filename = null;
+        $backupRow = null;
+
+        // If numeric ID, query the db_backups table
+        if (ctype_digit($idOrFilename)) {
+            $db = \Config\Database::connect();
+            $backupRow = $db->table('db_backups')->where('id', (int) $idOrFilename)->get()->getRowArray();
+            if ($backupRow && !empty($backupRow['filename'])) {
+                $filename = basename($backupRow['filename']);
+            }
+        }
+
+        if (!$filename) {
+            $filename = basename($idOrFilename);
+        }
+
+        $filePath = $backupDir . $filename;
+        if (!file_exists($filePath)) {
+            return null;
+        }
+
+        return [
+            'id'       => $backupRow['id'] ?? null,
+            'filename' => $filename,
+            'filepath' => $filePath,
+            'row'      => $backupRow,
+        ];
+    }
+
+    /**
      * Download SQL Backup File
      */
-    public function download(string $filename)
+    public function download(string $idOrFilename)
     {
-        $safeName = basename($filename);
-        $filePath = $this->backupService->getBackupDir() . $safeName;
+        ini_set('memory_limit', '512M');
 
-        if (!file_exists($filePath)) {
+        $resolved = $this->resolveBackupFile($idOrFilename);
+        if (!$resolved) {
             return redirect()->to('settings/backup')->with('error', 'File not found on disk.');
         }
 
-        return $this->response->download($filePath, null)->setFileName($safeName);
+        return $this->response->download($resolved['filepath'], null)->setFileName($resolved['filename']);
     }
 
     /**
      * Restore Database from a specific SQL backup file
      */
-    public function restore(string $filename)
+    public function restore(string $idOrFilename)
     {
-        $safeName = basename($filename);
-        $filePath = $this->backupService->getBackupDir() . $safeName;
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
 
-        if (!file_exists($filePath)) {
-            return redirect()->to('settings/backup')->with('error', 'Selected backup file does not exist.');
+        $resolved = $this->resolveBackupFile($idOrFilename);
+        if (!$resolved) {
+            return redirect()->to('settings/backup')->with('error', 'Selected backup file does not exist on disk.');
         }
+
+        $safeName = $resolved['filename'];
+        $filePath = $resolved['filepath'];
 
         try {
             $res = $this->backupService->restoreBackup($filePath);
@@ -153,17 +195,26 @@ class BackupController extends BaseController
     /**
      * Send Existing Backup to Email
      */
-    public function email(string $filename)
+    public function email(string $idOrFilename)
     {
-        $safeName = basename($filename);
-        $filePath = $this->backupService->getBackupDir() . $safeName;
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
 
-        if (!file_exists($filePath)) {
+        $resolved = $this->resolveBackupFile($idOrFilename);
+        if (!$resolved) {
             return redirect()->to('settings/backup')->with('error', 'Backup file does not exist on disk.');
         }
 
+        $safeName = $resolved['filename'];
+        $filePath = $resolved['filepath'];
+
         $res = $this->backupService->sendBackupByEmail($filePath, $safeName);
         if ($res['success']) {
+            $db = \Config\Database::connect();
+            $db->table('db_backups')->where('filename', $safeName)->update([
+                'email_status' => 'sent',
+                'email_error'  => null,
+            ]);
             return redirect()->to('settings/backup')->with('success', "Backup `{$safeName}` emailed successfully!");
         }
 
@@ -173,14 +224,18 @@ class BackupController extends BaseController
     /**
      * Upload Existing Backup to Google Drive
      */
-    public function gdrive(string $filename)
+    public function gdrive(string $idOrFilename)
     {
-        $safeName = basename($filename);
-        $filePath = $this->backupService->getBackupDir() . $safeName;
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
 
-        if (!file_exists($filePath)) {
+        $resolved = $this->resolveBackupFile($idOrFilename);
+        if (!$resolved) {
             return redirect()->to('settings/backup')->with('error', 'Backup file does not exist on disk.');
         }
+
+        $safeName = $resolved['filename'];
+        $filePath = $resolved['filepath'];
 
         $res = $this->backupService->uploadToGoogleDrive($filePath, $safeName);
         if ($res['success']) {
@@ -199,17 +254,32 @@ class BackupController extends BaseController
     /**
      * Delete a Backup File
      */
-    public function delete(string $filename)
+    public function delete(string $idOrFilename)
     {
-        $safeName = basename($filename);
-        $filePath = $this->backupService->getBackupDir() . $safeName;
+        $backupDir = $this->backupService->getBackupDir();
+        $safeName = null;
+        $db = \Config\Database::connect();
 
+        if (ctype_digit($idOrFilename)) {
+            $backupRow = $db->table('db_backups')->where('id', (int) $idOrFilename)->get()->getRowArray();
+            if ($backupRow && !empty($backupRow['filename'])) {
+                $safeName = basename($backupRow['filename']);
+            }
+        }
+
+        if (!$safeName) {
+            $safeName = basename($idOrFilename);
+        }
+
+        $filePath = $backupDir . $safeName;
         if (file_exists($filePath)) {
             @unlink($filePath);
         }
 
-        $db = \Config\Database::connect();
         $db->table('db_backups')->where('filename', $safeName)->delete();
+        if (ctype_digit($idOrFilename)) {
+            $db->table('db_backups')->where('id', (int) $idOrFilename)->delete();
+        }
 
         return redirect()->to('settings/backup')->with('success', "Backup `{$safeName}` deleted successfully.");
     }
@@ -221,27 +291,45 @@ class BackupController extends BaseController
     {
         $db = \Config\Database::connect();
         $post = $this->request->getPost();
+        $section = $post['section'] ?? '';
 
-        $keys = [
-            'backup_auto_enabled',
-            'backup_cron_time',
-            'backup_email_enabled',
-            'backup_email_recipients',
-            'backup_email_smtp_host',
-            'backup_email_smtp_port',
-            'backup_email_smtp_user',
-            'backup_email_smtp_pass',
-            'backup_email_smtp_crypto',
-            'backup_email_from_email',
-            'backup_email_from_name',
-            'backup_gdrive_enabled',
-            'backup_gdrive_client_id',
-            'backup_gdrive_client_secret',
-            'backup_gdrive_refresh_token',
-            'backup_gdrive_folder_id',
+        // Define fields managed by each section
+        $sectionFields = [
+            'auto_backup' => [
+                'backup_auto_enabled',
+                'backup_cron_time',
+            ],
+            'email' => [
+                'backup_email_enabled',
+                'backup_email_recipients',
+                'backup_email_smtp_host',
+                'backup_email_smtp_port',
+                'backup_email_smtp_user',
+                'backup_email_smtp_pass',
+                'backup_email_smtp_crypto',
+                'backup_email_from_email',
+                'backup_email_from_name',
+            ],
+            'gdrive' => [
+                'backup_gdrive_enabled',
+                'backup_gdrive_client_id',
+                'backup_gdrive_client_secret',
+                'backup_gdrive_refresh_token',
+                'backup_gdrive_folder_id',
+            ],
         ];
 
-        foreach ($keys as $key) {
+        // If section is specified, only update fields belonging to that section
+        // Otherwise, update whatever valid keys were posted
+        if (isset($sectionFields[$section])) {
+            $keysToUpdate = $sectionFields[$section];
+        } else {
+            // Fallback: all possible keys
+            $keysToUpdate = array_merge(...array_values($sectionFields));
+        }
+
+        foreach ($keysToUpdate as $key) {
+            // For checkboxes (e.g. enabled switches), if absent in the specific section's post, treat as '0'
             $val = $post[$key] ?? '0';
             if (is_array($val)) {
                 $val = implode(',', $val);
@@ -264,7 +352,7 @@ class BackupController extends BaseController
             }
         }
 
-        return redirect()->to('settings/backup')->with('success', 'Backup & Cloud configurations updated successfully.');
+        return redirect()->to('settings/backup')->with('success', 'Backup configuration updated successfully.');
     }
 }
 

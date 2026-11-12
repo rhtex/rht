@@ -38,6 +38,9 @@ class DatabaseBackupService
      */
     public function createBackup(string $source = 'manual', ?int $userId = null): array
     {
+        @set_time_limit(0);
+        @ini_set('memory_limit', '512M');
+
         $dbName = $this->db->getDatabase();
         $timestamp = date('Y-m-d_H-i-s');
         $filename = "backup_{$dbName}_{$timestamp}.sql";
@@ -464,6 +467,9 @@ class DatabaseBackupService
      */
     public function restoreBackup(string $filePath): array
     {
+        @set_time_limit(0);
+        @ini_set('memory_limit', '512M');
+
         if (!file_exists($filePath)) {
             return ['success' => false, 'error' => 'Backup file does not exist.'];
         }

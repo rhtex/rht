@@ -289,6 +289,7 @@
                 <div class="tab-pane fade" id="tab-auto-backup" role="tabpanel" aria-labelledby="auto-backup-tab">
                     <form action="<?= site_url('settings/backup/config') ?>" method="post">
                         <?= csrf_field() ?>
+                        <input type="hidden" name="section" value="auto_backup">
                         <div class="row">
                             <div class="col-md-7">
                                 <div class="form-check form-switch mb-3">
@@ -350,6 +351,7 @@
                 <div class="tab-pane fade" id="tab-email" role="tabpanel" aria-labelledby="email-tab">
                     <form action="<?= site_url('settings/backup/config') ?>" method="post">
                         <?= csrf_field() ?>
+                        <input type="hidden" name="section" value="email">
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="form-check form-switch mb-3">
@@ -434,6 +436,7 @@
                 <div class="tab-pane fade" id="tab-gdrive" role="tabpanel" aria-labelledby="gdrive-tab">
                     <form action="<?= site_url('settings/backup/config') ?>" method="post">
                         <?= csrf_field() ?>
+                        <input type="hidden" name="section" value="gdrive">
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="form-check form-switch mb-3">

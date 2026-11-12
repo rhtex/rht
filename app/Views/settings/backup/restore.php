@@ -58,15 +58,9 @@
                             </div>
                         </div>
 
-                        <div class="card bg-light border-0 mb-3">
-                            <div class="card-body py-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="confirmRestore" required>
-                                    <label class="form-check-label small fw-bold text-danger" for="confirmRestore">
-                                        I understand that all current tables and data in <u><?= esc($dbName) ?></u> will be permanently overwritten.
-                                    </label>
-                                </div>
-                            </div>
+                        <div class="alert alert-warning py-2 small mb-3 border-0 bg-warning bg-opacity-10 text-dark">
+                            <i class="fas fa-shield-alt text-warning me-1"></i>
+                            A confirmation prompt will appear to verify before restore begins.
                         </div>
 
                         <button type="submit" class="btn btn-danger w-100 py-2 fw-bold" id="btnStartRestore">
@@ -188,6 +182,45 @@
         </div>
     </div>
 
+    <!-- Modern Confirmation Modal -->
+    <div class="modal fade" id="confirmRestoreModal" tabindex="-1" aria-labelledby="confirmRestoreModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold" id="confirmRestoreModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirm Database Restore
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <span class="rounded-circle bg-danger bg-opacity-10 text-danger p-3 d-inline-block">
+                            <i class="fas fa-database fa-3x"></i>
+                        </span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-2">Are you sure you want to proceed?</h5>
+                    <p class="text-muted mb-3">
+                        Restoring will <strong class="text-danger">permanently overwrite and recreate</strong> all tables and records in target database <code class="fw-bold text-danger"><?= esc($dbName) ?></code> with the contents of:
+                    </p>
+                    <div class="p-2 bg-light rounded font-monospace small text-primary mb-3 text-truncate" id="confirmModalFileName">
+                        filename.zip
+                    </div>
+                    <p class="text-secondary small mb-0">
+                        <i class="fas fa-info-circle me-1"></i>Ensure no active transactions are underway. This operation cannot be undone.
+                    </p>
+                </div>
+                <div class="modal-footer bg-light d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger px-4 fw-bold" id="btnConfirmProceed">
+                        <i class="fas fa-undo me-1"></i> Yes, Restore Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- View Log Modal -->
     <div class="modal fade" id="restoreLogModal" tabindex="-1" aria-labelledby="restoreLogModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -256,24 +289,51 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    const confirmModalElem = document.getElementById('confirmRestoreModal');
+    const confirmModal = confirmModalElem ? new bootstrap.Modal(confirmModalElem) : null;
+    const confirmFileNameElem = document.getElementById('confirmModalFileName');
+    const btnProceed = document.getElementById('btnConfirmProceed');
+
+    let pendingFormData = null;
+    let pendingFile = null;
+
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
             const fileInput = document.getElementById('backup_file');
             if (!fileInput.files || fileInput.files.length === 0) {
-                alert('Please select a backup file (.zip or .sql).');
+                // Modern shake or alert feedback
+                fileInput.classList.add('is-invalid');
+                setTimeout(() => fileInput.classList.remove('is-invalid'), 2000);
                 return;
             }
 
-            const confirmCheck = document.getElementById('confirmRestore');
-            if (!confirmCheck.checked) {
-                alert('Please check the confirmation box to proceed.');
+            pendingFile = fileInput.files[0];
+            pendingFormData = new FormData(form);
+
+            // Populate file details in modern confirmation modal
+            const sizeMb = (pendingFile.size / (1024 * 1024)).toFixed(2);
+            confirmFileNameElem.innerHTML = `<i class="fas fa-file-archive me-1 text-secondary"></i><strong>${pendingFile.name}</strong> (${sizeMb} MB)`;
+
+            // Open modern Bootstrap confirmation modal
+            if (confirmModal) {
+                confirmModal.show();
+            }
+        });
+    }
+
+    if (btnProceed) {
+        btnProceed.addEventListener('click', function() {
+            if (confirmModal) {
+                confirmModal.hide();
+            }
+
+            if (!pendingFormData || !pendingFile) {
                 return;
             }
 
-            const file = fileInput.files[0];
-            const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+            const sizeMb = (pendingFile.size / (1024 * 1024)).toFixed(2);
 
             // Lock UI
             btn.disabled = true;
@@ -283,10 +343,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             terminal.innerHTML = '';
             const now = new Date().toLocaleTimeString();
-            appendLog(now, `Starting database restore process with file: ${file.name} (${sizeMb} MB)...`, 'warning');
+            appendLog(now, `Starting database restore process with file: ${pendingFile.name} (${sizeMb} MB)...`, 'warning');
             setProgress(5, 'Uploading to server...');
 
-            const formData = new FormData(form);
             const xhr = new XMLHttpRequest();
 
             // Track upload progress (0% - 30%)
@@ -353,7 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 appendLog(new Date().toLocaleTimeString(), 'Network error occurred during restore upload.', 'danger');
             };
 
-            xhr.send(formData);
+            xhr.send(pendingFormData);
         });
     }
 

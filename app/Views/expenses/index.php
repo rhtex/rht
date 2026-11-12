@@ -117,9 +117,9 @@
                 </thead>
                 <tbody>
                     <?php if(!empty($expenses)): ?>
-                        <?php foreach($expenses as $expense): ?>
+                        <?php foreach($expenses as $index => $expense): ?>
                         <tr>
-                            <td class="text-muted fw-semibold">#<?= $expense['id'] ?></td>
+                            <td class="text-muted fw-semibold"><?= $index + 1 ?></td>
                             <td><?= date('d/m/Y', strtotime($expense['expense_date'])) ?></td>
                             <td>
                                 <span class="badge bg-light text-primary border fw-semibold">

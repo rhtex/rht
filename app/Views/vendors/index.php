@@ -117,9 +117,7 @@
                     }
                     ?>
                     <tr>
-                        <th><a href="<?= getSortLink('vendors.id', $currentSortBy, $currentSortOrder) ?>"
-                                class="text-dark text-decoration-none">ID
-                                <?= getSortIcon('vendors.id', $currentSortBy, $currentSortOrder) ?></a></th>
+                        <th style="width: 60px;" class="text-center">#</th>
                         <th><a href="<?= getSortLink('vendors.name', $currentSortBy, $currentSortOrder) ?>"
                                 class="text-dark text-decoration-none">Vendor Name (City)
                                 <?= getSortIcon('vendors.name', $currentSortBy, $currentSortOrder) ?></a></th>
@@ -135,9 +133,9 @@
                 </thead>
                 <tbody id="vendorTableBody">
                     <?php if (!empty($vendors)): ?>
-                        <?php foreach ($vendors as $vendor): ?>
+                        <?php foreach ($vendors as $index => $vendor): ?>
                             <tr>
-                                <td class="text-center text-muted fw-bold">#<?= $vendor['id'] ?></td>
+                                <td class="text-center text-muted fw-bold"><?= $index + 1 ?></td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="bt-avatar"><?= esc(strtoupper(mb_substr($vendor['name'], 0, 1))) ?></span>
@@ -239,6 +237,7 @@
                         if (data.status === 'success') {
                             const tbody = document.getElementById('vendorTableBody');
                             data.data.forEach(vendor => {
+                                const rowIndex = tbody.querySelectorAll('tr').length + 1;
                                 const pendingBalance = parseFloat(vendor.pending_balance);
                                 const balanceType = pendingBalance >= 0 ? 'Payable' : 'Advance';
                                 const balanceClass = pendingBalance >= 0 ? 'text-danger' : 'text-success';
@@ -247,7 +246,7 @@
                                 const firstLetter = (vendor.name || 'V').charAt(0).toUpperCase();
                                 const row = `
                                 <tr>
-                                    <td class="text-center text-muted fw-bold">#${vendor.id}</td>
+                                    <td class="text-center text-muted fw-bold">${rowIndex}</td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="bt-avatar">${firstLetter}</span>

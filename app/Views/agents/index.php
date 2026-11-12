@@ -77,9 +77,9 @@
                 </thead>
                 <tbody>
                     <?php if(!empty($agents)): ?>
-                        <?php foreach($agents as $agent): ?>
+                        <?php foreach($agents as $index => $agent): ?>
                         <tr>
-                            <td class="text-muted fw-semibold">#<?= $agent['id'] ?></td>
+                            <td class="text-muted fw-semibold"><?= $index + 1 ?></td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle bg-primary-subtle text-primary fw-bold me-2 d-flex align-items-center justify-content-center" style="width:36px;height:36px;min-width:36px;">

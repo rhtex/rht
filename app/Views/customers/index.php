@@ -128,9 +128,7 @@
                     }
                     ?>
                     <tr>
-                        <th><a href="<?= getSortLink('customers.id', $currentSortBy, $currentSortOrder) ?>"
-                                class="text-dark text-decoration-none">ID
-                                <?= getSortIcon('customers.id', $currentSortBy, $currentSortOrder) ?></a></th>
+                        <th style="width: 60px;" class="text-center">#</th>
                         <th><a href="<?= getSortLink('customers.name', $currentSortBy, $currentSortOrder) ?>"
                                 class="text-dark text-decoration-none">Customer Name (City)
                                 <?= getSortIcon('customers.name', $currentSortBy, $currentSortOrder) ?></a></th>
@@ -146,9 +144,9 @@
                 </thead>
                 <tbody id="customerTableBody">
                     <?php if (!empty($customers)): ?>
-                        <?php foreach ($customers as $customer): ?>
+                        <?php foreach ($customers as $index => $customer): ?>
                             <tr>
-                                <td class="text-center text-muted fw-bold">#<?= $customer['id'] ?></td>
+                                <td class="text-center text-muted fw-bold"><?= $index + 1 ?></td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="bt-avatar"><?= esc(strtoupper(mb_substr($customer['name'], 0, 1))) ?></span>
@@ -250,6 +248,7 @@
                         if (data.status === 'success') {
                             const tbody = document.getElementById('customerTableBody');
                             data.data.forEach(customer => {
+                                const rowIndex = tbody.querySelectorAll('tr').length + 1;
                                 const pendingBalance = parseFloat(customer.pending_balance);
                                 const balanceType = pendingBalance >= 0 ? 'Dr' : 'Cr';
                                 const balanceClass = pendingBalance >= 0 ? 'text-danger' : 'text-success';
@@ -258,7 +257,7 @@
                                 const firstLetter = (customer.name || 'C').charAt(0).toUpperCase();
                                 const row = `
                                 <tr>
-                                    <td class="text-center text-muted fw-bold">#${customer.id}</td>
+                                    <td class="text-center text-muted fw-bold">${rowIndex}</td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="bt-avatar">${firstLetter}</span>

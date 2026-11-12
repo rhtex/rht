@@ -114,9 +114,9 @@ if (!empty($categories)) {
                 </thead>
                 <tbody>
                     <?php if(!empty($categories)): ?>
-                        <?php foreach($categories as $category): ?>
+                        <?php foreach($categories as $index => $category): ?>
                         <tr>
-                            <td class="text-muted fw-semibold">#<?= $category['id'] ?></td>
+                            <td class="text-muted fw-semibold"><?= $index + 1 ?></td>
                             <td>
                                 <strong class="text-dark"><i class="fas fa-tag text-primary me-2"></i><?= esc($category['category_name']) ?></strong>
                             </td>

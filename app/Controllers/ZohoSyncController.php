@@ -80,13 +80,29 @@ class ZohoSyncController extends BaseController
     public function syncFromZoho()
     {
         @ini_set('max_execution_time', '0');
+        @ini_set('memory_limit', '1024M');
         @set_time_limit(0);
         $module      = $this->request->getPost('module') ?: $this->request->getGet('module');
         $incremental = (bool) $this->request->getPost('incremental');
         $userId      = (int) (session('user_id') ?? 0) ?: null;
+        $syncKey     = (string) ($this->request->getPost('sync_key') ?: ($userId ? 'user_' . $userId : 'guest'));
 
-        $res = $this->orchestrator->syncFromZoho($module ?: null, $incremental, $userId);
-        return $this->respondSyncResult($res, 'Sync from Zoho Books completed');
+        ZohoSyncProgressService::update($syncKey, 5, 'Starting sync from Zoho Books...', 'running');
+        $progressCallback = function (int $pct, string $msg, array $extra = []) use ($syncKey) {
+            ZohoSyncProgressService::update($syncKey, $pct, $msg, 'running', $extra);
+        };
+
+        try {
+            $res = $this->orchestrator->syncFromZoho($module ?: null, $incremental, $userId, $progressCallback);
+            $isSuccess = !empty($res['success']);
+            $status    = $isSuccess ? 'completed' : 'failed';
+            $finalMsg  = $isSuccess ? 'Sync from Zoho Books completed' : ($res['message'] ?? 'Sync failed');
+            ZohoSyncProgressService::update($syncKey, 100, $finalMsg, $status, ['summary' => $res]);
+            return $this->respondSyncResult($res, 'Sync from Zoho Books completed');
+        } catch (\Throwable $e) {
+            ZohoSyncProgressService::update($syncKey, 100, 'Error: ' . $e->getMessage(), 'failed');
+            return $this->respondSyncResult(['success' => false, 'message' => $e->getMessage()], 'Sync from Zoho Books failed');
+        }
     }
 
     /**
@@ -95,12 +111,28 @@ class ZohoSyncController extends BaseController
     public function syncToZoho()
     {
         @ini_set('max_execution_time', '0');
+        @ini_set('memory_limit', '1024M');
         @set_time_limit(0);
-        $module = $this->request->getPost('module') ?: $this->request->getGet('module');
-        $userId = (int) (session('user_id') ?? 0) ?: null;
+        $module  = $this->request->getPost('module') ?: $this->request->getGet('module');
+        $userId  = (int) (session('user_id') ?? 0) ?: null;
+        $syncKey = (string) ($this->request->getPost('sync_key') ?: ($userId ? 'user_' . $userId : 'guest'));
 
-        $res = $this->orchestrator->syncToZoho($module ?: null, $userId);
-        return $this->respondSyncResult($res, 'Sync to Zoho Books completed');
+        ZohoSyncProgressService::update($syncKey, 5, 'Starting sync to Zoho Books...', 'running');
+        $progressCallback = function (int $pct, string $msg, array $extra = []) use ($syncKey) {
+            ZohoSyncProgressService::update($syncKey, $pct, $msg, 'running', $extra);
+        };
+
+        try {
+            $res = $this->orchestrator->syncToZoho($module ?: null, $userId, $progressCallback);
+            $isSuccess = !empty($res['success']);
+            $status    = $isSuccess ? 'completed' : 'failed';
+            $finalMsg  = $isSuccess ? 'Sync to Zoho Books completed' : ($res['message'] ?? 'Sync failed');
+            ZohoSyncProgressService::update($syncKey, 100, $finalMsg, $status, ['summary' => $res]);
+            return $this->respondSyncResult($res, 'Sync to Zoho Books completed');
+        } catch (\Throwable $e) {
+            ZohoSyncProgressService::update($syncKey, 100, 'Error: ' . $e->getMessage(), 'failed');
+            return $this->respondSyncResult(['success' => false, 'message' => $e->getMessage()], 'Sync to Zoho Books failed');
+        }
     }
 
     /**
@@ -109,12 +141,28 @@ class ZohoSyncController extends BaseController
     public function fullSync()
     {
         @ini_set('max_execution_time', '0');
+        @ini_set('memory_limit', '1024M');
         @set_time_limit(0);
-        $module = $this->request->getPost('module') ?: $this->request->getGet('module');
-        $userId = (int) (session('user_id') ?? 0) ?: null;
+        $module  = $this->request->getPost('module') ?: $this->request->getGet('module');
+        $userId  = (int) (session('user_id') ?? 0) ?: null;
+        $syncKey = (string) ($this->request->getPost('sync_key') ?: ($userId ? 'user_' . $userId : 'guest'));
 
-        $res = $this->orchestrator->fullBidirectionalSync($module ?: null, $userId);
-        return $this->respondSyncResult($res, 'Full Bidirectional Sync completed');
+        ZohoSyncProgressService::update($syncKey, 5, 'Starting full bidirectional sync...', 'running');
+        $progressCallback = function (int $pct, string $msg, array $extra = []) use ($syncKey) {
+            ZohoSyncProgressService::update($syncKey, $pct, $msg, 'running', $extra);
+        };
+
+        try {
+            $res = $this->orchestrator->fullBidirectionalSync($module ?: null, $userId, $progressCallback);
+            $isSuccess = !empty($res['success']);
+            $status    = $isSuccess ? 'completed' : 'failed';
+            $finalMsg  = $isSuccess ? 'Full Bidirectional Sync completed' : ($res['message'] ?? 'Sync failed');
+            ZohoSyncProgressService::update($syncKey, 100, $finalMsg, $status, ['summary' => $res]);
+            return $this->respondSyncResult($res, 'Full Bidirectional Sync completed');
+        } catch (\Throwable $e) {
+            ZohoSyncProgressService::update($syncKey, 100, 'Error: ' . $e->getMessage(), 'failed');
+            return $this->respondSyncResult(['success' => false, 'message' => $e->getMessage()], 'Full Bidirectional Sync failed');
+        }
     }
 
     /**

@@ -56,7 +56,7 @@
 
             <div class="d-flex flex-wrap gap-2">
                 <!-- 1. Sync from Zoho Books -->
-                <form action="<?= site_url('settings/integrations/zoho/sync-from-zoho') ?>" method="post" class="d-inline">
+                <form action="<?= site_url('settings/integrations/zoho/sync-from-zoho') ?>" method="post" class="d-inline" data-live-sync="1" data-sync-title="Sync All Modules from Zoho Books">
                     <?= csrf_field() ?>
                     <button type="submit" class="btn btn-primary fw-bold shadow-sm">
                         <i class="fas fa-cloud-download-alt me-1"></i> Sync from Zoho Books
@@ -64,7 +64,7 @@
                 </form>
 
                 <!-- 2. Sync to Zoho Books -->
-                <form action="<?= site_url('settings/integrations/zoho/sync-to-zoho') ?>" method="post" class="d-inline">
+                <form action="<?= site_url('settings/integrations/zoho/sync-to-zoho') ?>" method="post" class="d-inline" data-live-sync="1" data-sync-title="Sync All Modules to Zoho Books">
                     <?= csrf_field() ?>
                     <button type="submit" class="btn btn-success fw-bold shadow-sm">
                         <i class="fas fa-cloud-upload-alt me-1"></i> Sync to Zoho Books
@@ -72,7 +72,7 @@
                 </form>
 
                 <!-- 3. Full Bidirectional Sync -->
-                <form action="<?= site_url('settings/integrations/zoho/full-sync') ?>" method="post" class="d-inline">
+                <form action="<?= site_url('settings/integrations/zoho/full-sync') ?>" method="post" class="d-inline" data-live-sync="1" data-sync-title="Full Bidirectional Synchronization">
                     <?= csrf_field() ?>
                     <button type="submit" class="btn btn-indigo fw-bold shadow-sm" style="background:#4f46e5;color:#fff;">
                         <i class="fas fa-exchange-alt me-1"></i> Full Bidirectional Sync
@@ -221,7 +221,7 @@
                         </td>
                         <td class="text-end pe-4">
                             <div class="btn-group btn-group-sm">
-                                <form action="<?= site_url('settings/integrations/zoho/sync-module') ?>" method="post" class="d-inline">
+                                <form action="<?= site_url('settings/integrations/zoho/sync-module') ?>" method="post" class="d-inline" data-live-sync="1" data-sync-title="Pull <?= esc($ms['label']) ?> from Zoho Books">
                                     <?= csrf_field() ?>
                                     <input type="hidden" name="module" value="<?= esc($modKey) ?>">
                                     <input type="hidden" name="direction" value="from_zoho">
@@ -229,7 +229,7 @@
                                         <i class="fas fa-download me-1"></i> Pull
                                     </button>
                                 </form>
-                                <form action="<?= site_url('settings/integrations/zoho/sync-module') ?>" method="post" class="d-inline">
+                                <form action="<?= site_url('settings/integrations/zoho/sync-module') ?>" method="post" class="d-inline" data-live-sync="1" data-sync-title="Push <?= esc($ms['label']) ?> to Zoho Books">
                                     <?= csrf_field() ?>
                                     <input type="hidden" name="module" value="<?= esc($modKey) ?>">
                                     <input type="hidden" name="direction" value="to_zoho">
@@ -237,7 +237,7 @@
                                         <i class="fas fa-upload me-1"></i> Push
                                     </button>
                                 </form>
-                                <form action="<?= site_url('settings/integrations/zoho/sync-module') ?>" method="post" class="d-inline">
+                                <form action="<?= site_url('settings/integrations/zoho/sync-module') ?>" method="post" class="d-inline" data-live-sync="1" data-sync-title="Sync <?= esc($ms['label']) ?> (Bidirectional)">
                                     <?= csrf_field() ?>
                                     <input type="hidden" name="module" value="<?= esc($modKey) ?>">
                                     <input type="hidden" name="direction" value="bidirectional">
@@ -395,11 +395,15 @@
                 <!-- Live Progress Display -->
                 <div id="syncProgressContainer" class="d-none">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="small fw-bold text-dark" id="syncProgressStage">Starting sync...</span>
+                        <span class="small fw-bold text-dark text-truncate me-2" id="syncProgressStage">Starting sync...</span>
                         <span class="small fw-bold text-primary" id="syncProgressPct">0%</span>
                     </div>
-                    <div class="progress mb-3" style="height: 18px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" id="syncProgressBar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    <div class="progress mb-2" style="height: 22px; font-size: 12px; font-weight: bold;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" id="syncProgressBar" role="progressbar" style="width: 0%; min-width: 2em;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center text-muted small mb-2" id="syncProgressCounts">
+                        <span id="syncCurrentItemBadge" class="badge bg-light text-dark border">Initializing...</span>
+                        <span id="syncRateIndicator"><i class="fas fa-circle text-success me-1 small"></i>Live Streaming</span>
                     </div>
                     <div class="bg-dark text-light p-2 rounded small font-monospace" id="syncTerminalLog" style="height: 140px; overflow-y: auto; font-size: 11px;">
                         <div class="text-secondary">[<?= date('H:i:s') ?>] Preparing synchronization task...</div>
@@ -413,6 +417,40 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Modal: Dedicated Universal Live Sync Progress Modal (for all buttons: Pull, Push, Full Sync) -->
+<div class="modal fade" id="liveSyncModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="liveSyncModalTitle">
+                    <i class="fas fa-sync-alt fa-spin text-primary me-2" id="liveSyncModalSpinner"></i><span id="liveSyncModalTitleText">Synchronizing with Zoho Books...</span>
+                </h5>
+                <button type="button" class="btn-close d-none" data-bs-dismiss="modal" id="liveSyncModalCloseBtn"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small fw-bold text-dark text-truncate me-2" id="liveSyncStage">Connecting to Zoho Books...</span>
+                    <span class="small fw-bold text-primary fs-6" id="liveSyncPct">0%</span>
+                </div>
+                <div class="progress mb-2" style="height: 24px; font-size: 13px; font-weight: bold;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" id="liveSyncBar" role="progressbar" style="width: 0%; min-width: 2.5em;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
+                    <span id="liveSyncCurrentBadge" class="badge bg-light text-dark border">Initializing...</span>
+                    <span class="badge bg-success-subtle text-success border"><i class="fas fa-signal me-1"></i>Real-time Progress</span>
+                </div>
+                <label class="form-label small fw-semibold text-muted mb-1"><i class="fas fa-terminal me-1"></i>Live Activity Stream</label>
+                <div class="bg-dark text-light p-3 rounded font-monospace" id="liveSyncTerminal" style="height: 160px; overflow-y: auto; font-size: 11px; line-height: 1.5;">
+                    <div class="text-secondary">[<?= date('H:i:s') ?>] Initialized synchronization task...</div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary d-none" data-bs-dismiss="modal" id="liveSyncDismissBtn">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -515,7 +553,131 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Live Percentage Progress Bar for Sync Module Form
+    // Global Universal Sync Runner for all action buttons (Pull, Push, Full Sync)
+    window.runLiveSyncAction = function(url, title, initialStage) {
+        const modalEl = document.getElementById('liveSyncModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+
+        const titleText  = document.getElementById('liveSyncModalTitleText');
+        const spinner    = document.getElementById('liveSyncModalSpinner');
+        const stage      = document.getElementById('liveSyncStage');
+        const pctEl      = document.getElementById('liveSyncPct');
+        const bar        = document.getElementById('liveSyncBar');
+        const badge      = document.getElementById('liveSyncCurrentBadge');
+        const terminal   = document.getElementById('liveSyncTerminal');
+        const closeBtn   = document.getElementById('liveSyncModalCloseBtn');
+        const dismissBtn = document.getElementById('liveSyncDismissBtn');
+
+        titleText.textContent = title;
+        spinner.className = 'fas fa-sync-alt fa-spin text-primary me-2';
+        closeBtn.classList.add('d-none');
+        dismissBtn.classList.add('d-none');
+        bar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-primary';
+        terminal.innerHTML = '';
+
+        const syncKey = 'sync_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+
+        function addLiveLog(msg, type = 'info') {
+            const now = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = type === 'success' ? 'text-success fw-bold' : (type === 'danger' ? 'text-danger fw-bold' : (type === 'warning' ? 'text-warning' : 'text-light'));
+            div.innerHTML = `<span class="text-secondary me-2">[${now}]</span>${msg}`;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function setLivePct(val, text) {
+            val = Math.min(100, Math.max(0, val));
+            bar.style.width = val + '%';
+            bar.textContent = val + '%';
+            bar.setAttribute('aria-valuenow', val);
+            pctEl.textContent = val + '%';
+            if (text) {
+                stage.textContent = text;
+                badge.textContent = text;
+            }
+        }
+
+        setLivePct(5, initialStage || 'Connecting to Zoho Books API...');
+        addLiveLog(`Initiated: ${title}`, 'warning');
+
+        // Poller
+        const pollUrl = '<?= site_url('settings/integrations/zoho/sync-progress') ?>?sync_key=' + encodeURIComponent(syncKey);
+        let lastMsg = '';
+        const poller = setInterval(() => {
+            fetch(pollUrl)
+                .then(r => r.json())
+                .then(pData => {
+                    if (pData && typeof pData.pct !== 'undefined') {
+                        setLivePct(pData.pct, pData.message);
+                        if (pData.message && pData.message !== lastMsg) {
+                            lastMsg = pData.message;
+                            const logType = pData.status === 'failed' ? 'danger' : (pData.status === 'completed' ? 'success' : 'info');
+                            addLiveLog(pData.message, logType);
+                        }
+                        if (pData.status === 'completed' || pData.status === 'failed') {
+                            clearInterval(poller);
+                        }
+                    }
+                })
+                .catch(() => {});
+        }, 800);
+
+        // Send POST request
+        const fd = new FormData();
+        fd.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+        fd.append('sync_key', syncKey);
+
+        fetch(url, {
+            method: 'POST',
+            body: fd,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            clearInterval(poller);
+            setLivePct(100, data.success ? 'Completed successfully!' : 'Failed');
+            if (data.success) {
+                bar.className = 'progress-bar bg-success';
+                spinner.className = 'fas fa-check-circle text-success me-2';
+                titleText.textContent = 'Sync Finished';
+                addLiveLog(data.summary_message || 'Synchronization completed successfully!', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2200);
+            } else {
+                bar.className = 'progress-bar bg-danger';
+                spinner.className = 'fas fa-exclamation-triangle text-danger me-2';
+                titleText.textContent = 'Sync Encountered Errors';
+                addLiveLog('Error: ' + (data.message || 'Operation failed'), 'danger');
+                closeBtn.classList.remove('d-none');
+                dismissBtn.classList.remove('d-none');
+            }
+        })
+        .catch(err => {
+            clearInterval(poller);
+            setLivePct(100, 'Network/Server Error');
+            bar.className = 'progress-bar bg-danger';
+            spinner.className = 'fas fa-exclamation-triangle text-danger me-2';
+            titleText.textContent = 'Sync Error';
+            addLiveLog('Error: ' + err.message, 'danger');
+            closeBtn.classList.remove('d-none');
+            dismissBtn.classList.remove('d-none');
+        });
+    };
+
+    // Attach to all manual action forms with data-live-sync
+    document.querySelectorAll('form[data-live-sync]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const actionTitle = form.getAttribute('data-sync-title') || 'Zoho Synchronization';
+            const actionUrl   = form.action;
+            window.runLiveSyncAction(actionUrl, actionTitle, 'Starting task...');
+        });
+    });
     const syncForm = document.getElementById('syncModuleForm');
     if (syncForm) {
         syncForm.addEventListener('submit', function(e) {
@@ -567,7 +729,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressBar.textContent = pct + '%';
                 progressBar.setAttribute('aria-valuenow', pct);
                 progressPct.textContent = pct + '%';
-                if (stage) progressStg.textContent = stage;
+                if (stage) {
+                    progressStg.textContent = stage;
+                    const itemBadge = document.getElementById('syncCurrentItemBadge');
+                    if (itemBadge) itemBadge.textContent = stage;
+                }
             }
 
             addLog(`Initiating real-time sync for: ${modLabel} (${dirVal})...`, 'warning');

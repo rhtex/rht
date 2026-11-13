@@ -153,10 +153,17 @@ class PurchaseOrderSyncService extends AbstractModuleSyncService
             'failed_count'    => 0,
         ];
         $latestModified = null;
+        $totalRecords = count($listRes['records']);
+        $idx = 0;
+        $this->emitProgress(15, "Retrieved {$totalRecords} purchase order(s) from Zoho Books. Starting import...", ['total' => $totalRecords]);
 
         foreach ($listRes['records'] as $summary) {
+            $idx++;
             $stats['total_processed']++;
             $zohoId = (string) ($summary['purchaseorder_id'] ?? '');
+            $poNum  = $summary['purchaseorder_number'] ?? $zohoId;
+            $pct    = 15 + (int) round(($idx / max(1, $totalRecords)) * 80);
+
             if ($zohoId === '') {
                 continue;
             }
@@ -164,8 +171,11 @@ class PurchaseOrderSyncService extends AbstractModuleSyncService
             $mapping = $this->mappingModel->findByZoho('purchase_orders', $zohoId);
             if ($mapping && !empty($summary['last_modified_time']) && $mapping['zoho_last_modified_time'] === $summary['last_modified_time'] && $mapping['sync_status'] === 'SYNCED') {
                 $stats['skipped_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Skipped unchanged PO #{$poNum}", ['processed' => $idx, 'total' => $totalRecords]);
                 continue;
             }
+
+            $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Importing PO #{$poNum}...", ['processed' => $idx, 'total' => $totalRecords]);
 
             $detailRes = $this->client->get("/purchaseorders/{$zohoId}", [], [
                 'module'         => 'purchase_orders',
@@ -179,12 +189,16 @@ class PurchaseOrderSyncService extends AbstractModuleSyncService
             $act      = $applyRes['action'] ?? 'SKIPPED';
             if ($act === 'CREATED') {
                 $stats['created_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Created PO #{$poNum}", ['action' => 'CREATED']);
             } elseif ($act === 'UPDATED') {
                 $stats['updated_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Updated PO #{$poNum}", ['action' => 'UPDATED']);
             } elseif ($act === 'CONFLICT') {
                 $stats['conflict_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Conflict detected on PO #{$poNum}", ['action' => 'CONFLICT']);
             } elseif ($act === 'FAILED') {
                 $stats['failed_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Failed PO #{$poNum}: " . ($applyRes['message'] ?? 'Error'), ['action' => 'FAILED']);
             } else {
                 $stats['skipped_count']++;
             }

@@ -230,7 +230,7 @@ class ZohoSyncOrchestrator
     /**
      * Manual / Scheduled: Sync from Zoho Books -> CI4 ERP.
      */
-    public function syncFromZoho(?string $moduleFilter = null, bool $incremental = false, ?int $userId = null): array
+    public function syncFromZoho(?string $moduleFilter = null, bool $incremental = false, ?int $userId = null, ?callable $progressCallback = null): array
     {
         $run = $this->historyModel->startRun(
             $moduleFilter ? 'MODULE_SYNC' : 'MANUAL_FROM_ZOHO',
@@ -262,12 +262,32 @@ class ZohoSyncOrchestrator
         }
 
         try {
+            if ($progressCallback) {
+                call_user_func($progressCallback, 5, 'Caching tax rates & account mappings...');
+            }
+
             // Prime Taxes & Chart of Accounts metadata cache first
             (new ZohoTaxMapperService($this->client))->ensureMetadataCache();
 
+            $modTotal = count($modules);
+            $modIndex = 0;
+
             foreach ($modules as $modKey) {
+                $modIndex++;
+                if ($progressCallback) {
+                    $startPct = 5 + (int) round((($modIndex - 1) / max(1, $modTotal)) * 90);
+                    call_user_func($progressCallback, $startPct, "Synchronizing module: {$modKey} ({$modIndex}/{$modTotal})...");
+                }
+
                 $service = $this->getModuleService($modKey);
-                $modRes  = $service->pullFromZoho($incremental, true);
+                if ($progressCallback) {
+                    $service->setProgressCallback(function (int $pct, string $msg, array $extra = []) use ($progressCallback, $modIndex, $modTotal) {
+                        $scaledPct = (int) round((($modIndex - 1) * 100 + $pct) / max(1, $modTotal));
+                        call_user_func($progressCallback, $scaledPct, $msg, $extra);
+                    });
+                }
+
+                $modRes = $service->pullFromZoho($incremental, true);
 
                 $totals['summary'][$modKey] = $modRes;
                 if (empty($modRes['success'])) {
@@ -288,6 +308,10 @@ class ZohoSyncOrchestrator
                 $totals['failed_count']    += (int) ($modRes['failed_count'] ?? 0);
             }
 
+            if ($progressCallback) {
+                call_user_func($progressCallback, 98, 'Finalizing sync records and timestamps...');
+            }
+
             $this->settingModel->saveConfig(['last_sync_at' => date('Y-m-d H:i:s')]);
             $this->historyModel->completeRun($run['id'], $totals);
             ZohoSyncContext::setBatchId(null);
@@ -305,7 +329,7 @@ class ZohoSyncOrchestrator
     /**
      * Manual / Scheduled: Sync from CI4 ERP -> Zoho Books.
      */
-    public function syncToZoho(?string $moduleFilter = null, ?int $userId = null): array
+    public function syncToZoho(?string $moduleFilter = null, ?int $userId = null, ?callable $progressCallback = null): array
     {
         $run = $this->historyModel->startRun(
             $moduleFilter ? 'MODULE_SYNC' : 'MANUAL_TO_ZOHO',
@@ -329,9 +353,17 @@ class ZohoSyncOrchestrator
         ];
 
         try {
+            if ($progressCallback) {
+                call_user_func($progressCallback, 5, 'Caching tax rates & account mappings...');
+            }
+
             (new ZohoTaxMapperService($this->client))->ensureMetadataCache();
 
+            $modTotal = count($modules);
+            $modIndex = 0;
+
             foreach ($modules as $modKey) {
+                $modIndex++;
                 $modMeta = self::ORDERED_MODULES[$modKey] ?? null;
                 if (!$modMeta || !$db->tableExists($modMeta['table'])) {
                     continue;
@@ -340,14 +372,28 @@ class ZohoSyncOrchestrator
                 $service = $this->getModuleService($modKey);
                 $rows    = $db->table($modMeta['table'])->select('id')->orderBy('id', 'ASC')->get()->getResultArray();
                 $modStats = ['processed' => 0, 'synced' => 0, 'skipped' => 0, 'failed' => 0];
+                $rowCount = count($rows);
+                $rowIdx   = 0;
+
+                if ($progressCallback) {
+                    call_user_func($progressCallback, 10, "Found {$rowCount} local {$modKey} record(s) to push...");
+                }
 
                 foreach ($rows as $row) {
+                    $rowIdx++;
                     $localId = (int) $row['id'];
                     $totals['total_processed']++;
                     $modStats['processed']++;
 
                     $existingMap = $this->mappingModel->findByLocal($modKey, $localId);
-                    $res         = $service->pushToZoho($localId, $existingMap ? 'UPDATE' : 'CREATE');
+                    $op          = $existingMap ? 'UPDATE' : 'CREATE';
+
+                    if ($progressCallback) {
+                        $pct = 10 + (int) round(($rowIdx / max(1, $rowCount)) * 85);
+                        call_user_func($progressCallback, $pct, "[{$rowIdx}/{$rowCount}] Pushing {$modKey} #{$localId} ({$op}) to Zoho Books...");
+                    }
+
+                    $res = $service->pushToZoho($localId, $op);
 
                     if (!empty($res['skipped'])) {
                         $totals['skipped_count']++;
@@ -367,7 +413,7 @@ class ZohoSyncOrchestrator
                             $this->queueModel->enqueue([
                                 'module'          => $modKey,
                                 'local_record_id' => $localId,
-                                'operation'       => $existingMap ? 'UPDATE' : 'CREATE',
+                                'operation'       => $op,
                                 'direction'       => 'TO_ZOHO',
                                 'source'          => 'LOCAL',
                             ]);
@@ -379,6 +425,10 @@ class ZohoSyncOrchestrator
                 }
 
                 $totals['summary'][$modKey] = $modStats;
+            }
+
+            if ($progressCallback) {
+                call_user_func($progressCallback, 98, 'Finalizing sync records and timestamps...');
             }
 
             $this->settingModel->saveConfig(['last_sync_at' => date('Y-m-d H:i:s')]);
@@ -400,13 +450,24 @@ class ZohoSyncOrchestrator
      * 1. Pulls changes & detects conflicts from Zoho Books -> CI4 ERP.
      * 2. Pushes unmapped and modified local records from CI4 ERP -> Zoho Books (skipping any records with OPEN conflicts).
      */
-    public function fullBidirectionalSync(?string $moduleFilter = null, ?int $userId = null): array
+    public function fullBidirectionalSync(?string $moduleFilter = null, ?int $userId = null, ?callable $progressCallback = null): array
     {
         $run = $this->historyModel->startRun('FULL_BIDIRECTIONAL', $moduleFilter, $userId);
         ZohoSyncContext::setBatchId($run['batch_id']);
 
-        $fromRes = $this->syncFromZoho($moduleFilter, false, $userId);
-        $toRes   = $this->syncToZoho($moduleFilter, $userId);
+        $fromCallback = $progressCallback ? function (int $pct, string $msg, array $extra = []) use ($progressCallback) {
+            $halfPct = (int) round($pct * 0.5);
+            call_user_func($progressCallback, $halfPct, "[Pull] " . $msg, $extra);
+        } : null;
+
+        $fromRes = $this->syncFromZoho($moduleFilter, false, $userId, $fromCallback);
+
+        $toCallback = $progressCallback ? function (int $pct, string $msg, array $extra = []) use ($progressCallback) {
+            $halfPct = 50 + (int) round($pct * 0.5);
+            call_user_func($progressCallback, $halfPct, "[Push] " . $msg, $extra);
+        } : null;
+
+        $toRes = $this->syncToZoho($moduleFilter, $userId, $toCallback);
 
         $combined = [
             'total_processed' => (int) ($fromRes['total_processed'] ?? 0) + (int) ($toRes['total_processed'] ?? 0),

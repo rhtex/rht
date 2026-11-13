@@ -164,19 +164,31 @@ class VendorCreditSyncService extends AbstractModuleSyncService
             'failed_count'    => 0,
         ];
         $latestModified = null;
+        $totalRecords = count($listRes['records']);
+        $idx = 0;
+        $this->emitProgress(15, "Retrieved {$totalRecords} vendor credit(s) from Zoho Books. Starting import...", ['total' => $totalRecords]);
 
         foreach ($listRes['records'] as $summary) {
+            $idx++;
             $stats['total_processed']++;
+            $vcNum = $summary['vendor_credit_number'] ?? ($summary['vendor_credit_id'] ?? $idx);
+            $pct   = 15 + (int) round(($idx / max(1, $totalRecords)) * 80);
+            $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Importing vendor credit #{$vcNum}...", ['processed' => $idx, 'total' => $totalRecords]);
+
             $applyRes = $this->applyZohoRecordToLocal($summary, !$checkConflicts);
             $act      = $applyRes['action'] ?? 'SKIPPED';
             if ($act === 'CREATED') {
                 $stats['created_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Created vendor credit #{$vcNum}", ['action' => 'CREATED']);
             } elseif ($act === 'UPDATED') {
                 $stats['updated_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Updated vendor credit #{$vcNum}", ['action' => 'UPDATED']);
             } elseif ($act === 'CONFLICT') {
                 $stats['conflict_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Conflict on vendor credit #{$vcNum}", ['action' => 'CONFLICT']);
             } elseif ($act === 'FAILED') {
                 $stats['failed_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Failed vendor credit #{$vcNum}: " . ($applyRes['message'] ?? 'Error'), ['action' => 'FAILED']);
             } else {
                 $stats['skipped_count']++;
             }

@@ -176,13 +176,18 @@ class CustomerSyncService extends AbstractModuleSyncService
         ];
 
         $latestModified = null;
+        $custRecords = array_values(array_filter($listRes['records'], fn($r) => ($r['contact_type'] ?? 'customer') === 'customer'));
+        $totalRecords = count($custRecords);
+        $idx = 0;
+        $this->emitProgress(15, "Retrieved {$totalRecords} customer(s) from Zoho Books. Starting import...", ['total' => $totalRecords]);
 
-        foreach ($listRes['records'] as $summary) {
-            if (($summary['contact_type'] ?? 'customer') !== 'customer') {
-                continue;
-            }
+        foreach ($custRecords as $summary) {
+            $idx++;
             $stats['total_processed']++;
             $zohoId = (string) ($summary['contact_id'] ?? '');
+            $cName  = $summary['contact_name'] ?? $summary['company_name'] ?? $zohoId;
+            $pct    = 15 + (int) round(($idx / max(1, $totalRecords)) * 80);
+
             if ($zohoId === '') {
                 continue;
             }
@@ -191,8 +196,11 @@ class CustomerSyncService extends AbstractModuleSyncService
             $mapping = $this->mappingModel->findByZoho('customers', $zohoId);
             if ($mapping && !empty($summary['last_modified_time']) && $mapping['zoho_last_modified_time'] === $summary['last_modified_time'] && $mapping['sync_status'] === 'SYNCED') {
                 $stats['skipped_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Skipped unchanged customer {$cName}", ['processed' => $idx, 'total' => $totalRecords]);
                 continue;
             }
+
+            $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Importing customer {$cName}...", ['processed' => $idx, 'total' => $totalRecords]);
 
             // Fetch full contact detail (includes billing_address, shipping_address, contact_persons)
             $detailRes = $this->client->get("/contacts/{$zohoId}", [], [
@@ -210,12 +218,16 @@ class CustomerSyncService extends AbstractModuleSyncService
             $act      = $applyRes['action'] ?? 'SKIPPED';
             if ($act === 'CREATED') {
                 $stats['created_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Created customer {$cName}", ['action' => 'CREATED']);
             } elseif ($act === 'UPDATED') {
                 $stats['updated_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Updated customer {$cName}", ['action' => 'UPDATED']);
             } elseif ($act === 'CONFLICT') {
                 $stats['conflict_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Conflict detected on customer {$cName}", ['action' => 'CONFLICT']);
             } elseif ($act === 'FAILED') {
                 $stats['failed_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Failed customer {$cName}: " . ($applyRes['message'] ?? 'Error'), ['action' => 'FAILED']);
             } else {
                 $stats['skipped_count']++;
             }

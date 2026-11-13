@@ -199,9 +199,17 @@ class BillSyncService extends AbstractModuleSyncService
         ];
         $latestModified = null;
 
+        $totalRecords = count($listRes['records']);
+        $idx = 0;
+        $this->emitProgress(15, "Retrieved {$totalRecords} bill(s) from Zoho Books. Starting import...", ['total' => $totalRecords]);
+
         foreach ($listRes['records'] as $summary) {
+            $idx++;
             $stats['total_processed']++;
             $zohoId = (string) ($summary['bill_id'] ?? '');
+            $billNum = $summary['bill_number'] ?? $zohoId;
+            $pct = 15 + (int) round(($idx / max(1, $totalRecords)) * 80);
+
             if ($zohoId === '') {
                 continue;
             }
@@ -209,8 +217,11 @@ class BillSyncService extends AbstractModuleSyncService
             $mapping = $this->mappingModel->findByZoho('bills', $zohoId);
             if ($mapping && !empty($summary['last_modified_time']) && $mapping['zoho_last_modified_time'] === $summary['last_modified_time'] && $mapping['sync_status'] === 'SYNCED') {
                 $stats['skipped_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Skipped unchanged Bill #{$billNum}", ['processed' => $idx, 'total' => $totalRecords]);
                 continue;
             }
+
+            $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Fetching details & importing Bill #{$billNum}...", ['processed' => $idx, 'total' => $totalRecords]);
 
             $detailRes = $this->client->get("/bills/{$zohoId}", [], [
                 'module'         => 'bills',
@@ -224,12 +235,16 @@ class BillSyncService extends AbstractModuleSyncService
             $act      = $applyRes['action'] ?? 'SKIPPED';
             if ($act === 'CREATED') {
                 $stats['created_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Created Bill #{$billNum}", ['processed' => $idx, 'total' => $totalRecords, 'action' => 'CREATED']);
             } elseif ($act === 'UPDATED') {
                 $stats['updated_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Updated Bill #{$billNum}", ['processed' => $idx, 'total' => $totalRecords, 'action' => 'UPDATED']);
             } elseif ($act === 'CONFLICT') {
                 $stats['conflict_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Conflict detected on Bill #{$billNum}", ['processed' => $idx, 'total' => $totalRecords, 'action' => 'CONFLICT']);
             } elseif ($act === 'FAILED') {
                 $stats['failed_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Failed to import Bill #{$billNum}: " . ($applyRes['message'] ?? 'Error'), ['processed' => $idx, 'total' => $totalRecords, 'action' => 'FAILED']);
             } else {
                 $stats['skipped_count']++;
             }

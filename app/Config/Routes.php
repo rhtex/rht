@@ -746,6 +746,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
 
         // Synchronization Dashboard & Manual Actions
         $routes->get('sync', 'ZohoSyncController::dashboard');
+        $routes->get('sync-progress', 'ZohoSyncController::syncProgress');
         $routes->post('sync-from-zoho', 'ZohoSyncController::syncFromZoho');
         $routes->post('sync-to-zoho', 'ZohoSyncController::syncToZoho');
         $routes->post('full-sync', 'ZohoSyncController::fullSync');

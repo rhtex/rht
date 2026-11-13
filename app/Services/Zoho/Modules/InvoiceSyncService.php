@@ -204,10 +204,17 @@ class InvoiceSyncService extends AbstractModuleSyncService
             'failed_count'    => 0,
         ];
         $latestModified = null;
+        $totalRecords = count($listRes['records']);
+        $idx = 0;
+        $this->emitProgress(15, "Retrieved {$totalRecords} invoice(s) from Zoho Books. Starting import...", ['total' => $totalRecords]);
 
         foreach ($listRes['records'] as $summary) {
+            $idx++;
             $stats['total_processed']++;
             $zohoId = (string) ($summary['invoice_id'] ?? '');
+            $invNum = $summary['invoice_number'] ?? $zohoId;
+            $pct    = 15 + (int) round(($idx / max(1, $totalRecords)) * 80);
+
             if ($zohoId === '') {
                 continue;
             }
@@ -215,8 +222,11 @@ class InvoiceSyncService extends AbstractModuleSyncService
             $mapping = $this->mappingModel->findByZoho('invoices', $zohoId);
             if ($mapping && !empty($summary['last_modified_time']) && $mapping['zoho_last_modified_time'] === $summary['last_modified_time'] && $mapping['sync_status'] === 'SYNCED') {
                 $stats['skipped_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Skipped unchanged Invoice #{$invNum}", ['processed' => $idx, 'total' => $totalRecords]);
                 continue;
             }
+
+            $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Importing Invoice #{$invNum}...", ['processed' => $idx, 'total' => $totalRecords]);
 
             $detailRes = $this->client->get("/invoices/{$zohoId}", [], [
                 'module'         => 'invoices',
@@ -230,12 +240,16 @@ class InvoiceSyncService extends AbstractModuleSyncService
             $act      = $applyRes['action'] ?? 'SKIPPED';
             if ($act === 'CREATED') {
                 $stats['created_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Created Invoice #{$invNum}", ['action' => 'CREATED']);
             } elseif ($act === 'UPDATED') {
                 $stats['updated_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Updated Invoice #{$invNum}", ['action' => 'UPDATED']);
             } elseif ($act === 'CONFLICT') {
                 $stats['conflict_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Conflict on Invoice #{$invNum}", ['action' => 'CONFLICT']);
             } elseif ($act === 'FAILED') {
                 $stats['failed_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Failed Invoice #{$invNum}: " . ($applyRes['message'] ?? 'Error'), ['action' => 'FAILED']);
             } else {
                 $stats['skipped_count']++;
             }

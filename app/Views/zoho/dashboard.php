@@ -535,7 +535,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const modLabel = modSelect.options[modSelect.selectedIndex].text;
             const dirVal   = dirSelect.value;
+
+            // Generate unique syncKey per session to poll accurately
+            const syncKey = 'sync_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
             const formData = new FormData(syncForm);
+            formData.append('sync_key', syncKey);
 
             // Lock modal UI
             submitBtn.disabled = true;
@@ -544,7 +548,11 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Synchronizing...';
             progressBox.classList.remove('d-none');
 
+            let lastLoggedMessage = '';
+
             function addLog(msg, type = 'info') {
+                if (!msg || msg === lastLoggedMessage) return;
+                lastLoggedMessage = msg;
                 const now = new Date().toLocaleTimeString();
                 const div = document.createElement('div');
                 div.className = type === 'success' ? 'text-success fw-bold' : (type === 'danger' ? 'text-danger fw-bold' : (type === 'warning' ? 'text-warning' : 'text-light'));
@@ -554,7 +562,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             function setPct(pct, stage) {
-                pct = Math.min(95, Math.max(0, pct));
+                pct = Math.min(100, Math.max(0, pct));
                 progressBar.style.width = pct + '%';
                 progressBar.textContent = pct + '%';
                 progressBar.setAttribute('aria-valuenow', pct);
@@ -562,23 +570,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (stage) progressStg.textContent = stage;
             }
 
-            addLog(`Initiated sync for: ${modLabel} (${dirVal})...`, 'warning');
-            setPct(10, 'Connecting to Zoho Books API...');
+            addLog(`Initiating real-time sync for: ${modLabel} (${dirVal})...`, 'warning');
+            setPct(5, 'Connecting to Zoho Books API...');
 
-            // Simulated progress ticks while waiting for server batch
-            let currentPct = 15;
-            const progressTimer = setInterval(() => {
-                if (currentPct < 85) {
-                    currentPct += Math.floor(Math.random() * 8) + 2;
-                    let stageText = 'Retrieving & processing records...';
-                    if (currentPct > 35 && currentPct <= 65) {
-                        stageText = 'Parsing line items and taxes...';
-                    } else if (currentPct > 65) {
-                        stageText = 'Resolving local database mappings & conflict checks...';
-                    }
-                    setPct(currentPct, stageText);
-                }
-            }, 1200);
+            // Realtime progress poller every 800ms
+            const progressPollUrl = '<?= site_url('settings/integrations/zoho/sync-progress') ?>?sync_key=' + encodeURIComponent(syncKey);
+            const poller = setInterval(() => {
+                fetch(progressPollUrl)
+                    .then(r => r.json())
+                    .then(pData => {
+                        if (pData && typeof pData.pct !== 'undefined') {
+                            setPct(pData.pct, pData.message);
+                            if (pData.message) {
+                                const logType = pData.status === 'failed' ? 'danger' : (pData.status === 'completed' ? 'success' : 'info');
+                                addLog(pData.message, logType);
+                            }
+                            if (pData.status === 'completed' || pData.status === 'failed') {
+                                clearInterval(poller);
+                            }
+                        }
+                    })
+                    .catch(() => {});
+            }, 800);
 
             fetch(syncForm.action, {
                 method: 'POST',
@@ -589,7 +602,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(res => res.json())
             .then(data => {
-                clearInterval(progressTimer);
+                clearInterval(poller);
                 progressBar.style.width = '100%';
                 progressBar.textContent = '100%';
                 progressPct.textContent = '100%';
@@ -615,7 +628,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(err => {
-                clearInterval(progressTimer);
+                clearInterval(poller);
                 progressBar.className = 'progress-bar bg-danger';
                 progressStg.textContent = 'Connection error';
                 addLog('Request error: ' + err.message, 'danger');

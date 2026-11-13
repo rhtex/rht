@@ -172,19 +172,31 @@ class ItemSyncService extends AbstractModuleSyncService
         ];
 
         $latestModified = null;
+        $totalRecords = count($listRes['records']);
+        $idx = 0;
+        $this->emitProgress(15, "Retrieved {$totalRecords} item(s) from Zoho Books. Starting import...", ['total' => $totalRecords]);
 
         foreach ($listRes['records'] as $zohoItem) {
+            $idx++;
             $stats['total_processed']++;
+            $itemName = $zohoItem['name'] ?? ($zohoItem['item_id'] ?? $idx);
+            $pct      = 15 + (int) round(($idx / max(1, $totalRecords)) * 80);
+            $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Importing product/item '{$itemName}'...", ['processed' => $idx, 'total' => $totalRecords]);
+
             $applyRes = $this->applyZohoRecordToLocal($zohoItem, !$checkConflicts);
             $act      = $applyRes['action'] ?? 'SKIPPED';
             if ($act === 'CREATED') {
                 $stats['created_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Created item '{$itemName}'", ['action' => 'CREATED']);
             } elseif ($act === 'UPDATED') {
                 $stats['updated_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Updated item '{$itemName}'", ['action' => 'UPDATED']);
             } elseif ($act === 'CONFLICT') {
                 $stats['conflict_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Conflict on item '{$itemName}'", ['action' => 'CONFLICT']);
             } elseif ($act === 'FAILED') {
                 $stats['failed_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Failed item '{$itemName}': " . ($applyRes['message'] ?? 'Error'), ['action' => 'FAILED']);
             } else {
                 $stats['skipped_count']++;
             }

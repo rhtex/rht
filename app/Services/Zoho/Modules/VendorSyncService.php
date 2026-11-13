@@ -171,13 +171,18 @@ class VendorSyncService extends AbstractModuleSyncService
         ];
 
         $latestModified = null;
+        $vendorRecords = array_values(array_filter($listRes['records'], fn($r) => ($r['contact_type'] ?? '') === 'vendor'));
+        $totalRecords = count($vendorRecords);
+        $idx = 0;
+        $this->emitProgress(15, "Retrieved {$totalRecords} vendor(s) from Zoho Books. Starting import...", ['total' => $totalRecords]);
 
-        foreach ($listRes['records'] as $summary) {
-            if (($summary['contact_type'] ?? '') !== 'vendor') {
-                continue;
-            }
+        foreach ($vendorRecords as $summary) {
+            $idx++;
             $stats['total_processed']++;
             $zohoId = (string) ($summary['contact_id'] ?? '');
+            $vName  = $summary['contact_name'] ?? $summary['company_name'] ?? $zohoId;
+            $pct    = 15 + (int) round(($idx / max(1, $totalRecords)) * 80);
+
             if ($zohoId === '') {
                 continue;
             }
@@ -185,8 +190,11 @@ class VendorSyncService extends AbstractModuleSyncService
             $mapping = $this->mappingModel->findByZoho('vendors', $zohoId);
             if ($mapping && !empty($summary['last_modified_time']) && $mapping['zoho_last_modified_time'] === $summary['last_modified_time'] && $mapping['sync_status'] === 'SYNCED') {
                 $stats['skipped_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Skipped unchanged vendor {$vName}", ['processed' => $idx, 'total' => $totalRecords]);
                 continue;
             }
+
+            $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Importing vendor {$vName}...", ['processed' => $idx, 'total' => $totalRecords]);
 
             $detailRes = $this->client->get("/contacts/{$zohoId}", [], [
                 'module'         => 'vendors',
@@ -203,12 +211,16 @@ class VendorSyncService extends AbstractModuleSyncService
             $act      = $applyRes['action'] ?? 'SKIPPED';
             if ($act === 'CREATED') {
                 $stats['created_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Created vendor {$vName}", ['action' => 'CREATED']);
             } elseif ($act === 'UPDATED') {
                 $stats['updated_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Updated vendor {$vName}", ['action' => 'UPDATED']);
             } elseif ($act === 'CONFLICT') {
                 $stats['conflict_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Conflict detected on vendor {$vName}", ['action' => 'CONFLICT']);
             } elseif ($act === 'FAILED') {
                 $stats['failed_count']++;
+                $this->emitProgress($pct, "[{$idx}/{$totalRecords}] Failed vendor {$vName}: " . ($applyRes['message'] ?? 'Error'), ['action' => 'FAILED']);
             } else {
                 $stats['skipped_count']++;
             }

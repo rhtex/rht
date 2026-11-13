@@ -11,6 +11,7 @@ use App\Models\Zoho\ZohoSyncQueueModel;
 use App\Services\Zoho\ReconciliationService;
 use App\Services\Zoho\ZohoRateLimiterService;
 use App\Services\Zoho\ZohoSyncOrchestrator;
+use App\Services\Zoho\ZohoSyncProgressService;
 
 class ZohoSyncController extends BaseController
 {
@@ -130,18 +131,49 @@ class ZohoSyncController extends BaseController
         $module    = (string) ($this->request->getPost('module') ?: $this->request->getGet('module'));
         $direction = (string) ($this->request->getPost('direction') ?: 'bidirectional');
         $userId    = (int) (session('user_id') ?? 0) ?: null;
+        $syncKey   = (string) ($this->request->getPost('sync_key') ?: ($userId ? 'user_' . $userId : 'guest'));
 
         if ($module === '') {
             return $this->respondSyncResult(['success' => false, 'message' => 'Please select a module to synchronize.'], 'Module sync failed');
         }
 
-        $res = match ($direction) {
-            'from_zoho' => $this->orchestrator->syncFromZoho($module, false, $userId),
-            'to_zoho'   => $this->orchestrator->syncToZoho($module, $userId),
-            default     => $this->orchestrator->fullBidirectionalSync($module, $userId),
+        ZohoSyncProgressService::update($syncKey, 5, "Preparing {$module} ({$direction}) synchronization...", 'running');
+
+        $progressCallback = function (int $pct, string $msg, array $extra = []) use ($syncKey) {
+            ZohoSyncProgressService::update($syncKey, $pct, $msg, 'running', $extra);
         };
 
-        return $this->respondSyncResult($res, 'Module (' . $module . ') synchronization completed');
+        try {
+            $res = match ($direction) {
+                'from_zoho' => $this->orchestrator->syncFromZoho($module, false, $userId, $progressCallback),
+                'to_zoho'   => $this->orchestrator->syncToZoho($module, $userId, $progressCallback),
+                default     => $this->orchestrator->fullBidirectionalSync($module, $userId, $progressCallback),
+            };
+
+            $isSuccess = !empty($res['success']);
+            $finalPct  = 100;
+            $finalMsg  = $isSuccess ? 'Synchronization finished successfully!' : ($res['message'] ?? 'Sync encountered an error.');
+            $status    = $isSuccess ? 'completed' : 'failed';
+
+            ZohoSyncProgressService::update($syncKey, $finalPct, $finalMsg, $status, ['summary' => $res]);
+
+            return $this->respondSyncResult($res, 'Module (' . $module . ') synchronization completed');
+        } catch (\Throwable $e) {
+            ZohoSyncProgressService::update($syncKey, 100, 'Sync Exception: ' . $e->getMessage(), 'failed');
+            return $this->respondSyncResult(['success' => false, 'message' => $e->getMessage()], 'Module sync failed');
+        }
+    }
+
+    /**
+     * Poll real-time progress for an ongoing synchronization task.
+     */
+    public function syncProgress()
+    {
+        $userId  = (int) (session('user_id') ?? 0) ?: null;
+        $syncKey = (string) ($this->request->getGet('sync_key') ?: ($userId ? 'user_' . $userId : 'guest'));
+        $data    = ZohoSyncProgressService::get($syncKey);
+
+        return $this->response->setJSON($data);
     }
 
     /**

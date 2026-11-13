@@ -22,6 +22,20 @@ abstract class AbstractModuleSyncService
     protected ZohoSyncCursorModel $cursorModel;
     protected ZohoTaxMapperService $taxMapper;
     protected ZohoConflictService $conflictService;
+    protected $progressCallback = null;
+
+    public function setProgressCallback(?callable $cb): self
+    {
+        $this->progressCallback = $cb;
+        return $this;
+    }
+
+    protected function emitProgress(int $pct, string $msg, array $extra = []): void
+    {
+        if ($this->progressCallback && is_callable($this->progressCallback)) {
+            call_user_func($this->progressCallback, $pct, $msg, $extra);
+        }
+    }
 
     public function __construct(?ZohoApiClient $client = null)
     {

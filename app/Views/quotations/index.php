@@ -16,9 +16,11 @@
             <a href="<?= site_url('quotations') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('quotation.create')): ?>
             <a href="<?= site_url('quotations/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> New Quotation
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>

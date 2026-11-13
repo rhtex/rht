@@ -28,9 +28,11 @@ if (!empty($states)) {
             <a href="<?= site_url('countries') ?>" class="btn btn-light btn-sm fw-semibold shadow-sm me-2">
                 <i class="fas fa-globe-americas me-1 text-primary"></i> Countries
             </a>
+            <?php if (can('state.create')): ?>
             <a href="<?= site_url('states/create') ?>" class="btn btn-warning btn-sm fw-semibold shadow-sm">
                 <i class="fas fa-plus me-1"></i> Add State
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -77,9 +79,11 @@ if (!empty($states)) {
             <div class="text-center py-5 text-muted">
                 <i class="fas fa-map-marked-alt fa-3x mb-3 text-secondary opacity-50"></i>
                 <p class="mb-2 fw-semibold">No states registered yet.</p>
+                <?php if (can('state.create')): ?>
                 <a href="<?= site_url('states/create') ?>" class="btn btn-sm btn-primary">
                     <i class="fas fa-plus me-1"></i> Add First State
                 </a>
+                <?php endif; ?>
             </div>
         <?php else: ?>
             <div class="table-responsive">
@@ -140,12 +144,16 @@ if (!empty($states)) {
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
+                                    <?php if (can('state.edit')): ?>
                                     <a href="<?= site_url('states/edit/'.$state['id']) ?>" class="btn btn-outline-primary" title="Edit State">
                                         <i class="fas fa-pen"></i>
                                     </a>
+                                    <?php endif; ?>
+                                    <?php if (can('state.delete')): ?>
                                     <a href="<?= site_url('states/delete/'.$state['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this state?')" title="Delete State">
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

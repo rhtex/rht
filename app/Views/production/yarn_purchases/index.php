@@ -12,8 +12,8 @@
             <a href="<?= site_url('production/yarn-purchases') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
-            <?php if(in_array('weaver.create', session('permissions') ?? [])): ?>
-            <a href="<?= site_url('production/yarn-purchases/create') ?>" class="btn btn-sm btn-primary">
+            <?php if(can('weaver.create')): ?>
+            <?php if (can('yarn_purchase.create')): ?><a href="<?= site_url('production/yarn-purchases/create') ?>" class="btn btn-sm btn-primary"><?php endif; ?>
                 <i class="fas fa-plus me-1"></i> Add Yarn Purchase
             </a>
             <?php endif; ?>
@@ -140,12 +140,12 @@ $avgLanded = ($totalWeight > 0) ? ($totalAmount / $totalWeight) : 0;
                                     <a href="<?= site_url('production/yarn-purchases/view/'.$p['id']) ?>" class="btn btn-outline-primary" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <?php if(in_array('weaver.edit', session('permissions') ?? []) || in_array('weaver.create', session('permissions') ?? [])): ?>
+                                    <?php if(can('weaver.edit') || can('weaver.create')): ?>
                                     <a href="<?= site_url('production/yarn-purchases/edit/'.$p['id']) ?>" class="btn btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <?php endif; ?>
-                                    <?php if(in_array('weaver.delete', session('permissions') ?? [])): ?>
+                                    <?php if(can('weaver.delete')): ?>
                                     <a href="<?= site_url('production/yarn-purchases/delete/'.$p['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this purchase?')" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </a>

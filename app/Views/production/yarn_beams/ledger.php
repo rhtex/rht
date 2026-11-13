@@ -59,7 +59,7 @@
                     </tr>
                 </table>
 
-                <?php if(in_array('weaver.create', session('permissions') ?? [])): ?>
+                <?php if(can('weaver.create')): ?>
                     <hr>
                     <div class="text-center">
                         <?php if($beam['condition_status'] === 'Active'): ?>

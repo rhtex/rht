@@ -12,9 +12,11 @@
             <a href="<?= site_url('products') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('product.create')): ?>
             <a href="<?= site_url('products/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> Add New Product
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -158,12 +160,16 @@
                                     <a href="<?= site_url('products/view/'.$product['id']) ?>" class="btn btn-outline-primary" title="Manage Stock">
                                         <i class="fas fa-boxes"></i>
                                     </a>
+                                    <?php if (can('product.edit')): ?>
                                     <a href="<?= site_url('products/edit/'.$product['id']) ?>" class="btn btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    <?php endif; ?>
+                                    <?php if (can('product.delete')): ?>
                                     <a href="<?= site_url('products/delete/'.$product['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Delete this product?')" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

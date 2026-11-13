@@ -15,9 +15,11 @@
             <a href="<?= site_url('expenses') ?>" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-receipt me-1"></i> View Expenses
             </a>
+            <?php if (can('expense.create')): ?>
             <a href="<?= site_url('expense_categories/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> Add New Category
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -128,12 +130,16 @@ if (!empty($categories)) {
                             </td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
+                                    <?php if (can('expense.edit')): ?>
                                     <a href="<?= site_url('expense_categories/edit/'.$category['id']) ?>" class="btn btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    <?php endif; ?>
+                                    <?php if (can('expense.delete')): ?>
                                     <a href="<?= site_url('expense_categories/delete/'.$category['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this expense category?')" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

@@ -26,9 +26,11 @@ if (!empty($modules)) {
             <a href="<?= site_url('permissions') ?>" class="btn btn-light btn-sm fw-semibold shadow-sm me-2">
                 <i class="fas fa-key me-1 text-primary"></i> Permissions
             </a>
+            <?php if (can('module.create')): ?>
             <a href="<?= site_url('modules/create') ?>" class="btn btn-warning btn-sm fw-semibold shadow-sm">
                 <i class="fas fa-plus me-1"></i> Add Module
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -68,9 +70,11 @@ if (!empty($modules)) {
             <div class="text-center py-5 text-muted">
                 <i class="fas fa-cubes fa-3x mb-3 text-secondary opacity-50"></i>
                 <p class="mb-2 fw-semibold">No modules configured yet.</p>
+                <?php if (can('module.create')): ?>
                 <a href="<?= site_url('modules/create') ?>" class="btn btn-sm btn-primary">
                     <i class="fas fa-plus me-1"></i> Add First Module
                 </a>
+                <?php endif; ?>
             </div>
         <?php else: ?>
             <div class="table-responsive">
@@ -113,12 +117,16 @@ if (!empty($modules)) {
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
+                                    <?php if (can('module.edit')): ?>
                                     <a href="<?= site_url('modules/edit/'.$module['id']) ?>" class="btn btn-outline-primary" title="Edit Module">
                                         <i class="fas fa-pen"></i>
                                     </a>
+                                    <?php endif; ?>
+                                    <?php if (can('module.delete')): ?>
                                     <a href="<?= site_url('modules/delete/'.$module['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this module?')" title="Delete Module">
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

@@ -12,9 +12,11 @@
             <a href="<?= site_url('users') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('user.create')): ?>
             <a href="<?= site_url('users/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> Add New User
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -116,12 +118,16 @@ if (!empty($users)) {
                             </td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
+                                    <?php if (can('user.edit')): ?>
                                     <a href="<?= site_url('users/edit/'.$user['id']) ?>" class="btn btn-outline-warning" title="Edit User">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    <?php endif; ?>
+                                    <?php if (can('user.delete')): ?>
                                     <a href="<?= site_url('users/delete/'.$user['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this user?')" title="Delete User">
                                         <i class="fas fa-trash"></i>
                                     </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

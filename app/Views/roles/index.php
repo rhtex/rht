@@ -12,9 +12,11 @@
             <a href="<?= site_url('roles') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('role.create')): ?>
             <a href="<?= site_url('roles/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> Add New Role
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -62,13 +64,15 @@
                             <td><?= esc($role['description'] ?: 'No description provided') ?></td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
+                                    <?php if (can('role.edit')): ?>
                                     <a href="<?= site_url('roles/permissions/'.$role['id']) ?>" class="btn btn-outline-info" title="Manage Permissions">
                                         <i class="fas fa-key me-1"></i> Permissions
                                     </a>
                                     <a href="<?= site_url('roles/edit/'.$role['id']) ?>" class="btn btn-outline-warning" title="Edit Role">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <?php if(strtolower($role['role_name']) !== 'admin'): ?>
+                                    <?php endif; ?>
+                                    <?php if(strtolower($role['role_name']) !== 'admin' && can('role.delete')): ?>
                                     <a href="<?= site_url('roles/delete/'.$role['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this role?')" title="Delete Role">
                                         <i class="fas fa-trash"></i>
                                     </a>

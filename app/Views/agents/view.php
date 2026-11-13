@@ -20,9 +20,11 @@
         <div class="card-header">
             <h3 class="card-title">Agent Information</h3>
             <div class="card-tools">
+                <?php if (can('agent.edit')): ?>
                 <a href="<?= site_url('agents/edit/' . $agent['id']) ?>" class="btn btn-sm btn-warning">
                     <i class="fas fa-edit"></i> Edit
                 </a>
+                <?php endif; ?>
                 <a href="<?= site_url('agents') ?>" class="btn btn-sm btn-secondary">
                     <i class="fas fa-arrow-left"></i> Back
                 </a>

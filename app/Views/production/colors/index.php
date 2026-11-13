@@ -12,7 +12,7 @@
             <a href="<?= site_url('production/colors') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
-            <a href="<?= site_url('production/colors/create') ?>" class="btn btn-sm btn-primary">
+            <?php if (can('color.create')): ?><a href="<?= site_url('production/colors/create') ?>" class="btn btn-sm btn-primary"><?php endif; ?>
                 <i class="fas fa-plus me-1"></i> Add Color
             </a>
         </div>
@@ -106,8 +106,12 @@ if (!empty($colors)) {
                             </td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
+                                    <?php if (can('color.edit')): ?>
                                     <a href="<?= site_url('production/colors/edit/'.$color['id']) ?>" class="btn btn-outline-warning" title="Edit"><i class="fas fa-edit"></i></a>
+                                    <?php endif; ?>
+                                    <?php if (can('color.delete')): ?>
                                     <a href="<?= site_url('production/colors/delete/'.$color['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this color?')" title="Delete"><i class="fas fa-trash"></i></a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

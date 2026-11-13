@@ -45,7 +45,9 @@
                     </li>
                 </ul>
 
+                <?php if (can('employee.edit')): ?>
                 <a href="<?= site_url('employees/edit/' . $employee['id']) ?>" class="btn btn-primary d-block"><b><?= lang("App.edit") ?> Profile</b></a>
+                <?php endif; ?>
             </div>
         </div>
 

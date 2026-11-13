@@ -12,9 +12,11 @@
             <a href="<?= site_url('transports') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('transport.create')): ?>
             <a href="<?= site_url('transports/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> Add New Transport
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -117,12 +119,16 @@
                                     <a href="<?= site_url('transports/view/'.$transport['id']) ?>" class="btn btn-outline-primary" title="View Invoices & Returns">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    <?php if (can('transport.edit')): ?>
                                     <a href="<?= site_url('transports/edit/'.$transport['id']) ?>" class="btn btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    <?php endif; ?>
+                                    <?php if (can('transport.delete')): ?>
                                     <a href="<?= site_url('transports/delete/'.$transport['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this transport?')" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

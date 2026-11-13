@@ -12,7 +12,7 @@
             <a href="<?= site_url('production/yarn-weaving') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
-            <a href="<?= site_url('production/yarn-weaving/create') ?>" class="btn btn-sm btn-primary">
+            <?php if (can('yarn_weaving.create')): ?><a href="<?= site_url('production/yarn-weaving/create') ?>" class="btn btn-sm btn-primary"><?php endif; ?>
                 <i class="fas fa-plus me-1"></i> New Weaving DC
             </a>
         </div>
@@ -125,8 +125,12 @@ if (!empty($dcs)) {
                                 <div class="btn-group btn-group-sm">
                                     <a href="<?= site_url('production/yarn-weaving/view/'.$dc['id']) ?>" class="btn btn-outline-primary" title="View"><i class="fas fa-eye"></i></a>
                                     <?php if($dc['status'] === 'Open'): ?>
+                                        <?php if (can('yarn_weaving.edit')): ?>
                                         <a href="<?= site_url('production/yarn-weaving/edit/'.$dc['id']) ?>" class="btn btn-outline-warning" title="Edit"><i class="fas fa-edit"></i></a>
+                                        <?php endif; ?>
+                                        <?php if (can('yarn_weaving.delete')): ?>
                                         <a href="<?= site_url('production/yarn-weaving/delete/'.$dc['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Delete this DC?')" title="Delete"><i class="fas fa-trash"></i></a>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
                             </td>

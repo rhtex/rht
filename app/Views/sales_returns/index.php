@@ -16,9 +16,11 @@
             <a href="<?= site_url('sales_returns') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('sales_return.create')): ?>
             <a href="<?= site_url('sales_returns/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> Record Return
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>

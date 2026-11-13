@@ -41,7 +41,7 @@
                 </li>
 
 
-                <?php if(in_array('calendar.view', session('permissions') ?? []) || session('role') === 'admin'): ?>
+                <?php if(can('calendar.view') || session('role') === 'admin'): ?>
                 <li class="nav-item">
                     <a href="<?= site_url('calendar') ?>" class="nav-link <?= $segment1 == 'calendar' ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-calendar-alt text-success"></i>
@@ -51,7 +51,7 @@
                 <?php endif; ?>
 
                 <!-- SALES -->
-                <?php if(in_array('customer.view', session('permissions') ?? []) || in_array('agent.view', session('permissions') ?? []) || in_array('invoice.view', session('permissions') ?? []) || in_array('agent_payments.view', session('permissions') ?? [])): ?>
+                <?php if(can('customer.view') || can('agent.view') || can('invoice.view') || can('agent_payments.view')): ?>
                 <li class="nav-item <?= $isSales ? 'menu-open' : '' ?>">
                     <a href="#" class="nav-link <?= $isSales ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-shopping-basket text-primary"></i>
@@ -61,7 +61,7 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <?php if(in_array('customer.view', session('permissions') ?? [])): ?>
+                        <?php if(can('customer.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('customers') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-user-friends text-success"></i>
@@ -69,7 +69,7 @@
                             </a>
                         </li>
                         <?php endif; ?>
-                        <?php if(in_array('quotation.view', session('permissions') ?? [])): ?>
+                        <?php if(can('quotation.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('quotations') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-file-alt text-info"></i>
@@ -77,7 +77,7 @@
                             </a>
                         </li>
                         <?php endif; ?>
-                        <?php if(in_array('sales_order.view', session('permissions') ?? [])): ?>
+                        <?php if(can('sales_order.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('sales_orders') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-shopping-cart text-warning"></i>
@@ -85,7 +85,7 @@
                             </a>
                         </li>
                         <?php endif; ?>
-                        <?php if(in_array('invoice.view', session('permissions') ?? [])): ?>
+                        <?php if(can('invoice.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('invoices') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-file-invoice text-primary"></i>
@@ -117,7 +117,7 @@
                             </a>
                         </li>
                         <?php endif; ?>
-                        <?php if(in_array('agent.view', session('permissions') ?? [])): ?>
+                        <?php if(can('agent.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('agents') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-user-secret text-warning"></i>
@@ -125,7 +125,7 @@
                             </a>
                         </li>
                         <?php endif; ?>
-                        <?php if(in_array('agent_payments.view', session('permissions') ?? [])): ?>
+                        <?php if(can('agent_payments.view')): ?>
                         <li class="nav-item">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-hand-holding-usd text-success"></i>
@@ -141,7 +141,7 @@
                                         <p><?= lang("App.all_payments") ?></p>
                                     </a>
                                 </li>
-                                <?php if(in_array('agent_payments.create', session('permissions') ?? [])): ?>
+                                <?php if(can('agent_payments.create')): ?>
                                 <li class="nav-item">
                                     <a href="<?= site_url('agent-payments/create') ?>" class="nav-link">
                                         <i class="fas fa-plus nav-icon text-success"></i>
@@ -149,7 +149,7 @@
                                     </a>
                                 </li>
                                 <?php endif; ?>
-                                <?php if(in_array('agent_payments.reports', session('permissions') ?? [])): ?>
+                                <?php if(can('agent_payments.reports')): ?>
                                 <li class="nav-item">
                                     <a href="<?= site_url('agent-payments/reports') ?>" class="nav-link">
                                         <i class="fas fa-chart-line nav-icon text-warning"></i>
@@ -165,7 +165,7 @@
                 <?php endif; ?>
 
                 <!-- PURCHASES -->
-                <?php if(in_array('vendor.view', session('permissions') ?? []) || in_array('expense.view', session('permissions') ?? []) || in_array('bill.view', session('permissions') ?? [])): ?>
+                <?php if(can('vendor.view') || can('expense.view') || can('bill.view')): ?>
                 <li class="nav-item <?= $isPurchases ? 'menu-open' : '' ?>">
                     <a href="#" class="nav-link <?= $isPurchases ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-shopping-bag text-warning"></i>
@@ -175,7 +175,7 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <?php if(in_array('vendor.view', session('permissions') ?? [])): ?>
+                        <?php if(can('vendor.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('vendors') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-store text-info"></i>
@@ -202,7 +202,7 @@
                         </li>
                         <?php endif; ?>
                         
-                        <?php if(in_array('bill.view', session('permissions') ?? [])): ?>
+                        <?php if(can('bill.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('bills') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-file-invoice-dollar text-primary"></i>
@@ -216,7 +216,7 @@
                             </a>
                         </li>
                         <?php endif; ?>
-                        <?php if(in_array('expense.view', session('permissions') ?? [])): ?>
+                        <?php if(can('expense.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('expenses') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-receipt text-danger"></i>
@@ -235,7 +235,7 @@
                 <?php endif; ?>
 
                 <!-- INVENTORY -->
-                <?php if(in_array('product.view', session('permissions') ?? []) || in_array('product_category.view', session('permissions') ?? [])): ?>
+                <?php if(can('product.view') || can('product_category.view')): ?>
                 <li class="nav-item <?= $isInventory ? 'menu-open' : '' ?>">
                     <a href="#" class="nav-link <?= $isInventory ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-boxes text-info"></i>
@@ -245,7 +245,7 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <?php if(in_array('product.view', session('permissions') ?? [])): ?>
+                        <?php if(can('product.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('products') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-boxes text-info"></i>
@@ -253,7 +253,7 @@
                             </a>
                         </li>
                         <?php endif; ?>
-                        <?php if(in_array('product.edit', session('permissions') ?? [])): ?>
+                        <?php if(can('product.edit')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('products/approvals') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-clipboard-check text-warning"></i>
@@ -261,7 +261,7 @@
                             </a>
                         </li>
                         <?php endif; ?>
-                        <?php if(in_array('product_category.view', session('permissions') ?? [])): ?>
+                        <?php if(can('product_category.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('product_categories') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-list-alt text-success"></i>
@@ -274,7 +274,7 @@
                 <?php endif; ?>
 
                 <!-- PRODUCTION -->
-                <?php if(in_array('weaver.view', session('permissions') ?? [])): ?>
+                <?php if(can('weaver.view')): ?>
                 <li class="nav-item <?= $isProduction ? 'menu-open' : '' ?>">
                     <a href="#" class="nav-link <?= $isProduction ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-industry text-warning"></i>
@@ -387,7 +387,7 @@
                 <?php endif; ?>
 
                 <!-- OPERATIONS -->
-                <?php if(in_array('transport.view', session('permissions') ?? [])): ?>
+                <?php if(can('transport.view')): ?>
                 <li class="nav-item <?= $isOperations ? 'menu-open' : '' ?>">
                     <a href="#" class="nav-link <?= $isOperations ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-shipping-fast text-danger"></i>
@@ -408,7 +408,7 @@
                 <?php endif; ?>
 
                 <!-- FINANCE -->
-                <?php if(in_array('bank_account.view', session('permissions') ?? [])): ?>
+                <?php if(can('bank_account.view')): ?>
                 <li class="nav-item <?= $isFinance ? 'menu-open' : '' ?>">
                     <a href="#" class="nav-link <?= $isFinance ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-university text-primary"></i>
@@ -435,7 +435,7 @@
                 <?php endif; ?>
 
                 <!-- HR MANAGEMENT -->
-                <?php if(in_array('employee.view', session('permissions') ?? []) || in_array('attendance.view', session('permissions') ?? []) || in_array('loan.view', session('permissions') ?? []) || in_array('salary.view', session('permissions') ?? [])): ?>
+                <?php if(can('employee.view') || can('attendance.view') || can('loan.view') || can('salary.view')): ?>
                 <li class="nav-item <?= $isHR ? 'menu-open' : '' ?>">
                     <a href="#" class="nav-link <?= $isHR ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-users text-info"></i>
@@ -445,7 +445,7 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <?php if(in_array('employee.view', session('permissions') ?? [])): ?>
+                        <?php if(can('employee.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('employees') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-user-tie text-primary"></i>
@@ -453,7 +453,7 @@
                             </a>
                         </li>
                         <?php endif; ?>
-                        <?php if(in_array('attendance.view', session('permissions') ?? [])): ?>
+                        <?php if(can('attendance.view')): ?>
                         <li class="nav-item">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-calendar-check text-success"></i>
@@ -484,7 +484,7 @@
                             </ul>
                         </li>
                         <?php endif; ?>
-                        <?php if(in_array('loan.view', session('permissions') ?? [])): ?>
+                        <?php if(can('loan.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('loans') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-hand-holding-usd text-warning"></i>
@@ -492,7 +492,7 @@
                             </a>
                         </li>
                         <?php endif; ?>
-                        <?php if(in_array('salary.view', session('permissions') ?? [])): ?>
+                        <?php if(can('salary.view')): ?>
                         <li class="nav-item">
                             <a href="<?= site_url('salaries') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-file-invoice-dollar text-success"></i>
@@ -505,7 +505,7 @@
                 <?php endif; ?>
 
                 <!-- ADMINISTRATION -->
-                <?php if(in_array('user.view', session('permissions') ?? []) || in_array('role.view', session('permissions') ?? []) || in_array('setting.view', session('permissions') ?? []) || in_array('module.view', session('permissions') ?? []) || in_array('permission.view', session('permissions') ?? [])): ?>
+                <?php if(can('user.view') || can('role.view') || can('setting.view') || can('module.view') || can('permission.view')): ?>
                 <li class="nav-item <?= $isAdmin ? 'menu-open' : '' ?>">
                     <a href="#" class="nav-link <?= $isAdmin ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-shield-alt text-danger"></i>
@@ -515,7 +515,7 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <?php if(in_array('user.view', session('permissions') ?? []) || in_array('role.view', session('permissions') ?? []) || in_array('module.view', session('permissions') ?? []) || in_array('permission.view', session('permissions') ?? [])): ?>
+                        <?php if(can('user.view') || can('role.view') || can('module.view') || can('permission.view')): ?>
                         <li class="nav-item <?= $isUserMgmt ? 'menu-open' : '' ?>">
                             <a href="#" class="nav-link <?= $isUserMgmt ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-users-cog text-warning"></i>
@@ -525,7 +525,7 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
-                                <?php if(in_array('user.view', session('permissions') ?? [])): ?>
+                                <?php if(can('user.view')): ?>
                                 <li class="nav-item">
                                     <a href="<?= site_url('users') ?>" class="nav-link <?= $segment1 === 'users' ? 'active' : '' ?>">
                                         <i class="fas fa-users nav-icon text-primary"></i>
@@ -533,7 +533,7 @@
                                     </a>
                                 </li>
                                 <?php endif; ?>
-                                <?php if(in_array('role.view', session('permissions') ?? [])): ?>
+                                <?php if(can('role.view')): ?>
                                 <li class="nav-item">
                                     <a href="<?= site_url('roles') ?>" class="nav-link <?= $segment1 === 'roles' ? 'active' : '' ?>">
                                         <i class="fas fa-user-shield nav-icon text-danger"></i>
@@ -542,7 +542,7 @@
                                 </li>
                                 <?php endif; ?>
                                 
-                                <?php if(in_array('module.view', session('permissions') ?? [])): ?>
+                                <?php if(can('module.view')): ?>
                                 <li class="nav-item">
                                     <a href="<?= site_url('modules') ?>" class="nav-link <?= $segment1 === 'modules' ? 'active' : '' ?>">
                                         <i class="fas fa-cubes nav-icon text-success"></i>
@@ -551,7 +551,7 @@
                                 </li>
                                 <?php endif; ?>
 
-                                <?php if(in_array('permission.view', session('permissions') ?? [])): ?>
+                                <?php if(can('permission.view')): ?>
                                 <li class="nav-item">
                                     <a href="<?= site_url('permissions') ?>" class="nav-link <?= $segment1 === 'permissions' ? 'active' : '' ?>">
                                         <i class="fas fa-key nav-icon text-warning"></i>
@@ -563,7 +563,7 @@
                         </li>
                         <?php endif; ?>
 
-                        <?php if(in_array('setting.view', session('permissions') ?? []) || in_array('country.view', session('permissions') ?? []) || in_array('state.view', session('permissions') ?? [])): ?>
+                        <?php if(can('setting.view') || can('country.view') || can('state.view')): ?>
                         <li class="nav-item <?= $isSettingsSection ? 'menu-open' : '' ?>">
                             <a href="#" class="nav-link <?= $isSettingsSection ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-cogs text-secondary"></i>
@@ -573,7 +573,7 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
-                                <?php if(in_array('setting.view', session('permissions') ?? [])): ?>
+                                <?php if(can('setting.view')): ?>
                                 <li class="nav-item">
                                     <a href="<?= site_url('settings') ?>" class="nav-link <?= ($segment1 === 'settings' && empty($segment2)) ? 'active' : '' ?>">
                                         <i class="fas fa-tools nav-icon text-info"></i>
@@ -581,7 +581,7 @@
                                     </a>
                                 </li>
                                 <?php endif; ?>
-                                <?php if(in_array('country.view', session('permissions') ?? [])): ?>
+                                <?php if(can('country.view')): ?>
                                 <li class="nav-item">
                                     <a href="<?= site_url('countries') ?>" class="nav-link <?= $segment1 === 'countries' ? 'active' : '' ?>">
                                         <i class="fas fa-globe nav-icon text-primary"></i>
@@ -589,7 +589,7 @@
                                     </a>
                                 </li>
                                 <?php endif; ?>
-                                <?php if(in_array('state.view', session('permissions') ?? [])): ?>
+                                <?php if(can('state.view')): ?>
                                 <li class="nav-item">
                                     <a href="<?= site_url('states') ?>" class="nav-link <?= $segment1 === 'states' ? 'active' : '' ?>">
                                         <i class="fas fa-map nav-icon text-success"></i>
@@ -600,7 +600,7 @@
                                 
 
                                 
-                                <?php if(in_array('tax.view', session('permissions') ?? [])): ?>
+                                <?php if(can('tax.view')): ?>
                                 <li class="nav-item">
                                     <a href="<?= site_url('settings/taxes') ?>" class="nav-link <?= ($segment1 === 'settings' && $segment2 === 'taxes') ? 'active' : '' ?>">
                                         <i class="fas fa-percent nav-icon text-success"></i>
@@ -609,7 +609,7 @@
                                 </li>
                                 <?php endif; ?>
 
-                                <?php if(session('role') === 'admin' || in_array('setting.view', session('permissions') ?? []) || in_array('zoho.view', session('permissions') ?? [])): ?>
+                                <?php if(session('role') === 'admin' || can('setting.view') || can('zoho.view')): ?>
                                 <li class="nav-item <?= $isIntegrations ? 'menu-open' : '' ?>">
                                     <a href="#" class="nav-link <?= $isIntegrations ? 'active' : '' ?>">
                                         <i class="fas fa-plug nav-icon text-warning"></i>
@@ -647,7 +647,7 @@
                                 </li>
                                 <?php endif; ?>
 
-                                <?php if(in_array('setting.view', session('permissions') ?? []) || session('role') === 'admin'): ?>
+                                <?php if(can('setting.view') || session('role') === 'admin'): ?>
                                 <li class="nav-item">
                                     <a href="<?= site_url('settings/backup') ?>" class="nav-link <?= ($segment1 === 'settings' && $segment2 === 'backup') ? 'active' : '' ?>">
                                         <i class="fas fa-database nav-icon text-warning"></i>

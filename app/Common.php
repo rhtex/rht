@@ -13,3 +13,47 @@
  *
  * @see: https://codeigniter.com/user_guide/extending/common.html
  */
+
+if (!function_exists('has_permission')) {
+    /**
+     * Check if currently logged in user has permission.
+     * Admin role has all permissions by default.
+     *
+     * @param string|array $permission Single key or array of keys (returns true if ANY matches)
+     * @return bool
+     */
+    function has_permission($permission): bool
+    {
+        $session = session();
+        if (!$session || !$session->get('isLoggedIn')) {
+            return false;
+        }
+
+        if ($session->get('role') === 'admin') {
+            return true;
+        }
+
+        $userPermissions = $session->get('permissions') ?? [];
+        if (!is_array($userPermissions)) {
+            return false;
+        }
+
+        if (is_array($permission)) {
+            foreach ($permission as $p) {
+                if (in_array($p, $userPermissions, true)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        return in_array($permission, $userPermissions, true);
+    }
+}
+
+if (!function_exists('can')) {
+    function can($permission): bool
+    {
+        return has_permission($permission);
+    }
+}

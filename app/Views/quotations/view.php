@@ -39,15 +39,21 @@
                         <i class="fas fa-file-invoice-dollar me-1"></i> View Invoice <?= !empty($quotation['converted_invoice_number']) ? '(' . esc($quotation['converted_invoice_number']) . ')' : '' ?>
                     </a>
                 <?php elseif (!$isConverted): ?>
+                    <?php if (can('sales_order.create')): ?>
                     <a href="<?= site_url('quotations/convert-so/' . $quotation['id']) ?>" class="btn btn-sm btn-primary">
                         <i class="fas fa-shopping-cart me-1"></i> Convert to Sales Order
                     </a>
+                    <?php endif; ?>
+                    <?php if (can('invoice.create')): ?>
                     <a href="<?= site_url('quotations/convert-invoice/' . $quotation['id']) ?>" class="btn btn-sm btn-success">
                         <i class="fas fa-file-invoice-dollar me-1"></i> Convert to Invoice
                     </a>
+                    <?php endif; ?>
+                    <?php if (can('quotation.edit')): ?>
                     <a href="<?= site_url('quotations/edit/' . $quotation['id']) ?>" class="btn btn-sm btn-warning">
                         <i class="fas fa-edit me-1"></i> Edit
                     </a>
+                    <?php endif; ?>
                 <?php endif; ?>
                 <a href="<?= site_url('quotations/print/' . $quotation['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white">
                     <i class="fas fa-print me-1"></i> Print
@@ -81,12 +87,16 @@
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     <span>This Quotation has <strong>not yet been converted</strong> to a Sales Order or Invoice.</span>
                     <div class="ms-auto d-flex gap-2">
+                        <?php if (can('sales_order.create')): ?>
                         <a href="<?= site_url('quotations/convert-so/' . $quotation['id']) ?>" class="btn btn-sm btn-primary">
                             <i class="fas fa-shopping-cart me-1"></i> Convert to SO
                         </a>
+                        <?php endif; ?>
+                        <?php if (can('invoice.create')): ?>
                         <a href="<?= site_url('quotations/convert-invoice/' . $quotation['id']) ?>" class="btn btn-sm btn-success">
                             <i class="fas fa-file-invoice-dollar me-1"></i> Convert to Invoice
                         </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php endif; ?>

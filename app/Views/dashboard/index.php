@@ -10,9 +10,15 @@
     </div>
     <div class="col-sm-6 text-end">
         <div class="btn-group shadow-sm rounded-3 me-2">
+            <?php if (can('invoice.create')): ?>
             <a href="<?= site_url('invoices/create') ?>" class="btn btn-outline-primary btn-sm fw-bold"><i class="fas fa-plus me-1"></i> Invoice</a>
+            <?php endif; ?>
+            <?php if (can('quotation.create')): ?>
             <a href="<?= site_url('quotations/create') ?>" class="btn btn-outline-info btn-sm fw-bold"><i class="fas fa-plus me-1"></i> Quote</a>
+            <?php endif; ?>
+            <?php if (can('bill.create')): ?>
             <a href="<?= site_url('bills/create') ?>" class="btn btn-outline-warning btn-sm fw-bold"><i class="fas fa-plus me-1"></i> Bill</a>
+            <?php endif; ?>
         </div>
         <div class="btn-group shadow-sm rounded-3">
             <button class="btn btn-white btn-sm fw-bold border-0 px-3"><i class="fas fa-sync-alt me-1 text-primary"></i> Live</button>

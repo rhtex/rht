@@ -16,9 +16,11 @@
             <a href="<?= site_url('bills') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('bill.create')): ?>
             <a href="<?= site_url('bills/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> New Bill
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>

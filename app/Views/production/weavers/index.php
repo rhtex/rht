@@ -12,8 +12,8 @@
             <a href="<?= site_url('production/weavers') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
-            <?php if(in_array('weaver.create', session('permissions') ?? [])): ?>
-            <a href="<?= site_url('production/weavers/create') ?>" class="btn btn-sm btn-primary">
+            <?php if(can('weaver.create')): ?>
+            <?php if (can('weaver.create')): ?><a href="<?= site_url('production/weavers/create') ?>" class="btn btn-sm btn-primary"><?php endif; ?>
                 <i class="fas fa-plus me-1"></i> Add New Weaver
             </a>
             <?php endif; ?>
@@ -176,12 +176,12 @@ if (!empty($weavers)) {
                                     <a href="<?= site_url('production/weavers/view/'.$weaver['id']) ?>" class="btn btn-outline-primary" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <?php if(in_array('weaver.edit', session('permissions') ?? []) || in_array('weaver.create', session('permissions') ?? [])): ?>
+                                    <?php if(can('weaver.edit') || can('weaver.create')): ?>
                                     <a href="<?= site_url('production/weavers/edit/'.$weaver['id']) ?>" class="btn btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <?php endif; ?>
-                                    <?php if(in_array('weaver.delete', session('permissions') ?? [])): ?>
+                                    <?php if(can('weaver.delete')): ?>
                                     <a href="<?= site_url('production/weavers/delete/'.$weaver['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this weaver partner?')" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </a>

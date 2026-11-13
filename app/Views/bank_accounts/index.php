@@ -12,9 +12,11 @@
             <a href="<?= site_url('bank_accounts') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('bank_account.create')): ?>
             <a href="<?= site_url('bank_accounts/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> Add New Account
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -150,12 +152,16 @@
                                     <a href="<?= site_url('bank_accounts/statement/'.$account['id']) ?>" class="btn btn-outline-primary" title="View Statement">
                                         <i class="fas fa-list"></i>
                                     </a>
+                                    <?php if (can('bank_account.edit')): ?>
                                     <a href="<?= site_url('bank_accounts/edit/'.$account['id']) ?>" class="btn btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    <?php endif; ?>
+                                    <?php if (can('bank_account.delete')): ?>
                                     <a href="<?= site_url('bank_accounts/delete/'.$account['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this account?')" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

@@ -16,9 +16,11 @@
             <a href="<?= site_url('vendors/statement/'.$vendor['id']) ?>" class="btn btn-info shadow-sm text-white">
                 <i class="fas fa-file-invoice me-1"></i> Statement
             </a>
+            <?php if (can('vendor.edit')): ?>
             <a href="<?= site_url('vendors/edit/'.$vendor['id']) ?>" class="btn btn-warning shadow-sm">
                 <i class="fas fa-edit me-1"></i> Edit Profile
             </a>
+            <?php endif; ?>
             <a href="<?= site_url('vendors') ?>" class="btn btn-secondary shadow-sm">
                 <i class="fas fa-list me-1"></i> Back to List
             </a>

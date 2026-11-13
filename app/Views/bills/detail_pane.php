@@ -22,17 +22,17 @@
             <a href="<?= site_url('bills/view/' . $bill['id']) ?>?mode=single" class="btn btn-sm btn-outline-dark" title="Open Full Standalone Page">
                 <i class="fas fa-external-link-alt me-1"></i> Full Page View
             </a>
-            <?php if ($bill['status'] == 'Draft'): ?>
+            <?php if ($bill['status'] == 'Draft' && can('bill.edit')): ?>
                 <a href="<?= site_url('bills/mark-open/' . $bill['id']) ?>" class="btn btn-sm btn-success">
                     <i class="fas fa-check-circle me-1"></i> Mark Open
                 </a>
             <?php endif; ?>
-            <?php if ($bill['status'] != 'Void' && $bill['status'] != 'Paid'): ?>
+            <?php if ($bill['status'] != 'Void' && $bill['status'] != 'Paid' && can('bill.edit')): ?>
                 <a href="<?= site_url('bills/edit/' . $bill['id']) ?>" class="btn btn-sm btn-warning">
                     <i class="fas fa-edit me-1"></i> Edit
                 </a>
             <?php endif; ?>
-            <?php if ($bill['balance'] > 0 && $bill['status'] != 'Void'): ?>
+            <?php if ($bill['balance'] > 0 && $bill['status'] != 'Void' && can('bill.edit')): ?>
                 <a href="<?= site_url('bills/payment/' . $bill['id']) ?>" class="btn btn-sm btn-success">
                     <i class="fas fa-money-bill-wave me-1"></i> Payment
                 </a>

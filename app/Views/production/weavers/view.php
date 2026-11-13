@@ -186,7 +186,7 @@
                         <div class="tab-pane fade" id="personal-ledgers" role="tabpanel" aria-labelledby="personal-ledgers-tab">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 class="mb-0 fw-bold">Personal Ledgers</h5>
-                                <?php if (in_array('weaver.edit', session('permissions') ?? [])): ?>
+                                <?php if (can('weaver.edit')): ?>
                                     <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#newWeaverLedgerModal">
                                         <i class="fas fa-plus me-1"></i> New Ledger
                                     </button>
@@ -221,7 +221,7 @@
                                                         <div class="col-md-3"><strong>Interest Rate:</strong> <?= number_format($ledger['interest_rate'], 2) ?>%</div>
                                                         <div class="col-md-3"><strong>Total Due (w/ Int):</strong> ₹<?= number_format($ledger['total_amount_due'], 2) ?></div>
                                                         <div class="col-md-3 text-end">
-                                                            <?php if ($ledger['status'] == 'Active' && in_array('weaver.edit', session('permissions') ?? [])): ?>
+                                                            <?php if ($ledger['status'] == 'Active' && can('weaver.edit')): ?>
                                                                 <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick='openEditWeaverLedgerModal(<?= json_encode($ledger, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>
                                                                     <i class="fas fa-edit"></i> Edit
                                                                 </button>
@@ -280,7 +280,7 @@
                                                                             <td><?= esc($txn['remarks']) ?></td>
                                                                             <td class="text-end fw-bold">₹<?= number_format($txn['amount'], 2) ?></td>
                                                                             <td>
-                                                                                <?php if (($txn['transaction_type'] == 'Payment' || $txn['transaction_type'] == 'Waiveoff' || $txn['transaction_type'] == 'Interest Addition') && in_array('weaver.edit', session('permissions') ?? [])): ?>
+                                                                                <?php if (($txn['transaction_type'] == 'Payment' || $txn['transaction_type'] == 'Waiveoff' || $txn['transaction_type'] == 'Interest Addition') && can('weaver.edit')): ?>
                                                                                 <form action="<?= site_url('production/weaver-ledgers/reverse/' . $txn['id']) ?>" method="post" class="d-inline" onsubmit="return confirm('Reverse this transaction?');">
                                                                                     <?= csrf_field() ?>
                                                                                     <button type="submit" class="btn btn-xs btn-outline-danger" title="Reverse Transaction"><i class="fas fa-undo"></i></button>

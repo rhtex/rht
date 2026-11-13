@@ -12,9 +12,11 @@
             <a href="<?= site_url('employees') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('employee.create')): ?>
             <a href="<?= site_url('employees/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> Add New Employee
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -166,21 +168,27 @@
                                         <a href="<?= site_url('employees/view/' . $employee['id']) ?>" class="btn btn-outline-primary" title="View Details">
                                             <i class="fas fa-eye"></i>
                                         </a>
+                                        <?php if (can('employee.edit')): ?>
                                         <a href="<?= site_url('employees/edit/' . $employee['id']) ?>" class="btn btn-outline-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
+                                        <?php endif; ?>
                                         <?php if (empty($employee['user_id'])): ?>
+                                            <?php if (can('user.create')): ?>
                                             <a href="<?= site_url('users/convert/' . $employee['id']) ?>" class="btn btn-outline-info" title="<?= lang('App.convert_to_user') ?>">
                                                 <i class="fas fa-user-plus"></i>
                                             </a>
+                                            <?php endif; ?>
                                         <?php else: ?>
                                             <button class="btn btn-outline-secondary" disabled title="<?= lang('App.already_a_user') ?>">
                                                 <i class="fas fa-user-check"></i>
                                             </button>
                                         <?php endif; ?>
+                                        <?php if (can('employee.delete')): ?>
                                         <a href="<?= site_url('employees/delete/' . $employee['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this employee?')" title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </a>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>

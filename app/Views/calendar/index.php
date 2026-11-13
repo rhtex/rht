@@ -11,9 +11,11 @@ Calendar & Tasks
             <div class="card-header">
                 <h3 class="card-title">Pending Tasks</h3>
                 <div class="card-tools">
+                    <?php if (can('calendar.create')): ?>
                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addReminderModal">
                         <i class="fas fa-plus"></i> Add
                     </button>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -114,12 +116,16 @@ Calendar & Tasks
                 </div>
             </div>
             <div class="modal-footer">
+                <?php if (can('calendar.delete')): ?>
                 <button type="button" class="btn btn-outline-danger btn-sm" id="deleteEventBtn">
                     <i class="fas fa-trash"></i> Delete
                 </button>
+                <?php endif; ?>
+                <?php if (can('calendar.edit')): ?>
                 <button type="button" class="btn btn-success btn-sm" id="completeEventBtn">
                     <i class="fas fa-check"></i> Mark Completed
                 </button>
+                <?php endif; ?>
             </div>
         </div>
     </div>

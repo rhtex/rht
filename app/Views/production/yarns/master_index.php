@@ -10,7 +10,9 @@
     <div class="col-sm-6 text-end">
         <div class="btn-group">
             <a href="<?= site_url('production/yarns') ?>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Yarns Stock</a>
+            <?php if (can('yarn_master.create')): ?>
             <a href="<?= site_url('production/yarns/master/create') ?>" class="btn btn-primary"><i class="fas fa-plus"></i> Add Predefined Yarn</a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -46,12 +48,16 @@
                                 </span>
                             </td>
                             <td>
+                                <?php if (can('yarn_master.edit')): ?>
                                 <a href="<?= site_url('production/yarns/master/edit/'.$my['id']) ?>" class="btn btn-sm btn-warning" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
+                                <?php endif; ?>
+                                <?php if (can('yarn_master.delete')): ?>
                                 <a href="<?= site_url('production/yarns/master/delete/'.$my['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')" title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </a>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>

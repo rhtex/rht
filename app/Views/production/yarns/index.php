@@ -12,8 +12,8 @@
             <a href="<?= site_url('production/yarns/master') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-cog me-1"></i> Predefined Yarns
             </a>
-            <?php if(in_array('weaver.create', session('permissions') ?? [])): ?>
-            <a href="<?= site_url('production/yarns/create') ?>" class="btn btn-sm btn-primary">
+            <?php if(can('weaver.create')): ?>
+            <?php if (can('yarn.create')): ?><a href="<?= site_url('production/yarns/create') ?>" class="btn btn-sm btn-primary"><?php endif; ?>
                 <i class="fas fa-plus me-1"></i> Add New Yarn Stock
             </a>
             <?php endif; ?>
@@ -166,12 +166,12 @@ if (!empty($yarns)) {
                                     <a href="<?= site_url('production/yarns/view/'.$yarn['id']) ?>" class="btn btn-outline-primary" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <?php if(in_array('weaver.edit', session('permissions') ?? [])): ?>
+                                    <?php if(can('weaver.edit')): ?>
                                     <a href="<?= site_url('production/yarns/edit/'.$yarn['id']) ?>" class="btn btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <?php endif; ?>
-                                    <?php if(in_array('weaver.delete', session('permissions') ?? [])): ?>
+                                    <?php if(can('weaver.delete')): ?>
                                     <a href="<?= site_url('production/yarns/delete/'.$yarn['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this yarn stock?')" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </a>

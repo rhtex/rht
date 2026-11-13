@@ -26,9 +26,11 @@ if (!empty($countries)) {
             <a href="<?= site_url('states') ?>" class="btn btn-light btn-sm fw-semibold shadow-sm me-2">
                 <i class="fas fa-map-marker-alt me-1 text-primary"></i> View States
             </a>
+            <?php if (can('country.create')): ?>
             <a href="<?= site_url('countries/create') ?>" class="btn btn-warning btn-sm fw-semibold shadow-sm">
                 <i class="fas fa-plus me-1"></i> Add Country
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -68,9 +70,11 @@ if (!empty($countries)) {
             <div class="text-center py-5 text-muted">
                 <i class="fas fa-globe-americas fa-3x mb-3 text-secondary opacity-50"></i>
                 <p class="mb-2 fw-semibold">No countries configured yet.</p>
+                <?php if (can('country.create')): ?>
                 <a href="<?= site_url('countries/create') ?>" class="btn btn-sm btn-primary">
                     <i class="fas fa-plus me-1"></i> Add First Country
                 </a>
+                <?php endif; ?>
             </div>
         <?php else: ?>
             <div class="table-responsive">
@@ -123,12 +127,16 @@ if (!empty($countries)) {
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
+                                    <?php if (can('country.edit')): ?>
                                     <a href="<?= site_url('countries/edit/'.$country['id']) ?>" class="btn btn-outline-primary" title="Edit Country">
                                         <i class="fas fa-pen"></i>
                                     </a>
+                                    <?php endif; ?>
+                                    <?php if (can('country.delete')): ?>
                                     <a href="<?= site_url('countries/delete/'.$country['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this country?')" title="Delete Country">
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

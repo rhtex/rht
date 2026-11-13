@@ -12,9 +12,11 @@
             <a href="<?= site_url('loans') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('loan.create')): ?>
             <a href="<?= site_url('loans/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> New Loan Request
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -152,12 +154,16 @@
                                     <a href="<?= site_url('loans/view/'.$loan['id']) ?>" class="btn btn-outline-primary" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    <?php if (can('loan.edit')): ?>
                                     <a href="<?= site_url('loans/edit/'.$loan['id']) ?>" class="btn btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    <?php endif; ?>
+                                    <?php if (can('loan.delete')): ?>
                                     <a href="<?= site_url('loans/delete/'.$loan['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this loan record?')" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

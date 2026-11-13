@@ -12,9 +12,11 @@
             <a href="<?= site_url('salaries') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('salary.create')): ?>
             <a href="<?= site_url('salaries/calculate?month='.$month) ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-calculator me-1"></i> Calculate <?= date('M Y', strtotime($month)) ?> Payroll
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -147,16 +149,22 @@
                                     </a>
                                     
                                     <?php if ($salary['is_paid'] == 0): ?>
+                                        <?php if (can('salary.create')): ?>
                                         <a href="<?= site_url('salaries/mark-paid/'.$salary['id']) ?>" class="btn btn-outline-success" onclick="return confirm('Mark this salary as paid?')" title="Mark as Paid">
                                             <i class="fas fa-check-circle"></i>
                                         </a>
+                                        <?php endif; ?>
+                                        <?php if (can('salary.delete')): ?>
                                         <a href="<?= site_url('salaries/delete/'.$salary['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Delete this salary? Loan deductions will be reverted.')" title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </a>
+                                        <?php endif; ?>
                                     <?php else: ?>
+                                        <?php if (can('salary.create')): ?>
                                         <a href="<?= site_url('salaries/mark-unpaid/'.$salary['id']) ?>" class="btn btn-outline-warning" onclick="return confirm('Mark this salary as unpaid?')" title="Mark as Unpaid">
                                             <i class="fas fa-undo"></i>
                                         </a>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
                             </td>

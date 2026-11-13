@@ -66,6 +66,7 @@ if (!empty($categories)) {
 </div>
 
 <div class="row">
+    <?php if (can('product_category.create')): ?>
     <div class="col-md-4">
         <div class="card card-outline card-primary shadow-sm mb-3">
             <div class="card-header py-2 bg-white">
@@ -107,6 +108,9 @@ if (!empty($categories)) {
         </div>
     </div>
     <div class="col-md-8">
+    <?php else: ?>
+    <div class="col-md-12">
+    <?php endif; ?>
         <div class="card card-outline card-secondary shadow-sm">
             <div class="card-header py-2 bg-white">
                 <h3 class="card-title fw-bold">Product Category Hierarchy</h3>
@@ -143,12 +147,16 @@ if (!empty($categories)) {
                                     </td>
                                     <td class="text-end">
                                         <div class="btn-group btn-group-sm">
+                                            <?php if (can('product_category.edit')): ?>
                                             <a href="<?= site_url('product_categories/edit/'.$category['id']) ?>" class="btn btn-outline-warning" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            <?php endif; ?>
+                                            <?php if (can('product_category.delete')): ?>
                                             <a href="<?= site_url('product_categories/delete/'.$category['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this category?')" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </a>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>

@@ -19,8 +19,8 @@
         <div class="card-header">
             <h3 class="card-title"><i class="fas fa-info-circle me-1"></i> Vendor Information</h3>
             <div class="card-tools">
-                <?php if(in_array('weaver.edit', session('permissions') ?? [])): ?>
-                <a href="<?= site_url('production/vendors/edit/' . $vendor['id']) ?>" class="btn btn-sm btn-warning">
+                <?php if(can('weaver.edit')): ?>
+                <?php if (can('production_vendor.edit')): ?><a href="<?= site_url('production/vendors/edit/' . $vendor['id']) ?>" class="btn btn-sm btn-warning"><?php endif; ?>
                     <i class="fas fa-edit"></i> Edit
                 </a>
                 <?php endif; ?>

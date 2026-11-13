@@ -28,10 +28,14 @@
                         <i class="fas fa-file-invoice me-1"></i> View Invoice <?= !empty($order['converted_invoice_number']) ? '(' . esc($order['converted_invoice_number']) . ')' : '' ?>
                     </a>
                 <?php else: ?>
+                    <?php if (can('invoice.create')): ?>
                     <a href="<?= site_url('sales_orders/convert/' . $order['id']) ?>" class="btn btn-sm btn-primary">
                         <i class="fas fa-file-invoice-dollar me-1"></i> Convert to Invoice
                     </a>
+                    <?php endif; ?>
+                    <?php if (can('sales_order.edit')): ?>
                     <a href="<?= site_url('sales_orders/edit/' . $order['id']) ?>" class="btn btn-sm btn-warning"><i class="fas fa-edit me-1"></i> Edit</a>
+                    <?php endif; ?>
                 <?php endif; ?>
                 <a href="<?= site_url('sales_orders/print/' . $order['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white"><i class="fas fa-print me-1"></i> Print</a>
             </div>
@@ -41,9 +45,11 @@
                 <div class="alert alert-danger d-flex align-items-center py-2 mb-3">
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     <span>This Sales Order has <strong>not yet been converted</strong> to an Invoice.</span>
+                    <?php if (can('invoice.create')): ?>
                     <a href="<?= site_url('sales_orders/convert/' . $order['id']) ?>" class="btn btn-sm btn-primary ms-auto">
                         <i class="fas fa-file-invoice-dollar"></i> Convert Now
                     </a>
+                    <?php endif; ?>
                 </div>
             <?php else: ?>
                 <div class="alert alert-success d-flex align-items-center py-2 mb-3">

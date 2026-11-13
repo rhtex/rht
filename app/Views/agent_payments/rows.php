@@ -33,7 +33,9 @@
         <td class="text-end">
             <div class="btn-group btn-group-sm">
                 <a href="<?= site_url('agent-payments/view/' . $payment['id']) ?>" class="btn btn-outline-primary" title="View"><i class="fas fa-eye"></i></a>
+                <?php if (can('agent_payments.delete')): ?>
                 <a href="<?= site_url('agent-payments/delete/' . $payment['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this payment record?')" title="Delete"><i class="fas fa-trash"></i></a>
+                <?php endif; ?>
             </div>
         </td>
     </tr>

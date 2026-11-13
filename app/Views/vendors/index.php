@@ -15,7 +15,7 @@
             <a href="<?= site_url('bulk-upload/form') ?>" class="btn btn-sm btn-outline-primary" title="Bulk Upload Vendors">
                 <i class="fas fa-file-upload me-1"></i> Bulk Upload
             </a>
-            <?php if (in_array('vendor.create', session('permissions') ?? [])): ?>
+            <?php if (can('vendor.create')): ?>
                 <a href="<?= site_url('vendors/create') ?>" class="btn btn-sm btn-primary">
                     <i class="fas fa-plus me-1"></i> Add New Vendor
                 </a>
@@ -184,12 +184,16 @@
                                         <a href="<?= site_url('vendors/view/' . $vendor['id']) ?>" class="btn btn-outline-info" title="View">
                                             <i class="fas fa-eye"></i>
                                         </a>
+                                        <?php if (can('vendor.edit')): ?>
                                         <a href="<?= site_url('vendors/edit/' . $vendor['id']) ?>" class="btn btn-outline-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
+                                        <?php endif; ?>
+                                        <?php if (can('vendor.delete')): ?>
                                         <a href="<?= site_url('vendors/delete/' . $vendor['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure?')" title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </a>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>
@@ -275,12 +279,16 @@
                                             <a href="<?= site_url('vendors/view/') ?>${vendor.id}" class="btn btn-outline-info" title="View">
                                                 <i class="fas fa-eye"></i>
                                             </a>
+                                            <?php if (can('vendor.edit')): ?>
                                             <a href="<?= site_url('vendors/edit/') ?>${vendor.id}" class="btn btn-outline-warning" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            <?php endif; ?>
+                                            <?php if (can('vendor.delete')): ?>
                                             <a href="<?= site_url('vendors/delete/') ?>${vendor.id}" class="btn btn-outline-danger" onclick="return confirm('Are you sure?')" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </a>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>

@@ -40,9 +40,11 @@
                     </li>
                 </ul>
 
+                <?php if (can('transport.edit')): ?>
                 <div class="d-grid gap-2">
                     <a href="<?= site_url('transports/edit/' . $transport['id']) ?>" class="btn btn-primary"><b><?= lang("App.edit") ?> Transport</b></a>
                 </div>
+                <?php endif; ?>
             </div>
         </div>
 

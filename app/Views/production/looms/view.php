@@ -96,7 +96,7 @@
                         </div>
                     </div>
 
-                    <?php if(in_array('weaver.edit', session('permissions') ?? [])): ?>
+                    <?php if(can('weaver.edit')): ?>
                     <div class="d-grid mt-3">
                         <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Update Loom</button>
                     </div>
@@ -163,7 +163,7 @@
         <div class="card card-outline card-success shadow-sm">
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <h3 class="card-title text-dark fw-bold mb-0"><i class="fas fa-file-invoice-dollar me-1"></i> Loom Financial Ledgers</h3>
-                <?php if (in_array('weaver.edit', session('permissions') ?? [])): ?>
+                <?php if (can('weaver.edit')): ?>
                     <button type="button" class="btn btn-sm btn-success ms-auto" data-bs-toggle="modal" data-bs-target="#newLedgerModal">
                         <i class="fas fa-plus me-1"></i> New Ledger
                     </button>
@@ -198,7 +198,7 @@
                                             <div class="col-md-3"><strong>Interest Rate:</strong> <?= number_format($ledger['interest_rate'], 2) ?>%</div>
                                             <div class="col-md-3"><strong>Total Due (w/ Int):</strong> ₹<?= number_format($ledger['total_amount_due'], 2) ?></div>
                                             <div class="col-md-4 text-end">
-                                                <?php if ($ledger['status'] == 'Active' && in_array('weaver.edit', session('permissions') ?? [])): ?>
+                                                <?php if ($ledger['status'] == 'Active' && can('weaver.edit')): ?>
                                                     <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="openEditLedgerModal(<?= htmlspecialchars(json_encode($ledger)) ?>)">
                                                         <i class="fas fa-edit"></i> Edit
                                                     </button>
@@ -257,7 +257,7 @@
                                                                 <td><?= esc($txn['remarks']) ?></td>
                                                                 <td class="text-end fw-bold">₹<?= number_format($txn['amount'], 2) ?></td>
                                                                 <td>
-                                                                    <?php if (($txn['transaction_type'] == 'Payment' || $txn['transaction_type'] == 'Waiveoff' || $txn['transaction_type'] == 'Interest Addition') && in_array('weaver.edit', session('permissions') ?? [])): ?>
+                                                                    <?php if (($txn['transaction_type'] == 'Payment' || $txn['transaction_type'] == 'Waiveoff' || $txn['transaction_type'] == 'Interest Addition') && can('weaver.edit')): ?>
                                                                     <form action="<?= site_url('production/loom-ledgers/reverse/' . $txn['id']) ?>" method="post" class="d-inline" onsubmit="return confirm('Reverse this transaction? This will update the balance.');">
                                                                         <?= csrf_field() ?>
                                                                         <button type="submit" class="btn btn-xs btn-outline-danger" title="Reverse Transaction"><i class="fas fa-undo"></i></button>
@@ -282,7 +282,7 @@
 </div>
 
 <!-- Modals for Ledgers -->
-<?php if (in_array('weaver.edit', session('permissions') ?? [])): ?>
+<?php if (can('weaver.edit')): ?>
 <!-- New Ledger Modal -->
 <div class="modal fade" id="newLedgerModal" tabindex="-1">
     <div class="modal-dialog">

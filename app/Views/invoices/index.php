@@ -16,9 +16,11 @@
             <a href="<?= site_url('invoices') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('invoice.create')): ?>
             <a href="<?= site_url('invoices/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> New Invoice
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>

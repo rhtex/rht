@@ -23,17 +23,17 @@
                 <a href="<?= site_url('bills') ?>" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark" title="Back to Split Bills View">
                     <i class="fas fa-columns me-1 text-primary"></i> Split View
                 </a>
-                <?php if ($bill['status'] == 'Draft'): ?>
+                <?php if ($bill['status'] == 'Draft' && can('bill.edit')): ?>
                     <a href="<?= site_url('bills/mark-open/' . $bill['id']) ?>" class="btn btn-sm btn-success" onclick="return confirm('Mark this bill as Open?');">
                         <i class="fas fa-check-circle me-1"></i> Mark as Open
                     </a>
                 <?php endif; ?>
-                <?php if ($bill['status'] != 'Void' && $bill['status'] != 'Paid'): ?>
+                <?php if ($bill['status'] != 'Void' && $bill['status'] != 'Paid' && can('bill.edit')): ?>
                     <a href="<?= site_url('bills/edit/' . $bill['id']) ?>" class="btn btn-sm btn-warning">
                         <i class="fas fa-edit me-1"></i> Edit
                     </a>
                 <?php endif; ?>
-                <?php if ($bill['balance'] > 0 && $bill['status'] != 'Void'): ?>
+                <?php if ($bill['balance'] > 0 && $bill['status'] != 'Void' && can('bill.edit')): ?>
                     <a href="<?= site_url('bills/payment/' . $bill['id']) ?>" class="btn btn-sm btn-success">
                         <i class="fas fa-money-bill-wave me-1"></i> Record Payment
                     </a>

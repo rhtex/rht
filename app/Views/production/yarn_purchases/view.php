@@ -19,7 +19,7 @@
         <div class="card-header">
             <h3 class="card-title"><i class="fas fa-file-invoice me-1"></i> Purchase Invoice Information</h3>
             <div class="card-tools">
-                <?php if(in_array('weaver.edit', session('permissions') ?? []) || in_array('weaver.create', session('permissions') ?? [])): ?>
+                <?php if(can('weaver.edit') || can('weaver.create')): ?>
                 <a href="<?= site_url('production/yarn-purchases/edit/' . $purchase['id']) ?>" class="btn btn-sm btn-warning">
                     <i class="fas fa-edit"></i> Edit
                 </a>

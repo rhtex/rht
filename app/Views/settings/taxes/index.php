@@ -12,7 +12,7 @@
             <a href="<?= base_url('settings/taxes') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
-            <?php if(in_array('tax.create', session('permissions') ?? [])): ?>
+            <?php if(can('tax.create')): ?>
             <a href="<?= base_url('settings/taxes/new') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> New Tax Rate
             </a>
@@ -101,12 +101,12 @@ if (!empty($taxes)) {
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group btn-group-sm">
-                                        <?php if(in_array('tax.edit', session('permissions') ?? [])): ?>
+                                        <?php if(can('tax.edit')): ?>
                                         <a href="<?= base_url('settings/taxes/edit/' . $tax['id']) ?>" class="btn btn-outline-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <?php endif; ?>
-                                        <?php if(in_array('tax.delete', session('permissions') ?? [])): ?>
+                                        <?php if(can('tax.delete')): ?>
                                         <a href="<?= base_url('settings/taxes/delete/' . $tax['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this tax slab?')" title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </a>

@@ -30,9 +30,11 @@ $distinctModules = count($moduleSet);
             <a href="<?= site_url('modules') ?>" class="btn btn-outline-light btn-sm fw-semibold shadow-sm me-2">
                 <i class="fas fa-cubes me-1"></i> Modules
             </a>
+            <?php if (can('permission.create')): ?>
             <a href="<?= site_url('permissions/create') ?>" class="btn btn-warning btn-sm fw-semibold shadow-sm">
                 <i class="fas fa-plus me-1"></i> Add Permission
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -72,9 +74,11 @@ $distinctModules = count($moduleSet);
             <div class="text-center py-5 text-muted">
                 <i class="fas fa-key fa-3x mb-3 text-secondary opacity-50"></i>
                 <p class="mb-2 fw-semibold">No permissions defined yet.</p>
+                <?php if (can('permission.create')): ?>
                 <a href="<?= site_url('permissions/create') ?>" class="btn btn-sm btn-primary">
                     <i class="fas fa-plus me-1"></i> Add First Permission
                 </a>
+                <?php endif; ?>
             </div>
         <?php else: ?>
             <div class="table-responsive">
@@ -115,12 +119,16 @@ $distinctModules = count($moduleSet);
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
+                                    <?php if (can('permission.edit')): ?>
                                     <a href="<?= site_url('permissions/edit/'.$perm['id']) ?>" class="btn btn-outline-primary" title="Edit Permission">
                                         <i class="fas fa-pen"></i>
                                     </a>
+                                    <?php endif; ?>
+                                    <?php if (can('permission.delete')): ?>
                                     <a href="<?= site_url('permissions/delete/'.$perm['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this permission?')" title="Delete Permission">
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

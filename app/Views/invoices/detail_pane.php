@@ -22,17 +22,17 @@
             <a href="<?= site_url('invoices/view/' . $invoice['id']) ?>?mode=single" class="btn btn-sm btn-outline-dark" title="Open Full Standalone Page">
                 <i class="fas fa-external-link-alt me-1"></i> Full Page View
             </a>
-            <?php if ($invoice['status'] == 'Draft'): ?>
+            <?php if ($invoice['status'] == 'Draft' && can('invoice.edit')): ?>
                 <a href="<?= site_url('invoices/mark-sent/' . $invoice['id']) ?>" class="btn btn-sm btn-success">
                     <i class="fas fa-paper-plane me-1"></i> Mark Sent
                 </a>
             <?php endif; ?>
-            <?php if ($invoice['status'] != 'Void' && $invoice['status'] != 'Paid'): ?>
+            <?php if ($invoice['status'] != 'Void' && $invoice['status'] != 'Paid' && can('invoice.edit')): ?>
                 <a href="<?= site_url('invoices/edit/' . $invoice['id']) ?>" class="btn btn-sm btn-warning">
                     <i class="fas fa-edit me-1"></i> Edit
                 </a>
             <?php endif; ?>
-            <?php if ($invoice['balance'] > 0 && $invoice['status'] != 'Void'): ?>
+            <?php if ($invoice['balance'] > 0 && $invoice['status'] != 'Void' && can('invoice.edit')): ?>
                 <a href="<?= site_url('invoices/payment/' . $invoice['id']) ?>" class="btn btn-sm btn-success">
                     <i class="fas fa-money-bill-wave me-1"></i> Payment
                 </a>

@@ -12,7 +12,7 @@
             <a href="<?= site_url('production/warp-allocations') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
-            <a href="<?= site_url('production/warp-allocations/create') ?>" class="btn btn-sm btn-primary">
+            <?php if (can('warp_allocation.create')): ?><a href="<?= site_url('production/warp-allocations/create') ?>" class="btn btn-sm btn-primary"><?php endif; ?>
                 <i class="fas fa-plus me-1"></i> New Allocation
             </a>
         </div>
@@ -141,7 +141,7 @@ if (!empty($allocations)) {
                                         <?php if(in_array($allocation['status'], ['Allocated', 'In Weaving', 'Partially Returned'])): ?>
                                             <a href="<?= site_url('production/receipts/create/' . $allocation['id']) ?>" class="btn btn-outline-success" title="Receive Goods"><i class="fas fa-box-open"></i></a>
                                         <?php endif; ?>
-                                        <?php if($allocation['status'] == 'Allocated' && in_array('weaver.delete', session('permissions') ?? [])): ?>
+                                        <?php if($allocation['status'] == 'Allocated' && can('weaver.delete')): ?>
                                             <a href="<?= site_url('production/warp-allocations/delete/' . $allocation['id']) ?>" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this allocation?');"><i class="fas fa-trash"></i></a>
                                         <?php endif; ?>
                                     </div>

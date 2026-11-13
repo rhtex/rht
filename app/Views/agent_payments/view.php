@@ -20,11 +20,13 @@
         <div class="card-header">
             <h3 class="card-title">Payment Information</h3>
             <div class="card-tools">
+                <?php if (can('agent_payments.delete')): ?>
                 <a href="<?= site_url('agent-payments/delete/' . $payment['id']) ?>" 
                    class="btn btn-sm btn-danger"
                    onclick="return confirm('Are you sure you want to delete this payment? This will mark all invoices as unpaid again.')">
                     <i class="fas fa-trash"></i> Delete
                 </a>
+                <?php endif; ?>
             </div>
         </div>
         <div class="card-body">

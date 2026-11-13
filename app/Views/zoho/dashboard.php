@@ -462,38 +462,68 @@
 <!-- Modal 2: Sync Selected Records -->
 <div class="modal fade" id="syncRecordsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <form action="<?= site_url('settings/integrations/zoho/sync-records') ?>" method="post" class="modal-content">
+        <form action="<?= site_url('settings/integrations/zoho/sync-records') ?>" method="post" class="modal-content" id="syncRecordsForm">
             <?= csrf_field() ?>
             <div class="modal-header">
-                <h5 class="modal-title fw-bold"><i class="fas fa-check-square text-primary me-2"></i>Sync Selected Records to Zoho Books</h5>
+                <h5 class="modal-title fw-bold"><i class="fas fa-tasks text-primary me-2"></i>Sync Records by Number / Selection</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">1. Choose Module</label>
-                    <select name="module" id="pickerModuleSelect" class="form-select" required>
-                        <option value="">-- Select Module --</option>
-                        <?php foreach ($modulesList as $mKey => $mMeta): ?>
-                            <option value="<?= esc($mKey) ?>"><?= esc($mMeta['label']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div class="mb-2 d-flex justify-content-between align-items-center">
-                    <label class="form-label fw-semibold mb-0">2. Select Records to Synchronize</label>
-                    <div>
-                        <button type="button" class="btn btn-xs btn-outline-secondary" id="selectAllRecordsBtn">Select All</button>
-                        <button type="button" class="btn btn-xs btn-outline-secondary" id="clearAllRecordsBtn">Clear</button>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">1. Choose Module <span class="text-danger">*</span></label>
+                        <select name="module" id="pickerModuleSelect" class="form-select" required>
+                            <option value="">-- Select Module --</option>
+                            <?php foreach ($modulesList as $mKey => $mMeta): ?>
+                                <option value="<?= esc($mKey) ?>"><?= esc($mMeta['label']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">2. Sync Direction</label>
+                        <select name="direction" id="syncSelectedDirection" class="form-select">
+                            <option value="push" selected>Push to Zoho Books (CI4 ERP &rarr; Zoho)</option>
+                            <option value="pull">Pull from Zoho Books (Zoho &rarr; CI4 ERP)</option>
+                        </select>
                     </div>
                 </div>
-                <div id="recordsPickerContainer" class="border rounded-3 p-3 bg-light" style="max-height: 320px; overflow-y: auto;">
-                    <div class="text-muted text-center py-4">Select a module above to load its records.</div>
+
+                <!-- Manual Entry Section (Recommended & Primary) -->
+                <div class="card border-primary-subtle bg-light mb-3">
+                    <div class="card-body p-3">
+                        <label class="form-label fw-bold text-primary mb-1">
+                            <i class="fas fa-keyboard me-1"></i> Enter Document Number(s)
+                        </label>
+                        <textarea name="record_numbers" id="manualRecordNumbers" class="form-control font-monospace" rows="3" placeholder="e.g. INV-001938, INV-001939 or BILL-00045 (separate multiple by commas or new lines)"></textarea>
+                        <small class="text-muted d-block mt-1">
+                            Enter one or multiple document numbers. The system will look up and sync exactly the entered numbers.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Collapsible Checkbox Picker as secondary option -->
+                <div class="mb-2">
+                    <a class="text-decoration-none small text-muted" data-bs-toggle="collapse" href="#recordsPickerCollapse" role="button" aria-expanded="false" aria-controls="recordsPickerCollapse">
+                        <i class="fas fa-list-check me-1"></i> Or pick from recent records list (Click to expand)
+                    </a>
+                </div>
+                <div class="collapse" id="recordsPickerCollapse">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-semibold mb-0 small text-secondary">Recent records:</label>
+                        <div>
+                            <button type="button" class="btn btn-xs btn-outline-secondary" id="selectAllRecordsBtn">Select All</button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary" id="clearAllRecordsBtn">Clear</button>
+                        </div>
+                    </div>
+                    <div id="recordsPickerContainer" class="border rounded-3 p-3 bg-white" style="max-height: 220px; overflow-y: auto;">
+                        <div class="text-muted text-center py-3">Select a module above to load its records.</div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary fw-bold">
-                    <i class="fas fa-cloud-upload-alt me-1"></i> Sync Checked Records
+                <button type="submit" class="btn btn-primary fw-bold" id="syncRecordsSubmitBtn">
+                    <i class="fas fa-sync-alt me-1"></i> Synchronize Entered Records
                 </button>
             </div>
         </form>

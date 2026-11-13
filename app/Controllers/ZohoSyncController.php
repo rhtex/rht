@@ -231,9 +231,11 @@ class ZohoSyncController extends BaseController
     {
         @ini_set('max_execution_time', '0');
         @set_time_limit(0);
-        $module    = (string) $this->request->getPost('module');
-        $recordIds = $this->request->getPost('record_ids');
-        $userId    = (int) (session('user_id') ?? 0) ?: null;
+        $module        = (string) $this->request->getPost('module');
+        $recordIds     = $this->request->getPost('record_ids');
+        $manualNumbers = trim((string) $this->request->getPost('record_numbers'));
+        $direction     = (string) ($this->request->getPost('direction') ?: 'push'); // 'push' (to Zoho) or 'pull' (from Zoho)
+        $userId        = (int) (session('user_id') ?? 0) ?: null;
 
         if (is_string($recordIds)) {
             $recordIds = array_filter(array_map('intval', explode(',', $recordIds)));
@@ -243,12 +245,79 @@ class ZohoSyncController extends BaseController
             $recordIds = [];
         }
 
+        // If manual numbers are provided, parse comma or newline separated values
+        if (!empty($manualNumbers)) {
+            $parsedNumbers = array_filter(array_map('trim', preg_split('/[\r\n,]+/', $manualNumbers)));
+
+            if ($direction === 'pull') {
+                // Pull each entered document number directly from Zoho Books
+                $pullSuccess = 0;
+                $pullFailed  = 0;
+                $messages    = [];
+                foreach ($parsedNumbers as $docNum) {
+                    $res = $this->orchestrator->pullSingleRecordByNumber($module, $docNum);
+                    if (!empty($res['success'])) {
+                        $pullSuccess++;
+                        $messages[] = "{$docNum}: " . ($res['message'] ?? 'Pulled successfully');
+                    } else {
+                        $pullFailed++;
+                        $messages[] = "{$docNum}: " . ($res['message'] ?? 'Failed');
+                    }
+                }
+
+                $summary = "Pulled {$pullSuccess} record(s) from Zoho Books" . ($pullFailed > 0 ? ", {$pullFailed} failed." : ".");
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON([
+                        'success' => $pullFailed === 0,
+                        'message' => $summary . "\n" . implode("\n", $messages),
+                    ]);
+                }
+                return redirect()->back()->with($pullFailed === 0 ? 'success' : 'error', $summary);
+            }
+
+            // Direction is 'push' (CI4 ERP -> Zoho Books): resolve local record IDs from entered document numbers
+            $db = \Config\Database::connect();
+            $meta = ZohoSyncOrchestrator::ORDERED_MODULES[$module] ?? null;
+            if ($meta && $db->tableExists($meta['table'])) {
+                $labelCol = match ($module) {
+                    'customers', 'vendors' => 'name',
+                    'items'                => 'product_name',
+                    'quotations'           => 'quotation_number',
+                    'sales_orders'         => 'sales_order_number',
+                    'invoices'             => 'invoice_number',
+                    'credit_notes'         => 'return_number',
+                    'customer_payments', 'vendor_payments' => 'payment_number',
+                    'purchase_orders'      => 'purchase_order_number',
+                    'bills'                => 'bill_number',
+                    'vendor_credits'       => 'reference_no',
+                    default                => 'id',
+                };
+
+                $builder = $db->table($meta['table'])->select('id');
+                // Check if numeric IDs or string numbers
+                $builder->groupStart();
+                $builder->whereIn($labelCol, $parsedNumbers);
+                $numericEntries = array_filter($parsedNumbers, 'is_numeric');
+                if (!empty($numericEntries)) {
+                    $builder->orWhereIn('id', array_map('intval', $numericEntries));
+                }
+                $builder->groupEnd();
+
+                $foundRows = $builder->get()->getResultArray();
+                $resolvedIds = array_column($foundRows, 'id');
+                $recordIds = array_unique(array_merge($recordIds, array_map('intval', $resolvedIds)));
+            }
+        }
+
         if ($module === '' || empty($recordIds)) {
-            return $this->respondSyncResult(['success' => false, 'message' => 'Please select a module and at least one record.'], 'Selected records sync');
+            $msg = !empty($manualNumbers)
+                ? "No matching records found in ERP for the entered number(s): {$manualNumbers}"
+                : 'Please select a module and enter or choose at least one record number.';
+            return $this->respondSyncResult(['success' => false, 'message' => $msg], 'Selected records sync');
         }
 
         $res = $this->orchestrator->syncSelectedRecords($module, $recordIds, $userId);
-        return $this->respondSyncResult($res, 'Synchronized ' . count($recordIds) . ' selected record(s)');
+        return $this->respondSyncResult($res, 'Synchronized ' . count($recordIds) . ' record(s) with Zoho Books');
     }
 
     /**

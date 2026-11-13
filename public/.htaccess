@@ -1,20 +1,29 @@
 ﻿# Disable directory browsing
 Options -Indexes
 
-# PHP large upload limits for database restore
+# ----------------------------------------------------------------------
+# LiteSpeed / Apache connection timeout prevention for long sync/restore tasks
+# ----------------------------------------------------------------------
+<IfModule Litespeed>
+    RewriteEngine On
+    RewriteRule .* - [E=noconntimeout:1]
+    RewriteRule .* - [E=noabort:1]
+</IfModule>
+
+# PHP large upload & execution limits for database restore & Zoho sync
 <IfModule mod_php.c>
     php_value upload_max_filesize 1024M
     php_value post_max_size 1024M
     php_value memory_limit 1024M
-    php_value max_execution_time 300
-    php_value max_input_time 300
+    php_value max_execution_time 1200
+    php_value max_input_time 1200
 </IfModule>
 <IfModule mod_php7.c>
     php_value upload_max_filesize 1024M
     php_value post_max_size 1024M
     php_value memory_limit 1024M
-    php_value max_execution_time 300
-    php_value max_input_time 300
+    php_value max_execution_time 1200
+    php_value max_input_time 1200
 </IfModule>
 
 # ----------------------------------------------------------------------

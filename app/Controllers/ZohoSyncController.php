@@ -122,7 +122,11 @@ class ZohoSyncController extends BaseController
     public function syncModule()
     {
         @ini_set('max_execution_time', '0');
+        @ini_set('memory_limit', '1024M');
         @set_time_limit(0);
+        if (function_exists('apache_setenv')) {
+            @apache_setenv('no-gzip', '1');
+        }
         $module    = (string) ($this->request->getPost('module') ?: $this->request->getGet('module'));
         $direction = (string) ($this->request->getPost('direction') ?: 'bidirectional');
         $userId    = (int) (session('user_id') ?? 0) ?: null;

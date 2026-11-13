@@ -1,6 +1,13 @@
 # Disable directory browsing
 Options -Indexes
 
+# LiteSpeed / Apache connection timeout prevention for long sync/restore tasks
+<IfModule Litespeed>
+    RewriteEngine On
+    RewriteRule .* - [E=noconntimeout:1]
+    RewriteRule .* - [E=noabort:1]
+</IfModule>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
     

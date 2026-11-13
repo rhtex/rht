@@ -249,6 +249,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
 
     // Bills
     $routes->get('bills', 'BillController::index', ['filter' => 'permission:bill.view']);
+    $routes->get('bills/check-duplicate', 'BillController::checkDuplicate', ['filter' => 'permission:bill.view']);
     $routes->get('bills/create', 'BillController::create', ['filter' => 'permission:bill.create']);
     $routes->post('bills/store', 'BillController::store', ['filter' => 'permission:bill.create']);
     $routes->get('bills/view/(:num)', 'BillController::view/$1', ['filter' => 'permission:bill.view']);
@@ -567,6 +568,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
 
     // Bills
     $routes->get('bills', 'BillController::index', ['filter' => 'permission:bill.view']);
+    $routes->get('bills/check-duplicate', 'BillController::checkDuplicate', ['filter' => 'permission:bill.view']);
     $routes->get('bills/create', 'BillController::create', ['filter' => 'permission:bill.create']);
     $routes->post('bills/store', 'BillController::store', ['filter' => 'permission:bill.create']);
     $routes->get('bills/view/(:num)', 'BillController::view/$1', ['filter' => 'permission:bill.view']);

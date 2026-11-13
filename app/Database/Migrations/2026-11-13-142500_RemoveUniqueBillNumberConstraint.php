@@ -34,3 +34,4 @@ class RemoveUniqueBillNumberConstraint extends Migration
         $db->query("ALTER TABLE bills ADD UNIQUE `bill_number` (`bill_number`)");
     }
 }
+

@@ -179,8 +179,14 @@
                 <div class="row g-2">
                     <div class="col-sm-6">
                         <label class="form-label">Bill Number</label>
-                        <input type="text" name="bill_number" class="form-control fw-bold bg-light"
-                            value="<?= esc($bill['bill_number'] ?? 'Auto-Generated') ?>" readonly>
+                        <input type="text" name="bill_number" id="billNumberInput" class="form-control fw-bold"
+                            value="<?= esc($bill['bill_number'] ?? '') ?>" placeholder="e.g. BILL-001 or Supplier Bill #">
+                        <div id="billNumberDuplicateAlert" class="mt-1 d-none">
+                            <span class="text-danger small fw-semibold">
+                                <i class="fas fa-exclamation-triangle me-1"></i>This Bill # already exists for this vendor!
+                                <a href="javascript:void(0)" id="viewExistingBillsLink" class="text-danger text-decoration-underline fw-bold ms-1">View Existing Bills (<span id="existingBillsCount">0</span>)</a>
+                            </span>
+                        </div>
                     </div>
                     <div class="col-sm-6">
                         <label class="form-label">Bill Date <span class="text-danger">*</span></label>
@@ -195,8 +201,14 @@
                     </div>
                     <div class="col-sm-6">
                         <label class="form-label">Vendor Inv # / Ref #</label>
-                        <input type="text" name="reference_number" class="form-control"
+                        <input type="text" name="reference_number" id="referenceNumberInput" class="form-control"
                             value="<?= esc($bill['reference_number'] ?? '') ?>" placeholder="Vendor invoice number">
+                        <div id="refNumberDuplicateAlert" class="mt-1 d-none">
+                            <span class="text-danger small fw-semibold">
+                                <i class="fas fa-exclamation-triangle me-1"></i>This Ref / Inv # already exists for this vendor!
+                                <a href="javascript:void(0)" id="viewExistingRefBillsLink" class="text-danger text-decoration-underline fw-bold ms-1">View Existing Bills (<span id="existingRefBillsCount">0</span>)</a>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -425,6 +437,46 @@
     </div>
 </div>
 </form>
+</div>
+
+<!-- MODAL: Existing Bills with Same Vendor -->
+<div class="modal fade" id="existingBillsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow border-0">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title fw-bold" id="existingBillsModalTitle">
+                    <i class="fas fa-exclamation-circle me-2"></i>Existing Bills for this Vendor
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="alert alert-warning py-2 small mb-3">
+                    <i class="fas fa-info-circle me-1"></i> The following bill(s) were found with matching bill/reference number for this vendor.
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Bill #</th>
+                                <th>Ref / Inv #</th>
+                                <th>Date</th>
+                                <th>Due Date</th>
+                                <th class="text-end">Total Amount</th>
+                                <th class="text-end">Balance</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="existingBillsModalTbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- TEMPLATE ROW FOR ADDING PRODUCTS DYNAMICALLY -->
@@ -792,6 +844,109 @@ document.addEventListener('DOMContentLoaded', function() {
         recalculateRow($(this));
     });
     recalculateAll();
+
+    // -------------------------------------------------------------
+    // Live Inline Duplicate Bill Number Check for Selected Vendor
+    // -------------------------------------------------------------
+    const currentBillId = <?= (int) ($bill['id'] ?? 0) ?>;
+    let cachedDuplicateBills = [];
+
+    function renderDuplicateModalRows(bills) {
+        const tbody = document.getElementById('existingBillsModalTbody');
+        if (!tbody) return;
+        if (!bills || bills.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-3 text-muted">No bills found.</td></tr>';
+            return;
+        }
+
+        let html = '';
+        bills.forEach(function(b) {
+            const statusBadgeClass = b.status === 'Paid' ? 'bg-success' : (b.status === 'Overdue' ? 'bg-danger' : 'bg-primary');
+            const totalFmt = parseFloat(b.total_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const balFmt   = parseFloat(b.balance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            html += `
+                <tr>
+                    <td class="fw-bold text-primary">${b.bill_number || '-'}</td>
+                    <td>${b.reference_number || '-'}</td>
+                    <td>${b.bill_date || '-'}</td>
+                    <td>${b.due_date || '-'}</td>
+                    <td class="text-end fw-bold">₹${totalFmt}</td>
+                    <td class="text-end text-danger fw-bold">₹${balFmt}</td>
+                    <td class="text-center"><span class="badge ${statusBadgeClass}">${b.status || 'Open'}</span></td>
+                    <td class="text-center">
+                        <a href="<?= site_url('bills/view/') ?>${b.id}?mode=single" target="_blank" class="btn btn-xs btn-outline-primary" title="View Bill Details">
+                            <i class="fas fa-eye me-1"></i> View
+                        </a>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function checkBillDuplicate(field) {
+        const vendorId = $('#vendorSelect').val();
+        const billNumber = (field === 'bill' ? $('#billNumberInput').val() : $('#referenceNumberInput').val())?.trim();
+        const alertBox   = field === 'bill' ? $('#billNumberDuplicateAlert') : $('#refNumberDuplicateAlert');
+        const countSpan  = field === 'bill' ? $('#existingBillsCount') : $('#existingRefBillsCount');
+
+        if (!vendorId || !billNumber) {
+            alertBox.addClass('d-none');
+            return;
+        }
+
+        const url = `<?= site_url('bills/check-duplicate') ?>?vendor_id=${encodeURIComponent(vendorId)}&bill_number=${encodeURIComponent(billNumber)}&exclude_id=${currentBillId}`;
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res && res.has_duplicate) {
+                cachedDuplicateBills = res.bills || [];
+                countSpan.text(res.count);
+                alertBox.removeClass('d-none');
+            } else {
+                alertBox.addClass('d-none');
+            }
+        })
+        .catch(err => {
+            console.error("Duplicate check error:", err);
+        });
+    }
+
+    // Debounced listeners for bill_number and reference_number input
+    let dupTimer = null;
+    $('#billNumberInput').on('input blur', function() {
+        clearTimeout(dupTimer);
+        dupTimer = setTimeout(() => checkBillDuplicate('bill'), 350);
+    });
+
+    $('#referenceNumberInput').on('input blur', function() {
+        clearTimeout(dupTimer);
+        dupTimer = setTimeout(() => checkBillDuplicate('ref'), 350);
+    });
+
+    $('#vendorSelect').on('change', function() {
+        setTimeout(() => {
+            checkBillDuplicate('bill');
+            checkBillDuplicate('ref');
+        }, 200);
+    });
+
+    // Modal popup triggers
+    $('#viewExistingBillsLink, #viewExistingRefBillsLink').on('click', function(e) {
+        e.preventDefault();
+        renderDuplicateModalRows(cachedDuplicateBills);
+        const modalEl = document.getElementById('existingBillsModal');
+        if (modalEl) {
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+    });
 });
 </script>
 <?= $this->endSection() ?>

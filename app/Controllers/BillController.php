@@ -124,8 +124,11 @@ class BillController extends BaseController
         $db = \Config\Database::connect();
         $db->transStart();
 
-        // Generate bill number
-        $billNumber = $this->billModel->generateBillNumber();
+        // Use custom bill number if provided by user; otherwise auto-generate
+        $customNumber = trim((string) $this->request->getPost('bill_number'));
+        $billNumber   = ($customNumber !== '' && $customNumber !== 'Auto-Generated')
+            ? $customNumber
+            : $this->billModel->generateBillNumber();
 
         // Create bill
         $billData = [
@@ -302,6 +305,7 @@ class BillController extends BaseController
         // Update bill
         $billData = [
             'vendor_id' => $this->request->getPost('vendor_id'),
+            'bill_number' => trim((string) $this->request->getPost('bill_number')) ?: $bill['bill_number'],
             'bill_date' => $this->request->getPost('bill_date'),
             'due_date' => $this->request->getPost('due_date'),
             'reference_number' => $this->request->getPost('reference_number'),
@@ -549,4 +553,40 @@ class BillController extends BaseController
 
         return view('bills/print', $data);
     }
+
+    /**
+     * AJAX endpoint to check if a bill number already exists for a vendor.
+     */
+    public function checkDuplicate()
+    {
+        $vendorId   = (int) $this->request->getGet('vendor_id');
+        $billNumber = trim((string) $this->request->getGet('bill_number'));
+        $excludeId  = (int) ($this->request->getGet('exclude_id') ?? 0);
+
+        if ($vendorId <= 0 || $billNumber === '') {
+            return $this->response->setJSON(['has_duplicate' => false, 'bills' => []]);
+        }
+
+        $builder = $this->billModel
+            ->select('bills.id, bills.bill_number, bills.reference_number, bills.bill_date, bills.due_date, bills.total_amount, bills.paid_amount, bills.balance, bills.status, vendors.name as vendor_name')
+            ->join('vendors', 'vendors.id = bills.vendor_id', 'left')
+            ->where('bills.vendor_id', $vendorId)
+            ->groupStart()
+                ->where('bills.bill_number', $billNumber)
+                ->orWhere('bills.reference_number', $billNumber)
+            ->groupEnd();
+
+        if ($excludeId > 0) {
+            $builder->where('bills.id !=', $excludeId);
+        }
+
+        $existingBills = $builder->orderBy('bills.bill_date', 'DESC')->findAll();
+
+        return $this->response->setJSON([
+            'has_duplicate' => count($existingBills) > 0,
+            'count'         => count($existingBills),
+            'bills'         => $existingBills,
+        ]);
+    }
 }
+

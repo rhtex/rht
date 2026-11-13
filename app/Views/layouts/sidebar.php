@@ -41,12 +41,14 @@
                 </li>
 
 
+                <?php if(in_array('calendar.view', session('permissions') ?? []) || session('role') === 'admin'): ?>
                 <li class="nav-item">
                     <a href="<?= site_url('calendar') ?>" class="nav-link <?= $segment1 == 'calendar' ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-calendar-alt text-success"></i>
                         <p><?= lang("App.calendar_tasks") ?></p>
                     </a>
                 </li>
+                <?php endif; ?>
 
                 <!-- SALES -->
                 <?php if(in_array('customer.view', session('permissions') ?? []) || in_array('agent.view', session('permissions') ?? []) || in_array('invoice.view', session('permissions') ?? []) || in_array('agent_payments.view', session('permissions') ?? [])): ?>

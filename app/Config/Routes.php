@@ -153,12 +153,12 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->get('reconciliation/report/(:num)/(:any)/(:any)', 'ReconciliationController::report/$1/$2/$3', ['filter' => 'permission:bank_account.view']);
 
     // Calendar Routes
-    $routes->group('calendar', function ($routes) {
+    $routes->group('calendar', ['filter' => 'permission:calendar.view'], function ($routes) {
         $routes->get('/', 'CalendarController::index');
         $routes->get('fetch', 'CalendarController::fetchEvents');
-        $routes->post('store', 'CalendarController::store');
-        $routes->post('update/(:num)', 'CalendarController::update/$1');
-        $routes->post('delete/(:num)', 'CalendarController::delete/$1');
+        $routes->post('store', 'CalendarController::store', ['filter' => 'permission:calendar.create']);
+        $routes->post('update/(:num)', 'CalendarController::update/$1', ['filter' => 'permission:calendar.edit']);
+        $routes->post('delete/(:num)', 'CalendarController::delete/$1', ['filter' => 'permission:calendar.delete']);
         $routes->get('check', 'CalendarController::checkReminders');
     });
 
@@ -188,7 +188,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('customers/update/(:num)', 'CustomerController::update/$1', ['filter' => 'permission:customer.edit']);
     $routes->get('customers/delete/(:num)', 'CustomerController::delete/$1', ['filter' => 'permission:customer.delete']);
     $routes->get('customers/statement/(:num)', 'CustomerController::statement/$1', ['filter' => 'permission:customer.view']);
-    $routes->get('customers/details/(:num)', 'CustomerController::getDetails/$1');
+    $routes->get('customers/details/(:num)', 'CustomerController::getDetails/$1', ['filter' => 'permission:customer.view']);
 
     // Sales Returns
     $routes->get('sales_returns', 'SalesReturnController::index', ['filter' => 'permission:invoice.view']);
@@ -237,7 +237,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('products/approveItem/(:num)', 'ProductController::approveItem/$1', ['filter' => 'permission:product.edit']);
     $routes->post('products/rejectItem/(:num)', 'ProductController::rejectItem/$1', ['filter' => 'permission:product.edit']);
     $routes->post('products/markDamaged/(:num)', 'ProductController::markDamaged/$1', ['filter' => 'permission:product.edit']);
-    $routes->get('products/barcode/(:segment)', 'ProductController::getByBarcode/$1');
+    $routes->get('products/barcode/(:segment)', 'ProductController::getByBarcode/$1', ['filter' => 'permission:product.view']);
 
     // Production (Weavers)
     $routes->get('production/weavers', 'WeaverController::index', ['filter' => 'permission:weaver.view']);
@@ -295,14 +295,14 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->get('invoices/payment/(:num)', 'InvoiceController::recordPayment/$1', ['filter' => 'permission:invoice.edit']);
     $routes->post('invoices/payment/(:num)', 'InvoiceController::storePayment/$1', ['filter' => 'permission:invoice.edit']);
     $routes->get('invoices/print/(:num)', 'InvoiceController::print/$1', ['filter' => 'permission:invoice.view']);
-    $routes->get('invoices/mark-sent/(:num)', 'InvoiceController::markAsSent/$1');
+    $routes->get('invoices/mark-sent/(:num)', 'InvoiceController::markAsSent/$1', ['filter' => 'permission:invoice.edit']);
     $routes->get('invoices/tracking', 'InvoiceController::tracking', ['filter' => 'permission:invoice.view']);
     $routes->post('invoices/update-waybill/(:num)', 'InvoiceController::updateWaybill/$1', ['filter' => 'permission:invoice.edit']);
     $routes->post('invoices/update-delivery-status/(:num)', 'InvoiceController::updateDeliveryStatus/$1', ['filter' => 'permission:invoice.edit']);
     $routes->get('invoices/doc-tracking', 'InvoiceController::docTracking', ['filter' => 'permission:invoice.view']);
     $routes->post('invoices/update-doc-details/(:num)', 'InvoiceController::updateDocDetails/$1', ['filter' => 'permission:invoice.edit']);
     $routes->post('invoices/update-doc-status/(:num)', 'InvoiceController::updateDocStatus/$1', ['filter' => 'permission:invoice.edit']);
-    $routes->get('invoices/history/(:num)', 'InvoiceController::getHistory/$1');
+    $routes->get('invoices/history/(:num)', 'InvoiceController::getHistory/$1', ['filter' => 'permission:invoice.view']);
 
     // Customer Receipts (Invoice Payments)
     $routes->get('invoice_payments', 'InvoicePaymentController::index', ['filter' => 'permission:invoice.view']);
@@ -349,14 +349,6 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
         $routes->post('vendors/(:num)/address/sync', 'ApiController::syncVendorAddress/$1');
     });
 
-    // Tax Routes
-    $routes->group('settings/taxes', function ($routes) {
-        $routes->get('', 'TaxController::index', ['filter' => 'permission:tax.view']);
-        $routes->get('new', 'TaxController::new', ['filter' => 'permission:tax.create']);
-        $routes->post('delete/(:num)', 'CalendarController::delete/$1');
-        $routes->get('check', 'CalendarController::checkReminders');
-    });
-
     // Expense Management
     $routes->get('expenses', 'ExpenseController::index', ['filter' => 'permission:expense.view']);
     $routes->get('expenses/create', 'ExpenseController::create', ['filter' => 'permission:expense.create']);
@@ -383,7 +375,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('customers/update/(:num)', 'CustomerController::update/$1', ['filter' => 'permission:customer.edit']);
     $routes->get('customers/delete/(:num)', 'CustomerController::delete/$1', ['filter' => 'permission:customer.delete']);
     $routes->get('customers/statement/(:num)', 'CustomerController::statement/$1', ['filter' => 'permission:customer.view']);
-    $routes->get('customers/details/(:num)', 'CustomerController::getDetails/$1');
+    $routes->get('customers/details/(:num)', 'CustomerController::getDetails/$1', ['filter' => 'permission:customer.view']);
 
     // Sales Returns
     $routes->get('sales_returns', 'SalesReturnController::index', ['filter' => 'permission:invoice.view']);
@@ -432,7 +424,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('products/approveItem/(:num)', 'ProductController::approveItem/$1', ['filter' => 'permission:product.edit']);
     $routes->post('products/rejectItem/(:num)', 'ProductController::rejectItem/$1', ['filter' => 'permission:product.edit']);
     $routes->post('products/markDamaged/(:num)', 'ProductController::markDamaged/$1', ['filter' => 'permission:product.edit']);
-    $routes->get('products/barcode/(:segment)', 'ProductController::getByBarcode/$1');
+    $routes->get('products/barcode/(:segment)', 'ProductController::getByBarcode/$1', ['filter' => 'permission:product.view']);
 
     // Production (Weavers)
     $routes->get('production/weavers', 'WeaverController::index', ['filter' => 'permission:weaver.view']);
@@ -614,14 +606,14 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->get('invoices/payment/(:num)', 'InvoiceController::recordPayment/$1', ['filter' => 'permission:invoice.edit']);
     $routes->post('invoices/payment/(:num)', 'InvoiceController::storePayment/$1', ['filter' => 'permission:invoice.edit']);
     $routes->get('invoices/print/(:num)', 'InvoiceController::print/$1', ['filter' => 'permission:invoice.view']);
-    $routes->get('invoices/mark-sent/(:num)', 'InvoiceController::markAsSent/$1');
+    $routes->get('invoices/mark-sent/(:num)', 'InvoiceController::markAsSent/$1', ['filter' => 'permission:invoice.edit']);
     $routes->get('invoices/tracking', 'InvoiceController::tracking', ['filter' => 'permission:invoice.view']);
     $routes->post('invoices/update-waybill/(:num)', 'InvoiceController::updateWaybill/$1', ['filter' => 'permission:invoice.edit']);
     $routes->post('invoices/update-delivery-status/(:num)', 'InvoiceController::updateDeliveryStatus/$1', ['filter' => 'permission:invoice.edit']);
     $routes->get('invoices/doc-tracking', 'InvoiceController::docTracking', ['filter' => 'permission:invoice.view']);
     $routes->post('invoices/update-doc-details/(:num)', 'InvoiceController::updateDocDetails/$1', ['filter' => 'permission:invoice.edit']);
     $routes->post('invoices/update-doc-status/(:num)', 'InvoiceController::updateDocStatus/$1', ['filter' => 'permission:invoice.edit']);
-    $routes->get('invoices/history/(:num)', 'InvoiceController::getHistory/$1');
+    $routes->get('invoices/history/(:num)', 'InvoiceController::getHistory/$1', ['filter' => 'permission:invoice.view']);
 
     // Customer Receipts (Invoice Payments)
     $routes->get('invoice_payments', 'InvoicePaymentController::index', ['filter' => 'permission:invoice.view']);
@@ -730,42 +722,42 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     // Yarn Inventory (Just assuming basic ones for now based on previous)
     $routes->get('production/yarn-inventory', 'YarnInventoryController::index', ['filter' => 'permission:yarn_inventory.view']);
 
-    $routes->group('bulk-upload', ['filter' => 'auth', 'permission' => 'customer.bulk_upload|vendor.bulk_upload'], function($routes){
+    $routes->group('bulk-upload', ['filter' => 'permission:customer.create'], function($routes){
         $routes->get('form', 'BulkUploadController::showForm');
         $routes->post('process', 'BulkUploadController::process');
     });
 
     // Zoho Books Integration (Settings -> Integrations -> Zoho Books)
-    $routes->group('settings/integrations/zoho', function ($routes) {
+    $routes->group('settings/integrations/zoho', ['filter' => 'permission:setting.view'], function ($routes) {
         $routes->get('', 'ZohoSettingsController::index');
-        $routes->post('save', 'ZohoSettingsController::save');
-        $routes->get('connect', 'ZohoSettingsController::connect');
-        $routes->get('callback', 'ZohoSettingsController::callback');
-        $routes->post('test', 'ZohoSettingsController::testConnection');
-        $routes->post('refresh-token', 'ZohoSettingsController::refreshToken');
-        $routes->post('disconnect', 'ZohoSettingsController::disconnect');
-        $routes->post('select-organization', 'ZohoSettingsController::selectOrganization');
+        $routes->post('save', 'ZohoSettingsController::save', ['filter' => 'permission:setting.edit']);
+        $routes->get('connect', 'ZohoSettingsController::connect', ['filter' => 'permission:setting.edit']);
+        $routes->get('callback', 'ZohoSettingsController::callback', ['filter' => 'permission:setting.edit']);
+        $routes->post('test', 'ZohoSettingsController::testConnection', ['filter' => 'permission:setting.edit']);
+        $routes->post('refresh-token', 'ZohoSettingsController::refreshToken', ['filter' => 'permission:setting.edit']);
+        $routes->post('disconnect', 'ZohoSettingsController::disconnect', ['filter' => 'permission:setting.edit']);
+        $routes->post('select-organization', 'ZohoSettingsController::selectOrganization', ['filter' => 'permission:setting.edit']);
 
         // Synchronization Dashboard & Manual Actions
         $routes->get('sync', 'ZohoSyncController::dashboard');
         $routes->get('sync-progress', 'ZohoSyncController::syncProgress');
-        $routes->post('sync-from-zoho', 'ZohoSyncController::syncFromZoho');
-        $routes->post('sync-to-zoho', 'ZohoSyncController::syncToZoho');
-        $routes->post('full-sync', 'ZohoSyncController::fullSync');
-        $routes->post('sync-module', 'ZohoSyncController::syncModule');
-        $routes->post('sync-records', 'ZohoSyncController::syncSelectedRecords');
+        $routes->post('sync-from-zoho', 'ZohoSyncController::syncFromZoho', ['filter' => 'permission:setting.edit']);
+        $routes->post('sync-to-zoho', 'ZohoSyncController::syncToZoho', ['filter' => 'permission:setting.edit']);
+        $routes->post('full-sync', 'ZohoSyncController::fullSync', ['filter' => 'permission:setting.edit']);
+        $routes->post('sync-module', 'ZohoSyncController::syncModule', ['filter' => 'permission:setting.edit']);
+        $routes->post('sync-records', 'ZohoSyncController::syncSelectedRecords', ['filter' => 'permission:setting.edit']);
         $routes->get('sync-record/(:segment)/(:num)', 'ZohoSyncController::syncSingleRecord/$1/$2');
-        $routes->post('sync-record/(:segment)/(:num)', 'ZohoSyncController::syncSingleRecord/$1/$2');
-        $routes->post('retry-failed', 'ZohoSyncController::retryFailed');
+        $routes->post('sync-record/(:segment)/(:num)', 'ZohoSyncController::syncSingleRecord/$1/$2', ['filter' => 'permission:setting.edit']);
+        $routes->post('retry-failed', 'ZohoSyncController::retryFailed', ['filter' => 'permission:setting.edit']);
         $routes->get('module-records/(:segment)', 'ZohoSyncController::fetchModuleRecords/$1');
 
         // Conflicts, Reconciliation & Logs
         $routes->get('conflicts', 'ZohoSyncController::conflicts');
-        $routes->post('conflicts/resolve/(:num)', 'ZohoSyncController::resolveConflict/$1');
+        $routes->post('conflicts/resolve/(:num)', 'ZohoSyncController::resolveConflict/$1', ['filter' => 'permission:setting.edit']);
         $routes->get('reconciliation', 'ZohoSyncController::reconciliation');
         $routes->get('logs', 'ZohoSyncController::logs');
         $routes->get('logs/payload/(:num)', 'ZohoSyncController::logPayload/$1');
-        $routes->post('logs/prune', 'ZohoSyncController::pruneOldLogs');
+        $routes->post('logs/prune', 'ZohoSyncController::pruneOldLogs', ['filter' => 'permission:setting.edit']);
     });
 
     // Database Backup Routes
@@ -776,7 +768,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
         $routes->get('restore-log/(:segment)', 'BackupController::viewRestoreLog/$1', ['filter' => 'permission:setting.view']);
         $routes->post('upload-restore-ajax', 'BackupController::uploadAndRestoreAjax', ['filter' => 'permission:setting.edit']);
         $routes->post('upload-restore', 'BackupController::uploadAndRestore', ['filter' => 'permission:setting.edit']);
-        $routes->get('download/(:segment)', 'BackupController::download/$1');
+        $routes->get('download/(:segment)', 'BackupController::download/$1', ['filter' => 'permission:setting.view']);
         $routes->post('restore/(:segment)', 'BackupController::restore/$1', ['filter' => 'permission:setting.edit']);
         $routes->post('email/(:segment)', 'BackupController::email/$1', ['filter' => 'permission:setting.edit']);
         $routes->post('gdrive/(:segment)', 'BackupController::gdrive/$1', ['filter' => 'permission:setting.edit']);

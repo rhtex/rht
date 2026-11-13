@@ -269,16 +269,29 @@ class BillSyncService extends AbstractModuleSyncService
             return ['success' => false, 'action' => 'FAILED', 'message' => 'Missing Zoho bill_id'];
         }
 
+        $localVendorId = $this->ensureLocalVendorId((string) ($zohoBill['vendor_id'] ?? ''), $zohoBill['vendor_name'] ?? null);
+        if (!$localVendorId) {
+            return ['success' => false, 'action' => 'FAILED', 'message' => 'Could not resolve local vendor for Zoho Bill ' . $zohoId];
+        }
+
         $mapping   = $this->mappingModel->findByZoho('bills', $zohoId);
         $localBill = null;
 
         if ($mapping) {
             $localBill = $this->billModel->getBillById((int) $mapping['local_record_id']);
         }
-        if (!$localBill && !empty($zohoBill['bill_number'])) {
-            $found = $this->billModel->where('bill_number', trim($zohoBill['bill_number']))->first();
+
+        // Secondary fallback match: ONLY match when both vendor_id AND bill_number match an unmapped local bill
+        if (!$localBill && !empty($zohoBill['bill_number']) && $localVendorId) {
+            $found = $this->billModel->where('vendor_id', $localVendorId)
+                                     ->where('bill_number', trim($zohoBill['bill_number']))
+                                     ->first();
             if ($found) {
-                $localBill = $this->billModel->getBillById((int) $found['id']);
+                // Ensure this local bill isn't already mapped to a different zoho_bill_id
+                $existingLocalMap = $this->mappingModel->findByLocal('bills', (int) $found['id']);
+                if (!$existingLocalMap || $existingLocalMap['zoho_record_id'] === $zohoId) {
+                    $localBill = $this->billModel->getBillById((int) $found['id']);
+                }
             }
         }
 
@@ -310,11 +323,6 @@ class BillSyncService extends AbstractModuleSyncService
                 $this->pushToZoho($localId, 'UPDATE');
                 return ['success' => true, 'action' => 'UPDATED', 'local_record_id' => $localId];
             }
-        }
-
-        $localVendorId = $this->ensureLocalVendorId((string) ($zohoBill['vendor_id'] ?? ''), $zohoBill['vendor_name'] ?? null);
-        if (!$localVendorId) {
-            return ['success' => false, 'action' => 'FAILED', 'message' => 'Could not resolve local vendor for Zoho Bill ' . $zohoId];
         }
 
         return ZohoSyncContext::runAsZoho(function () use ($zohoBill, $zohoId, $localBill, $localVendorId, $normalizedZoho) {

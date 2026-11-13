@@ -47,6 +47,11 @@
                 <a href="<?= site_url('invoices/print/' . $invoice['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white">
                     <i class="fas fa-print me-1"></i> Print
                 </a>
+                <?php if (can('eway_bill.create')): ?>
+                    <a href="<?= site_url('eway_bills/create?doc_type=invoice&doc_id=' . $invoice['id']) ?>" class="btn btn-sm btn-outline-primary" title="Generate e-Way Bill via Zoho Books">
+                        <i class="fas fa-truck me-1"></i> e-Way Bill
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
         <div class="card-body">
@@ -77,6 +82,8 @@
                         <tr><th>Transport:</th><td><?= esc($invoice['transport_name']) ?: '-' ?></td></tr>
                         <tr><th>Waybill / LR:</th><td><?= esc($invoice['waybill_number']) ?: '-' ?></td></tr>
                         <tr><th>Waybill Date:</th><td><?= $invoice['waybill_date'] ? date('d/m/Y', strtotime($invoice['waybill_date'])) : '-' ?></td></tr>
+                        <tr><th>Packages:</th><td><?= esc($invoice['packages_count']) ?: '-' ?></td></tr>
+                        <tr><th>No. of Bales:</th><td><?= esc($invoice['bales_count'] ?? '') !== '' ? esc($invoice['bales_count']) : '-' ?></td></tr>
                         <tr>
                             <th>Delivery Status:</th>
                             <td>

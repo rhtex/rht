@@ -14,7 +14,7 @@ class ReturnShipmentModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'vendor_id', 'reference_no', 'return_date', 'transport_name', 
-        'waybill_number', 'waybill_date', 'packages_count', 'ewaybill_number',
+        'waybill_number', 'waybill_date', 'packages_count', 'bales_count', 'ewaybill_number',
         'waybill_image', 'delivery_status', 'status', 'item_count', 'notes', 'created_at', 'updated_at'
     ];
 

@@ -437,6 +437,9 @@ class InvoiceSyncService extends AbstractModuleSyncService
                 $zohoInv['last_modified_time'] ?? null
             );
 
+            // Automatically adjust invoice numbering sequence in settings if this pulled invoice has a higher sequence
+            $this->adjustInvoiceSequenceAfterPull($updated['invoice_number'] ?? '');
+
             return [
                 'success'         => true,
                 'action'          => $action,
@@ -574,5 +577,35 @@ class InvoiceSyncService extends AbstractModuleSyncService
         $zohoInv = $detailRes['data']['invoice'];
         return $this->applyZohoRecordToLocal($zohoInv, true);
     }
+
+    /**
+     * Ensure the invoice sequence setting stays at or above any newly pulled Zoho invoice number
+     */
+    protected function adjustInvoiceSequenceAfterPull(string $invoiceNumber): void
+    {
+        if (empty($invoiceNumber)) {
+            return;
+        }
+
+        try {
+            $settingModel = new \App\Models\SettingModel();
+            $prefix = $settingModel->getSetting('invoice_prefix', 'INV-');
+            $prefixEscaped = preg_quote($prefix, '/');
+
+            if (preg_match('/^' . $prefixEscaped . '(\d+)$/', trim($invoiceNumber), $matches)) {
+                $pulledNum = (int) $matches[1];
+                $currentNext = (int) $settingModel->getSetting('invoice_next_number', '0');
+
+                // If pulled invoice number is >= the current next number, advance next number to pulledNum + 1
+                if ($pulledNum >= $currentNext) {
+                    $settingModel->updateSetting('invoice_next_number', (string) ($pulledNum + 1));
+                    log_message('info', "Adjusted invoice_next_number to " . ($pulledNum + 1) . " following Zoho pull of invoice {$invoiceNumber}");
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Error adjusting invoice sequence after Zoho pull: ' . $e->getMessage());
+        }
+    }
 }
+
 

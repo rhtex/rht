@@ -15,6 +15,7 @@ class ZohoSyncCommand extends BaseCommand
     protected $options     = [
         '--direction'    => 'Sync direction: to_zoho | from_zoho | both | queue (default: queue)',
         '--module'       => 'Optional module key (e.g. customers, vendors, items, invoices, bills)',
+        '--number'       => 'Pull a specific record by number/ID from Zoho Books (e.g. --module=invoices --number=INV-001938)',
         '--retry-failed' => 'Retry failed sync mappings & queue records',
         '--clean-logs'   => 'Prune logs and payload files older than specified days (default: 90)',
         '--limit'        => 'Batch limit for queue processing (default: 50)',
@@ -28,11 +29,27 @@ class ZohoSyncCommand extends BaseCommand
         $retryFailed = CLI::getOption('retry-failed') !== null || in_array('--retry-failed', $params, true);
         $direction   = (string) (CLI::getOption('direction') ?: 'queue');
         $module      = CLI::getOption('module') ? trim((string) CLI::getOption('module')) : null;
+        $docNumber   = CLI::getOption('number') ? trim((string) CLI::getOption('number')) : null;
         $limit       = max(1, (int) (CLI::getOption('limit') ?: 50));
 
         CLI::write('=== Zoho Books Synchronization CLI ===', 'cyan');
 
         try {
+            if ($docNumber) {
+                if (!$module) {
+                    CLI::error('Please specify --module when using --number (e.g. --module=invoices --number=INV-001938 or --module=bills --number=BILL-0001)');
+                    return EXIT_ERROR;
+                }
+                CLI::write("Pulling single record [{$module}] number: '{$docNumber}' directly from Zoho Books...", 'yellow');
+                $result = $orchestrator->pullSingleRecordByNumber($module, $docNumber);
+                if (!empty($result['success'])) {
+                    CLI::write("Success: " . ($result['message'] ?? 'Record imported successfully'), 'green');
+                    return EXIT_SUCCESS;
+                } else {
+                    CLI::error("Failed: " . ($result['message'] ?? 'Could not find or import record'));
+                    return EXIT_ERROR;
+                }
+            }
             if ($cleanLogs) {
                 $days = max(7, (int) (CLI::getOption('clean-logs') ?: 90));
                 CLI::write("Pruning Zoho API logs and payload files older than {$days} days...", 'yellow');

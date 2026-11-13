@@ -27,6 +27,7 @@ class InvoiceModel extends Model
         'transport_name',
         'waybill_number',
         'packages_count',
+        'bales_count',
         'waybill_date',
         'ewaybill_number',
         'waybill_image',
@@ -296,22 +297,63 @@ class InvoiceModel extends Model
     }
 
     /**
-     * Generate next invoice number
+     * Generate next invoice number based on system settings
      */
     public function generateInvoiceNumber()
     {
-        $prefix = 'INV-' . date('Ym') . '-';
-        $lastInvoice = $this->like('invoice_number', $prefix, 'after')
-            ->orderBy('id', 'DESC')
-            ->first();
-
-        if ($lastInvoice) {
-            $lastNumber = (int) substr($lastInvoice['invoice_number'], -4);
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
+        $settingModel = new \App\Models\SettingModel();
+        $format = $settingModel->getSetting('invoice_number_format', 'zoho'); // 'zoho' or 'yearly_month'
+        $prefix = $settingModel->getSetting('invoice_prefix', 'INV-');
+        $paddingDigits = (int) $settingModel->getSetting('invoice_padding_digits', 6);
+        if ($paddingDigits < 1) {
+            $paddingDigits = 6;
         }
 
-        return $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+        if ($format === 'yearly_month') {
+            $patternPrefix = $prefix . date('Ym') . '-';
+            $lastInvoice = $this->like('invoice_number', $patternPrefix, 'after')
+                ->orderBy('id', 'DESC')
+                ->first();
+
+            $nextNumber = 1;
+            if ($lastInvoice && !empty($lastInvoice['invoice_number'])) {
+                $suffix = substr($lastInvoice['invoice_number'], strlen($patternPrefix));
+                if (is_numeric($suffix)) {
+                    $nextNumber = ((int) $suffix) + 1;
+                }
+            }
+
+            return $patternPrefix . str_pad($nextNumber, max(4, $paddingDigits), '0', STR_PAD_LEFT);
+        }
+
+        // Zoho Books format: {prefix}{padded_sequence}, e.g. INV-001939
+        // 1. Check max existing sequence number matching {prefix}\d+
+        $db = \Config\Database::connect();
+        $query = $db->query("SELECT invoice_number FROM invoices WHERE invoice_number LIKE " . $db->escape($prefix . '%'));
+        $maxNum = 0;
+        if ($query) {
+            $rows = $query->getResultArray();
+            $prefixEscaped = preg_quote($prefix, '/');
+            foreach ($rows as $row) {
+                if (preg_match('/^' . $prefixEscaped . '(\d+)$/', $row['invoice_number'], $matches)) {
+                    $num = (int) $matches[1];
+                    if ($num > $maxNum) {
+                        $maxNum = $num;
+                    }
+                }
+            }
+        }
+
+        // 2. Check if a custom next number is configured in settings
+        $configuredNext = $settingModel->getSetting('invoice_next_number', '');
+        $configuredNextNum = is_numeric($configuredNext) ? (int) $configuredNext : 0;
+
+        // Next number is whichever is larger: (maxNum + 1) or configuredNextNum
+        $nextSequence = max($maxNum + 1, $configuredNextNum);
+        if ($nextSequence < 1) {
+            $nextSequence = 1;
+        }
+
+        return $prefix . str_pad($nextSequence, $paddingDigits, '0', STR_PAD_LEFT);
     }
 }

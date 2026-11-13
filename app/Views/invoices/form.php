@@ -280,13 +280,17 @@
                 <label class="form-label">Waybill Date</label>
                 <input type="date" name="waybill_date" class="form-control" value="<?= esc($invoice['waybill_date'] ?? '') ?>">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label">E-Waybill No.</label>
                 <input type="text" name="ewaybill_number" class="form-control" value="<?= esc($invoice['ewaybill_number'] ?? '') ?>" placeholder="E-Waybill No.">
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <label class="form-label">Packages <span class="text-danger">*</span></label>
                 <input type="number" required name="packages_count" class="form-control" min="1" step="1" value="<?= esc($invoice['packages_count'] ?? '1') ?>" placeholder="Qty">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">No. of Bales</label>
+                <input type="number" name="bales_count" class="form-control" min="0" step="1" value="<?= esc($invoice['bales_count'] ?? '') ?>" placeholder="Bales">
             </div>
         </div>
 

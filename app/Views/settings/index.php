@@ -116,6 +116,46 @@
                             <input type="text" class="form-control" name="settings[company_whatsapp]" value="<?= esc($settings['company_whatsapp'] ?? '') ?>">
                         </div>
                     </div>
+
+                    <hr class="my-4">
+                    <h5 class="text-primary mb-3"><i class="fas fa-file-invoice"></i> Invoice Numbering Configuration</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Numbering Format <span class="text-danger">*</span></label>
+                            <select class="form-select" name="settings[invoice_number_format]" id="invoiceFormatSelect">
+                                <option value="zoho" <?= ($settings['invoice_number_format'] ?? 'zoho') === 'zoho' ? 'selected' : '' ?>>Zoho Books Standard (Prefix + Padded Sequence, e.g. INV-000001)</option>
+                                <option value="yearly_month" <?= ($settings['invoice_number_format'] ?? '') === 'yearly_month' ? 'selected' : '' ?>>Year & Month Prefix (e.g. INV-<?= date('Ym') ?>-0001)</option>
+                            </select>
+                            <small class="text-muted">Choose between continuous Zoho Books style numbering or monthly reset format.</small>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Invoice Prefix</label>
+                            <input type="text" class="form-control" id="invoicePrefixInput" name="settings[invoice_prefix]" value="<?= esc($settings['invoice_prefix'] ?? 'INV-') ?>" placeholder="INV-">
+                            <small class="text-muted">E.g. <code>INV-</code></small>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Digit Padding Length</label>
+                            <input type="number" class="form-control" id="invoicePaddingInput" name="settings[invoice_padding_digits]" value="<?= esc($settings['invoice_padding_digits'] ?? '6') ?>" min="1" max="10">
+                            <small class="text-muted">Default is 6 (e.g. 001939).</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Next Sequence Number (Optional Override)</label>
+                            <input type="number" class="form-control" id="invoiceNextNumberInput" name="settings[invoice_next_number]" value="<?= esc($settings['invoice_next_number'] ?? '') ?>" placeholder="Leave blank for auto-increment">
+                            <small class="text-muted">System will auto-continue from the highest billed invoice (currently <b><?= esc($nextInvoicePreview ?? '') ?></b>). Set only to force a jump to a higher sequence.</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Next Invoice Number Live Preview</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-tag"></i></span>
+                                <input type="text" class="form-control fw-bold text-success bg-light" id="invoicePreviewBox" value="<?= esc($nextInvoicePreview ?? '') ?>" readonly>
+                            </div>
+                            <small class="text-muted">This preview dynamically reflects your settings.</small>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-footer">
                     <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Changes</button>
@@ -179,6 +219,32 @@ $(document).ready(function() {
     if (countrySelect.val()) {
         loadStates(countrySelect.val(), selectedStateId);
     }
+
+    // Invoice Preview Live Updates
+    function updateInvoicePreview() {
+        const format = $('#invoiceFormatSelect').val();
+        let prefix = $('#invoicePrefixInput').val() || 'INV-';
+        let padding = parseInt($('#invoicePaddingInput').val(), 10) || 6;
+        if (padding < 1) padding = 6;
+        let overrideNum = parseInt($('#invoiceNextNumberInput').val(), 10);
+
+        // Fallback sequence based on current max (1938)
+        let seq = (!isNaN(overrideNum) && overrideNum > 0) ? overrideNum : 1939;
+
+        if (format === 'yearly_month') {
+            const now = new Date();
+            const ym = now.getFullYear().toString() + String(now.getMonth() + 1).padStart(2, '0');
+            const seqStr = String(seq).padStart(Math.max(4, padding), '0');
+            $('#invoicePreviewBox').val(prefix + ym + '-' + seqStr);
+        } else {
+            const seqStr = String(seq).padStart(padding, '0');
+            $('#invoicePreviewBox').val(prefix + seqStr);
+        }
+    }
+
+    $('#invoiceFormatSelect, #invoicePrefixInput, #invoicePaddingInput, #invoiceNextNumberInput').on('input change', function() {
+        updateInvoicePreview();
+    });
 });
 </script>
 <?= $this->endSection() ?>

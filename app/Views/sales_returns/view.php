@@ -15,6 +15,11 @@
                     <i class="fas fa-file-invoice me-1"></i> View Invoice
                 </a>
             <?php endif; ?>
+            <?php if (can('eway_bill.create')): ?>
+                <a href="<?= site_url('eway_bills/create?doc_type=credit_note&doc_id=' . $return['id']) ?>" class="btn btn-sm btn-outline-primary" title="Generate e-Way Bill for Credit Note">
+                    <i class="fas fa-truck me-1"></i> e-Way Bill
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>

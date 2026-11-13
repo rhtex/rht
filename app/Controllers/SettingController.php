@@ -26,9 +26,14 @@ class SettingController extends BaseController
         $countryModel = new \App\Models\CountryModel();
         $countries = $countryModel->orderBy('name', 'ASC')->findAll();
 
+        // Compute preview of next invoice number
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $nextInvoicePreview = $invoiceModel->generateInvoiceNumber();
+
         return view('settings/index', [
-            'settings'  => $settingMap,
-            'countries' => $countries
+            'settings'           => $settingMap,
+            'countries'          => $countries,
+            'nextInvoicePreview' => $nextInvoicePreview
         ]);
     }
 

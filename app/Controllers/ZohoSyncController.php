@@ -271,6 +271,42 @@ class ZohoSyncController extends BaseController
     }
 
     /**
+     * Pull a single record from Zoho Books by its document or sequence number
+     */
+    public function pullByNumber()
+    {
+        $module = trim((string) $this->request->getPost('module'));
+        $docNumber = trim((string) $this->request->getPost('doc_number'));
+
+        if ($module === '' || $docNumber === '') {
+            $err = 'Please select a module and enter a valid document or sequence number.';
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => $err]);
+            }
+            return redirect()->back()->with('error', $err);
+        }
+
+        try {
+            $res = $this->orchestrator->pullSingleRecordByNumber($module, $docNumber);
+
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON($res);
+            }
+
+            if (!empty($res['success'])) {
+                return redirect()->back()->with('success', $res['message'] ?? "Successfully pulled {$docNumber} from Zoho Books.");
+            }
+            return redirect()->back()->with('error', $res['message'] ?? "Failed to pull {$docNumber} from Zoho Books.");
+        } catch (\Throwable $e) {
+            $msg = 'Pull Error: ' . $e->getMessage();
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => $msg]);
+            }
+            return redirect()->back()->with('error', $msg);
+        }
+    }
+
+    /**
      * Action F: Retry Failed Sync
      */
     public function retryFailed()

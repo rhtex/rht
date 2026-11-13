@@ -538,6 +538,15 @@ class ZohoSyncOrchestrator
     }
 
     /**
+     * Pull a single record from Zoho Books by its document or sequence number (e.g. INV-001938, BILL-00045, etc.)
+     */
+    public function pullSingleRecordByNumber(string $module, string $numberOrId): array
+    {
+        $service = $this->getModuleService($module);
+        return $service->pullByNumberFromZoho($numberOrId);
+    }
+
+    /**
      * Retry all FAILED / PENDING items in zoho_sync_queue and any FAILED mappings.
      */
     public function retryFailed(?string $moduleFilter = null, int $limit = 100, ?int $userId = null): array

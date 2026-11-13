@@ -724,6 +724,7 @@ class VendorController extends BaseController
             'waybill_date' => $this->request->getPost('waybill_date') ?: null,
             'ewaybill_number' => $this->request->getPost('ewaybill_number'),
             'packages_count' => $this->request->getPost('packages_count') ?: null,
+            'bales_count' => $this->request->getPost('bales_count') ?: null,
         ];
 
         $img = $this->request->getFile('waybill_image');

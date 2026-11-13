@@ -153,6 +153,12 @@
                 <?php if ($invoice['waybill_number']): ?>
                     <p><strong>Waybill / LR:</strong> <?= esc($invoice['waybill_number']) ?></p>
                 <?php endif; ?>
+                <?php if (!empty($invoice['packages_count'])): ?>
+                    <p><strong>Packages:</strong> <?= esc($invoice['packages_count']) ?></p>
+                <?php endif; ?>
+                <?php if (!empty($invoice['bales_count'])): ?>
+                    <p><strong>No. of Bales:</strong> <?= esc($invoice['bales_count']) ?></p>
+                <?php endif; ?>
             </div>
         </div>
 

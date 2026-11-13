@@ -196,6 +196,16 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
     $routes->get('sales_returns/view/(:num)', 'SalesReturnController::view/$1', ['filter' => 'permission:invoice.view']);
 
+    // e-Way Bills (Zoho Books API Integration)
+    $routes->get('eway_bills', 'EwayBillController::index', ['filter' => 'permission:eway_bill.view']);
+    $routes->get('eway_bills/create', 'EwayBillController::create', ['filter' => 'permission:eway_bill.create']);
+    $routes->get('eway_bills/lookup-document', 'EwayBillController::lookupDocument', ['filter' => 'permission:eway_bill.view']);
+    $routes->post('eway_bills/store', 'EwayBillController::store', ['filter' => 'permission:eway_bill.create']);
+    $routes->post('eway_bills/update-part-b/(:num)', 'EwayBillController::updatePartB/$1', ['filter' => 'permission:eway_bill.edit']);
+    $routes->post('eway_bills/cancel/(:num)', 'EwayBillController::cancel/$1', ['filter' => 'permission:eway_bill.delete']);
+    $routes->post('eway_bills/regenerate/(:num)', 'EwayBillController::regenerate/$1', ['filter' => 'permission:eway_bill.create']);
+    $routes->get('eway_bills/sync/(:num)', 'EwayBillController::sync/$1', ['filter' => 'permission:eway_bill.view']);
+
     // Purchase (Vendors) Management
     $routes->get('vendors', 'VendorController::index', ['filter' => 'permission:vendor.view']);
     $routes->get('vendors/returns', 'VendorController::pendingReturns', ['filter' => 'permission:vendor.view']);
@@ -382,6 +392,16 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->get('sales_returns/create', 'SalesReturnController::create', ['filter' => 'permission:invoice.edit']);
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
     $routes->get('sales_returns/view/(:num)', 'SalesReturnController::view/$1', ['filter' => 'permission:invoice.view']);
+
+    // e-Way Bills (Zoho Books API Integration)
+    $routes->get('eway_bills', 'EwayBillController::index', ['filter' => 'permission:eway_bill.view']);
+    $routes->get('eway_bills/create', 'EwayBillController::create', ['filter' => 'permission:eway_bill.create']);
+    $routes->get('eway_bills/lookup-document', 'EwayBillController::lookupDocument', ['filter' => 'permission:eway_bill.view']);
+    $routes->post('eway_bills/store', 'EwayBillController::store', ['filter' => 'permission:eway_bill.create']);
+    $routes->post('eway_bills/update-part-b/(:num)', 'EwayBillController::updatePartB/$1', ['filter' => 'permission:eway_bill.edit']);
+    $routes->post('eway_bills/cancel/(:num)', 'EwayBillController::cancel/$1', ['filter' => 'permission:eway_bill.delete']);
+    $routes->post('eway_bills/regenerate/(:num)', 'EwayBillController::regenerate/$1', ['filter' => 'permission:eway_bill.create']);
+    $routes->get('eway_bills/sync/(:num)', 'EwayBillController::sync/$1', ['filter' => 'permission:eway_bill.view']);
 
     // Purchase (Vendors) Management
     $routes->get('vendors', 'VendorController::index', ['filter' => 'permission:vendor.view']);
@@ -715,6 +735,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
         $routes->post('full-sync', 'ZohoSyncController::fullSync', ['filter' => 'permission:setting.edit']);
         $routes->post('sync-module', 'ZohoSyncController::syncModule', ['filter' => 'permission:setting.edit']);
         $routes->post('sync-records', 'ZohoSyncController::syncSelectedRecords', ['filter' => 'permission:setting.edit']);
+        $routes->post('pull-by-number', 'ZohoSyncController::pullByNumber', ['filter' => 'permission:setting.edit']);
         $routes->get('sync-record/(:segment)/(:num)', 'ZohoSyncController::syncSingleRecord/$1/$2');
         $routes->post('sync-record/(:segment)/(:num)', 'ZohoSyncController::syncSingleRecord/$1/$2', ['filter' => 'permission:setting.edit']);
         $routes->post('retry-failed', 'ZohoSyncController::retryFailed', ['filter' => 'permission:setting.edit']);

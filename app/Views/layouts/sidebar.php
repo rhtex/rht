@@ -17,7 +17,7 @@
                 $segment3 = $uri->getTotalSegments() >= 3 ? $uri->getSegment(3) : '';
                 $segment4 = $uri->getTotalSegments() >= 4 ? $uri->getSegment(4) : '';
                 
-                $isSales = in_array($segment1, ['customers', 'quotations', 'sales_orders', 'invoices', 'sales_returns', 'invoice_payments', 'agents', 'agent-payments']);
+                $isSales = in_array($segment1, ['customers', 'quotations', 'sales_orders', 'invoices', 'eway_bills', 'sales_returns', 'invoice_payments', 'agents', 'agent-payments']);
                 $isPurchases = in_array($segment1, ['vendors', 'bills', 'payments', 'expenses', 'expense_categories']);
                 $isInventory = in_array($segment1, ['products', 'product_categories']);
                 $isProduction = in_array($segment1, ['production', 'weavers']) || ($segment1 === 'production' && $segment2 === 'colors');
@@ -102,6 +102,12 @@
                             <a href="<?= site_url('invoices/doc-tracking') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-file-contract text-warning"></i>
                                 <p><?= lang("App.invoice_doc_tracking") ?></p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= site_url('eway_bills') ?>" class="nav-link <?= ($segment1 === 'eway_bills') ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-truck text-primary"></i>
+                                <p>e-Way Bills</p>
                             </a>
                         </li>
                         <li class="nav-item">

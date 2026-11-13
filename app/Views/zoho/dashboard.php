@@ -89,7 +89,12 @@
                     <i class="fas fa-check-square me-1"></i> Sync Selected Records
                 </button>
 
-                <!-- 6. Retry Failed Sync -->
+                <!-- 6. Pull Single by Number -->
+                <button type="button" class="btn btn-outline-success fw-bold" data-bs-toggle="modal" data-bs-target="#pullByNumberModal">
+                    <i class="fas fa-search-plus me-1"></i> Pull by Number
+                </button>
+
+                <!-- 7. Retry Failed Sync -->
                 <form action="<?= site_url('settings/integrations/zoho/retry-failed') ?>" method="post" class="d-inline">
                     <?= csrf_field() ?>
                     <button type="submit" class="btn btn-outline-warning text-dark fw-bold">
@@ -495,6 +500,49 @@
     </div>
 </div>
 
+<!-- Modal 3: Pull Single Record by Number -->
+<div class="modal fade" id="pullByNumberModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="<?= site_url('settings/integrations/zoho/pull-by-number') ?>" method="post" class="modal-content" id="pullByNumberForm">
+            <?= csrf_field() ?>
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="fas fa-search-plus text-success me-2"></i>Pull Single Record by Number</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3">
+                    Fetch and synchronize a specific record directly from Zoho Books using its document number (or Zoho ID).
+                </p>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Module <span class="text-danger">*</span></label>
+                    <select name="module" id="pullByNumModule" class="form-select" required>
+                        <?php foreach ($modulesList as $mKey => $mMeta): ?>
+                            <option value="<?= esc($mKey) ?>" <?= $mKey === 'invoices' ? 'selected' : '' ?>>
+                                <?= esc($mMeta['label']) ?> (<?= esc($mKey) ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Document / Sequence Number <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fas fa-barcode"></i></span>
+                        <input type="text" name="doc_number" id="pullByNumInput" class="form-control fw-bold" placeholder="e.g. INV-001938 or BILL-00045" required>
+                    </div>
+                    <small class="text-muted" id="pullByNumHelp">Enter the exact invoice number (e.g. <code>INV-001938</code>), bill number, or record identifier.</small>
+                </div>
+                <div id="pullByNumStatus" class="alert d-none small mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="pullByNumCancelBtn">Close</button>
+                <button type="submit" class="btn btn-success fw-bold" id="pullByNumSubmitBtn">
+                    <i class="fas fa-cloud-download-alt me-1"></i> Pull Record
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
@@ -803,6 +851,81 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeBtn.classList.remove('d-none');
                 submitBtn.className = 'btn btn-primary fw-bold';
                 submitBtn.innerHTML = '<i class="fas fa-redo me-1"></i> Retry';
+            });
+        });
+    }
+
+    // Pull by number form handler
+    const pullByNumForm = document.getElementById('pullByNumberForm');
+    const pullByNumInput = document.getElementById('pullByNumInput');
+    const pullByNumModule = document.getElementById('pullByNumModule');
+    const pullByNumHelp = document.getElementById('pullByNumHelp');
+    const pullByNumStatus = document.getElementById('pullByNumStatus');
+    const pullByNumSubmitBtn = document.getElementById('pullByNumSubmitBtn');
+
+    if (pullByNumModule && pullByNumHelp) {
+        const placeholders = {
+            'invoices': 'e.g. INV-001938',
+            'bills': 'e.g. BILL-00045 or vendor invoice no',
+            'quotations': 'e.g. EST-00001',
+            'sales_orders': 'e.g. SO-00001',
+            'purchase_orders': 'e.g. PO-00001',
+            'credit_notes': 'e.g. CN-00001',
+            'vendor_credits': 'e.g. DN-00001',
+            'customer_payments': 'e.g. PAY-00001',
+            'vendor_payments': 'e.g. VPAY-00001',
+            'items': 'e.g. SKU or exact Item Name',
+            'customers': 'e.g. Customer Name or GSTIN',
+            'vendors': 'e.g. Vendor Name or GSTIN'
+        };
+
+        pullByNumModule.addEventListener('change', function() {
+            const m = this.value;
+            const ph = placeholders[m] || 'Enter document or record number';
+            pullByNumInput.placeholder = ph;
+            pullByNumHelp.innerHTML = `Enter the exact number/identifier for <b>${m}</b> (${ph}).`;
+        });
+    }
+
+    if (pullByNumForm) {
+        pullByNumForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(pullByNumForm);
+            pullByNumSubmitBtn.disabled = true;
+            pullByNumSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Pulling...';
+            pullByNumStatus.className = 'alert alert-info small mb-0';
+            pullByNumStatus.textContent = 'Searching and importing from Zoho Books...';
+            pullByNumStatus.classList.remove('d-none');
+
+            fetch(pullByNumForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    pullByNumStatus.className = 'alert alert-success small mb-0';
+                    pullByNumStatus.textContent = data.message || 'Record successfully imported into local ERP!';
+                    pullByNumSubmitBtn.className = 'btn btn-success fw-bold';
+                    pullByNumSubmitBtn.innerHTML = '<i class="fas fa-check me-1"></i> Pulled!';
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1800);
+                } else {
+                    pullByNumStatus.className = 'alert alert-danger small mb-0';
+                    pullByNumStatus.textContent = data.message || 'Failed to pull record from Zoho Books.';
+                    pullByNumSubmitBtn.disabled = false;
+                    pullByNumSubmitBtn.className = 'btn btn-success fw-bold';
+                    pullByNumSubmitBtn.innerHTML = '<i class="fas fa-cloud-download-alt me-1"></i> Pull Record';
+                }
+            })
+            .catch(err => {
+                pullByNumStatus.className = 'alert alert-danger small mb-0';
+                pullByNumStatus.textContent = 'Request failed: ' + err.message;
+                pullByNumSubmitBtn.disabled = false;
+                pullByNumSubmitBtn.className = 'btn btn-success fw-bold';
+                pullByNumSubmitBtn.innerHTML = '<i class="fas fa-cloud-download-alt me-1"></i> Pull Record';
             });
         });
     }

@@ -39,7 +39,7 @@ class DatabaseBackupService
     public function createBackup(string $source = 'manual', ?int $userId = null): array
     {
         @set_time_limit(0);
-        @ini_set('memory_limit', '512M');
+        @ini_set('memory_limit', '1024M');
 
         $dbName = $this->db->getDatabase();
         $timestamp = date('Y-m-d_H-i-s');
@@ -578,7 +578,7 @@ class DatabaseBackupService
     public function restoreBackup(string $filePath, ?callable $logCallback = null): array
     {
         @set_time_limit(0);
-        @ini_set('memory_limit', '512M');
+        @ini_set('memory_limit', '1024M');
 
         $log = function(string $msg, int $pct) use ($logCallback) {
             if ($logCallback && is_callable($logCallback)) {
@@ -674,7 +674,7 @@ class DatabaseBackupService
                 $log("Executing high-speed MySQL restore engine...", 55);
                 $passArg = !empty($pass) ? '--password=' . escapeshellarg($pass) : '';
                 $cmd = sprintf(
-                    '%s --user=%s %s --host=%s --port=%s %s < %s 2>&1',
+                    '%s --user=%s %s --host=%s --port=%s --max_allowed_packet=512M %s < %s 2>&1',
                     escapeshellarg($mysqlBinary),
                     escapeshellarg($user),
                     $passArg,

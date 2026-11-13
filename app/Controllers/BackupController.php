@@ -90,7 +90,7 @@ class BackupController extends BaseController
     public function create()
     {
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
 
         try {
             $userId = session()->get('user_id') ? (int) session()->get('user_id') : null;
@@ -155,7 +155,7 @@ class BackupController extends BaseController
      */
     public function download(string $idOrFilename)
     {
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
 
         $resolved = $this->resolveBackupFile($idOrFilename);
         if (!$resolved) {
@@ -339,7 +339,7 @@ class BackupController extends BaseController
     public function uploadAndRestoreAjax()
     {
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
 
         $startTime = microtime(true);
         $logs = [];
@@ -499,7 +499,7 @@ class BackupController extends BaseController
     public function uploadAndRestore()
     {
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
 
         $file = $this->request->getFile('backup_file');
         if (!$file || !$file->isValid()) {
@@ -561,7 +561,7 @@ class BackupController extends BaseController
     public function restore(string $idOrFilename)
     {
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
 
         $resolved = $this->resolveBackupFile($idOrFilename);
         if (!$resolved) {
@@ -589,7 +589,7 @@ class BackupController extends BaseController
     public function email(string $idOrFilename)
     {
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
 
         $resolved = $this->resolveBackupFile($idOrFilename);
         if (!$resolved) {
@@ -618,7 +618,7 @@ class BackupController extends BaseController
     public function gdrive(string $idOrFilename)
     {
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
 
         $resolved = $this->resolveBackupFile($idOrFilename);
         if (!$resolved) {

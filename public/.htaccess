@@ -1,18 +1,18 @@
-# Disable directory browsing
+﻿# Disable directory browsing
 Options -Indexes
 
 # PHP large upload limits for database restore
 <IfModule mod_php.c>
-    php_value upload_max_filesize 512M
-    php_value post_max_size 512M
-    php_value memory_limit 512M
+    php_value upload_max_filesize 1024M
+    php_value post_max_size 1024M
+    php_value memory_limit 1024M
     php_value max_execution_time 300
     php_value max_input_time 300
 </IfModule>
 <IfModule mod_php7.c>
-    php_value upload_max_filesize 512M
-    php_value post_max_size 512M
-    php_value memory_limit 512M
+    php_value upload_max_filesize 1024M
+    php_value post_max_size 1024M
+    php_value memory_limit 1024M
     php_value max_execution_time 300
     php_value max_input_time 300
 </IfModule>

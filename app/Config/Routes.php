@@ -629,37 +629,6 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('payments/update/(:num)', 'PaymentController::update/$1', ['filter' => 'permission:bill.edit']);
     $routes->post('payments/delete/(:num)', 'PaymentController::delete/$1', ['filter' => 'permission:bill.edit']);
 
-    // Agent Payments
-    $routes->get('agent-payments', 'AgentPaymentController::index', ['filter' => 'permission:agent_payments.view']);
-    $routes->get('agent-payments/datatable', 'AgentPaymentController::datatable', ['filter' => 'permission:agent_payments.view']);
-    $routes->get('agent-payments/create', 'AgentPaymentController::create', ['filter' => 'permission:agent_payments.create']);
-    $routes->get('agent-payments/create/(:num)', 'AgentPaymentController::create/$1', ['filter' => 'permission:agent_payments.create']);
-    $routes->post('agent-payments/store', 'AgentPaymentController::store', ['filter' => 'permission:agent_payments.create']);
-    $routes->get('agent-payments/view/(:num)', 'AgentPaymentController::view/$1', ['filter' => 'permission:agent_payments.view']);
-    $routes->get('agent-payments/delete/(:num)', 'AgentPaymentController::delete/$1', ['filter' => 'permission:agent_payments.delete']);
-    $routes->get('agent-payments/pending-commissions/(:num)', 'AgentPaymentController::getPendingCommissions/$1', ['filter' => 'permission:agent_payments.view']);
-    $routes->get('agent-payments/reports', 'AgentPaymentController::reports', ['filter' => 'permission:agent_payments.reports']);
-    $routes->get('agent-payments/preview-report', 'AgentPaymentController::previewReport', ['filter' => 'permission:agent_payments.view']);
-
-    // Master Data AJAX
-    $routes->get('master-data/states/(:num)', 'MasterDataController::getStatesByCountry/$1');
-    $routes->get('master-data/product-by-barcode', 'MasterDataController::getProductByBarcode');
-
-    // API Routes for n8n Integration
-    $routes->group('api', ['filter' => 'apiauth'], function ($routes) {
-        // Customer APIs
-        $routes->get('customers', 'ApiController::getCustomers');
-        $routes->get('customers/(:num)', 'ApiController::getCustomer/$1');
-        $routes->put('customers/(:num)', 'ApiController::updateCustomer/$1');
-        $routes->post('customers/(:num)/address/sync', 'ApiController::syncCustomerAddress/$1');
-
-        // Vendor APIs
-        $routes->get('vendors', 'ApiController::getVendors');
-        $routes->get('vendors/(:num)', 'ApiController::getVendor/$1');
-        $routes->put('vendors/(:num)', 'ApiController::updateVendor/$1');
-        $routes->post('vendors/(:num)/address/sync', 'ApiController::syncVendorAddress/$1');
-    });
-
     // Tax Routes
     $routes->group('settings/taxes', function ($routes) {
         $routes->get('', 'TaxController::index', ['filter' => 'permission:tax.view']);

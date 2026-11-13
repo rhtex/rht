@@ -364,35 +364,51 @@
 </div>
 
 <!-- Modal 1: Sync Selected Module -->
-<div class="modal fade" id="syncModuleModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="syncModuleModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog">
-        <form action="<?= site_url('settings/integrations/zoho/sync-module') ?>" method="post" class="modal-content">
+        <form action="<?= site_url('settings/integrations/zoho/sync-module') ?>" method="post" class="modal-content" id="syncModuleForm">
             <?= csrf_field() ?>
             <div class="modal-header">
                 <h5 class="modal-title fw-bold"><i class="fas fa-layer-group text-primary me-2"></i>Sync Selected Module</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" id="syncModuleCloseBtn"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Select Module</label>
-                    <select name="module" class="form-select" required>
-                        <?php foreach ($modulesList as $mKey => $mMeta): ?>
-                            <option value="<?= esc($mKey) ?>"><?= esc($mMeta['label']) ?> (<?= esc($mKey) ?>)</option>
-                        <?php endforeach; ?>
-                    </select>
+                <div id="syncModuleFields">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Select Module</label>
+                        <select name="module" id="syncModalModule" class="form-select" required>
+                            <?php foreach ($modulesList as $mKey => $mMeta): ?>
+                                <option value="<?= esc($mKey) ?>"><?= esc($mMeta['label']) ?> (<?= esc($mKey) ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Synchronization Direction</label>
+                        <select name="direction" id="syncModalDirection" class="form-select">
+                            <option value="bidirectional">Full Bidirectional (Zoho &harr; CI4 ERP)</option>
+                            <option value="from_zoho" selected>Pull from Zoho Books (Zoho &rarr; CI4 ERP)</option>
+                            <option value="to_zoho">Push to Zoho Books (CI4 ERP &rarr; Zoho)</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Synchronization Direction</label>
-                    <select name="direction" class="form-select">
-                        <option value="bidirectional">Full Bidirectional (Zoho &harr; CI4 ERP)</option>
-                        <option value="from_zoho">Pull from Zoho Books (Zoho &rarr; CI4 ERP)</option>
-                        <option value="to_zoho">Push to Zoho Books (CI4 ERP &rarr; Zoho)</option>
-                    </select>
+
+                <!-- Live Progress Display -->
+                <div id="syncProgressContainer" class="d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small fw-bold text-dark" id="syncProgressStage">Starting sync...</span>
+                        <span class="small fw-bold text-primary" id="syncProgressPct">0%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 18px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" id="syncProgressBar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                    <div class="bg-dark text-light p-2 rounded small font-monospace" id="syncTerminalLog" style="height: 140px; overflow-y: auto; font-size: 11px;">
+                        <div class="text-secondary">[<?= date('H:i:s') ?>] Preparing synchronization task...</div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary fw-bold">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="syncModuleCancelBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary fw-bold" id="syncModuleSubmitBtn">
                     <i class="fas fa-sync-alt me-1"></i> Start Module Sync
                 </button>
             </div>
@@ -496,6 +512,119 @@ document.addEventListener('DOMContentLoaded', function() {
     if (clrAllBtn) {
         clrAllBtn.addEventListener('click', function() {
             document.querySelectorAll('.record-picker-cb').forEach(cb => cb.checked = false);
+        });
+    }
+
+    // Live Percentage Progress Bar for Sync Module Form
+    const syncForm = document.getElementById('syncModuleForm');
+    if (syncForm) {
+        syncForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const submitBtn   = document.getElementById('syncModuleSubmitBtn');
+            const cancelBtn   = document.getElementById('syncModuleCancelBtn');
+            const closeBtn    = document.getElementById('syncModuleCloseBtn');
+            const fieldsBox   = document.getElementById('syncModuleFields');
+            const progressBox = document.getElementById('syncProgressContainer');
+            const progressBar = document.getElementById('syncProgressBar');
+            const progressPct = document.getElementById('syncProgressPct');
+            const progressStg = document.getElementById('syncProgressStage');
+            const terminal    = document.getElementById('syncTerminalLog');
+            const modSelect   = document.getElementById('syncModalModule');
+            const dirSelect   = document.getElementById('syncModalDirection');
+
+            const modLabel = modSelect.options[modSelect.selectedIndex].text;
+            const dirVal   = dirSelect.value;
+            const formData = new FormData(syncForm);
+
+            // Lock modal UI
+            submitBtn.disabled = true;
+            cancelBtn.disabled = true;
+            closeBtn.classList.add('d-none');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Synchronizing...';
+            progressBox.classList.remove('d-none');
+
+            function addLog(msg, type = 'info') {
+                const now = new Date().toLocaleTimeString();
+                const div = document.createElement('div');
+                div.className = type === 'success' ? 'text-success fw-bold' : (type === 'danger' ? 'text-danger fw-bold' : (type === 'warning' ? 'text-warning' : 'text-light'));
+                div.innerHTML = `<span class="text-secondary me-2">[${now}]</span>${msg}`;
+                terminal.appendChild(div);
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+
+            function setPct(pct, stage) {
+                pct = Math.min(95, Math.max(0, pct));
+                progressBar.style.width = pct + '%';
+                progressBar.textContent = pct + '%';
+                progressBar.setAttribute('aria-valuenow', pct);
+                progressPct.textContent = pct + '%';
+                if (stage) progressStg.textContent = stage;
+            }
+
+            addLog(`Initiated sync for: ${modLabel} (${dirVal})...`, 'warning');
+            setPct(10, 'Connecting to Zoho Books API...');
+
+            // Simulated progress ticks while waiting for server batch
+            let currentPct = 15;
+            const progressTimer = setInterval(() => {
+                if (currentPct < 85) {
+                    currentPct += Math.floor(Math.random() * 8) + 2;
+                    let stageText = 'Retrieving & processing records...';
+                    if (currentPct > 35 && currentPct <= 65) {
+                        stageText = 'Parsing line items and taxes...';
+                    } else if (currentPct > 65) {
+                        stageText = 'Resolving local database mappings & conflict checks...';
+                    }
+                    setPct(currentPct, stageText);
+                }
+            }, 1200);
+
+            fetch(syncForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                clearInterval(progressTimer);
+                progressBar.style.width = '100%';
+                progressBar.textContent = '100%';
+                progressPct.textContent = '100%';
+
+                if (data.success) {
+                    progressBar.className = 'progress-bar bg-success';
+                    progressStg.textContent = 'Completed successfully!';
+                    addLog(data.summary_message || 'Synchronization finished successfully!', 'success');
+                    submitBtn.className = 'btn btn-success fw-bold';
+                    submitBtn.innerHTML = '<i class="fas fa-check me-1"></i> Completed';
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2200);
+                } else {
+                    progressBar.className = 'progress-bar bg-danger';
+                    progressStg.textContent = 'Sync failed';
+                    addLog('Sync Error: ' + (data.message || 'Unknown failure'), 'danger');
+                    submitBtn.disabled = false;
+                    cancelBtn.disabled = false;
+                    closeBtn.classList.remove('d-none');
+                    submitBtn.className = 'btn btn-primary fw-bold';
+                    submitBtn.innerHTML = '<i class="fas fa-redo me-1"></i> Retry';
+                }
+            })
+            .catch(err => {
+                clearInterval(progressTimer);
+                progressBar.className = 'progress-bar bg-danger';
+                progressStg.textContent = 'Connection error';
+                addLog('Request error: ' + err.message, 'danger');
+                submitBtn.disabled = false;
+                cancelBtn.disabled = false;
+                closeBtn.classList.remove('d-none');
+                submitBtn.className = 'btn btn-primary fw-bold';
+                submitBtn.innerHTML = '<i class="fas fa-redo me-1"></i> Retry';
+            });
         });
     }
 });

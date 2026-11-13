@@ -324,6 +324,25 @@ class ZohoSyncController extends BaseController
     }
 
     /**
+     * AJAX endpoint to inspect full payload (reads from JSON file on disk if offloaded)
+     */
+    public function logPayload(int $logId)
+    {
+        $data = $this->logModel->getFullPayload($logId);
+        return $this->response->setJSON($data);
+    }
+
+    /**
+     * Clean logs older than 90 days
+     */
+    public function pruneOldLogs()
+    {
+        $days = (int) ($this->request->getPost('days') ?? 90);
+        $deleted = $this->logModel->pruneLogsOlderThan(max(7, $days));
+        return redirect()->back()->with('success', "Cleaned {$deleted} log records and associated JSON files older than {$days} days.");
+    }
+
+    /**
      * Sync Logs & Queue Inspector Screen
      */
     public function logs()

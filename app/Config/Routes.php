@@ -761,6 +761,8 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
         $routes->post('conflicts/resolve/(:num)', 'ZohoSyncController::resolveConflict/$1');
         $routes->get('reconciliation', 'ZohoSyncController::reconciliation');
         $routes->get('logs', 'ZohoSyncController::logs');
+        $routes->get('logs/payload/(:num)', 'ZohoSyncController::logPayload/$1');
+        $routes->post('logs/prune', 'ZohoSyncController::pruneOldLogs');
     });
 
     // Database Backup Routes

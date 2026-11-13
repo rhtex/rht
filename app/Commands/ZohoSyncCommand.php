@@ -16,6 +16,7 @@ class ZohoSyncCommand extends BaseCommand
         '--direction'    => 'Sync direction: to_zoho | from_zoho | both | queue (default: queue)',
         '--module'       => 'Optional module key (e.g. customers, vendors, items, invoices, bills)',
         '--retry-failed' => 'Retry failed sync mappings & queue records',
+        '--clean-logs'   => 'Prune logs and payload files older than specified days (default: 90)',
         '--limit'        => 'Batch limit for queue processing (default: 50)',
     ];
 
@@ -23,6 +24,7 @@ class ZohoSyncCommand extends BaseCommand
     {
         $orchestrator = new ZohoSyncOrchestrator();
 
+        $cleanLogs   = CLI::getOption('clean-logs') !== null || in_array('--clean-logs', $params, true);
         $retryFailed = CLI::getOption('retry-failed') !== null || in_array('--retry-failed', $params, true);
         $direction   = (string) (CLI::getOption('direction') ?: 'queue');
         $module      = CLI::getOption('module') ? trim((string) CLI::getOption('module')) : null;
@@ -31,6 +33,14 @@ class ZohoSyncCommand extends BaseCommand
         CLI::write('=== Zoho Books Synchronization CLI ===', 'cyan');
 
         try {
+            if ($cleanLogs) {
+                $days = max(7, (int) (CLI::getOption('clean-logs') ?: 90));
+                CLI::write("Pruning Zoho API logs and payload files older than {$days} days...", 'yellow');
+                $deleted = (new \App\Models\Zoho\ZohoSyncLogModel())->pruneLogsOlderThan($days);
+                CLI::write("Cleaned {$deleted} log records and expired JSON files.", 'green');
+                return EXIT_SUCCESS;
+            }
+
             if ($retryFailed) {
                 CLI::write('Retrying failed Zoho sync items...', 'yellow');
                 $result = $orchestrator->retryFailedSync();

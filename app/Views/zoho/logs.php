@@ -139,8 +139,15 @@
 
 <!-- HTTP Request & Response Audit Logs -->
 <div class="card card-outline card-secondary shadow-sm mb-3">
-    <div class="card-header bg-white py-2">
+    <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
         <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-terminal text-primary me-2"></i>API Request &amp; Response Logs (Latest 150)</h3>
+        <form action="<?= site_url('settings/integrations/zoho/logs/prune') ?>" method="post" class="d-inline" onsubmit="return confirm('Prune logs and stored payload JSON files older than 90 days?');">
+            <?= csrf_field() ?>
+            <input type="hidden" name="days" value="90">
+            <button type="submit" class="btn btn-xs btn-outline-danger">
+                <i class="fas fa-trash-alt me-1"></i> Clean Logs &gt; 90 Days
+            </button>
+        </form>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -189,6 +196,7 @@
                                 <td class="small text-danger" style="max-width:260px;"><?= esc($log['error_message'] ?? '') ?></td>
                                 <td class="text-end pe-3">
                                     <button type="button" class="btn btn-xs btn-outline-secondary view-log-btn"
+                                            data-id="<?= (int) $log['id'] ?>"
                                             data-endpoint="<?= esc($log['endpoint'] ?? '') ?>"
                                             data-req="<?= esc($log['request_payload'] ?? '') ?>"
                                             data-res="<?= esc($log['response_payload'] ?? '') ?>">
@@ -237,11 +245,32 @@
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.view-log-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            document.getElementById('modalLogEndpoint').textContent = btn.getAttribute('data-endpoint') || '';
-            document.getElementById('modalLogReq').textContent      = btn.getAttribute('data-req') || '(empty)';
-            document.getElementById('modalLogRes').textContent      = btn.getAttribute('data-res') || '(empty)';
+            const logId = btn.getAttribute('data-id');
+            const ep = btn.getAttribute('data-endpoint') || '';
+            let req = btn.getAttribute('data-req') || '(empty)';
+            let res = btn.getAttribute('data-res') || '(empty)';
+
+            document.getElementById('modalLogEndpoint').textContent = ep;
+            document.getElementById('modalLogReq').textContent      = req;
+            document.getElementById('modalLogRes').textContent      = res;
             const modal = new bootstrap.Modal(document.getElementById('logPayloadModal'));
             modal.show();
+
+            // If response points to disk file storage, asynchronously fetch the full content
+            if (logId && (res.includes('"_storage":"file"') || req.includes('"_storage":"file"'))) {
+                document.getElementById('modalLogRes').textContent = 'Loading full payload from disk file...';
+                fetch('<?= site_url('settings/integrations/zoho/logs/payload') ?>/' + logId)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data) {
+                            if (data.request) document.getElementById('modalLogReq').textContent = data.request;
+                            if (data.response) document.getElementById('modalLogRes').textContent = data.response;
+                        }
+                    })
+                    .catch(err => {
+                        document.getElementById('modalLogRes').textContent = res;
+                    });
+            }
         });
     });
 });

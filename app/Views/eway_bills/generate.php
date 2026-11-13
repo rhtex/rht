@@ -60,7 +60,7 @@
                                     <div class="input-group">
                                         <input type="text" id="doc_search_input" class="form-control" 
                                             placeholder="Type Invoice No (e.g. INV-001937)..." 
-                                            value="<?= esc($document['invoice_number'] ?? ($document['return_number'] ?? '')) ?>">
+                                            value="<?= esc(!empty($document) ? ($document['invoice_number'] ?? ($document['return_number'] ?? '')) : '') ?>">
                                         <button class="btn btn-outline-primary" type="button" onclick="performDocLookup()">
                                             <i class="fas fa-search me-1"></i> Find
                                         </button>
@@ -76,22 +76,27 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-2">
                                         <label class="text-muted small d-block">Document Number & Date</label>
-                                        <span class="fw-bold" id="lbl_doc_no"><?= esc($document['invoice_number'] ?? ($document['return_number'] ?? 'Not Selected')) ?></span>
-                                        <span class="text-muted ms-2" id="lbl_doc_date"><?= !empty($document['invoice_date'] ?? $document['return_date']) ? '(' . date('d M Y', strtotime($document['invoice_date'] ?? $document['return_date'])) . ')' : '' ?></span>
-                                        <input type="hidden" name="document_number" id="hidden_doc_number" value="<?= esc($document['invoice_number'] ?? ($document['return_number'] ?? '')) ?>">
-                                        <input type="hidden" name="document_date" id="hidden_doc_date" value="<?= esc($document['invoice_date'] ?? ($document['return_date'] ?? date('Y-m-d'))) ?>">
+                                        <span class="fw-bold" id="lbl_doc_no"><?= esc(!empty($document) ? ($document['invoice_number'] ?? ($document['return_number'] ?? 'Not Selected')) : 'Not Selected') ?></span>
+                                        <span class="text-muted ms-2" id="lbl_doc_date">
+                                            <?php 
+                                            $docDate = !empty($document) ? ($document['invoice_date'] ?? ($document['return_date'] ?? null)) : null;
+                                            echo $docDate ? '(' . date('d M Y', strtotime($docDate)) . ')' : '';
+                                            ?>
+                                        </span>
+                                        <input type="hidden" name="document_number" id="hidden_doc_number" value="<?= esc(!empty($document) ? ($document['invoice_number'] ?? ($document['return_number'] ?? '')) : '') ?>">
+                                        <input type="hidden" name="document_date" id="hidden_doc_date" value="<?= esc(!empty($document) ? ($document['invoice_date'] ?? ($document['return_date'] ?? date('Y-m-d'))) : date('Y-m-d')) ?>">
                                     </div>
                                     <div class="col-md-6 mb-2">
                                         <label class="text-muted small d-block">Customer / Party Name</label>
-                                        <span class="fw-bold" id="lbl_party_name"><?= esc($party['name'] ?? ($party['customer_name'] ?? 'Not Selected')) ?></span>
-                                        <div class="small text-muted" id="lbl_party_gstin">GSTIN: <?= esc($party['gstin'] ?? 'Unregistered') ?></div>
+                                        <span class="fw-bold" id="lbl_party_name"><?= esc(!empty($party) ? ($party['name'] ?? ($party['customer_name'] ?? 'Not Selected')) : 'Not Selected') ?></span>
+                                        <div class="small text-muted" id="lbl_party_gstin">GSTIN: <?= esc(!empty($party['gstin']) ? $party['gstin'] : 'Unregistered') ?></div>
                                     </div>
                                 </div>
                                 <div class="row mt-2 pt-2 border-top">
                                     <div class="col-md-4">
                                         <label class="text-muted small d-block">Total Taxable + Tax</label>
-                                        <span class="fs-5 fw-bold text-success" id="lbl_total_amount">₹<?= number_format((float) ($document['total_amount'] ?? 0), 2) ?></span>
-                                        <input type="hidden" name="total_amount" id="hidden_total_amount" value="<?= esc($document['total_amount'] ?? 0) ?>">
+                                        <span class="fs-5 fw-bold text-success" id="lbl_total_amount">₹<?= number_format((float) (!empty($document['total_amount']) ? $document['total_amount'] : 0), 2) ?></span>
+                                        <input type="hidden" name="total_amount" id="hidden_total_amount" value="<?= esc(!empty($document['total_amount']) ? $document['total_amount'] : 0) ?>">
                                     </div>
                                     <div class="col-md-8 text-end">
                                         <span class="badge bg-info text-white" id="lbl_existing_ewb">
@@ -328,7 +333,7 @@
                             <div class="mb-3" id="group_vehicle_number">
                                 <label class="form-label fw-bold">Vehicle Number <span class="text-danger" id="req_star_vehicle">*</span></label>
                                 <input type="text" name="vehicle_number" id="vehicle_number" class="form-control text-uppercase" 
-                                    placeholder="e.g. TN28AB1234" value="<?= esc($document['transport_name'] ?? '') ?>">
+                                    placeholder="e.g. TN28AB1234" value="<?= esc(!empty($document['transport_name']) ? $document['transport_name'] : '') ?>">
                                 <div class="form-text small">Enter without space or hyphens.</div>
                             </div>
 
@@ -355,12 +360,12 @@
                                 <div class="col-6">
                                     <label class="form-label">LR / Waybill Number</label>
                                     <input type="text" name="transporter_doc_number" class="form-control" 
-                                        value="<?= esc($document['waybill_number'] ?? '') ?>" placeholder="LR Number">
+                                        value="<?= esc(!empty($document['waybill_number']) ? $document['waybill_number'] : '') ?>" placeholder="LR Number">
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label">LR Date</label>
                                     <input type="date" name="transporter_doc_date" class="form-control" 
-                                        value="<?= esc($document['waybill_date'] ?? date('Y-m-d')) ?>">
+                                        value="<?= esc(!empty($document['waybill_date']) ? $document['waybill_date'] : date('Y-m-d')) ?>">
                                 </div>
                             </div>
                         </div>

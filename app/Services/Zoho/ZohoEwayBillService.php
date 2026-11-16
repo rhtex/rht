@@ -335,6 +335,46 @@ class ZohoEwayBillService
 
         $response = $this->client->post('/ewaybills', $payload, [], $meta);
 
+        // Fallback / Auto-recovery:
+        // If Zoho returns "API access is not available" on 'save_generate', Zoho Books might not have
+        // the direct GSP API integration enabled, or the user generates it via Zoho portal (e.g. using IRN portal).
+        // Try 'save' action to persist e-waybill details in Zoho Books, and check if an ewaybill number exists on the invoice.
+        if (empty($response['success']) && ($response['message'] ?? '') === 'API access is not available' && $action === 'save_generate') {
+            $payload['action'] = 'save';
+            $saveResponse = $this->client->post('/ewaybills', $payload, [], $meta);
+            if (!empty($saveResponse['success'])) {
+                // Check if the invoice in Zoho Books already has eway_bill_details or ewaybills attached
+                if ($zohoId && $docType === 'invoice') {
+                    $invRes = $this->client->get("/invoices/{$zohoId}");
+                    if (!empty($invRes['data']['invoice'])) {
+                        $remoteInv = $invRes['data']['invoice'];
+                        $latestEwb = !empty($remoteInv['ewaybills']) ? end($remoteInv['ewaybills']) : null;
+                        $ewbDetails = $remoteInv['eway_bill_details'] ?? null;
+                        
+                        $ewbNum = $latestEwb['ewaybill_number'] ?? ($ewbDetails['eway_bill_number'] ?? null);
+                        if ($ewbNum) {
+                            $response = [
+                                'success' => true,
+                                'data' => [
+                                    'ewaybill' => [
+                                        'ewaybill_id'     => $latestEwb['ewaybill_id'] ?? ($saveResponse['data']['ewaybill']['ewaybill_id'] ?? null),
+                                        'ewaybill_number' => $ewbNum,
+                                        'ewaybill_date'   => $latestEwb['ewaybill_date'] ?? ($ewbDetails['eway_bill_date'] ?? date('Y-m-d H:i:s')),
+                                        'valid_until'     => $latestEwb['ewaybill_expiry_date'] ?? null,
+                                        'status'          => $latestEwb['ewaybill_status'] ?? 'generated',
+                                    ]
+                                ]
+                            ];
+                        } else {
+                            $response = $saveResponse;
+                        }
+                    }
+                } else {
+                    $response = $saveResponse;
+                }
+            }
+        }
+
         $recordData = [
             'document_type'          => $docType,
             'document_id'            => $docId,
@@ -643,36 +683,92 @@ class ZohoEwayBillService
     public function syncStatus(int $ewayBillId): array
     {
         $ewb = $this->ewayModel->find($ewayBillId);
-        if (!$ewb || empty($ewb['zoho_ewaybill_id'])) {
-            return ['success' => false, 'message' => 'No Zoho e-Way Bill ID attached.'];
+        if (!$ewb) {
+            return ['success' => false, 'message' => 'e-Way Bill record not found.'];
         }
 
-        $res = $this->client->get("/ewaybills/{$ewb['zoho_ewaybill_id']}", [], [
-            'module'          => 'eway_bills',
-            'local_record_id' => $ewayBillId,
-            'operation'       => 'GET_EWAYBILL',
-        ]);
+        // 1. If we have a zoho_ewaybill_id, query Zoho's /ewaybills/{id}
+        if (!empty($ewb['zoho_ewaybill_id'])) {
+            $res = $this->client->get("/ewaybills/{$ewb['zoho_ewaybill_id']}", [], [
+                'module'          => 'eway_bills',
+                'local_record_id' => $ewayBillId,
+                'operation'       => 'GET_EWAYBILL',
+            ]);
 
-        if (empty($res['success'])) {
-            return ['success' => false, 'message' => $res['message'] ?? 'Failed to sync with Zoho Books.'];
+            if (!empty($res['success'])) {
+                $zohoData = $res['data']['ewaybill'] ?? ($res['data'] ?? []);
+                $status   = strtolower($zohoData['ewaybill_status'] ?? ($zohoData['status'] ?? ($ewb['status'] ?? 'generated')));
+                $ewbNum   = $zohoData['ewaybill_number'] ?? $ewb['ewaybill_number'];
+
+                $updateData = [
+                    'ewaybill_number' => $ewbNum,
+                    'valid_until'     => $zohoData['ewaybill_expiry_date'] ?? ($zohoData['valid_until'] ?? $ewb['valid_until']),
+                    'status'          => $status,
+                    'error_message'   => null,
+                    'last_sync_at'    => date('Y-m-d H:i:s'),
+                    'updated_at'      => date('Y-m-d H:i:s'),
+                ];
+                $this->ewayModel->update($ewayBillId, $updateData);
+
+                if ($ewb['document_type'] === 'invoice' && $ewbNum) {
+                    (new InvoiceModel())->update($ewb['document_id'], [
+                        'ewaybill_number' => $ewbNum,
+                        'updated_at'      => date('Y-m-d H:i:s'),
+                    ]);
+                }
+
+                return [
+                    'success' => true,
+                    'status'  => $status,
+                    'data'    => $zohoData,
+                ];
+            }
         }
 
-        $zohoData = $res['data']['ewaybill'] ?? ($res['data'] ?? []);
-        $status   = strtolower($zohoData['status'] ?? ($ewb['status'] ?? 'generated'));
+        // 2. If no zoho_ewaybill_id or GET /ewaybills failed, check the parent document (e.g. invoice) in Zoho Books
+        $zohoDocId = $this->getZohoRecordId($ewb['document_type'], (int) $ewb['document_id']);
+        if ($zohoDocId && $ewb['document_type'] === 'invoice') {
+            $invRes = $this->client->get("/invoices/{$zohoDocId}");
+            if (!empty($invRes['data']['invoice'])) {
+                $remoteInv  = $invRes['data']['invoice'];
+                $ewbDetails = $remoteInv['eway_bill_details'] ?? null;
+                $ewbList    = $remoteInv['ewaybills'] ?? [];
 
-        $this->ewayModel->update($ewayBillId, [
-            'ewaybill_number' => $zohoData['ewaybill_number'] ?? $ewb['ewaybill_number'],
-            'valid_until'     => $zohoData['valid_until'] ?? $ewb['valid_until'],
-            'status'          => $status,
-            'last_sync_at'    => date('Y-m-d H:i:s'),
-            'updated_at'      => date('Y-m-d H:i:s'),
-        ]);
+                $matchedEwb = null;
+                if (!empty($ewbList)) {
+                    $matchedEwb = end($ewbList);
+                }
 
-        return [
-            'success' => true,
-            'status'  => $status,
-            'data'    => $zohoData,
-        ];
+                $ewbNum = $matchedEwb['ewaybill_number'] ?? ($ewbDetails['eway_bill_number'] ?? null);
+                if ($ewbNum) {
+                    $status = strtolower($matchedEwb['ewaybill_status'] ?? 'generated');
+                    $updateData = [
+                        'zoho_ewaybill_id' => $matchedEwb['ewaybill_id'] ?? $ewb['zoho_ewaybill_id'],
+                        'ewaybill_number'  => $ewbNum,
+                        'ewaybill_date'    => $matchedEwb['ewaybill_date'] ?? ($ewbDetails['eway_bill_date'] ?? $ewb['ewaybill_date']),
+                        'valid_until'      => $matchedEwb['ewaybill_expiry_date'] ?? $ewb['valid_until'],
+                        'status'           => $status,
+                        'error_message'    => null,
+                        'last_sync_at'     => date('Y-m-d H:i:s'),
+                        'updated_at'       => date('Y-m-d H:i:s'),
+                    ];
+                    $this->ewayModel->update($ewayBillId, $updateData);
+
+                    (new InvoiceModel())->update($ewb['document_id'], [
+                        'ewaybill_number' => $ewbNum,
+                        'updated_at'      => date('Y-m-d H:i:s'),
+                    ]);
+
+                    return [
+                        'success' => true,
+                        'status'  => $status,
+                        'data'    => $matchedEwb ?: $ewbDetails,
+                    ];
+                }
+            }
+        }
+
+        return ['success' => false, 'message' => 'Unable to find active e-Way Bill details in Zoho Books.'];
     }
 }
 

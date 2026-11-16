@@ -318,10 +318,10 @@
                                 <div class="col-6">
                                     <label class="form-label">Transport Mode <span class="text-danger">*</span></label>
                                     <select name="transport_mode" class="form-select" required>
-                                        <option value="1">1 - Road</option>
-                                        <option value="2">2 - Rail</option>
-                                        <option value="3">3 - Air</option>
-                                        <option value="4">4 - Ship</option>
+                                        <option value="road">1 - Road</option>
+                                        <option value="rail">2 - Rail</option>
+                                        <option value="air">3 - Air</option>
+                                        <option value="ship">4 - Ship</option>
                                     </select>
                                 </div>
                                 <div class="col-6">
@@ -346,16 +346,11 @@
                                 </select>
                             </div>
 
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="form-label">Transporter ID (Zoho ID / GSTIN)</label>
-                                    <input type="text" name="transporter_id" id="transporter_id" class="form-control text-uppercase" placeholder="Zoho Transporter ID or 15-digit GSTIN">
-                                    <div class="form-text small text-muted">Pass Zoho Transporter ID or Transporter GSTIN.</div>
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Transporter Name</label>
-                                    <input type="text" name="transporter_name" id="transporter_name" class="form-control" placeholder="Agency Name">
-                                </div>
+                            <div class="mb-3">
+                                <label class="form-label">Transporter ID (Zoho ID / GSTIN)</label>
+                                <input type="text" name="transporter_id" id="transporter_id" class="form-control text-uppercase" placeholder="Zoho Transporter ID or 15-digit GSTIN">
+                                <div class="form-text small text-muted">Pass Zoho Transporter ID or Transporter GSTIN.</div>
+                                <input type="hidden" name="transporter_name" id="transporter_name" value="">
                             </div>
 
                             <div class="row g-2">

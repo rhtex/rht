@@ -334,10 +334,10 @@
                                 <div class="col-6">
                                     <label class="form-label">Transport Mode <span class="text-danger">*</span></label>
                                     <select name="transport_mode" class="form-select" required>
-                                        <option value="1" <?= (($ewayBill['transport_mode'] ?? 1) == 1) ? 'selected' : '' ?>>1 - Road</option>
-                                        <option value="2" <?= (($ewayBill['transport_mode'] ?? 1) == 2) ? 'selected' : '' ?>>2 - Rail</option>
-                                        <option value="3" <?= (($ewayBill['transport_mode'] ?? 1) == 3) ? 'selected' : '' ?>>3 - Air</option>
-                                        <option value="4" <?= (($ewayBill['transport_mode'] ?? 1) == 4) ? 'selected' : '' ?>>4 - Ship</option>
+                                        <option value="road" <?= (in_array(($ewayBill['transport_mode'] ?? 'road'), [1, '1', 'road'])) ? 'selected' : '' ?>>1 - Road</option>
+                                        <option value="rail" <?= (in_array(($ewayBill['transport_mode'] ?? ''), [2, '2', 'rail'])) ? 'selected' : '' ?>>2 - Rail</option>
+                                        <option value="air" <?= (in_array(($ewayBill['transport_mode'] ?? ''), [3, '3', 'air'])) ? 'selected' : '' ?>>3 - Air</option>
+                                        <option value="ship" <?= (in_array(($ewayBill['transport_mode'] ?? ''), [4, '4', 'ship'])) ? 'selected' : '' ?>>4 - Ship</option>
                                     </select>
                                 </div>
                                 <div class="col-6">
@@ -363,20 +363,13 @@
                                 </select>
                             </div>
 
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="form-label">Transporter ID (Zoho ID / GSTIN)</label>
-                                    <input type="text" name="transporter_id" id="transporter_id" class="form-control text-uppercase" 
-                                        placeholder="Zoho Transporter ID or 15-digit GSTIN" 
-                                        value="<?= esc($ewayBill['transporter_id'] ?? '') ?>">
-                                    <div class="form-text small text-muted">Pass Zoho Transporter ID or Transporter GSTIN.</div>
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Transporter Name</label>
-                                    <input type="text" name="transporter_name" id="transporter_name" class="form-control" 
-                                        placeholder="Agency Name" 
-                                        value="<?= esc($ewayBill['transporter_name'] ?? '') ?>">
-                                </div>
+                            <div class="mb-3">
+                                <label class="form-label">Transporter ID (Zoho ID / GSTIN)</label>
+                                <input type="text" name="transporter_id" id="transporter_id" class="form-control text-uppercase" 
+                                    placeholder="Zoho Transporter ID or 15-digit GSTIN" 
+                                    value="<?= esc($ewayBill['transporter_id'] ?? '') ?>">
+                                <div class="form-text small text-muted">Pass Zoho Transporter ID or Transporter GSTIN.</div>
+                                <input type="hidden" name="transporter_name" id="transporter_name" value="<?= esc($ewayBill['transporter_name'] ?? '') ?>">
                             </div>
 
                             <div class="row g-2">

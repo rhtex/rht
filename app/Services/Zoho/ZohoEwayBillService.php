@@ -46,6 +46,20 @@ class ZohoEwayBillService
     }
 
     /**
+     * Map transportation mode to Zoho Books string format ('road', 'rail', 'air', 'ship')
+     */
+    protected function mapTransportationMode(mixed $mode): string
+    {
+        $modeStr = strtolower(trim((string) $mode));
+        return match ($modeStr) {
+            '2', 'rail', 'railways' => 'rail',
+            '3', 'air', 'airways'   => 'air',
+            '4', 'ship', 'shipment' => 'ship',
+            default                 => 'road',
+        };
+    }
+
+    /**
      * Fetch the mapped Zoho record ID for a local document
      */
     public function getZohoRecordId(string $docType, int $docId): ?string
@@ -229,7 +243,7 @@ class ZohoEwayBillService
         $payload = [
             'entity_type'         => $this->mapDocTypeToZoho($docType),
             'action'              => $action,
-            'transportation_mode' => (int) ($data['transport_mode'] ?? 1),
+            'transportation_mode' => $this->mapTransportationMode($data['transport_mode'] ?? 'road'),
         ];
 
         // Only explicitly send distance if > 0 so Zoho auto-computes by pincode when 0

@@ -75,7 +75,7 @@ class ZohoEwayBillService
      *   - from_place, from_state_code, from_pincode
      *   - to_place, to_state_code, to_pincode
      */
-    public function generate(array $data, ?int $userId = null): array
+    public function generate(array $data, ?int $userId = null, ?int $targetEwayBillId = null): array
     {
         $docType = $data['document_type'] ?? 'invoice';
         $docId   = (int) ($data['document_id'] ?? 0);
@@ -202,8 +202,13 @@ class ZohoEwayBillService
             $recordData['last_sync_at']     = date('Y-m-d H:i:s');
             $recordData['error_message']    = null;
 
-            $this->ewayModel->insert($recordData);
-            $insertId = $this->ewayModel->getInsertID();
+            if ($targetEwayBillId && $this->ewayModel->find($targetEwayBillId)) {
+                $this->ewayModel->update($targetEwayBillId, $recordData);
+                $finalId = $targetEwayBillId;
+            } else {
+                $this->ewayModel->insert($recordData);
+                $finalId = $this->ewayModel->getInsertID();
+            }
 
             // Sync back to local invoice if applicable
             if ($docType === 'invoice' && $ewbNumber) {
@@ -215,7 +220,7 @@ class ZohoEwayBillService
 
             return [
                 'success'         => true,
-                'id'              => $insertId,
+                'id'              => $finalId,
                 'ewaybill_number' => $ewbNumber,
                 'valid_until'     => $validUntil,
                 'status'          => $status,
@@ -228,7 +233,12 @@ class ZohoEwayBillService
         $errorMsg = $response['message'] ?? 'Zoho Books API error while generating e-Way Bill';
         $recordData['status']        = 'failed';
         $recordData['error_message'] = $errorMsg;
-        $this->ewayModel->insert($recordData);
+
+        if ($targetEwayBillId && $this->ewayModel->find($targetEwayBillId)) {
+            $this->ewayModel->update($targetEwayBillId, $recordData);
+        } else {
+            $this->ewayModel->insert($recordData);
+        }
 
         return [
             'success' => false,
@@ -387,18 +397,37 @@ class ZohoEwayBillService
             'document_id'     => $oldEwb['document_id'],
             'document_number' => $oldEwb['document_number'],
             'document_date'   => $oldEwb['document_date'],
+            'transport_mode'  => $oldEwb['transport_mode'],
+            'distance_km'     => $oldEwb['distance_km'],
+            'transporter_id'  => $oldEwb['transporter_id'],
+            'transporter_name'=> $oldEwb['transporter_name'],
             'total_amount'    => $oldEwb['total_amount'],
             'cgst_amount'     => $oldEwb['cgst_amount'],
             'sgst_amount'     => $oldEwb['sgst_amount'],
             'igst_amount'     => $oldEwb['igst_amount'],
+            'from_address_1'  => $oldEwb['from_address_1'],
+            'from_address_2'  => $oldEwb['from_address_2'],
             'from_place'      => $oldEwb['from_place'],
             'from_state_code' => $oldEwb['from_state_code'],
+            'from_pincode'    => $oldEwb['from_pincode'],
+            'bill_from_place' => $oldEwb['bill_from_place'],
+            'bill_from_state_code' => $oldEwb['bill_from_state_code'],
+            'bill_from_pincode' => $oldEwb['bill_from_pincode'],
+            'bill_to_place'   => $oldEwb['bill_to_place'],
+            'bill_to_state_code' => $oldEwb['bill_to_state_code'],
+            'bill_to_pincode' => $oldEwb['bill_to_pincode'],
+            'to_address_1'    => $oldEwb['to_address_1'],
+            'to_address_2'    => $oldEwb['to_address_2'],
             'to_place'        => $oldEwb['to_place'],
             'to_state_code'   => $oldEwb['to_state_code'],
+            'to_pincode'      => $oldEwb['to_pincode'],
             'action'          => 'save_generate',
         ], $freshData);
 
-        return $this->generate($merged, $userId);
+        // If the original record was 'failed', update that exact record instead of creating a duplicate row
+        $targetId = ($oldEwb['status'] === 'failed') ? $cancelledEwayBillId : null;
+
+        return $this->generate($merged, $userId, $targetId);
     }
 
     /**

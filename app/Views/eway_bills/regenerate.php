@@ -244,21 +244,25 @@
                             </h5>
                         </div>
                         <div class="card-body">
-                            <div class="form-check p-3 border rounded mb-3 bg-light">
-                                <input class="form-check-input" type="radio" name="action" id="action_full" value="save_generate" checked onchange="togglePartBRequirement()">
-                                <label class="form-check-label fw-bold" for="action_full">
-                                    <i class="fas fa-check-circle text-success me-1"></i> Full e-Way Bill (Part-A + Part-B)
-                                </label>
+                            <div class="border rounded p-3 mb-3 bg-light">
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="action" id="action_full" value="save_generate" checked onchange="togglePartBRequirement()">
+                                    <label class="form-check-label fw-bold text-dark cursor-pointer" for="action_full">
+                                        <i class="fas fa-check-circle text-success me-1"></i> Full e-Way Bill (Part-A + Part-B)
+                                    </label>
+                                </div>
                                 <div class="text-muted small ps-4">
                                     Generates complete e-Way Bill ready for transit. Vehicle number & distance are mandatory.
                                 </div>
                             </div>
 
-                            <div class="form-check p-3 border rounded mb-3 bg-light">
-                                <input class="form-check-input" type="radio" name="action" id="action_part_a" value="generate_part_a" onchange="togglePartBRequirement()">
-                                <label class="form-check-label fw-bold" for="action_part_a">
-                                    <i class="fas fa-clock text-warning me-1"></i> Part-A Slip Only (Deferred Vehicle)
-                                </label>
+                            <div class="border rounded p-3 mb-0 bg-light">
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="action" id="action_part_a" value="generate_part_a" onchange="togglePartBRequirement()">
+                                    <label class="form-check-label fw-bold text-dark cursor-pointer" for="action_part_a">
+                                        <i class="fas fa-clock text-warning me-1"></i> Part-A Slip Only (Deferred Vehicle)
+                                    </label>
+                                </div>
                                 <div class="text-muted small ps-4">
                                     Vehicle is not assigned yet or handed to a third-party transporter. Transporter ID is mandatory.
                                 </div>

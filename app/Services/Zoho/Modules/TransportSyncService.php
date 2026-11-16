@@ -23,7 +23,9 @@ class TransportSyncService
     }
 
     /**
-     * Fetch transporters from Zoho Books and sync into local transports table.
+     * Fetch dedicated transporters from Zoho Books/Inventory e-Way Bill API
+     * and sync into local transports table.
+     * Note: Strictly fetches Transporters, NOT general vendors/contacts.
      *
      * @return array Result stats [created, updated, skipped, total_found, errors]
      */
@@ -52,90 +54,105 @@ class TransportSyncService
 
         $transporters = [];
 
-        // 1. Try e-Way Bill / Transporters settings endpoint (/settings/transporters)
-        $ewbRes = $this->client->get('/settings/transporters', [], [
-            'module'    => 'transports',
-            'operation' => 'FETCH_ZOHO_TRANSPORTERS',
-        ]);
+        // 1. Primary: Zoho Books / Inventory India e-Way Bill Transporters endpoint: /ewaybills/transporters
+        // Also check /settings/transporters as alternate path
+        $endpoints = ['/ewaybills/transporters', '/settings/transporters'];
 
-        if (!empty($ewbRes['success']) && !empty($ewbRes['data'])) {
-            $rawList = $ewbRes['data']['transporters'] ?? ($ewbRes['data']['data'] ?? []);
-            if (is_array($rawList)) {
-                foreach ($rawList as $item) {
-                    $name = trim((string) ($item['transporter_name'] ?? ($item['name'] ?? '')));
-                    if ($name === '') {
-                        continue;
+        foreach ($endpoints as $endpoint) {
+            $page = 1;
+            $hasMore = true;
+
+            while ($hasMore && $page <= 5) {
+                $res = $this->client->get($endpoint, [
+                    'page'     => $page,
+                    'per_page' => 200,
+                ], [
+                    'module'    => 'transports',
+                    'operation' => 'FETCH_EWAYBILL_TRANSPORTERS',
+                ]);
+
+                if (!empty($res['success']) && !empty($res['data'])) {
+                    $rawList = $res['data']['transporters'] ?? ($res['data']['data'] ?? []);
+                    if (is_array($rawList) && !empty($rawList)) {
+                        foreach ($rawList as $item) {
+                            $name = trim((string) ($item['transporter_name'] ?? ($item['name'] ?? '')));
+                            if ($name === '') {
+                                continue;
+                            }
+                            $key = strtoupper($name);
+                            if (!isset($transporters[$key])) {
+                                $gstin = trim((string) (
+                                    $item['transporter_id_no'] ??
+                                    ($item['transporter_gstin'] ??
+                                    ($item['transporter_id'] ??
+                                    ($item['gst_no'] ?? ($item['gstin'] ?? ''))))
+                                ));
+
+                                $transporters[$key] = [
+                                    'name'    => $name,
+                                    'gstin'   => $gstin,
+                                    'code'    => trim((string) ($item['transporter_code'] ?? ($item['code'] ?? ''))),
+                                    'phone'   => trim((string) ($item['phone'] ?? ($item['mobile'] ?? ''))),
+                                    'address' => trim((string) ($item['address'] ?? '')),
+                                    'type'    => (stripos($name, 'courier') !== false) ? 'Courier Service' : 'Parcel Service',
+                                    'source'  => 'ewaybills_transporters',
+                                ];
+                            }
+                        }
                     }
-                    $transporters[strtoupper($name)] = [
-                        'name'    => $name,
-                        'gstin'   => trim((string) ($item['transporter_id'] ?? ($item['gst_no'] ?? ($item['gstin'] ?? '')))),
-                        'code'    => trim((string) ($item['transporter_code'] ?? ($item['code'] ?? ''))),
-                        'phone'   => trim((string) ($item['phone'] ?? ($item['mobile'] ?? ''))),
-                        'address' => trim((string) ($item['address'] ?? '')),
-                        'type'    => (stripos($name, 'courier') !== false) ? 'Courier Service' : 'Parcel Service',
-                        'source'  => 'ewaybill_transporters',
-                    ];
+
+                    $pageContext = $res['data']['page_context'] ?? [];
+                    $hasMore = !empty($pageContext['has_more_page']);
+                    $page++;
+                } else {
+                    // Endpoint not found or failed, don't continue paging
+                    break;
                 }
+            }
+
+            // If we successfully retrieved transporters from the primary endpoint, no need to try alternate
+            if (!empty($transporters)) {
+                break;
             }
         }
 
-        // 2. Fetch Vendors tagged with or named Transport / Courier
-        $vendorQueries = ['transport', 'courier', 'cargo', 'logistics', 'parcel'];
-        foreach ($vendorQueries as $vq) {
-            $vRes = $this->client->get('/contacts', [
-                'contact_type' => 'vendor',
-                'search_text'  => $vq,
-                'per_page'     => 50,
+        // 2. Secondary fallback: Extract transporters from generated e-Way Bills (/ewaybills)
+        // Every e-Way Bill created in Zoho stores transporter_name and transporter_id
+        $ewbPage = 1;
+        $ewbHasMore = true;
+        while ($ewbHasMore && $ewbPage <= 3) {
+            $ewbRes = $this->client->get('/ewaybills', [
+                'page'     => $ewbPage,
+                'per_page' => 200,
             ], [
                 'module'    => 'transports',
-                'operation' => 'SEARCH_VENDOR_TRANSPORTERS',
+                'operation' => 'EXTRACT_FROM_EWAYBILLS',
             ]);
 
-            if (!empty($vRes['success']) && !empty($vRes['data']['contacts'])) {
-                foreach ($vRes['data']['contacts'] as $contact) {
-                    $cName = trim((string) ($contact['contact_name'] ?? ($contact['company_name'] ?? '')));
-                    if ($cName === '') {
-                        continue;
-                    }
-
-                    $key = strtoupper($cName);
-                    if (!isset($transporters[$key])) {
-                        $transporters[$key] = [
-                            'name'    => $cName,
-                            'gstin'   => trim((string) ($contact['gst_no'] ?? ($contact['gst_treatment'] ?? ''))),
-                            'code'    => trim((string) ($contact['contact_salutation'] ?? '')),
-                            'phone'   => trim((string) ($contact['phone'] ?? ($contact['mobile'] ?? ''))),
-                            'address' => trim((string) ($contact['billing_address']['address'] ?? '')),
-                            'type'    => (stripos($cName, 'courier') !== false) ? 'Courier Service' : 'Parcel Service',
-                            'source'  => 'vendor_contacts',
-                        ];
+            if (!empty($ewbRes['success']) && !empty($ewbRes['data']['ewaybills'])) {
+                foreach ($ewbRes['data']['ewaybills'] as $ewb) {
+                    $tName = trim((string) ($ewb['transporter_name'] ?? ''));
+                    if ($tName !== '') {
+                        $key = strtoupper($tName);
+                        if (!isset($transporters[$key])) {
+                            $transporters[$key] = [
+                                'name'    => $tName,
+                                'gstin'   => trim((string) ($ewb['transporter_id'] ?? '')),
+                                'code'    => '',
+                                'phone'   => '',
+                                'address' => '',
+                                'type'    => (stripos($tName, 'courier') !== false) ? 'Courier Service' : 'Parcel Service',
+                                'source'  => 'ewaybills_extracted',
+                            ];
+                        }
                     }
                 }
-            }
-        }
 
-        // 3. Fallback: Extract from recent Zoho e-Way bills or invoices if available
-        $ewbListRes = $this->client->get('/ewaybills', ['per_page' => 50], [
-            'module'    => 'transports',
-            'operation' => 'EXTRACT_FROM_EWAYBILLS',
-        ]);
-        if (!empty($ewbListRes['success']) && !empty($ewbListRes['data']['ewaybills'])) {
-            foreach ($ewbListRes['data']['ewaybills'] as $ewb) {
-                $tName = trim((string) ($ewb['transporter_name'] ?? ''));
-                if ($tName !== '') {
-                    $key = strtoupper($tName);
-                    if (!isset($transporters[$key])) {
-                        $transporters[$key] = [
-                            'name'    => $tName,
-                            'gstin'   => trim((string) ($ewb['transporter_id'] ?? '')),
-                            'code'    => '',
-                            'phone'   => '',
-                            'address' => '',
-                            'type'    => (stripos($tName, 'courier') !== false) ? 'Courier Service' : 'Parcel Service',
-                            'source'  => 'ewaybills_extracted',
-                        ];
-                    }
-                }
+                $pageContext = $ewbRes['data']['page_context'] ?? [];
+                $ewbHasMore = !empty($pageContext['has_more_page']);
+                $ewbPage++;
+            } else {
+                break;
             }
         }
 

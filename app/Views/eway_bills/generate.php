@@ -306,33 +306,44 @@
 
                             <div class="mb-3" id="group_vehicle_number">
                                 <label class="form-label fw-bold">Vehicle Number <span class="text-danger" id="req_star_vehicle">*</span></label>
-                                <select name="vehicle_number" id="vehicle_number" class="form-select select2-vehicle" onchange="onVehicleSelect(this)">
-                                    <option value="">-- Select Registered Vehicle or Enter New --</option>
+                                <select id="vehicle_picker" class="form-select select2-vehicle" onchange="onVehicleSelect(this)">
+                                    <option value="">-- Select Registered Vehicle or Others --</option>
+                                    <?php 
+                                        $initialDocVeh = !empty($document['transport_name']) ? strtoupper(str_replace(' ', '', $document['transport_name'])) : '';
+                                        $isMatched = false;
+                                    ?>
                                     <?php if (!empty($vehicles)): ?>
                                         <?php foreach ($vehicles as $v): ?>
-                                            <option value="<?= esc($v['vehicle_number']) ?>" 
+                                            <?php 
+                                                $vNum = strtoupper(str_replace(' ', '', $v['vehicle_number']));
+                                                $selected = (!empty($initialDocVeh) && $initialDocVeh === $vNum);
+                                                if ($selected) { $isMatched = true; }
+                                            ?>
+                                            <option value="<?= esc($vNum) ?>" 
                                                 data-type="<?= esc($v['vehicle_type']) ?>"
-                                                <?= (!empty($document['transport_name']) && strtoupper(str_replace(' ', '', $document['transport_name'])) === strtoupper($v['vehicle_number'])) ? 'selected' : '' ?>>
+                                                <?= $selected ? 'selected' : '' ?>>
                                                 <?= esc($v['vehicle_number']) ?> <?= !empty($v['vehicle_name']) ? ' - ' . esc($v['vehicle_name']) : '' ?> (<?= esc($v['vehicle_type']) ?>)
                                             </option>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
-                                    <?php if (!empty($document['transport_name'])): ?>
-                                        <?php 
-                                            $docVeh = strtoupper(str_replace(' ', '', $document['transport_name']));
-                                            $alreadyInList = false;
-                                            if (!empty($vehicles)) {
-                                                foreach ($vehicles as $v) {
-                                                    if (strtoupper($v['vehicle_number']) === $docVeh) { $alreadyInList = true; break; }
-                                                }
-                                            }
-                                        ?>
-                                        <?php if (!$alreadyInList): ?>
-                                            <option value="<?= esc($docVeh) ?>" selected><?= esc($docVeh) ?> (From Invoice)</option>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
+                                    <option value="OTHERS" <?= (!empty($initialDocVeh) && !$isMatched) ? 'selected' : '' ?>>
+                                        ➕ Others / Third-party Vehicle (Enter Manually)
+                                    </option>
                                 </select>
-                                <div class="form-text small">Select from Operations &gt; Vehicles master list (or type custom vehicle).</div>
+
+                                <!-- Manual Vehicle Input (Shown if Others is selected) -->
+                                <div id="group_manual_vehicle" class="mt-2 <?= (!empty($initialDocVeh) && !$isMatched) ? '' : 'd-none' ?>">
+                                    <label class="form-label text-primary small fw-bold mb-1"><i class="fas fa-pencil-alt me-1"></i> Enter Vehicle Number Manually:</label>
+                                    <input type="text" id="manual_vehicle_number" class="form-control text-uppercase"
+                                        placeholder="e.g. TN28BY9140"
+                                        value="<?= (!empty($initialDocVeh) && !$isMatched) ? esc($initialDocVeh) : '' ?>"
+                                        oninput="syncVehicleNumber()">
+                                </div>
+
+                                <!-- Hidden input submitted with the form -->
+                                <input type="hidden" name="vehicle_number" id="vehicle_number" 
+                                    value="<?= (!empty($initialDocVeh)) ? esc($initialDocVeh) : '' ?>">
+                                <div class="form-text small">Select from Operations &gt; Vehicles master list or choose 'Others' to type manually.</div>
                             </div>
 
                             <div class="mb-3">
@@ -481,12 +492,13 @@ function performDocLookup() {
 
                 // Populate Vehicle Number if present in doc
                 if (doc.vehicle_number) {
-                    const $veh = $('#vehicle_number');
+                    const $veh = $('#vehicle_picker');
                     if ($veh.find("option[value='" + doc.vehicle_number + "']").length) {
                         $veh.val(doc.vehicle_number).trigger('change');
                     } else {
-                        const newOption = new Option(doc.vehicle_number + ' (From Document)', doc.vehicle_number, true, true);
-                        $veh.append(newOption).trigger('change');
+                        $veh.val('OTHERS').trigger('change');
+                        $('#manual_vehicle_number').val(doc.vehicle_number);
+                        $('#vehicle_number').val(doc.vehicle_number);
                     }
                 }
 
@@ -509,6 +521,20 @@ function performDocLookup() {
 }
 
 function onVehicleSelect(select) {
+    const val = select.value;
+    const groupManual = document.getElementById('group_manual_vehicle');
+    const manualInput = document.getElementById('manual_vehicle_number');
+    const hiddenVehInput = document.getElementById('vehicle_number');
+
+    if (val === 'OTHERS') {
+        groupManual.classList.remove('d-none');
+        manualInput.focus();
+        hiddenVehInput.value = manualInput.value.trim().toUpperCase().replace(/\s+/g, '');
+    } else {
+        groupManual.classList.add('d-none');
+        hiddenVehInput.value = val ? val.trim().toUpperCase().replace(/\s+/g, '') : '';
+    }
+
     const opt = select.options ? select.options[select.selectedIndex] : null;
     if (opt && opt.getAttribute('data-type')) {
         const vTypeSelect = document.querySelector('select[name="vehicle_type"]');
@@ -518,19 +544,30 @@ function onVehicleSelect(select) {
     }
 }
 
+function syncVehicleNumber() {
+    const manualInput = document.getElementById('manual_vehicle_number');
+    const hiddenVehInput = document.getElementById('vehicle_number');
+    hiddenVehInput.value = manualInput.value.trim().toUpperCase().replace(/\s+/g, '');
+}
+
 // Initial trigger on load
 $(document).ready(function() {
     togglePartBRequirement();
 
     $('.select2-vehicle').select2({
         theme: 'bootstrap-5',
-        tags: true,
-        placeholder: '-- Select Registered Vehicle or Type New --',
+        placeholder: '-- Select Registered Vehicle or Others --',
         allowClear: true,
         width: '100%'
     }).on('select2:select', function(e) {
         onVehicleSelect(this);
     });
+
+    // Run initial sync
+    const vPicker = document.getElementById('vehicle_picker');
+    if (vPicker) {
+        onVehicleSelect(vPicker);
+    }
 });
 </script>
 <?= $this->endSection() ?>

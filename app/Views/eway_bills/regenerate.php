@@ -320,31 +320,44 @@
                                 <label class="form-label fw-bold">Vehicle Number <span class="text-danger" id="req_star_vehicle">*</span></label>
                                 <?php 
                                     $currentVeh = strtoupper(str_replace(' ', '', $ewayBill['vehicle_number'] ?? (!empty($document['transport_name']) ? $document['transport_name'] : '')));
+                                    $isMatched = false;
                                 ?>
-                                <select name="vehicle_number" id="vehicle_number" class="form-select select2-vehicle" onchange="onVehicleSelect(this)">
-                                    <option value="">-- Select Registered Vehicle or Enter New --</option>
+                                <select id="vehicle_picker" class="form-select select2-vehicle" onchange="onVehicleSelect(this)">
+                                    <option value="">-- Select Registered Vehicle or Others --</option>
                                     <?php 
-                                        $vehFoundInList = false;
                                         if (!empty($vehicles)): 
                                             foreach ($vehicles as $v):
                                                 $vNum = strtoupper(str_replace(' ', '', $v['vehicle_number']));
-                                                $isVehSelected = ($vNum === $currentVeh);
-                                                if ($isVehSelected) { $vehFoundInList = true; }
+                                                $selected = (!empty($currentVeh) && $vNum === $currentVeh);
+                                                if ($selected) { $isMatched = true; }
                                     ?>
-                                            <option value="<?= esc($v['vehicle_number']) ?>" 
+                                            <option value="<?= esc($vNum) ?>" 
                                                 data-type="<?= esc($v['vehicle_type']) ?>"
-                                                <?= $isVehSelected ? 'selected' : '' ?>>
+                                                <?= $selected ? 'selected' : '' ?>>
                                                 <?= esc($v['vehicle_number']) ?> <?= !empty($v['vehicle_name']) ? ' - ' . esc($v['vehicle_name']) : '' ?> (<?= esc($v['vehicle_type']) ?>)
                                             </option>
                                     <?php 
                                             endforeach; 
                                         endif; 
                                     ?>
-                                    <?php if (!empty($currentVeh) && !$vehFoundInList): ?>
-                                        <option value="<?= esc($currentVeh) ?>" selected><?= esc($currentVeh) ?> (Current / Previous)</option>
-                                    <?php endif; ?>
+                                    <option value="OTHERS" <?= (!empty($currentVeh) && !$isMatched) ? 'selected' : '' ?>>
+                                        ➕ Others / Third-party Vehicle (Enter Manually)
+                                    </option>
                                 </select>
-                                <div class="form-text small">Select from Operations &gt; Vehicles master list (or type custom vehicle).</div>
+
+                                <!-- Manual Vehicle Input (Shown if Others is selected) -->
+                                <div id="group_manual_vehicle" class="mt-2 <?= (!empty($currentVeh) && !$isMatched) ? '' : 'd-none' ?>">
+                                    <label class="form-label text-primary small fw-bold mb-1"><i class="fas fa-pencil-alt me-1"></i> Enter Vehicle Number Manually:</label>
+                                    <input type="text" id="manual_vehicle_number" class="form-control text-uppercase"
+                                        placeholder="e.g. TN28BY9140"
+                                        value="<?= (!empty($currentVeh) && !$isMatched) ? esc($currentVeh) : '' ?>"
+                                        oninput="syncVehicleNumber()">
+                                </div>
+
+                                <!-- Hidden input submitted with the form -->
+                                <input type="hidden" name="vehicle_number" id="vehicle_number" 
+                                    value="<?= (!empty($currentVeh)) ? esc($currentVeh) : '' ?>">
+                                <div class="form-text small">Select from Operations &gt; Vehicles master list or choose 'Others' to type manually.</div>
                             </div>
 
                             <div class="mb-3">
@@ -483,6 +496,20 @@ function applyPresetTransporter(select) {
 }
 
 function onVehicleSelect(select) {
+    const val = select.value;
+    const groupManual = document.getElementById('group_manual_vehicle');
+    const manualInput = document.getElementById('manual_vehicle_number');
+    const hiddenVehInput = document.getElementById('vehicle_number');
+
+    if (val === 'OTHERS') {
+        groupManual.classList.remove('d-none');
+        manualInput.focus();
+        hiddenVehInput.value = manualInput.value.trim().toUpperCase().replace(/\s+/g, '');
+    } else {
+        groupManual.classList.add('d-none');
+        hiddenVehInput.value = val ? val.trim().toUpperCase().replace(/\s+/g, '') : '';
+    }
+
     const opt = select.options ? select.options[select.selectedIndex] : null;
     if (opt && opt.getAttribute('data-type')) {
         const vTypeSelect = document.querySelector('select[name="vehicle_type"]');
@@ -490,6 +517,12 @@ function onVehicleSelect(select) {
             vTypeSelect.value = opt.getAttribute('data-type');
         }
     }
+}
+
+function syncVehicleNumber() {
+    const manualInput = document.getElementById('manual_vehicle_number');
+    const hiddenVehInput = document.getElementById('vehicle_number');
+    hiddenVehInput.value = manualInput.value.trim().toUpperCase().replace(/\s+/g, '');
 }
 
 $(document).ready(function() {
@@ -504,13 +537,18 @@ $(document).ready(function() {
 
     $('.select2-vehicle').select2({
         theme: 'bootstrap-5',
-        tags: true,
-        placeholder: '-- Select Registered Vehicle or Type New --',
+        placeholder: '-- Select Registered Vehicle or Others --',
         allowClear: true,
         width: '100%'
     }).on('select2:select', function(e) {
         onVehicleSelect(this);
     });
+
+    // Run initial sync
+    const vPicker = document.getElementById('vehicle_picker');
+    if (vPicker) {
+        onVehicleSelect(vPicker);
+    }
 });
 </script>
 <?= $this->endSection() ?>

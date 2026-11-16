@@ -145,28 +145,21 @@
                                         <h6 class="fw-bold text-primary mb-0"><i class="fas fa-warehouse me-1"></i> Dispatch From</h6>
                                         <span class="badge bg-primary-subtle text-primary border">Place of Dispatch</span>
                                     </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Address Line 1</label>
-                                        <input type="text" name="from_address_1" class="form-control form-control-sm" value="C.P Kannaiah Street, Opp: Gopinath Engineering Works">
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Address Line 2</label>
-                                        <input type="text" name="from_address_2" class="form-control form-control-sm" value="Rasipuram (TK), Namakkal">
-                                    </div>
-                                    <div class="row g-2">
-                                        <div class="col-5">
-                                            <label class="form-label small">Dispatch City <span class="text-danger">*</span></label>
-                                            <input type="text" name="from_place" class="form-control form-control-sm" value="Rasipuram" required>
-                                        </div>
-                                        <div class="col-3">
-                                            <label class="form-label small">State Code <span class="text-danger">*</span></label>
-                                            <input type="text" name="from_state_code" class="form-control form-control-sm" value="33" required>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="form-label small">Pincode <span class="text-danger">*</span></label>
-                                            <input type="text" name="from_pincode" class="form-control form-control-sm" value="637408" required>
+                                    <div class="p-2 rounded bg-light border">
+                                        <div class="small fw-semibold">Rasi Handloom Textiles</div>
+                                        <div class="small text-muted" id="disp_from_address_1">C.P Kannaiah Street, Opp: Gopinath Engineering Works</div>
+                                        <div class="small text-muted" id="disp_from_address_2">Rasipuram (TK), Namakkal</div>
+                                        <div class="small text-primary mt-1">
+                                            <strong>City:</strong> <span id="disp_from_place">Rasipuram</span> | 
+                                            <strong>State:</strong> <span id="disp_from_state_code">33 (TN)</span> | 
+                                            <strong>PIN:</strong> <span id="disp_from_pincode">637408</span>
                                         </div>
                                     </div>
+                                    <input type="hidden" name="from_address_1" id="from_address_1" value="C.P Kannaiah Street, Opp: Gopinath Engineering Works">
+                                    <input type="hidden" name="from_address_2" id="from_address_2" value="Rasipuram (TK), Namakkal">
+                                    <input type="hidden" name="from_place" id="from_place" value="Rasipuram">
+                                    <input type="hidden" name="from_state_code" id="from_state_code" value="33">
+                                    <input type="hidden" name="from_pincode" id="from_pincode" value="637408">
                                 </div>
                                 <div class="col-md-6">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
@@ -178,10 +171,10 @@
                                         <div class="small text-muted">C.P Kannaiah Street, Opp: Gopinath Engineering Works,</div>
                                         <div class="small text-muted">Rasipuram (TK), Namakkal, Tamil Nadu, India - 637408</div>
                                         <div class="small text-primary mt-1"><strong>City:</strong> Rasipuram | <strong>State:</strong> 33 (TN) | <strong>PIN:</strong> 637408</div>
-                                        <input type="hidden" name="bill_from_place" value="Rasipuram">
-                                        <input type="hidden" name="bill_from_state_code" value="33">
-                                        <input type="hidden" name="bill_from_pincode" value="637408">
                                     </div>
+                                    <input type="hidden" name="bill_from_place" value="Rasipuram">
+                                    <input type="hidden" name="bill_from_state_code" value="33">
+                                    <input type="hidden" name="bill_from_pincode" value="637408">
                                 </div>
                             </div>
 
@@ -192,33 +185,21 @@
                                         <h6 class="fw-bold text-info mb-0"><i class="fas fa-file-invoice me-1"></i> Bill To</h6>
                                         <span class="badge bg-info-subtle text-info border">Buyer / Billing Address</span>
                                     </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Billing Address Line 1</label>
-                                        <input type="text" name="bill_to_address_1" id="bill_to_address_1" class="form-control form-control-sm" 
-                                            value="<?= esc($billAddress['address_line1'] ?? '') ?>" placeholder="e.g. 56, DHARMARAJA KOIL STREET">
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Billing Address Line 2</label>
-                                        <input type="text" name="bill_to_address_2" id="bill_to_address_2" class="form-control form-control-sm" 
-                                            value="<?= esc($billAddress['address_line2'] ?? '') ?>" placeholder="e.g. KOSAPPALAYAM,ARNI">
-                                    </div>
-                                    <div class="row g-2">
-                                        <div class="col-5">
-                                            <label class="form-label small">Billing City <span class="text-danger">*</span></label>
-                                            <input type="text" name="bill_to_place" id="bill_to_place" class="form-control form-control-sm" 
-                                                value="<?= esc($billAddress['city'] ?? '') ?>" placeholder="e.g. Arni" required>
-                                        </div>
-                                        <div class="col-3">
-                                            <label class="form-label small">State Code <span class="text-danger">*</span></label>
-                                            <input type="text" name="bill_to_state_code" id="bill_to_state_code" class="form-control form-control-sm" 
-                                                value="<?= esc($billAddress['gst_state_code'] ?? '33') ?>" required>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="form-label small">Pincode <span class="text-danger">*</span></label>
-                                            <input type="text" name="bill_to_pincode" id="bill_to_pincode" class="form-control form-control-sm" 
-                                                value="<?= esc($billAddress['pincode'] ?? '') ?>" placeholder="632301" required>
+                                    <div class="p-2 rounded bg-light border">
+                                        <div class="small fw-semibold" id="disp_bill_party_name"><?= esc(!empty($party) ? ($party['name'] ?? ($party['customer_name'] ?? 'Not Selected')) : 'Not Selected') ?></div>
+                                        <div class="small text-muted" id="disp_bill_to_address_1"><?= esc($billAddress['address_line1'] ?? '-') ?></div>
+                                        <div class="small text-muted" id="disp_bill_to_address_2"><?= esc($billAddress['address_line2'] ?? '') ?></div>
+                                        <div class="small text-info mt-1">
+                                            <strong>City:</strong> <span id="disp_bill_to_place"><?= esc($billAddress['city'] ?? '-') ?></span> | 
+                                            <strong>State:</strong> <span id="disp_bill_to_state_code"><?= esc($billAddress['gst_state_code'] ?? '33') ?></span> | 
+                                            <strong>PIN:</strong> <span id="disp_bill_to_pincode"><?= esc($billAddress['pincode'] ?? '-') ?></span>
                                         </div>
                                     </div>
+                                    <input type="hidden" name="bill_to_address_1" id="bill_to_address_1" value="<?= esc($billAddress['address_line1'] ?? '') ?>">
+                                    <input type="hidden" name="bill_to_address_2" id="bill_to_address_2" value="<?= esc($billAddress['address_line2'] ?? '') ?>">
+                                    <input type="hidden" name="bill_to_place" id="bill_to_place" value="<?= esc($billAddress['city'] ?? '') ?>">
+                                    <input type="hidden" name="bill_to_state_code" id="bill_to_state_code" value="<?= esc($billAddress['gst_state_code'] ?? '33') ?>">
+                                    <input type="hidden" name="bill_to_pincode" id="bill_to_pincode" value="<?= esc($billAddress['pincode'] ?? '') ?>">
                                 </div>
 
                                 <div class="col-md-6">
@@ -226,33 +207,21 @@
                                         <h6 class="fw-bold text-success mb-0"><i class="fas fa-truck-moving me-1"></i> Ship To</h6>
                                         <span class="badge bg-success-subtle text-success border">Delivery / Consignee Address</span>
                                     </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Shipping Address Line 1</label>
-                                        <input type="text" name="to_address_1" id="to_address_1" class="form-control form-control-sm" 
-                                            value="<?= esc($shipAddress['address_line1'] ?? '') ?>" placeholder="e.g. 500, Gandhi Road">
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Shipping Address Line 2</label>
-                                        <input type="text" name="to_address_2" id="to_address_2" class="form-control form-control-sm" 
-                                            value="<?= esc($shipAddress['address_line2'] ?? '') ?>" placeholder="e.g. Near Bus Stand">
-                                    </div>
-                                    <div class="row g-2">
-                                        <div class="col-5">
-                                            <label class="form-label small">Delivery City <span class="text-danger">*</span></label>
-                                            <input type="text" name="to_place" id="to_place" class="form-control form-control-sm" 
-                                                value="<?= esc($shipAddress['city'] ?? '') ?>" placeholder="e.g. Kanchipuram" required>
-                                        </div>
-                                        <div class="col-3">
-                                            <label class="form-label small">State Code <span class="text-danger">*</span></label>
-                                            <input type="text" name="to_state_code" id="to_state_code" class="form-control form-control-sm" 
-                                                value="<?= esc($shipAddress['gst_state_code'] ?? '33') ?>" required>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="form-label small">Pincode <span class="text-danger">*</span></label>
-                                            <input type="text" name="to_pincode" id="to_pincode" class="form-control form-control-sm" 
-                                                value="<?= esc($shipAddress['pincode'] ?? '') ?>" placeholder="631501" required>
+                                    <div class="p-2 rounded bg-light border">
+                                        <div class="small fw-semibold" id="disp_ship_party_name"><?= esc(!empty($party) ? ($party['name'] ?? ($party['customer_name'] ?? 'Not Selected')) : 'Not Selected') ?></div>
+                                        <div class="small text-muted" id="disp_to_address_1"><?= esc($shipAddress['address_line1'] ?? '-') ?></div>
+                                        <div class="small text-muted" id="disp_to_address_2"><?= esc($shipAddress['address_line2'] ?? '') ?></div>
+                                        <div class="small text-success mt-1">
+                                            <strong>City:</strong> <span id="disp_to_place"><?= esc($shipAddress['city'] ?? '-') ?></span> | 
+                                            <strong>State:</strong> <span id="disp_to_state_code"><?= esc($shipAddress['gst_state_code'] ?? '33') ?></span> | 
+                                            <strong>PIN:</strong> <span id="disp_to_pincode"><?= esc($shipAddress['pincode'] ?? '-') ?></span>
                                         </div>
                                     </div>
+                                    <input type="hidden" name="to_address_1" id="to_address_1" value="<?= esc($shipAddress['address_line1'] ?? '') ?>">
+                                    <input type="hidden" name="to_address_2" id="to_address_2" value="<?= esc($shipAddress['address_line2'] ?? '') ?>">
+                                    <input type="hidden" name="to_place" id="to_place" value="<?= esc($shipAddress['city'] ?? '') ?>">
+                                    <input type="hidden" name="to_state_code" id="to_state_code" value="<?= esc($shipAddress['gst_state_code'] ?? '33') ?>">
+                                    <input type="hidden" name="to_pincode" id="to_pincode" value="<?= esc($shipAddress['pincode'] ?? '') ?>">
                                 </div>
                             </div>
                         </div>
@@ -456,38 +425,32 @@ function performDocLookup() {
                 document.getElementById('lbl_total_amount').innerText = '₹' + parseFloat(doc.total_amount).toLocaleString('en-IN', {minimumFractionDigits: 2});
 
                 // Populate Bill To
-                if (doc.bill_to_address_1) {
-                    document.getElementById('bill_to_address_1').value = doc.bill_to_address_1;
-                }
-                if (doc.bill_to_address_2) {
-                    document.getElementById('bill_to_address_2').value = doc.bill_to_address_2;
-                }
-                if (doc.bill_to_place) {
-                    document.getElementById('bill_to_place').value = doc.bill_to_place;
-                }
-                if (doc.bill_to_pincode) {
-                    document.getElementById('bill_to_pincode').value = doc.bill_to_pincode;
-                }
-                if (doc.bill_to_state_code) {
-                    document.getElementById('bill_to_state_code').value = doc.bill_to_state_code;
-                }
+                document.getElementById('disp_bill_party_name').innerText = doc.party_name || '-';
+                document.getElementById('disp_bill_to_address_1').innerText = doc.bill_to_address_1 || '-';
+                document.getElementById('disp_bill_to_address_2').innerText = doc.bill_to_address_2 || '';
+                document.getElementById('disp_bill_to_place').innerText = doc.bill_to_place || '-';
+                document.getElementById('disp_bill_to_state_code').innerText = doc.bill_to_state_code || '33';
+                document.getElementById('disp_bill_to_pincode').innerText = doc.bill_to_pincode || '-';
+
+                document.getElementById('bill_to_address_1').value = doc.bill_to_address_1 || '';
+                document.getElementById('bill_to_address_2').value = doc.bill_to_address_2 || '';
+                document.getElementById('bill_to_place').value = doc.bill_to_place || '';
+                document.getElementById('bill_to_pincode').value = doc.bill_to_pincode || '';
+                document.getElementById('bill_to_state_code').value = doc.bill_to_state_code || '33';
 
                 // Populate Ship To
-                if (doc.to_address_1) {
-                    document.getElementById('to_address_1').value = doc.to_address_1;
-                }
-                if (doc.to_address_2) {
-                    document.getElementById('to_address_2').value = doc.to_address_2;
-                }
-                if (doc.to_place) {
-                    document.getElementById('to_place').value = doc.to_place;
-                }
-                if (doc.to_pincode) {
-                    document.getElementById('to_pincode').value = doc.to_pincode;
-                }
-                if (doc.to_state_code) {
-                    document.getElementById('to_state_code').value = doc.to_state_code;
-                }
+                document.getElementById('disp_ship_party_name').innerText = doc.party_name || '-';
+                document.getElementById('disp_to_address_1').innerText = doc.to_address_1 || '-';
+                document.getElementById('disp_to_address_2').innerText = doc.to_address_2 || '';
+                document.getElementById('disp_to_place').innerText = doc.to_place || '-';
+                document.getElementById('disp_to_state_code').innerText = doc.to_state_code || '33';
+                document.getElementById('disp_to_pincode').innerText = doc.to_pincode || '-';
+
+                document.getElementById('to_address_1').value = doc.to_address_1 || '';
+                document.getElementById('to_address_2').value = doc.to_address_2 || '';
+                document.getElementById('to_place').value = doc.to_place || '';
+                document.getElementById('to_pincode').value = doc.to_pincode || '';
+                document.getElementById('to_state_code').value = doc.to_state_code || '33';
 
                 const ewbBadge = document.getElementById('lbl_existing_ewb');
                 if (doc.existing_ewb) {

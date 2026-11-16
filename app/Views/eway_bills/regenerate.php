@@ -150,33 +150,21 @@
                                         <h6 class="fw-bold text-primary mb-0"><i class="fas fa-warehouse me-1"></i> Dispatch From</h6>
                                         <span class="badge bg-primary-subtle text-primary border">Place of Dispatch</span>
                                     </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Address Line 1</label>
-                                        <input type="text" name="from_address_1" class="form-control form-control-sm" 
-                                            value="<?= esc($ewayBill['from_address_1'] ?? 'C.P Kannaiah Street, Opp: Gopinath Engineering Works') ?>">
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Address Line 2</label>
-                                        <input type="text" name="from_address_2" class="form-control form-control-sm" 
-                                            value="<?= esc($ewayBill['from_address_2'] ?? 'Rasipuram (TK), Namakkal') ?>">
-                                    </div>
-                                    <div class="row g-2">
-                                        <div class="col-5">
-                                            <label class="form-label small">Dispatch City <span class="text-danger">*</span></label>
-                                            <input type="text" name="from_place" class="form-control form-control-sm" 
-                                                value="<?= esc($ewayBill['from_place'] ?? 'Rasipuram') ?>" required>
-                                        </div>
-                                        <div class="col-3">
-                                            <label class="form-label small">State Code <span class="text-danger">*</span></label>
-                                            <input type="text" name="from_state_code" class="form-control form-control-sm" 
-                                                value="<?= esc($ewayBill['from_state_code'] ?? '33') ?>" required>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="form-label small">Pincode <span class="text-danger">*</span></label>
-                                            <input type="text" name="from_pincode" class="form-control form-control-sm" 
-                                                value="<?= esc($ewayBill['from_pincode'] ?? '637408') ?>" required>
+                                    <div class="p-2 rounded bg-light border">
+                                        <div class="small fw-semibold">Rasi Handloom Textiles</div>
+                                        <div class="small text-muted"><?= esc($ewayBill['from_address_1'] ?? 'C.P Kannaiah Street, Opp: Gopinath Engineering Works') ?></div>
+                                        <div class="small text-muted"><?= esc($ewayBill['from_address_2'] ?? 'Rasipuram (TK), Namakkal') ?></div>
+                                        <div class="small text-primary mt-1">
+                                            <strong>City:</strong> <?= esc($ewayBill['from_place'] ?? 'Rasipuram') ?> | 
+                                            <strong>State:</strong> <?= esc($ewayBill['from_state_code'] ?? '33') ?> | 
+                                            <strong>PIN:</strong> <?= esc($ewayBill['from_pincode'] ?? '637408') ?>
                                         </div>
                                     </div>
+                                    <input type="hidden" name="from_address_1" value="<?= esc($ewayBill['from_address_1'] ?? 'C.P Kannaiah Street, Opp: Gopinath Engineering Works') ?>">
+                                    <input type="hidden" name="from_address_2" value="<?= esc($ewayBill['from_address_2'] ?? 'Rasipuram (TK), Namakkal') ?>">
+                                    <input type="hidden" name="from_place" value="<?= esc($ewayBill['from_place'] ?? 'Rasipuram') ?>">
+                                    <input type="hidden" name="from_state_code" value="<?= esc($ewayBill['from_state_code'] ?? '33') ?>">
+                                    <input type="hidden" name="from_pincode" value="<?= esc($ewayBill['from_pincode'] ?? '637408') ?>">
                                 </div>
 
                                 <div class="col-md-6">
@@ -189,10 +177,10 @@
                                         <div class="small text-muted">C.P Kannaiah Street, Opp: Gopinath Engineering Works,</div>
                                         <div class="small text-muted">Rasipuram (TK), Namakkal, Tamil Nadu, India - 637408</div>
                                         <div class="small text-primary mt-1"><strong>City:</strong> Rasipuram | <strong>State:</strong> 33 (TN) | <strong>PIN:</strong> 637408</div>
-                                        <input type="hidden" name="bill_from_place" value="<?= esc($ewayBill['bill_from_place'] ?? 'Rasipuram') ?>">
-                                        <input type="hidden" name="bill_from_state_code" value="<?= esc($ewayBill['bill_from_state_code'] ?? '33') ?>">
-                                        <input type="hidden" name="bill_from_pincode" value="<?= esc($ewayBill['bill_from_pincode'] ?? '637408') ?>">
                                     </div>
+                                    <input type="hidden" name="bill_from_place" value="<?= esc($ewayBill['bill_from_place'] ?? 'Rasipuram') ?>">
+                                    <input type="hidden" name="bill_from_state_code" value="<?= esc($ewayBill['bill_from_state_code'] ?? '33') ?>">
+                                    <input type="hidden" name="bill_from_pincode" value="<?= esc($ewayBill['bill_from_pincode'] ?? '637408') ?>">
                                 </div>
                             </div>
 
@@ -203,33 +191,21 @@
                                         <h6 class="fw-bold text-info mb-0"><i class="fas fa-file-invoice me-1"></i> Bill To</h6>
                                         <span class="badge bg-info-subtle text-info border">Buyer / Billing Address</span>
                                     </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Billing Address Line 1</label>
-                                        <input type="text" name="bill_to_address_1" id="bill_to_address_1" class="form-control form-control-sm" 
-                                            value="<?= esc($billAddress['address_line1'] ?? '') ?>" placeholder="e.g. 56, DHARMARAJA KOIL STREET">
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Billing Address Line 2</label>
-                                        <input type="text" name="bill_to_address_2" id="bill_to_address_2" class="form-control form-control-sm" 
-                                            value="<?= esc($billAddress['address_line2'] ?? '') ?>" placeholder="e.g. KOSAPPALAYAM,ARNI">
-                                    </div>
-                                    <div class="row g-2">
-                                        <div class="col-5">
-                                            <label class="form-label small">Billing City <span class="text-danger">*</span></label>
-                                            <input type="text" name="bill_to_place" id="bill_to_place" class="form-control form-control-sm" 
-                                                value="<?= esc(!empty($ewayBill['bill_to_place']) ? $ewayBill['bill_to_place'] : ($billAddress['city'] ?? '')) ?>" required>
-                                        </div>
-                                        <div class="col-3">
-                                            <label class="form-label small">State Code <span class="text-danger">*</span></label>
-                                            <input type="text" name="bill_to_state_code" id="bill_to_state_code" class="form-control form-control-sm" 
-                                                value="<?= esc(!empty($ewayBill['bill_to_state_code']) ? $ewayBill['bill_to_state_code'] : ($billAddress['gst_state_code'] ?? '33')) ?>" required>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="form-label small">Pincode <span class="text-danger">*</span></label>
-                                            <input type="text" name="bill_to_pincode" id="bill_to_pincode" class="form-control form-control-sm" 
-                                                value="<?= esc(!empty($ewayBill['bill_to_pincode']) ? $ewayBill['bill_to_pincode'] : ($billAddress['pincode'] ?? '')) ?>" required>
+                                    <div class="p-2 rounded bg-light border">
+                                        <div class="small fw-semibold"><?= esc(!empty($party) ? ($party['name'] ?? ($party['customer_name'] ?? 'Not Selected')) : 'Not Selected') ?></div>
+                                        <div class="small text-muted"><?= esc($billAddress['address_line1'] ?? '-') ?></div>
+                                        <div class="small text-muted"><?= esc($billAddress['address_line2'] ?? '') ?></div>
+                                        <div class="small text-info mt-1">
+                                            <strong>City:</strong> <?= esc(!empty($ewayBill['bill_to_place']) ? $ewayBill['bill_to_place'] : ($billAddress['city'] ?? '-')) ?> | 
+                                            <strong>State:</strong> <?= esc(!empty($ewayBill['bill_to_state_code']) ? $ewayBill['bill_to_state_code'] : ($billAddress['gst_state_code'] ?? '33')) ?> | 
+                                            <strong>PIN:</strong> <?= esc(!empty($ewayBill['bill_to_pincode']) ? $ewayBill['bill_to_pincode'] : ($billAddress['pincode'] ?? '-')) ?>
                                         </div>
                                     </div>
+                                    <input type="hidden" name="bill_to_address_1" value="<?= esc($billAddress['address_line1'] ?? '') ?>">
+                                    <input type="hidden" name="bill_to_address_2" value="<?= esc($billAddress['address_line2'] ?? '') ?>">
+                                    <input type="hidden" name="bill_to_place" value="<?= esc(!empty($ewayBill['bill_to_place']) ? $ewayBill['bill_to_place'] : ($billAddress['city'] ?? '')) ?>">
+                                    <input type="hidden" name="bill_to_state_code" value="<?= esc(!empty($ewayBill['bill_to_state_code']) ? $ewayBill['bill_to_state_code'] : ($billAddress['gst_state_code'] ?? '33')) ?>">
+                                    <input type="hidden" name="bill_to_pincode" value="<?= esc(!empty($ewayBill['bill_to_pincode']) ? $ewayBill['bill_to_pincode'] : ($billAddress['pincode'] ?? '')) ?>">
                                 </div>
 
                                 <div class="col-md-6">
@@ -237,33 +213,21 @@
                                         <h6 class="fw-bold text-success mb-0"><i class="fas fa-truck-moving me-1"></i> Ship To</h6>
                                         <span class="badge bg-success-subtle text-success border">Delivery / Consignee Address</span>
                                     </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Shipping Address Line 1</label>
-                                        <input type="text" name="to_address_1" id="to_address_1" class="form-control form-control-sm" 
-                                            value="<?= esc(!empty($ewayBill['to_address_1']) ? $ewayBill['to_address_1'] : ($shipAddress['address_line1'] ?? '')) ?>">
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Shipping Address Line 2</label>
-                                        <input type="text" name="to_address_2" id="to_address_2" class="form-control form-control-sm" 
-                                            value="<?= esc(!empty($ewayBill['to_address_2']) ? $ewayBill['to_address_2'] : ($shipAddress['address_line2'] ?? '')) ?>">
-                                    </div>
-                                    <div class="row g-2">
-                                        <div class="col-5">
-                                            <label class="form-label small">Delivery City <span class="text-danger">*</span></label>
-                                            <input type="text" name="to_place" id="to_place" class="form-control form-control-sm" 
-                                                value="<?= esc(!empty($ewayBill['to_place']) ? $ewayBill['to_place'] : ($shipAddress['city'] ?? '')) ?>" required>
-                                        </div>
-                                        <div class="col-3">
-                                            <label class="form-label small">State Code <span class="text-danger">*</span></label>
-                                            <input type="text" name="to_state_code" id="to_state_code" class="form-control form-control-sm" 
-                                                value="<?= esc(!empty($ewayBill['to_state_code']) ? $ewayBill['to_state_code'] : ($shipAddress['gst_state_code'] ?? '33')) ?>" required>
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="form-label small">Pincode <span class="text-danger">*</span></label>
-                                            <input type="text" name="to_pincode" id="to_pincode" class="form-control form-control-sm" 
-                                                value="<?= esc(!empty($ewayBill['to_pincode']) ? $ewayBill['to_pincode'] : ($shipAddress['pincode'] ?? '')) ?>" required>
+                                    <div class="p-2 rounded bg-light border">
+                                        <div class="small fw-semibold"><?= esc(!empty($party) ? ($party['name'] ?? ($party['customer_name'] ?? 'Not Selected')) : 'Not Selected') ?></div>
+                                        <div class="small text-muted"><?= esc(!empty($ewayBill['to_address_1']) ? $ewayBill['to_address_1'] : ($shipAddress['address_line1'] ?? '-')) ?></div>
+                                        <div class="small text-muted"><?= esc(!empty($ewayBill['to_address_2']) ? $ewayBill['to_address_2'] : ($shipAddress['address_line2'] ?? '')) ?></div>
+                                        <div class="small text-success mt-1">
+                                            <strong>City:</strong> <?= esc(!empty($ewayBill['to_place']) ? $ewayBill['to_place'] : ($shipAddress['city'] ?? '-')) ?> | 
+                                            <strong>State:</strong> <?= esc(!empty($ewayBill['to_state_code']) ? $ewayBill['to_state_code'] : ($shipAddress['gst_state_code'] ?? '33')) ?> | 
+                                            <strong>PIN:</strong> <?= esc(!empty($ewayBill['to_pincode']) ? $ewayBill['to_pincode'] : ($shipAddress['pincode'] ?? '-')) ?>
                                         </div>
                                     </div>
+                                    <input type="hidden" name="to_address_1" value="<?= esc(!empty($ewayBill['to_address_1']) ? $ewayBill['to_address_1'] : ($shipAddress['address_line1'] ?? '')) ?>">
+                                    <input type="hidden" name="to_address_2" value="<?= esc(!empty($ewayBill['to_address_2']) ? $ewayBill['to_address_2'] : ($shipAddress['address_line2'] ?? '')) ?>">
+                                    <input type="hidden" name="to_place" value="<?= esc(!empty($ewayBill['to_place']) ? $ewayBill['to_place'] : ($shipAddress['city'] ?? '')) ?>">
+                                    <input type="hidden" name="to_state_code" value="<?= esc(!empty($ewayBill['to_state_code']) ? $ewayBill['to_state_code'] : ($shipAddress['gst_state_code'] ?? '33')) ?>">
+                                    <input type="hidden" name="to_pincode" value="<?= esc(!empty($ewayBill['to_pincode']) ? $ewayBill['to_pincode'] : ($shipAddress['pincode'] ?? '')) ?>">
                                 </div>
                             </div>
                         </div>

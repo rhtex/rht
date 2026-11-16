@@ -36,6 +36,11 @@
                             <label class="form-label">Transport Code</label>
                             <input type="text" name="transport_code" class="form-control" value="<?= old('transport_code', $isEdit ? $transport['transport_code'] : '') ?>">
                         </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Zoho Transporter ID</label>
+                            <input type="text" name="zoho_transporter_id" class="form-control" value="<?= old('zoho_transporter_id', $isEdit ? ($transport['zoho_transporter_id'] ?? '') : '') ?>" placeholder="e.g. 4600000000123">
+                            <div class="form-text small text-muted">ID from Zoho Books / Inventory Transporters list.</div>
+                        </div>
 
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Branch Name</label>

@@ -81,23 +81,29 @@ class TransportSyncService
                             }
                             $key = strtoupper($name);
                             if (!isset($transporters[$key])) {
+                                $zohoTransporterId = trim((string) ($item['transporter_id'] ?? ''));
                                 $gstin = trim((string) (
                                     $item['transporter_registration_id'] ??
                                     ($item['transporter_id_no'] ??
                                     ($item['transporter_gstin'] ??
                                     ($item['transin'] ??
-                                    ($item['transporter_id'] ??
-                                    ($item['gst_no'] ?? ($item['gstin'] ?? ''))))))
+                                    ($item['gst_no'] ?? ($item['gstin'] ?? '')))))
                                 ));
 
+                                // If gstin is still empty, and transporter_id looks like a 15-character GSTIN/TRANSIN, use it as gstin too
+                                if ($gstin === '' && strlen($zohoTransporterId) === 15 && preg_match('/^[0-9]{2}[A-Z0-9]{13}$/i', $zohoTransporterId)) {
+                                    $gstin = $zohoTransporterId;
+                                }
+
                                 $transporters[$key] = [
-                                    'name'    => $name,
-                                    'gstin'   => $gstin,
-                                    'code'    => trim((string) ($item['transporter_code'] ?? ($item['code'] ?? ''))),
-                                    'phone'   => trim((string) ($item['phone'] ?? ($item['mobile'] ?? ''))),
-                                    'address' => trim((string) ($item['address'] ?? '')),
-                                    'type'    => (stripos($name, 'courier') !== false) ? 'Courier Service' : 'Parcel Service',
-                                    'source'  => 'ewaybills_transporters',
+                                    'name'                => $name,
+                                    'zoho_transporter_id' => $zohoTransporterId,
+                                    'gstin'               => $gstin,
+                                    'code'                => trim((string) ($item['transporter_code'] ?? ($item['code'] ?? ''))),
+                                    'phone'               => trim((string) ($item['phone'] ?? ($item['mobile'] ?? ''))),
+                                    'address'             => trim((string) ($item['address'] ?? '')),
+                                    'type'                => (stripos($name, 'courier') !== false) ? 'Courier Service' : 'Parcel Service',
+                                    'source'              => 'ewaybills_transporters',
                                 ];
                             }
                         }
@@ -137,14 +143,16 @@ class TransportSyncService
                     if ($tName !== '') {
                         $key = strtoupper($tName);
                         if (!isset($transporters[$key])) {
+                            $extractedId = trim((string) ($ewb['transporter_id'] ?? ''));
                             $transporters[$key] = [
-                                'name'    => $tName,
-                                'gstin'   => trim((string) ($ewb['transporter_id'] ?? '')),
-                                'code'    => '',
-                                'phone'   => '',
-                                'address' => '',
-                                'type'    => (stripos($tName, 'courier') !== false) ? 'Courier Service' : 'Parcel Service',
-                                'source'  => 'ewaybills_extracted',
+                                'name'                => $tName,
+                                'zoho_transporter_id' => $extractedId,
+                                'gstin'               => $extractedId,
+                                'code'                => '',
+                                'phone'               => '',
+                                'address'             => '',
+                                'type'                => (stripos($tName, 'courier') !== false) ? 'Courier Service' : 'Parcel Service',
+                                'source'              => 'ewaybills_extracted',
                             ];
                         }
                     }
@@ -178,6 +186,7 @@ class TransportSyncService
                     'transport_name'      => $trData['name'],
                     'transport_type'      => $trData['type'],
                     'transport_code'      => !empty($trData['code']) ? $trData['code'] : ($trData['name']),
+                    'zoho_transporter_id' => !empty($trData['zoho_transporter_id']) ? $trData['zoho_transporter_id'] : ($existing['zoho_transporter_id'] ?? null),
                     'branch'              => !empty($existing['branch']) ? $existing['branch'] : 'Main Branch',
                     'branch_address'      => !empty($trData['address']) ? $trData['address'] : (!empty($existing['branch_address']) ? $existing['branch_address'] : 'Tamil Nadu'),
                     'branch_phone_number' => !empty($trData['phone']) ? $trData['phone'] : (!empty($existing['branch_phone_number']) ? $existing['branch_phone_number'] : '-'),
@@ -189,6 +198,9 @@ class TransportSyncService
                 if ($existing) {
                     // Update existing
                     $updatePayload = [];
+                    if (!empty($trData['zoho_transporter_id']) && empty($existing['zoho_transporter_id'])) {
+                        $updatePayload['zoho_transporter_id'] = $trData['zoho_transporter_id'];
+                    }
                     if (!empty($trData['gstin']) && empty($existing['branch_gst_number'])) {
                         $updatePayload['branch_gst_number'] = $trData['gstin'];
                     }

@@ -13,7 +13,7 @@ class TransportModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'transport_name', 'transport_type', 'transport_code', 'branch', 'branch_address',
+        'transport_name', 'transport_type', 'transport_code', 'zoho_transporter_id', 'branch', 'branch_address',
         'branch_phone_number', 'branch_gst_number', 'state_id', 'country_id'
     ];
 

@@ -38,6 +38,11 @@
                     <li class="list-group-item">
                         <b>GST</b> <a class="float-end text-decoration-none"><?= esc($transport['branch_gst_number'] ?: 'N/A') ?></a>
                     </li>
+                    <?php if (!empty($transport['zoho_transporter_id'])): ?>
+                    <li class="list-group-item">
+                        <b>Zoho Transporter ID</b> <code class="float-end text-secondary"><?= esc($transport['zoho_transporter_id']) ?></code>
+                    </li>
+                    <?php endif; ?>
                 </ul>
 
                 <?php if (can('transport.edit')): ?>

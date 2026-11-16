@@ -406,8 +406,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Transporter ID (GSTIN)</label>
-                        <input type="text" name="transporter_id" id="regen_transporter_id" class="form-control" placeholder="15-digit GSTIN / TRANSIN">
+                        <label class="form-label">Transporter ID (Zoho Transporter ID or GSTIN)</label>
+                        <input type="text" name="transporter_id" id="regen_transporter_id" class="form-control" placeholder="Zoho Transporter ID or 15-digit GSTIN / TRANSIN">
                     </div>
                 </div>
                 <div class="modal-footer">

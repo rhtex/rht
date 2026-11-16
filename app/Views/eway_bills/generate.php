@@ -306,8 +306,9 @@
                                     <?php foreach ($transports as $t): ?>
                                         <option value="<?= esc($t['id']) ?>" 
                                             data-name="<?= esc($t['transport_name']) ?>" 
-                                            data-gst="<?= esc($t['branch_gst_number']) ?>">
-                                            <?= esc($t['transport_name']) ?> (GST: <?= esc($t['branch_gst_number'] ?: 'N/A') ?>)
+                                            data-gst="<?= esc($t['branch_gst_number']) ?>"
+                                            data-zoho-id="<?= esc($t['zoho_transporter_id'] ?? '') ?>">
+                                            <?= esc($t['transport_name']) ?> <?= !empty($t['zoho_transporter_id']) ? '(Zoho ID: ' . esc($t['zoho_transporter_id']) . ')' : (!empty($t['branch_gst_number']) ? '(GST: ' . esc($t['branch_gst_number']) . ')' : '') ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -347,8 +348,9 @@
 
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
-                                    <label class="form-label">Transporter ID (GSTIN)</label>
-                                    <input type="text" name="transporter_id" id="transporter_id" class="form-control text-uppercase" placeholder="15-digit GSTIN">
+                                    <label class="form-label">Transporter ID (Zoho ID / GSTIN)</label>
+                                    <input type="text" name="transporter_id" id="transporter_id" class="form-control text-uppercase" placeholder="Zoho Transporter ID or 15-digit GSTIN">
+                                    <div class="form-text small text-muted">Pass Zoho Transporter ID or Transporter GSTIN.</div>
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label">Transporter Name</label>
@@ -404,7 +406,9 @@ function applyPresetTransporter(select) {
     const opt = select.options[select.selectedIndex];
     if (opt && opt.value) {
         document.getElementById('transporter_name').value = opt.getAttribute('data-name') || '';
-        document.getElementById('transporter_id').value = opt.getAttribute('data-gst') || '';
+        const zohoId = opt.getAttribute('data-zoho-id') || '';
+        const gst = opt.getAttribute('data-gst') || '';
+        document.getElementById('transporter_id').value = zohoId ? zohoId : gst;
     }
 }
 

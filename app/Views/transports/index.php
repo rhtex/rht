@@ -121,7 +121,12 @@
                                     <span class="text-muted">-</span>
                                 <?php endif; ?>
                             </td>
-                            <td><?= !empty($transport['branch_gst_number']) ? '<code>'.esc($transport['branch_gst_number']).'</code>' : '<span class="text-muted">-</span>' ?></td>
+                            <td>
+                                <?= !empty($transport['branch_gst_number']) ? '<code>'.esc($transport['branch_gst_number']).'</code>' : '<span class="text-muted">-</span>' ?>
+                                <?php if (!empty($transport['zoho_transporter_id'])): ?>
+                                    <div class="small text-muted" title="Zoho Transporter ID">Zoho: <?= esc($transport['zoho_transporter_id']) ?></div>
+                                <?php endif; ?>
+                            </td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
                                     <a href="<?= site_url('transports/view/'.$transport['id']) ?>" class="btn btn-outline-primary" title="View Invoices & Returns">

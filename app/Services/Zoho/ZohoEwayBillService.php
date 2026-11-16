@@ -108,7 +108,12 @@ class ZohoEwayBillService
         }
 
         if (!empty($data['transporter_id'])) {
-            $payload['transporter_id'] = strtoupper(trim($data['transporter_id']));
+            $transVal = trim($data['transporter_id']);
+            $payload['transporter_id'] = $transVal;
+            // If it's a 15-character GSTIN/TRANSIN, also provide transporter_registration_id for full compatibility
+            if (strlen($transVal) === 15 && preg_match('/^[0-9]{2}[A-Z0-9]{13}$/i', $transVal)) {
+                $payload['transporter_registration_id'] = strtoupper($transVal);
+            }
         }
         if (!empty($data['transporter_name'])) {
             $payload['transporter_name'] = trim($data['transporter_name']);

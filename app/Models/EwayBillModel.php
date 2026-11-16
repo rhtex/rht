@@ -28,6 +28,7 @@ class EwayBillModel extends Model
         'transport_mode',
         'distance_km',
         'transporter_id',
+        'transporter_registration_id',
         'transporter_name',
         'transporter_doc_number',
         'transporter_doc_date',

@@ -454,6 +454,13 @@ function applyPresetTransporter(select) {
 
 document.addEventListener('DOMContentLoaded', function() {
     togglePartBRequirement();
+
+    // If transporter is selected or present but GSTIN is empty, sync from select option
+    const presetSelect = document.getElementById('preset_transporter');
+    const gstinInput = document.getElementById('transporter_gstin');
+    if (presetSelect && presetSelect.value && (!gstinInput.value || gstinInput.value.trim() === '')) {
+        applyPresetTransporter(presetSelect);
+    }
 });
 </script>
 <?= $this->endSection() ?>

@@ -443,6 +443,18 @@ class EwayBillController extends BaseController
         $transports = $this->transportModel->findAll();
         $states     = $this->stateModel->findAll();
 
+        // If ewayBill has missing transporter_registration_id, resolve it from transports master
+        if (empty($ewayBill['transporter_registration_id'])) {
+            foreach ($transports as $t) {
+                if ((!empty($ewayBill['transporter_id']) && $t['zoho_transporter_id'] === $ewayBill['transporter_id'])
+                    || (!empty($ewayBill['transporter_name']) && strtolower($t['transport_name']) === strtolower($ewayBill['transporter_name']))
+                ) {
+                    $ewayBill['transporter_registration_id'] = $t['branch_gst_number'] ?? '';
+                    break;
+                }
+            }
+        }
+
         return view('eway_bills/regenerate', [
             'title'       => 'Regenerate e-Way Bill #' . ($ewayBill['ewaybill_number'] ?? $ewayBill['document_number']),
             'ewayBill'    => $ewayBill,

@@ -60,6 +60,25 @@ class ZohoEwayBillService
     }
 
     /**
+     * Map sub_supply_type to Zoho Books allowed format
+     */
+    protected function mapSubSupplyType(?string $type): string
+    {
+        $typeStr = strtolower(trim((string) $type));
+        return match ($typeStr) {
+            'export'                 => 'export',
+            'job work', 'job_work'   => 'job_work',
+            'skd/ckd', 'skd_ckd', 'skd', 'sktd' => 'sktd',
+            'recipient not known', 'recipient_not_known' => 'recipient_not_known',
+            'for own use', 'for_own_use' => 'for_own_use',
+            'exhibition or fairs', 'exhibition_or_fairs' => 'exhibition_or_fairs',
+            'line sales', 'line_sales' => 'line_sales',
+            'others'                 => 'others',
+            default                  => 'supply',
+        };
+    }
+
+    /**
      * Fetch the mapped Zoho record ID for a local document
      */
     public function getZohoRecordId(string $docType, int $docId): ?string
@@ -240,11 +259,18 @@ class ZohoEwayBillService
         // Build Payload according to Zoho E-Way Bill schema
         $distance = (int) ($data['distance_km'] ?? 0);
 
+        $subSupplyType = $this->mapSubSupplyType($data['sub_supply_type'] ?? 'supply');
+
         $payload = [
             'entity_type'         => $this->mapDocTypeToZoho($docType),
             'action'              => $action,
+            'sub_supply_type'     => $subSupplyType,
             'transportation_mode' => $this->mapTransportationMode($data['transport_mode'] ?? 'road'),
         ];
+
+        if ($subSupplyType === 'others') {
+            $payload['sub_supply_type_desc'] = !empty($data['sub_supply_type_desc']) ? trim($data['sub_supply_type_desc']) : 'Goods Transport';
+        }
 
         // Only explicitly send distance if > 0 so Zoho auto-computes by pincode when 0
         if ($distance > 0) {
@@ -311,6 +337,8 @@ class ZohoEwayBillService
             'document_id'            => $docId,
             'document_number'        => $data['document_number'] ?? '',
             'document_date'          => $data['document_date'] ?? date('Y-m-d'),
+            'supply_type'            => $data['supply_type'] ?? 'Outward',
+            'sub_supply_type'        => $data['sub_supply_type'] ?? 'Supply',
             'transport_mode'         => (int) ($data['transport_mode'] ?? 1),
             'distance_km'            => (int) ($data['distance_km'] ?? 0),
             'transporter_id'         => $resolvedTrans['zoho_transporter_id'] ?? ($resolvedTrans['transporter_registration_id'] ?? $rawTransId),

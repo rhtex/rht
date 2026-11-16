@@ -204,6 +204,7 @@ class EwayBillController extends BaseController
                         'id'                  => $doc['id'],
                         'document_number'     => $doc['invoice_number'],
                         'document_date'       => $doc['invoice_date'],
+                        'vehicle_number'      => !empty($doc['transport_name']) ? strtoupper(str_replace(' ', '', $doc['transport_name'])) : '',
                         'total_amount'        => $doc['total_amount'],
                         'cgst_amount'         => $doc['cgst_amount'] ?? 0,
                         'sgst_amount'         => $doc['sgst_amount'] ?? 0,

@@ -448,7 +448,9 @@
     </div>
 </div>
 <?php endif; ?>
+<?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
 <script>
 function togglePartBRequirement() {
     const isPartA = document.getElementById('action_part_a').checked;
@@ -481,7 +483,7 @@ function applyPresetTransporter(select) {
 }
 
 function onVehicleSelect(select) {
-    const opt = select.options[select.selectedIndex];
+    const opt = select.options ? select.options[select.selectedIndex] : null;
     if (opt && opt.getAttribute('data-type')) {
         const vTypeSelect = document.querySelector('select[name="vehicle_type"]');
         if (vTypeSelect) {
@@ -490,7 +492,7 @@ function onVehicleSelect(select) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+$(document).ready(function() {
     togglePartBRequirement();
 
     // If transporter is selected or present but GSTIN is empty, sync from select option
@@ -500,17 +502,15 @@ document.addEventListener('DOMContentLoaded', function() {
         applyPresetTransporter(presetSelect);
     }
 
-    if (window.jQuery && $.fn.select2) {
-        $('.select2-vehicle').select2({
-            theme: 'bootstrap-5',
-            tags: true,
-            placeholder: '-- Select Registered Vehicle or Type New --',
-            allowClear: true,
-            width: '100%'
-        }).on('select2:select', function(e) {
-            onVehicleSelect(this);
-        });
-    }
+    $('.select2-vehicle').select2({
+        theme: 'bootstrap-5',
+        tags: true,
+        placeholder: '-- Select Registered Vehicle or Type New --',
+        allowClear: true,
+        width: '100%'
+    }).on('select2:select', function(e) {
+        onVehicleSelect(this);
+    });
 });
 </script>
 <?= $this->endSection() ?>

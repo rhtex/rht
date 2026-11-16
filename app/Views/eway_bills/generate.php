@@ -379,10 +379,9 @@
                     </div>
                 </div>
             </div>
-        </form>
-    </div>
-</div>
+        <?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
 <script>
 function togglePartBRequirement() {
     const isPartA = document.getElementById('action_part_a').checked;
@@ -480,6 +479,17 @@ function performDocLookup() {
                 document.getElementById('to_pincode').value = doc.to_pincode || '';
                 document.getElementById('to_state_code').value = doc.to_state_code || '33';
 
+                // Populate Vehicle Number if present in doc
+                if (doc.vehicle_number) {
+                    const $veh = $('#vehicle_number');
+                    if ($veh.find("option[value='" + doc.vehicle_number + "']").length) {
+                        $veh.val(doc.vehicle_number).trigger('change');
+                    } else {
+                        const newOption = new Option(doc.vehicle_number + ' (From Document)', doc.vehicle_number, true, true);
+                        $veh.append(newOption).trigger('change');
+                    }
+                }
+
                 const ewbBadge = document.getElementById('lbl_existing_ewb');
                 if (doc.existing_ewb) {
                     ewbBadge.className = 'badge bg-warning text-dark';
@@ -499,7 +509,7 @@ function performDocLookup() {
 }
 
 function onVehicleSelect(select) {
-    const opt = select.options[select.selectedIndex];
+    const opt = select.options ? select.options[select.selectedIndex] : null;
     if (opt && opt.getAttribute('data-type')) {
         const vTypeSelect = document.querySelector('select[name="vehicle_type"]');
         if (vTypeSelect) {
@@ -509,20 +519,18 @@ function onVehicleSelect(select) {
 }
 
 // Initial trigger on load
-document.addEventListener('DOMContentLoaded', function() {
+$(document).ready(function() {
     togglePartBRequirement();
 
-    if (window.jQuery && $.fn.select2) {
-        $('.select2-vehicle').select2({
-            theme: 'bootstrap-5',
-            tags: true,
-            placeholder: '-- Select Registered Vehicle or Type New --',
-            allowClear: true,
-            width: '100%'
-        }).on('select2:select', function(e) {
-            onVehicleSelect(this);
-        });
-    }
+    $('.select2-vehicle').select2({
+        theme: 'bootstrap-5',
+        tags: true,
+        placeholder: '-- Select Registered Vehicle or Type New --',
+        allowClear: true,
+        width: '100%'
+    }).on('select2:select', function(e) {
+        onVehicleSelect(this);
+    });
 });
 </script>
 <?= $this->endSection() ?>

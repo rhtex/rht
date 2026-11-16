@@ -200,6 +200,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     // e-Way Bills (Zoho Books API Integration)
     $routes->get('eway_bills', 'EwayBillController::index', ['filter' => 'permission:eway_bill.view']);
     $routes->get('eway_bills/create', 'EwayBillController::create', ['filter' => 'permission:eway_bill.create']);
+    $routes->get('eway_bills/regenerate/(:num)', 'EwayBillController::regeneratePage/$1', ['filter' => 'permission:eway_bill.create']);
     $routes->get('eway_bills/lookup-document', 'EwayBillController::lookupDocument', ['filter' => 'permission:eway_bill.view']);
     $routes->post('eway_bills/store', 'EwayBillController::store', ['filter' => 'permission:eway_bill.create']);
     $routes->post('eway_bills/update-part-b/(:num)', 'EwayBillController::updatePartB/$1', ['filter' => 'permission:eway_bill.edit']);
@@ -397,6 +398,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     // e-Way Bills (Zoho Books API Integration)
     $routes->get('eway_bills', 'EwayBillController::index', ['filter' => 'permission:eway_bill.view']);
     $routes->get('eway_bills/create', 'EwayBillController::create', ['filter' => 'permission:eway_bill.create']);
+    $routes->get('eway_bills/regenerate/(:num)', 'EwayBillController::regeneratePage/$1', ['filter' => 'permission:eway_bill.create']);
     $routes->get('eway_bills/lookup-document', 'EwayBillController::lookupDocument', ['filter' => 'permission:eway_bill.view']);
     $routes->post('eway_bills/store', 'EwayBillController::store', ['filter' => 'permission:eway_bill.create']);
     $routes->post('eway_bills/update-part-b/(:num)', 'EwayBillController::updatePartB/$1', ['filter' => 'permission:eway_bill.edit']);

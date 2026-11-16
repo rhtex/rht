@@ -359,6 +359,105 @@ class EwayBillController extends BaseController
     }
 
     /**
+     * Regenerate e-Way Bill Page
+     * Displays complete details identical to generation and provides an option to cancel.
+     */
+    public function regeneratePage($id)
+    {
+        $ewayBill = $this->ewayModel->find((int) $id);
+        if (!$ewayBill) {
+            return redirect()->to(site_url('eway_bills'))->with('error', 'e-Way Bill record not found.');
+        }
+
+        $docType = $ewayBill['document_type'] ?? 'invoice';
+        $docId   = (int) ($ewayBill['document_id'] ?? 0);
+
+        $document    = null;
+        $party       = null;
+        $shipAddress = null;
+        $billAddress = null;
+
+        $addrModel = new \App\Models\AddressModel();
+        if ($docId > 0) {
+            if ($docType === 'invoice') {
+                $document = $this->invoiceModel->getInvoiceById($docId);
+                if ($document) {
+                    $party       = $this->customerModel->find($document['customer_id'] ?? 0);
+                    $billAddress = $addrModel->select('addresses.*, states.name as state_name, states.gst_state_code')
+                        ->join('states', 'states.id = addresses.state_id', 'left')
+                        ->where('owner_type', 'customer')
+                        ->where('owner_id', (int) ($document['customer_id'] ?? 0))
+                        ->where('address_type', 'billing')
+                        ->where('is_active', 1)
+                        ->first();
+                    $shipAddress = $addrModel->select('addresses.*, states.name as state_name, states.gst_state_code')
+                        ->join('states', 'states.id = addresses.state_id', 'left')
+                        ->where('owner_type', 'customer')
+                        ->where('owner_id', (int) ($document['customer_id'] ?? 0))
+                        ->where('address_type', 'shipping')
+                        ->where('is_active', 1)
+                        ->first() ?: $billAddress;
+                }
+            } elseif ($docType === 'credit_note') {
+                $document = $this->returnModel->find($docId);
+                if ($document) {
+                    $party       = $this->customerModel->find($document['customer_id'] ?? 0);
+                    $billAddress = $addrModel->select('addresses.*, states.name as state_name, states.gst_state_code')
+                        ->join('states', 'states.id = addresses.state_id', 'left')
+                        ->where('owner_type', 'customer')
+                        ->where('owner_id', (int) ($document['customer_id'] ?? 0))
+                        ->where('address_type', 'billing')
+                        ->where('is_active', 1)
+                        ->first();
+                    $shipAddress = $addrModel->select('addresses.*, states.name as state_name, states.gst_state_code')
+                        ->join('states', 'states.id = addresses.state_id', 'left')
+                        ->where('owner_type', 'customer')
+                        ->where('owner_id', (int) ($document['customer_id'] ?? 0))
+                        ->where('address_type', 'shipping')
+                        ->where('is_active', 1)
+                        ->first() ?: $billAddress;
+                }
+            }
+        }
+
+        // Merge addresses from ewayBill record if document lookup returned empty fields
+        if (!$billAddress) {
+            $billAddress = [
+                'address_line1'  => $ewayBill['from_address_1'] ?? '',
+                'address_line2'  => $ewayBill['from_address_2'] ?? '',
+                'city'           => $ewayBill['bill_to_place'] ?? '',
+                'gst_state_code' => $ewayBill['bill_to_state_code'] ?? '33',
+                'pincode'        => $ewayBill['bill_to_pincode'] ?? '',
+            ];
+        }
+        if (!$shipAddress) {
+            $shipAddress = [
+                'address_line1'  => $ewayBill['to_address_1'] ?? '',
+                'address_line2'  => $ewayBill['to_address_2'] ?? '',
+                'city'           => $ewayBill['to_place'] ?? '',
+                'gst_state_code' => $ewayBill['to_state_code'] ?? '33',
+                'pincode'        => $ewayBill['to_pincode'] ?? '',
+            ];
+        }
+
+        $transports = $this->transportModel->findAll();
+        $states     = $this->stateModel->findAll();
+
+        return view('eway_bills/regenerate', [
+            'title'       => 'Regenerate e-Way Bill #' . ($ewayBill['ewaybill_number'] ?? $ewayBill['document_number']),
+            'ewayBill'    => $ewayBill,
+            'docType'     => $docType,
+            'docId'       => $docId,
+            'document'    => $document,
+            'party'       => $party,
+            'billAddress' => $billAddress,
+            'shipAddress' => $shipAddress,
+            'transports'  => $transports,
+            'states'      => $states,
+        ]);
+    }
+
+    /**
      * Regenerate e-Way Bill
      */
     public function regenerate($id)
@@ -372,7 +471,7 @@ class EwayBillController extends BaseController
             return redirect()->to(site_url('eway_bills'))->with('success', $res['message']);
         }
 
-        return redirect()->back()->with('error', $res['message'] ?? 'Failed to regenerate e-Way Bill.');
+        return redirect()->back()->withInput()->with('error', $res['message'] ?? 'Failed to regenerate e-Way Bill.');
     }
 
     /**

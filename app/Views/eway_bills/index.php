@@ -233,10 +233,9 @@
 
                                             <!-- Regenerate e-Way Bill -->
                                             <?php if (in_array($row['status'], ['cancelled', 'failed']) && can('eway_bill.create')): ?>
-                                                <button type="button" class="btn btn-outline-warning" title="Regenerate e-Way Bill"
-                                                    onclick="openRegenerateModal(<?= htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8') ?>)">
+                                                <a href="<?= site_url('eway_bills/regenerate/' . $row['id']) ?>" class="btn btn-outline-warning" title="Regenerate e-Way Bill (Full Details Page)">
                                                     <i class="fas fa-redo"></i>
-                                                </button>
+                                                </a>
                                             <?php endif; ?>
 
                                             <!-- Sync status with Zoho Books -->
@@ -371,54 +370,6 @@
     </div>
 </div>
 
-<!-- Modal: Regenerate e-Way Bill -->
-<div class="modal fade" id="modalRegenerate" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="post" id="formRegenerate" action="">
-            <?= csrf_field() ?>
-            <div class="modal-content shadow">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title"><i class="fas fa-redo me-2"></i> Regenerate e-Way Bill</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="small text-muted">Generate a brand new e-Way Bill for Document <strong id="regen_doc_display"></strong> after cancellation or failure.</p>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Vehicle Number <span class="text-danger">*</span></label>
-                        <input type="text" name="vehicle_number" id="regen_vehicle_number" class="form-control text-uppercase" placeholder="e.g. TN01AB1234" required>
-                    </div>
-
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Distance (Km)</label>
-                            <input type="number" name="distance_km" id="regen_distance_km" class="form-control" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Transport Mode</label>
-                            <select name="transport_mode" class="form-select">
-                                <option value="1">1 - Road</option>
-                                <option value="2">2 - Rail</option>
-                                <option value="3">3 - Air</option>
-                                <option value="4">4 - Ship</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Transporter ID (Zoho Transporter ID or GSTIN)</label>
-                        <input type="text" name="transporter_id" id="regen_transporter_id" class="form-control" placeholder="Zoho Transporter ID or 15-digit GSTIN / TRANSIN">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-warning"><i class="fas fa-check-circle me-1"></i> Regenerate Now</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
 <script>
 function openPartBModal(row) {
     document.getElementById('formPartB').action = '<?= site_url('eway_bills/update-part-b') ?>/' + row.id;
@@ -436,15 +387,6 @@ function openCancelModal(id, ewbNumber) {
     document.getElementById('formCancel').action = '<?= site_url('eway_bills/cancel') ?>/' + id;
     document.getElementById('cancel_ewb_display').innerText = '#' + ewbNumber;
     new bootstrap.Modal(document.getElementById('modalCancel')).show();
-}
-
-function openRegenerateModal(row) {
-    document.getElementById('formRegenerate').action = '<?= site_url('eway_bills/regenerate') ?>/' + row.id;
-    document.getElementById('regen_doc_display').innerText = '#' + row.document_number;
-    document.getElementById('regen_vehicle_number').value = row.vehicle_number || '';
-    document.getElementById('regen_distance_km').value = row.distance_km || '0';
-    document.getElementById('regen_transporter_id').value = row.transporter_id || '';
-    new bootstrap.Modal(document.getElementById('modalRegenerate')).show();
 }
 </script>
 <?= $this->endSection() ?>

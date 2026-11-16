@@ -50,6 +50,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
 
     // Transports
     $routes->get('transports', 'TransportController::index', ['filter' => 'permission:transport.view']);
+    $routes->post('transports/sync-zoho', 'TransportController::syncFromZoho', ['filter' => 'permission:transport.edit']);
     $routes->get('transports/create', 'TransportController::create', ['filter' => 'permission:transport.create']);
     $routes->post('transports/store', 'TransportController::store', ['filter' => 'permission:transport.create']);
     $routes->get('transports/view/(:num)', 'TransportController::view/$1', ['filter' => 'permission:transport.view']);

@@ -152,4 +152,48 @@ class TransportController extends BaseController
         $this->transportModel->delete($id);
         return redirect()->to('transports')->with('success', 'Transport deleted successfully.');
     }
+
+    /**
+     * Sync Transporter details from Zoho Books API
+     */
+    public function syncFromZoho()
+    {
+        try {
+            $syncService = new \App\Services\Zoho\Modules\TransportSyncService();
+            $result = $syncService->syncTransportersFromZoho();
+
+            $msg = sprintf(
+                'Zoho Transport sync completed! Found: %d, Created: %d, Updated: %d, Up to date: %d.',
+                $result['total_found'],
+                $result['created'],
+                $result['updated'],
+                $result['skipped']
+            );
+
+            if (!empty($result['errors'])) {
+                $msg .= ' Some notices: ' . implode(', ', array_slice($result['errors'], 0, 3));
+            }
+
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => $msg,
+                    'data'    => $result,
+                ]);
+            }
+
+            return redirect()->to('transports')->with('success', $msg);
+        } catch (\Throwable $e) {
+            log_message('error', 'TransportController::syncFromZoho failed: ' . $e->getMessage());
+
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to sync transports: ' . $e->getMessage(),
+                ]);
+            }
+
+            return redirect()->to('transports')->with('error', 'Failed to fetch transports from Zoho: ' . $e->getMessage());
+        }
+    }
 }

@@ -12,6 +12,14 @@
             <a href="<?= site_url('transports') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
                 <i class="fas fa-sync-alt me-1"></i> Refresh
             </a>
+            <?php if (can('transport.edit')): ?>
+            <form action="<?= site_url('transports/sync-zoho') ?>" method="post" class="d-inline" id="syncZohoForm">
+                <?= csrf_field() ?>
+                <button type="submit" class="btn btn-sm btn-outline-info" id="btnSyncZoho" title="Fetch & Update Transporters from Zoho Books">
+                    <i class="fas fa-cloud-download-alt me-1"></i> Sync from Zoho
+                </button>
+            </form>
+            <?php endif; ?>
             <?php if (can('transport.create')): ?>
             <a href="<?= site_url('transports/create') ?>" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus me-1"></i> Add New Transport
@@ -146,4 +154,21 @@
         </div>
     </div>
 </div>
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var syncForm = document.getElementById('syncZohoForm');
+    if (syncForm) {
+        syncForm.addEventListener('submit', function() {
+            var btn = document.getElementById('btnSyncZoho');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Syncing...';
+            }
+        });
+    }
+});
+</script>
 <?= $this->endSection() ?>

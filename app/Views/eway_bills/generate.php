@@ -306,9 +306,33 @@
 
                             <div class="mb-3" id="group_vehicle_number">
                                 <label class="form-label fw-bold">Vehicle Number <span class="text-danger" id="req_star_vehicle">*</span></label>
-                                <input type="text" name="vehicle_number" id="vehicle_number" class="form-control text-uppercase" 
-                                    placeholder="e.g. TN28AB1234" value="<?= esc(!empty($document['transport_name']) ? $document['transport_name'] : '') ?>">
-                                <div class="form-text small">Enter without space or hyphens.</div>
+                                <select name="vehicle_number" id="vehicle_number" class="form-select select2-vehicle" onchange="onVehicleSelect(this)">
+                                    <option value="">-- Select Registered Vehicle or Enter New --</option>
+                                    <?php if (!empty($vehicles)): ?>
+                                        <?php foreach ($vehicles as $v): ?>
+                                            <option value="<?= esc($v['vehicle_number']) ?>" 
+                                                data-type="<?= esc($v['vehicle_type']) ?>"
+                                                <?= (!empty($document['transport_name']) && strtoupper(str_replace(' ', '', $document['transport_name'])) === strtoupper($v['vehicle_number'])) ? 'selected' : '' ?>>
+                                                <?= esc($v['vehicle_number']) ?> <?= !empty($v['vehicle_name']) ? ' - ' . esc($v['vehicle_name']) : '' ?> (<?= esc($v['vehicle_type']) ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                    <?php if (!empty($document['transport_name'])): ?>
+                                        <?php 
+                                            $docVeh = strtoupper(str_replace(' ', '', $document['transport_name']));
+                                            $alreadyInList = false;
+                                            if (!empty($vehicles)) {
+                                                foreach ($vehicles as $v) {
+                                                    if (strtoupper($v['vehicle_number']) === $docVeh) { $alreadyInList = true; break; }
+                                                }
+                                            }
+                                        ?>
+                                        <?php if (!$alreadyInList): ?>
+                                            <option value="<?= esc($docVeh) ?>" selected><?= esc($docVeh) ?> (From Invoice)</option>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </select>
+                                <div class="form-text small">Select from Operations &gt; Vehicles master list (or type custom vehicle).</div>
                             </div>
 
                             <div class="mb-3">
@@ -474,9 +498,31 @@ function performDocLookup() {
         });
 }
 
+function onVehicleSelect(select) {
+    const opt = select.options[select.selectedIndex];
+    if (opt && opt.getAttribute('data-type')) {
+        const vTypeSelect = document.querySelector('select[name="vehicle_type"]');
+        if (vTypeSelect) {
+            vTypeSelect.value = opt.getAttribute('data-type');
+        }
+    }
+}
+
 // Initial trigger on load
 document.addEventListener('DOMContentLoaded', function() {
     togglePartBRequirement();
+
+    if (window.jQuery && $.fn.select2) {
+        $('.select2-vehicle').select2({
+            theme: 'bootstrap-5',
+            tags: true,
+            placeholder: '-- Select Registered Vehicle or Type New --',
+            allowClear: true,
+            width: '100%'
+        }).on('select2:select', function(e) {
+            onVehicleSelect(this);
+        });
+    }
 });
 </script>
 <?= $this->endSection() ?>

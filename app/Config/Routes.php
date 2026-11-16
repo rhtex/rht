@@ -58,6 +58,14 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('transports/update/(:num)', 'TransportController::update/$1', ['filter' => 'permission:transport.edit']);
     $routes->get('transports/delete/(:num)', 'TransportController::delete/$1', ['filter' => 'permission:transport.delete']);
 
+    // Vehicles
+    $routes->get('vehicles', 'VehicleController::index', ['filter' => 'permission:vehicle.view']);
+    $routes->get('vehicles/create', 'VehicleController::create', ['filter' => 'permission:vehicle.create']);
+    $routes->post('vehicles/store', 'VehicleController::store', ['filter' => 'permission:vehicle.create']);
+    $routes->get('vehicles/edit/(:num)', 'VehicleController::edit/$1', ['filter' => 'permission:vehicle.edit']);
+    $routes->post('vehicles/update/(:num)', 'VehicleController::update/$1', ['filter' => 'permission:vehicle.edit']);
+    $routes->get('vehicles/delete/(:num)', 'VehicleController::delete/$1', ['filter' => 'permission:vehicle.delete']);
+
     // User Management
     $routes->get('users', 'UserController::index', ['filter' => 'permission:user.view']);
     $routes->get('users/create', 'UserController::create', ['filter' => 'permission:user.create']);

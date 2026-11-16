@@ -318,9 +318,33 @@
 
                             <div class="mb-3" id="group_vehicle_number">
                                 <label class="form-label fw-bold">Vehicle Number <span class="text-danger" id="req_star_vehicle">*</span></label>
-                                <input type="text" name="vehicle_number" id="vehicle_number" class="form-control text-uppercase" 
-                                    placeholder="e.g. TN28AB1234" value="<?= esc($ewayBill['vehicle_number'] ?? (!empty($document['transport_name']) ? $document['transport_name'] : '')) ?>">
-                                <div class="form-text small">Enter vehicle plate without spaces or hyphens.</div>
+                                <?php 
+                                    $currentVeh = strtoupper(str_replace(' ', '', $ewayBill['vehicle_number'] ?? (!empty($document['transport_name']) ? $document['transport_name'] : '')));
+                                ?>
+                                <select name="vehicle_number" id="vehicle_number" class="form-select select2-vehicle" onchange="onVehicleSelect(this)">
+                                    <option value="">-- Select Registered Vehicle or Enter New --</option>
+                                    <?php 
+                                        $vehFoundInList = false;
+                                        if (!empty($vehicles)): 
+                                            foreach ($vehicles as $v):
+                                                $vNum = strtoupper(str_replace(' ', '', $v['vehicle_number']));
+                                                $isVehSelected = ($vNum === $currentVeh);
+                                                if ($isVehSelected) { $vehFoundInList = true; }
+                                    ?>
+                                            <option value="<?= esc($v['vehicle_number']) ?>" 
+                                                data-type="<?= esc($v['vehicle_type']) ?>"
+                                                <?= $isVehSelected ? 'selected' : '' ?>>
+                                                <?= esc($v['vehicle_number']) ?> <?= !empty($v['vehicle_name']) ? ' - ' . esc($v['vehicle_name']) : '' ?> (<?= esc($v['vehicle_type']) ?>)
+                                            </option>
+                                    <?php 
+                                            endforeach; 
+                                        endif; 
+                                    ?>
+                                    <?php if (!empty($currentVeh) && !$vehFoundInList): ?>
+                                        <option value="<?= esc($currentVeh) ?>" selected><?= esc($currentVeh) ?> (Current / Previous)</option>
+                                    <?php endif; ?>
+                                </select>
+                                <div class="form-text small">Select from Operations &gt; Vehicles master list (or type custom vehicle).</div>
                             </div>
 
                             <div class="mb-3">
@@ -456,6 +480,16 @@ function applyPresetTransporter(select) {
     }
 }
 
+function onVehicleSelect(select) {
+    const opt = select.options[select.selectedIndex];
+    if (opt && opt.getAttribute('data-type')) {
+        const vTypeSelect = document.querySelector('select[name="vehicle_type"]');
+        if (vTypeSelect) {
+            vTypeSelect.value = opt.getAttribute('data-type');
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     togglePartBRequirement();
 
@@ -464,6 +498,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const gstinInput = document.getElementById('transporter_gstin');
     if (presetSelect && presetSelect.value && (!gstinInput.value || gstinInput.value.trim() === '')) {
         applyPresetTransporter(presetSelect);
+    }
+
+    if (window.jQuery && $.fn.select2) {
+        $('.select2-vehicle').select2({
+            theme: 'bootstrap-5',
+            tags: true,
+            placeholder: '-- Select Registered Vehicle or Type New --',
+            allowClear: true,
+            width: '100%'
+        }).on('select2:select', function(e) {
+            onVehicleSelect(this);
+        });
     }
 });
 </script>

@@ -9,6 +9,7 @@ use App\Models\SalesReturnModel;
 use App\Models\ReturnShipmentModel;
 use App\Models\StateModel;
 use App\Models\TransportModel;
+use App\Models\VehicleModel;
 use App\Services\Zoho\ZohoEwayBillService;
 
 class EwayBillController extends BaseController
@@ -20,6 +21,7 @@ class EwayBillController extends BaseController
     protected CustomerModel $customerModel;
     protected TransportModel $transportModel;
     protected StateModel $stateModel;
+    protected VehicleModel $vehicleModel;
 
     public function __construct()
     {
@@ -30,6 +32,7 @@ class EwayBillController extends BaseController
         $this->customerModel  = new CustomerModel();
         $this->transportModel = new TransportModel();
         $this->stateModel     = new StateModel();
+        $this->vehicleModel   = new VehicleModel();
     }
 
     /**
@@ -135,6 +138,7 @@ class EwayBillController extends BaseController
 
         $transports = $this->transportModel->findAll();
         $states     = $this->stateModel->findAll();
+        $vehicles   = $this->vehicleModel->getActiveVehicles();
 
         return view('eway_bills/generate', [
             'title'       => 'Generate e-Way Bill',
@@ -146,6 +150,7 @@ class EwayBillController extends BaseController
             'shipAddress' => $shipAddress,
             'transports'  => $transports,
             'states'      => $states,
+            'vehicles'    => $vehicles,
         ]);
     }
 
@@ -442,6 +447,7 @@ class EwayBillController extends BaseController
 
         $transports = $this->transportModel->findAll();
         $states     = $this->stateModel->findAll();
+        $vehicles   = $this->vehicleModel->getActiveVehicles();
 
         // If ewayBill has missing transporter_registration_id, resolve it from transports master
         if (empty($ewayBill['transporter_registration_id'])) {
@@ -466,6 +472,7 @@ class EwayBillController extends BaseController
             'shipAddress' => $shipAddress,
             'transports'  => $transports,
             'states'      => $states,
+            'vehicles'    => $vehicles,
         ]);
     }
 

@@ -21,7 +21,7 @@
                 $isPurchases = in_array($segment1, ['vendors', 'bills', 'payments', 'expenses', 'expense_categories']);
                 $isInventory = in_array($segment1, ['products', 'product_categories']);
                 $isProduction = in_array($segment1, ['production', 'weavers']) || ($segment1 === 'production' && $segment2 === 'colors');
-                $isOperations = in_array($segment1, ['transports']);
+                $isOperations = in_array($segment1, ['transports', 'vehicles']);
                 $isFinance = in_array($segment1, ['bank_accounts', 'reconciliation']);
                 $isHR = in_array($segment1, ['employees', 'attendance', 'loans', 'salaries']);
                 $isCalendar = in_array($segment1, ['calendar']);
@@ -393,7 +393,7 @@
                 <?php endif; ?>
 
                 <!-- OPERATIONS -->
-                <?php if(can('transport.view')): ?>
+                <?php if(can('transport.view') || can('vehicle.view')): ?>
                 <li class="nav-item <?= $isOperations ? 'menu-open' : '' ?>">
                     <a href="#" class="nav-link <?= $isOperations ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-shipping-fast text-danger"></i>
@@ -403,12 +403,22 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
+                        <?php if(can('transport.view')): ?>
                         <li class="nav-item">
-                            <a href="<?= site_url('transports') ?>" class="nav-link">
+                            <a href="<?= site_url('transports') ?>" class="nav-link <?= ($segment1 === 'transports') ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-truck text-danger"></i>
                                 <p><?= lang("App.transports") ?></p>
                             </a>
                         </li>
+                        <?php endif; ?>
+                        <?php if(can('vehicle.view')): ?>
+                        <li class="nav-item">
+                            <a href="<?= site_url('vehicles') ?>" class="nav-link <?= ($segment1 === 'vehicles') ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-truck-moving text-warning"></i>
+                                <p>Vehicles</p>
+                            </a>
+                        </li>
+                        <?php endif; ?>
                     </ul>
                 </li>
                 <?php endif; ?>

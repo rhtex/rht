@@ -365,10 +365,10 @@
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label">Transporter GSTIN / TRANSIN</label>
-                                    <input type="text" name="transporter_gstin" id="transporter_gstin" class="form-control text-uppercase" 
+                                    <input type="text" name="transporter_gstin" id="transporter_gstin" class="form-control text-uppercase bg-light" 
                                         placeholder="15-digit GSTIN / TRANSIN"
-                                        value="<?= esc($ewayBill['transporter_registration_id'] ?? '') ?>">
-                                    <div class="form-text small text-muted">Transporter's 15-digit GSTIN number.</div>
+                                        value="<?= esc($ewayBill['transporter_registration_id'] ?? '') ?>" readonly>
+                                    <div class="form-text small text-muted">Auto-populated from transporter (uneditable).</div>
                                 </div>
                                 <input type="hidden" name="transporter_name" id="transporter_name" value="<?= esc($ewayBill['transporter_name'] ?? '') ?>">
                             </div>

@@ -82,10 +82,12 @@ class TransportSyncService
                             $key = strtoupper($name);
                             if (!isset($transporters[$key])) {
                                 $gstin = trim((string) (
-                                    $item['transporter_id_no'] ??
+                                    $item['transporter_registration_id'] ??
+                                    ($item['transporter_id_no'] ??
                                     ($item['transporter_gstin'] ??
+                                    ($item['transin'] ??
                                     ($item['transporter_id'] ??
-                                    ($item['gst_no'] ?? ($item['gstin'] ?? ''))))
+                                    ($item['gst_no'] ?? ($item['gstin'] ?? ''))))))
                                 ));
 
                                 $transporters[$key] = [

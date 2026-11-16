@@ -51,6 +51,8 @@ class TransportModel extends Model
                     ->orLike('transport_code', $filters['search'])
                     ->orLike('branch_phone_number', $filters['search'])
                     ->orLike('branch', $filters['search'])
+                    ->orLike('branch_gst_number', $filters['search'])
+                    ->orLike('zoho_transporter_id', $filters['search'])
                     ->groupEnd();
         }
 

@@ -68,7 +68,7 @@
         <form action="<?= site_url('transports') ?>" method="get" class="row g-2 align-items-end">
             <div class="col-md-10 col-sm-9">
                 <label for="search" class="form-label">Search</label>
-                <input type="text" name="search" id="search" class="form-control" placeholder="Search by name, transport code, phone, or branch..." value="<?= esc($filters['search'] ?? '') ?>">
+                <input type="text" name="search" id="search" class="form-control" placeholder="Search by name, transport code, GSTIN, Zoho ID, phone, or branch..." value="<?= esc($filters['search'] ?? '') ?>">
             </div>
             <div class="col-md-2 col-sm-3 d-flex gap-1">
                 <button type="submit" class="btn btn-primary w-100" title="Apply Filter"><i class="fas fa-search"></i> Search</button>

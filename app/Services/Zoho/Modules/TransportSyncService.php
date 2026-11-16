@@ -171,15 +171,25 @@ class TransportSyncService
         // Process and upsert each transporter into local DB
         foreach ($transporters as $trData) {
             try {
-                $existing = $this->transportModel->groupStart()
-                    ->where('LOWER(transport_name)', strtolower($trData['name']))
-                    ->orWhere('transport_name', $trData['name'])
-                    ->groupEnd()
-                    ->first();
+                // Match by Zoho Transporter ID first if available
+                $existing = null;
+                if (!empty($trData['zoho_transporter_id'])) {
+                    $existing = $this->transportModel->where('zoho_transporter_id', $trData['zoho_transporter_id'])->first();
+                }
 
-                // If not found by name, check by GSTIN if provided
+                // If not found by zoho_transporter_id, match by GSTIN if non-empty
                 if (!$existing && !empty($trData['gstin'])) {
                     $existing = $this->transportModel->where('branch_gst_number', $trData['gstin'])->first();
+                }
+
+                // If not found, match by transport name (case-insensitive and trimmed)
+                if (!$existing) {
+                    $cleanName = strtolower(trim($trData['name']));
+                    $existing = $this->transportModel->groupStart()
+                        ->where('LOWER(TRIM(transport_name))', $cleanName)
+                        ->orWhere('transport_name', $trData['name'])
+                        ->groupEnd()
+                        ->first();
                 }
 
                 $record = [
@@ -198,7 +208,7 @@ class TransportSyncService
                 if ($existing) {
                     // Update existing
                     $updatePayload = [];
-                    if (!empty($trData['zoho_transporter_id']) && empty($existing['zoho_transporter_id'])) {
+                    if (!empty($trData['zoho_transporter_id']) && $existing['zoho_transporter_id'] !== $trData['zoho_transporter_id']) {
                         $updatePayload['zoho_transporter_id'] = $trData['zoho_transporter_id'];
                     }
                     if (!empty($trData['gstin']) && empty($existing['branch_gst_number'])) {

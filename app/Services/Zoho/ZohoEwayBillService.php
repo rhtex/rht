@@ -33,7 +33,72 @@ class ZohoEwayBillService
     }
 
     /**
-     * Map internal document type to Zoho Books entity_type
+     * Build API metadata for e-Way Bill requests, defaulting to the configured API service ('inventory' or 'books').
+     */
+    protected function getEwbMeta(string $operation, ?int $localRecordId = null, ?string $forceService = null, string $module = 'eway_bills'): array
+    {
+        $config  = $this->settingModel->getConfig(false);
+        $service = $forceService ?? ($config['ewaybill_api_service'] ?? 'inventory');
+        if (!in_array($service, ['inventory', 'books'], true)) {
+            $service = 'inventory';
+        }
+
+        $meta = [
+            'module'      => $module,
+            'operation'   => $operation,
+            'api_service' => $service,
+        ];
+        if ($localRecordId !== null) {
+            $meta['local_record_id'] = $localRecordId;
+        }
+        return $meta;
+    }
+
+    /**
+     * Execute an e-Way Bill request against the configured Zoho API (Inventory v1 by default).
+     * Handles HTTP 401 code 57 (missing ZohoInventory OAuth scope) with optional Books v3 fallback for reads/syncs.
+     */
+    protected function requestEwb(
+        string $method,
+        string $endpoint,
+        ?array $payload = null,
+        array $query = [],
+        array $meta = [],
+        bool $allowBooksFallbackOnAuth = false
+    ): array {
+        if (empty($meta['api_service'])) {
+            $meta = array_merge($this->getEwbMeta($meta['operation'] ?? strtoupper($method)), $meta);
+        }
+
+        $res = $this->client->request($method, $endpoint, $payload, $query, $meta);
+
+        if (
+            ($meta['api_service'] ?? 'inventory') === 'inventory'
+            && empty($res['success'])
+            && (int) ($res['http_code'] ?? 0) === 401
+            && (int) ($res['zoho_code'] ?? 0) === 57
+        ) {
+            if ($allowBooksFallbackOnAuth) {
+                $booksMeta                = $meta;
+                $booksMeta['api_service'] = 'books';
+                $fallbackRes              = $this->client->request($method, $endpoint, $payload, $query, $booksMeta);
+                if (!empty($fallbackRes['success'])) {
+                    $fallbackRes['used_fallback_service'] = 'books';
+                    return $fallbackRes;
+                }
+            }
+
+            $res['auth_scope_required'] = 'ZohoInventory.fullaccess.all';
+            $res['message']             = 'Zoho Inventory API returned HTTP 401 (Not Authorized for ZohoInventory). '
+                . 'Please go to Settings -> Integrations -> Zoho and click "Connect / Re-Authorize Zoho (Books + Inventory OAuth 2.0)" '
+                . 'to authorize the ZohoInventory.fullaccess.all scope.';
+        }
+
+        return $res;
+    }
+
+    /**
+     * Map internal document type to Zoho e-Way Bill entity_type
      */
     protected function mapDocTypeToZoho(string $docType): string
     {
@@ -42,6 +107,20 @@ class ZohoEwayBillService
             'delivery_challan' => 'deliverychallan',
             'purchase_bill'   => 'bill',
             default           => 'invoice',
+        };
+    }
+
+    /**
+     * Map transaction_type to Zoho Inventory v1 allowed format
+     */
+    protected function mapTransactionType(?string $type): string
+    {
+        $t = strtolower(trim((string) $type));
+        return match ($t) {
+            '2', 'bill_to_ship_to', 'bill to - ship to', 'bill to ship to' => 'bill_to_ship_to',
+            '3', 'bill_from_dispatch_from', 'bill from - dispatch from', 'bill from dispatch from' => 'bill_from_dispatch_from',
+            '4', 'combination_of_2_and_3', 'combination of 2 and 3' => 'combination_of_2_and_3',
+            default => 'regular',
         };
     }
 
@@ -219,13 +298,14 @@ class ZohoEwayBillService
         // 4. Fallback: If zohoId is still not resolved, query Zoho's /ewaybills/transporters API
         if (!$zohoId && ($transName !== '' || $gstin !== '')) {
             try {
-                $res = $this->client->get('/ewaybills/transporters', [
-                    'page'     => 1,
-                    'per_page' => 200,
-                ], [
-                    'module'    => 'transports',
-                    'operation' => 'RESOLVE_TRANSPORTER_ID',
-                ]);
+                $res = $this->requestEwb(
+                    'GET',
+                    '/ewaybills/transporters',
+                    null,
+                    ['page' => 1, 'per_page' => 200],
+                    $this->getEwbMeta('RESOLVE_TRANSPORTER_ID', null, null, 'transports'),
+                    true
+                );
 
                 if (!empty($res['success']) && !empty($res['data']['transporters'])) {
                     foreach ($res['data']['transporters'] as $item) {
@@ -293,21 +373,28 @@ class ZohoEwayBillService
      */
     public function generate(array $data, ?int $userId = null, ?int $targetEwayBillId = null): array
     {
-        $docType = $data['document_type'] ?? 'invoice';
-        $docId   = (int) ($data['document_id'] ?? 0);
-        $action  = $data['action'] ?? 'save_generate';
+        $docType    = $data['document_type'] ?? 'invoice';
+        $docId      = (int) ($data['document_id'] ?? 0);
+        $rawAction  = strtolower(trim((string) ($data['action'] ?? 'save_generate')));
+        $isPartA    = ($rawAction === 'generate_part_a') || empty($data['vehicle_number']);
+        $zohoAction = match ($rawAction) {
+            'save'               => 'save',
+            'manually_generated' => 'manually_generated',
+            default              => 'save_generate',
+        };
 
         $zohoId = $this->getZohoRecordId($docType, $docId);
 
-        // Build Payload according to Zoho E-Way Bill schema
-        $distance = (int) ($data['distance_km'] ?? 0);
-
-        $subSupplyType = $this->mapSubSupplyType($data['sub_supply_type'] ?? 'supply');
+        // Build Payload according to Zoho Inventory v1 / Books e-Way Bill schema
+        $distance        = (int) ($data['distance_km'] ?? 0);
+        $subSupplyType   = $this->mapSubSupplyType($data['sub_supply_type'] ?? 'supply');
+        $transactionType = $this->mapTransactionType($data['transaction_type'] ?? 'regular');
 
         $payload = [
             'entity_type'         => $this->mapDocTypeToZoho($docType),
-            'action'              => $action,
+            'action'              => $zohoAction,
             'sub_supply_type'     => $subSupplyType,
+            'transaction_type'    => $transactionType,
             'transportation_mode' => $this->mapTransportationMode($data['transport_mode'] ?? 'road'),
         ];
 
@@ -324,13 +411,20 @@ class ZohoEwayBillService
             $payload['entity_id'] = $zohoId;
         }
 
-        // Part B conveyance fields
-        if (!empty($data['vehicle_number'])) {
+        if ($zohoAction === 'manually_generated' && !empty($data['ewaybill_number'])) {
+            $payload['ewaybill_number'] = trim((string) $data['ewaybill_number']);
+            if (!empty($data['ewaybill_date'])) {
+                $payload['ewaybill_date'] = trim((string) $data['ewaybill_date']);
+            }
+        }
+
+        // Part B conveyance fields (explicitly omitted for Part-A slips)
+        if (!$isPartA && !empty($data['vehicle_number'])) {
             $payload['vehicle_number'] = strtoupper(trim(str_replace(' ', '', $data['vehicle_number'])));
             $payload['vehicle_type']   = !empty($data['vehicle_type']) ? strtolower(str_replace(' ', '_', $data['vehicle_type'])) : 'regular';
         }
 
-        // Transporter resolution: always pass Zoho internal transporter_id to Zoho Books API
+        // Transporter resolution: always pass Zoho internal transporter_id to Zoho API
         $rawTransId   = $data['transporter_id'] ?? null;
         $rawTransName = $data['transporter_name'] ?? null;
         $rawTransGst  = $data['transporter_gstin'] ?? ($data['transporter_registration_id'] ?? null);
@@ -353,7 +447,7 @@ class ZohoEwayBillService
             $payload['transporter_document_date'] = trim($data['transporter_doc_date']);
         }
 
-        // Place details
+        // Place & shipping state details
         if (!empty($data['from_place'])) {
             $payload['from_place'] = trim($data['from_place']);
         }
@@ -364,23 +458,34 @@ class ZohoEwayBillService
             $payload['to_place'] = trim($data['to_place']);
         }
         if (!empty($data['to_state_code'])) {
-            $payload['to_state'] = trim($data['to_state_code']);
+            $toState = trim((string) $data['to_state_code']);
+            $payload['to_state']           = $toState;
+            $payload['ship_to_state_code'] = $toState;
         }
 
-        // Call Zoho API
-        $meta = [
-            'module'          => 'eway_bills',
-            'local_record_id' => $docId,
-            'operation'       => 'GENERATE_EWAYBILL',
-        ];
+        // If updating an existing draft/failed Zoho e-Way Bill record, call PUT /ewaybills/{id}?action=...
+        $existingTarget      = $targetEwayBillId ? $this->ewayModel->find($targetEwayBillId) : null;
+        $existingDraftZohoId = ($existingTarget
+            && !empty($existingTarget['zoho_ewaybill_id'])
+            && in_array($existingTarget['status'], ['draft', 'failed'], true))
+            ? $existingTarget['zoho_ewaybill_id']
+            : null;
 
-        $response = $this->client->post('/ewaybills', $payload, [], $meta);
+        if ($existingDraftZohoId) {
+            $meta                   = $this->getEwbMeta('UPDATE_AND_GENERATE_EWAYBILL', $docId);
+            $meta['zoho_record_id'] = $existingDraftZohoId;
+            $response               = $this->requestEwb('PUT', "/ewaybills/{$existingDraftZohoId}", $payload, ['action' => $zohoAction], $meta, false);
+        } else {
+            $meta     = $this->getEwbMeta('GENERATE_EWAYBILL', $docId);
+            $response = $this->requestEwb('POST', '/ewaybills', $payload, [], $meta, false);
+        }
 
-        // Zoho code 9 = the organization's Zoho Books plan/setup does not allow e-Way Bill generation via API.
+        // Zoho code 9 = API access is not available for e-Way Bill generation on that endpoint/plan.
         // Never fake success here: report clearly so the user knows nothing was generated with NIC.
         if (empty($response['success']) && (int) ($response['zoho_code'] ?? 0) === 9) {
-            $response['message'] = 'Zoho Books rejected e-Way Bill generation via API ("API access is not available"). '
-                . 'Nothing was generated with the NIC portal. Generate it in Zoho Books, then use Sync to pull the new number.';
+            $usedService         = strtoupper((string) ($meta['api_service'] ?? 'inventory'));
+            $response['message'] = "Zoho ({$usedService}) rejected e-Way Bill generation via API (\"API access is not available\"). "
+                . 'Nothing was generated with the NIC portal. Generate it in Zoho, then use Sync to pull the new number.';
         }
 
         $recordData = [
@@ -435,15 +540,16 @@ class ZohoEwayBillService
 
             // A number is only trusted if Zoho reports it as freshly generated with NIC and
             // it is not a number we already hold as cancelled for this document.
-            $isGenerated = $ewbNumber !== '' && $zohoStatus === 'generated' && !$this->isCancelledNumber($docType, $docId, $ewbNumber);
+            $allowedStatuses = ($zohoAction === 'manually_generated') ? ['generated', 'manually_generated'] : ['generated'];
+            $isGenerated     = $ewbNumber !== '' && in_array($zohoStatus, $allowedStatuses, true) && !$this->isCancelledNumber($docType, $docId, $ewbNumber);
 
             if ($isGenerated) {
-                $status = ($action === 'generate_part_a' || empty($data['vehicle_number'])) ? 'part_a_generated' : 'generated';
+                $status = $isPartA ? 'part_a_generated' : 'generated';
             } else {
-                // Saved in Zoho Books only (draft) â€“ not generated with NIC.
-                $status    = 'draft';
-                $ewbNumber = null;
-                $ewbDate   = null;
+                // Saved in Zoho only (draft) - not generated with NIC.
+                $status     = 'draft';
+                $ewbNumber  = null;
+                $ewbDate    = null;
                 $validUntil = null;
             }
 
@@ -453,7 +559,7 @@ class ZohoEwayBillService
             $recordData['valid_until']      = $validUntil;
             $recordData['status']           = $status;
             $recordData['last_sync_at']     = date('Y-m-d H:i:s');
-            $recordData['error_message']    = $isGenerated ? null : 'Saved in Zoho Books as draft; e-Way Bill not generated with NIC yet.';
+            $recordData['error_message']    = $isGenerated ? null : 'Saved in Zoho as draft; e-Way Bill not generated with NIC yet.';
 
             if ($targetEwayBillId && $this->ewayModel->find($targetEwayBillId)) {
                 $this->ewayModel->update($targetEwayBillId, $recordData);
@@ -464,14 +570,14 @@ class ZohoEwayBillService
             }
 
             if (!$isGenerated) {
-                $intendedDraft = ($action === 'save');
+                $intendedDraft = ($zohoAction === 'save');
                 return [
                     'success' => $intendedDraft,
                     'id'      => $finalId,
                     'status'  => $status,
                     'message' => $intendedDraft
-                        ? 'e-Way Bill details saved in Zoho Books as draft (not generated with NIC yet).'
-                        : 'Zoho Books saved the e-Way Bill details but did not return a generated e-Way Bill number (Zoho status: '
+                        ? 'e-Way Bill details saved in Zoho as draft (not generated with NIC yet).'
+                        : 'Zoho saved the e-Way Bill details but did not return a generated e-Way Bill number (Zoho status: '
                             . ($zohoStatus ?: 'unknown') . '). Nothing was generated with NIC.',
                     'data'    => $ewbData,
                 ];
@@ -554,17 +660,20 @@ class ZohoEwayBillService
         $payload = array_filter($payload, static fn($v) => $v !== null && $v !== '');
 
         if (!$zohoEwbId || empty($ewb['ewaybill_number']) || !in_array($ewb['status'], ['generated', 'part_a_generated'], true)) {
-            return ['success' => false, 'message' => 'Vehicle details can only be updated on an e-Way Bill that was actually generated in Zoho Books.'];
+            return ['success' => false, 'message' => 'Vehicle details can only be updated on an e-Way Bill that was actually generated in Zoho.'];
         }
 
-        $res = $this->client->post("/ewaybills/{$zohoEwbId}/vehicles", $payload, [], [
-            'module'          => 'eway_bills',
-            'local_record_id' => $ewayBillId,
-            'operation'       => 'UPDATE_PART_B_VEHICLE',
-        ]);
+        $res = $this->requestEwb(
+            'POST',
+            "/ewaybills/{$zohoEwbId}/vehicles",
+            $payload,
+            [],
+            $this->getEwbMeta('UPDATE_PART_B_VEHICLE', $ewayBillId),
+            false
+        );
 
         if (empty($res['success'])) {
-            $msg = $res['message'] ?? 'Failed to update Part B in Zoho Books';
+            $msg = $res['message'] ?? 'Failed to update Part B in Zoho';
             $this->ewayModel->update($ewayBillId, ['error_message' => $msg, 'updated_at' => date('Y-m-d H:i:s')]);
             return ['success' => false, 'message' => $msg, 'raw' => $res];
         }
@@ -609,7 +718,7 @@ class ZohoEwayBillService
 
         $zohoEwbId = $ewb['zoho_ewaybill_id'] ?? null;
         if (!$zohoEwbId || empty($ewb['ewaybill_number']) || !in_array($ewb['status'], ['generated', 'part_a_generated'], true)) {
-            return ['success' => false, 'message' => 'Only e-Way Bills that were actually generated in Zoho Books can be cancelled.'];
+            return ['success' => false, 'message' => 'Only e-Way Bills that were actually generated in Zoho can be cancelled.'];
         }
 
         $payload = [
@@ -617,20 +726,23 @@ class ZohoEwayBillService
             'remarks' => $remarks,
         ];
 
-        $res = $this->client->post("/ewaybills/{$zohoEwbId}/cancel", $payload, [], [
-            'module'          => 'eway_bills',
-            'local_record_id' => $ewayBillId,
-            'operation'       => 'CANCEL_EWAYBILL',
-        ]);
+        $res = $this->requestEwb(
+            'POST',
+            "/ewaybills/{$zohoEwbId}/cancel",
+            $payload,
+            [],
+            $this->getEwbMeta('CANCEL_EWAYBILL', $ewayBillId),
+            false
+        );
 
         if (empty($res['success'])) {
             $this->ewayModel->update($ewayBillId, [
-                'error_message' => $res['message'] ?? 'Zoho Books cancellation failed.',
+                'error_message' => $res['message'] ?? 'Zoho cancellation failed.',
                 'updated_at'    => date('Y-m-d H:i:s'),
             ]);
             return [
                 'success' => false,
-                'message' => $res['message'] ?? 'Failed to cancel e-Way Bill in Zoho Books.',
+                'message' => $res['message'] ?? 'Failed to cancel e-Way Bill in Zoho.',
                 'raw'     => $res,
             ];
         }
@@ -743,43 +855,99 @@ class ZohoEwayBillService
 
         // 1. Direct lookup by linked Zoho e-Way Bill id
         if (!empty($ewb['zoho_ewaybill_id'])) {
-            $res = $this->client->get("/ewaybills/{$ewb['zoho_ewaybill_id']}", [], [
-                'module'          => 'eway_bills',
-                'local_record_id' => $ewayBillId,
-                'operation'       => 'GET_EWAYBILL',
-            ]);
+            // Pull latest live status from the GST portal into Zoho first
+            $this->requestEwb(
+                'POST',
+                "/ewaybills/{$ewb['zoho_ewaybill_id']}/sync",
+                null,
+                [],
+                $this->getEwbMeta('SYNC_EWAYBILL_GST', $ewayBillId),
+                true
+            );
+
+            $res = $this->requestEwb(
+                'GET',
+                "/ewaybills/{$ewb['zoho_ewaybill_id']}",
+                null,
+                [],
+                $this->getEwbMeta('GET_EWAYBILL', $ewayBillId),
+                true
+            );
             if (!empty($res['success'])) {
                 $zohoEwb = $res['data']['ewaybill'] ?? null;
             }
         }
 
-        // 2. Not linked yet (e.g. generated in Zoho portal): find an unlinked, live e-Way Bill on the invoice
-        if (!$zohoEwb && $docType === 'invoice') {
+        // 2. Not linked yet (e.g. generated in Zoho portal): find an unlinked, live e-Way Bill via Inventory v1 /ewaybills list or Invoice
+        if (!$zohoEwb) {
             $zohoDocId = $this->getZohoRecordId($docType, $docId);
             if ($zohoDocId) {
-                $invRes  = $this->client->get("/invoices/{$zohoDocId}");
-                $ewbList = $invRes['data']['invoice']['ewaybills'] ?? [];
+                $ewbCandidates  = [];
+                $zohoEntityType = $this->mapDocTypeToZoho($docType);
 
-                $cancelledNums = [];
-                foreach ($ewbList as $item) {
-                    if (strtolower($item['ewaybill_status'] ?? '') === 'cancelled' && !empty($item['ewaybill_number'])) {
-                        $cancelledNums[] = $item['ewaybill_number'];
+                if (in_array($zohoEntityType, ['invoice', 'creditnote', 'deliverychallan'], true)) {
+                    $listRes = $this->requestEwb(
+                        'GET',
+                        '/ewaybills',
+                        null,
+                        [
+                            'entity_type' => $zohoEntityType,
+                            'entity_ids'  => $zohoDocId,
+                        ],
+                        $this->getEwbMeta('LIST_EWAYBILLS_FOR_DOC', $ewayBillId),
+                        true
+                    );
+                    if (!empty($listRes['success']) && !empty($listRes['data']['ewaybills']) && is_array($listRes['data']['ewaybills'])) {
+                        $ewbCandidates = array_merge($ewbCandidates, $listRes['data']['ewaybills']);
                     }
                 }
 
-                foreach ($ewbList as $item) {
+                if ($docType === 'invoice') {
+                    $invRes = $this->client->get("/invoices/{$zohoDocId}");
+                    $invEwbList = $invRes['data']['invoice']['ewaybills'] ?? [];
+                    if (!empty($invEwbList) && is_array($invEwbList)) {
+                        $ewbCandidates = array_merge($ewbCandidates, $invEwbList);
+                    }
+                }
+
+                $cancelledNums = [];
+                foreach ($ewbCandidates as $item) {
+                    if (strtolower((string) ($item['ewaybill_status'] ?? '')) === 'cancelled' && !empty($item['ewaybill_number'])) {
+                        $cancelledNums[] = trim((string) $item['ewaybill_number']);
+                    }
+                }
+
+                foreach ($ewbCandidates as $item) {
                     $num = trim((string) ($item['ewaybill_number'] ?? ''));
-                    if ($num === '' || $this->mapZohoStatus($item['ewaybill_status'] ?? '') !== 'generated') {
+                    if ($num === '' || $this->mapZohoStatus((string) ($item['ewaybill_status'] ?? '')) !== 'generated') {
                         continue;
                     }
                     if (in_array($num, $cancelledNums, true) || $this->isCancelledNumber($docType, $docId, $num)) {
                         continue; // stale copy of a cancelled number
                     }
-                    $linkedElsewhere = $this->ewayModel->where('zoho_ewaybill_id', $item['ewaybill_id'])
-                        ->where('id !=', $ewayBillId)->countAllResults() > 0;
+                    $linkedElsewhere = !empty($item['ewaybill_id'])
+                        && $this->ewayModel->where('zoho_ewaybill_id', $item['ewaybill_id'])
+                            ->where('id !=', $ewayBillId)->countAllResults() > 0;
                     if ($linkedElsewhere) {
                         continue;
                     }
+
+                    // Fetch full details if list item doesn't include full expiry timestamp
+                    if (!empty($item['ewaybill_id']) && empty($item['ewaybill_expiry_date'])) {
+                        $detailRes = $this->requestEwb(
+                            'GET',
+                            "/ewaybills/{$item['ewaybill_id']}",
+                            null,
+                            [],
+                            $this->getEwbMeta('GET_EWAYBILL', $ewayBillId),
+                            true
+                        );
+                        if (!empty($detailRes['success']) && !empty($detailRes['data']['ewaybill'])) {
+                            $zohoEwb = $detailRes['data']['ewaybill'];
+                            break;
+                        }
+                    }
+
                     $zohoEwb = $item;
                     break;
                 }
@@ -788,7 +956,7 @@ class ZohoEwayBillService
 
         if (!$zohoEwb) {
             $this->ewayModel->update($ewayBillId, ['last_sync_at' => date('Y-m-d H:i:s')]);
-            return ['success' => false, 'message' => 'No newly generated e-Way Bill found in Zoho Books for this document.'];
+            return ['success' => false, 'message' => 'No newly generated e-Way Bill found in Zoho for this document.'];
         }
 
         $num    = trim((string) ($zohoEwb['ewaybill_number'] ?? ''));
@@ -812,7 +980,9 @@ class ZohoEwayBillService
         if (in_array($status, ['generated', 'cancelled', 'expired'], true) && $num !== '') {
             $update['ewaybill_number'] = $num;
             $update['ewaybill_date']   = !empty($zohoEwb['ewaybill_date']) ? $zohoEwb['ewaybill_date'] : $ewb['ewaybill_date'];
-            $update['valid_until']     = !empty($zohoEwb['ewaybill_expiry_date']) ? $zohoEwb['ewaybill_expiry_date'] : $ewb['valid_until'];
+            $update['valid_until']     = !empty($zohoEwb['ewaybill_expiry_date'])
+                ? $zohoEwb['ewaybill_expiry_date']
+                : (!empty($zohoEwb['expires_in']) ? $zohoEwb['expires_in'] : $ewb['valid_until']);
             $update['error_message']   = null;
         }
         if ($status === 'cancelled') {
@@ -838,6 +1008,188 @@ class ZohoEwayBillService
             'success' => true,
             'status'  => $status,
             'data'    => $zohoEwb,
+        ];
+    }
+
+    /**
+     * Fetch e-Way Bill module settings & registered GST portal credentials from Zoho.
+     */
+    public function getEwayBillSettings(): array
+    {
+        $config = $this->settingModel->getConfig(false);
+        if (empty($config['has_refresh_token']) || empty($config['organization_id'])) {
+            return [
+                'success'             => false,
+                'is_ewaybill_enabled' => false,
+                'credentials'         => [],
+                'primary_credential'  => null,
+                'tax_settings_id'     => $config['ewaybill_tax_settings_id'] ?? null,
+                'ewaybill_username'   => $config['ewaybill_gst_username'] ?? null,
+                'gstin'               => null,
+                'is_active'           => false,
+                'message'             => 'Zoho OAuth connection or Organization ID is not configured.',
+            ];
+        }
+
+        $res = $this->requestEwb(
+            'GET',
+            '/settings/ewaybills',
+            null,
+            [],
+            $this->getEwbMeta('GET_EWAYBILL_SETTINGS'),
+            true
+        );
+
+        if (empty($res['success'])) {
+            return [
+                'success'             => false,
+                'service_used'        => $config['ewaybill_api_service'] ?? 'inventory',
+                'needs_reauth'        => !empty($res['auth_scope_required']),
+                'is_ewaybill_enabled' => false,
+                'credentials'         => [],
+                'primary_credential'  => null,
+                'tax_settings_id'     => $config['ewaybill_tax_settings_id'] ?? null,
+                'ewaybill_username'   => $config['ewaybill_gst_username'] ?? null,
+                'gstin'               => null,
+                'is_active'           => false,
+                'message'             => $res['message'] ?? 'Unable to fetch e-Way Bill settings from Zoho.',
+                'raw'                 => $res,
+            ];
+        }
+
+        $settings    = $res['data']['ewaybill_settings'] ?? [];
+        $creds       = $settings['ewaybill_credentials'] ?? [];
+        $primaryCred = is_array($creds) && !empty($creds) ? $creds[0] : null;
+        $taxSetId    = $primaryCred['tax_settings_id'] ?? ($config['ewaybill_tax_settings_id'] ?? null);
+        $username    = $primaryCred['ewaybill_username'] ?? ($config['ewaybill_gst_username'] ?? null);
+
+        // Cache latest username / tax_settings_id locally if changed
+        $cacheUpdate = [];
+        if ($username && $username !== ($config['ewaybill_gst_username'] ?? null)) {
+            $cacheUpdate['ewaybill_gst_username'] = $username;
+        }
+        if ($taxSetId && $taxSetId !== ($config['ewaybill_tax_settings_id'] ?? null)) {
+            $cacheUpdate['ewaybill_tax_settings_id'] = $taxSetId;
+        }
+        if (!empty($cacheUpdate)) {
+            $this->settingModel->saveConfig($cacheUpdate);
+        }
+
+        return [
+            'success'             => true,
+            'service_used'        => $res['used_fallback_service'] ?? ($config['ewaybill_api_service'] ?? 'inventory'),
+            'used_fallback'       => !empty($res['used_fallback_service']),
+            'is_ewaybill_enabled' => !empty($settings['is_ewaybill_enabled']),
+            'credentials'         => $creds,
+            'primary_credential'  => $primaryCred,
+            'tax_settings_id'     => $taxSetId,
+            'ewaybill_username'   => $username,
+            'gstin'               => $primaryCred['gstin'] ?? null,
+            'is_active'           => !empty($primaryCred['is_active']),
+            'message'             => 'OK',
+            'raw'                 => $res,
+        ];
+    }
+
+    /**
+     * Update GST Portal (GSP) credentials for e-Way Bill generation in Zoho.
+     * Endpoint: PUT /settings/{tax_settings_id}/ewaybills or PUT /settings/ewaybills
+     */
+    public function updateEwayBillCredentials(string $username, string $password, ?string $taxSettingsId = null): array
+    {
+        $username = trim($username);
+        if ($username === '' || $password === '') {
+            return ['success' => false, 'message' => 'Both GST Portal Username and Password are required.'];
+        }
+
+        $taxSettingsId = trim((string) $taxSettingsId);
+        $endpoint      = $taxSettingsId !== '' ? "/settings/{$taxSettingsId}/ewaybills" : '/settings/ewaybills';
+
+        $payload = [
+            'ewaybill_username' => $username,
+            'ewaybill_password' => $password,
+        ];
+
+        $res = $this->requestEwb(
+            'PUT',
+            $endpoint,
+            $payload,
+            [],
+            $this->getEwbMeta('UPDATE_EWAYBILL_CREDENTIALS'),
+            true
+        );
+
+        if (empty($res['success'])) {
+            return [
+                'success' => false,
+                'message' => $res['message'] ?? 'Failed to update e-Way Bill GST portal credentials in Zoho.',
+                'raw'     => $res,
+            ];
+        }
+
+        $save = ['ewaybill_gst_username' => $username];
+        if ($taxSettingsId !== '') {
+            $save['ewaybill_tax_settings_id'] = $taxSettingsId;
+        }
+        $this->settingModel->saveConfig($save);
+
+        return [
+            'success' => true,
+            'message' => $res['data']['message'] ?? 'GST Portal e-Way Bill credentials updated successfully in Zoho.',
+            'data'    => $res['data'] ?? [],
+        ];
+    }
+
+    /**
+     * Test both Zoho Inventory v1 and Zoho Books v3 e-Way Bill API endpoints.
+     */
+    public function testEwayBillApi(): array
+    {
+        $invRes = $this->client->request(
+            'GET',
+            '/settings/ewaybills',
+            null,
+            [],
+            $this->getEwbMeta('TEST_EWAYBILL_INVENTORY_API', null, 'inventory')
+        );
+
+        $booksRes = $this->client->request(
+            'GET',
+            '/settings/ewaybills',
+            null,
+            [],
+            $this->getEwbMeta('TEST_EWAYBILL_BOOKS_API', null, 'books')
+        );
+
+        $invOk        = !empty($invRes['success']);
+        $booksOk      = !empty($booksRes['success']);
+        $needsReauth  = !$invOk && ((int) ($invRes['http_code'] ?? 0) === 401 && (int) ($invRes['zoho_code'] ?? 0) === 57);
+        $ewbSettings  = $invRes['data']['ewaybill_settings'] ?? ($booksRes['data']['ewaybill_settings'] ?? null);
+        $credCount    = count($ewbSettings['ewaybill_credentials'] ?? []);
+        $credActive   = !empty($ewbSettings['ewaybill_credentials'][0]['is_active']);
+
+        if ($invOk) {
+            $msg = 'Zoho Inventory v1 e-Way Bill API is connected & authorized (HTTP 200). '
+                . ($credCount > 0 ? ($credActive ? 'GSP credentials are active.' : 'GSP credentials found but inactive.') : 'No GSP credentials configured in Zoho.');
+        } elseif ($needsReauth) {
+            $msg = 'Zoho Inventory v1 returned HTTP 401 (Not Authorized). Your current OAuth token only has ZohoBooks scope. '
+                . 'Click "Connect / Re-Authorize Zoho (Books + Inventory OAuth 2.0)" to grant ZohoInventory.fullaccess.all.';
+        } else {
+            $msg = 'Zoho Inventory v1 e-Way Bill API test failed: ' . ($invRes['message'] ?? 'Unknown error');
+        }
+
+        return [
+            'success'                => $invOk,
+            'inventory_ok'           => $invOk,
+            'inventory_http_code'    => $invRes['http_code'] ?? 0,
+            'inventory_zoho_code'    => $invRes['zoho_code'] ?? null,
+            'inventory_message'      => $invRes['message'] ?? '',
+            'inventory_needs_reauth' => $needsReauth,
+            'books_ok'               => $booksOk,
+            'books_http_code'        => $booksRes['http_code'] ?? 0,
+            'books_message'          => $booksRes['message'] ?? '',
+            'ewaybill_settings'      => $ewbSettings,
+            'message'                => $msg,
         ];
     }
 }

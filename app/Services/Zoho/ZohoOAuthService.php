@@ -32,8 +32,16 @@ class ZohoOAuthService
             ? $config['oauth_redirect_url']
             : site_url('settings/integrations/zoho/callback');
 
+        $rawScopes = trim((string) ($config['oauth_scopes'] ?? 'ZohoBooks.fullaccess.all,ZohoInventory.fullaccess.all'));
+        $scopes    = array_values(array_unique(array_filter(array_map('trim', preg_split('/[\s,]+/', $rawScopes) ?: []))));
+        foreach (['ZohoBooks.fullaccess.all', 'ZohoInventory.fullaccess.all'] as $requiredScope) {
+            if (!in_array($requiredScope, $scopes, true)) {
+                $scopes[] = $requiredScope;
+            }
+        }
+
         $params = [
-            'scope'         => 'ZohoBooks.fullaccess.all',
+            'scope'         => implode(',', $scopes),
             'client_id'     => $config['client_id'],
             'state'         => $state ?: bin2hex(random_bytes(12)),
             'response_type' => 'code',
@@ -68,8 +76,9 @@ class ZohoOAuthService
             if ($mappedDc && $mappedDc !== $config['data_center']) {
                 $dcInfo = ZohoDataCenterRegistry::get($mappedDc);
                 $this->settingModel->saveConfig([
-                    'data_center'  => $mappedDc,
-                    'api_base_url' => $dcInfo['api_base_url'],
+                    'data_center'            => $mappedDc,
+                    'api_base_url'           => $dcInfo['api_base_url'],
+                    'inventory_api_base_url' => $dcInfo['inventory_api_base_url'],
                 ]);
                 $config = $this->settingModel->getConfig(true);
             }
@@ -108,7 +117,9 @@ class ZohoOAuthService
             $update['refresh_token'] = $response['refresh_token'];
         }
         if (!empty($response['api_domain'])) {
-            $update['api_base_url'] = rtrim($response['api_domain'], '/') . '/books/v3';
+            $apiDomain = rtrim($response['api_domain'], '/');
+            $update['api_base_url']           = $apiDomain . '/books/v3';
+            $update['inventory_api_base_url'] = $apiDomain . '/inventory/v1';
         }
 
         $this->settingModel->saveConfig($update);

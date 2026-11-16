@@ -27,6 +27,11 @@ class ZohoSettingModel extends Model
         'organizations_cache_json',
         'oauth_redirect_url',
         'api_base_url',
+        'ewaybill_api_service',
+        'inventory_api_base_url',
+        'oauth_scopes',
+        'ewaybill_gst_username',
+        'ewaybill_tax_settings_id',
         'conflict_strategy',
         'preserve_document_numbers',
         'subscription_plan',
@@ -64,14 +69,19 @@ class ZohoSettingModel extends Model
         self::$schemaEnsured = true;
 
         try {
+            $loadMigration = static function (): \App\Database\Migrations\CreateZohoIntegrationTables {
+                if (!class_exists(\App\Database\Migrations\CreateZohoIntegrationTables::class, false)) {
+                    require_once APPPATH . 'Database/Migrations/2026-11-10-000001_CreateZohoIntegrationTables.php';
+                }
+                return new \App\Database\Migrations\CreateZohoIntegrationTables();
+            };
+
             if (!$this->db->tableExists('zoho_settings') || !$this->db->tableExists('zoho_sync_mapping')) {
-                $migration = new \App\Database\Migrations\CreateZohoIntegrationTables();
-                $migration->up();
+                $loadMigration()->up();
             } else {
                 $cols = array_map('strtolower', $this->db->getFieldNames('zoho_settings'));
-                if (!in_array('subscription_plan', $cols, true)) {
-                    $migration = new \App\Database\Migrations\CreateZohoIntegrationTables();
-                    $migration->up();
+                if (!in_array('subscription_plan', $cols, true) || !in_array('ewaybill_api_service', $cols, true)) {
+                    $loadMigration()->up();
                 }
             }
         } catch (\Throwable $e) {
@@ -92,6 +102,9 @@ class ZohoSettingModel extends Model
                 'sync_mode'                  => 'immediate',
                 'data_center'                => 'in',
                 'api_base_url'               => 'https://www.zohoapis.in/books/v3',
+                'ewaybill_api_service'       => 'inventory',
+                'inventory_api_base_url'     => 'https://www.zohoapis.in/inventory/v1',
+                'oauth_scopes'               => 'ZohoBooks.fullaccess.all,ZohoInventory.fullaccess.all',
                 'oauth_redirect_url'         => site_url('settings/integrations/zoho/callback'),
                 'conflict_strategy'          => 'manual_review',
                 'preserve_document_numbers'  => 1,
@@ -106,6 +119,20 @@ class ZohoSettingModel extends Model
 
         if (empty($row['oauth_redirect_url'])) {
             $row['oauth_redirect_url'] = site_url('settings/integrations/zoho/callback');
+        }
+        if (empty($row['ewaybill_api_service']) || !in_array($row['ewaybill_api_service'], ['inventory', 'books'], true)) {
+            $row['ewaybill_api_service'] = 'inventory';
+        }
+        if (empty($row['inventory_api_base_url'])) {
+            if (!empty($row['api_base_url']) && strpos($row['api_base_url'], '/books/v3') !== false) {
+                $row['inventory_api_base_url'] = str_replace('/books/v3', '/inventory/v1', rtrim($row['api_base_url'], '/'));
+            } else {
+                $dcInfo = \App\Services\Zoho\ZohoDataCenterRegistry::get($row['data_center'] ?? 'in');
+                $row['inventory_api_base_url'] = $dcInfo['inventory_api_base_url'];
+            }
+        }
+        if (empty($row['oauth_scopes'])) {
+            $row['oauth_scopes'] = 'ZohoBooks.fullaccess.all,ZohoInventory.fullaccess.all';
         }
 
         if ($decryptSecrets) {
@@ -164,6 +191,27 @@ class ZohoSettingModel extends Model
         }
         if (array_key_exists('api_base_url', $input)) {
             $update['api_base_url'] = rtrim(trim((string) $input['api_base_url']), '/');
+        }
+        if (!empty($input['ewaybill_api_service']) && in_array($input['ewaybill_api_service'], ['inventory', 'books'], true)) {
+            $update['ewaybill_api_service'] = $input['ewaybill_api_service'];
+        }
+        if (array_key_exists('inventory_api_base_url', $input)) {
+            $invUrl = rtrim(trim((string) $input['inventory_api_base_url']), '/');
+            if ($invUrl !== '') {
+                $update['inventory_api_base_url'] = $invUrl;
+            }
+        }
+        if (array_key_exists('oauth_scopes', $input)) {
+            $scopes = trim((string) $input['oauth_scopes']);
+            if ($scopes !== '') {
+                $update['oauth_scopes'] = $scopes;
+            }
+        }
+        if (array_key_exists('ewaybill_gst_username', $input)) {
+            $update['ewaybill_gst_username'] = trim((string) $input['ewaybill_gst_username']) ?: null;
+        }
+        if (array_key_exists('ewaybill_tax_settings_id', $input)) {
+            $update['ewaybill_tax_settings_id'] = trim((string) $input['ewaybill_tax_settings_id']) ?: null;
         }
         if (!empty($input['conflict_strategy']) && in_array($input['conflict_strategy'], ['manual_review', 'latest_timestamp', 'prefer_zoho', 'prefer_local'], true)) {
             $update['conflict_strategy'] = $input['conflict_strategy'];

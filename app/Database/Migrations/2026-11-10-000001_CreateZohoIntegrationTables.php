@@ -29,6 +29,11 @@ class CreateZohoIntegrationTables extends Migration
                     `organizations_cache_json` LONGTEXT NULL,
                     `oauth_redirect_url` VARCHAR(500) NULL,
                     `api_base_url` VARCHAR(255) NOT NULL DEFAULT 'https://www.zohoapis.in/books/v3',
+                    `ewaybill_api_service` VARCHAR(20) NOT NULL DEFAULT 'inventory',
+                    `inventory_api_base_url` VARCHAR(255) NOT NULL DEFAULT 'https://www.zohoapis.com/inventory/v1',
+                    `oauth_scopes` VARCHAR(500) NOT NULL DEFAULT 'ZohoBooks.fullaccess.all,ZohoInventory.fullaccess.all',
+                    `ewaybill_gst_username` VARCHAR(255) NULL,
+                    `ewaybill_tax_settings_id` VARCHAR(64) NULL,
                     `conflict_strategy` ENUM('manual_review','latest_timestamp','prefer_zoho','prefer_local') NOT NULL DEFAULT 'manual_review',
                     `preserve_document_numbers` TINYINT(1) NOT NULL DEFAULT 1,
                     `subscription_plan` VARCHAR(30) NOT NULL DEFAULT 'free',
@@ -52,6 +57,9 @@ class CreateZohoIntegrationTables extends Migration
                 'sync_mode'                  => 'immediate',
                 'data_center'                => 'in',
                 'api_base_url'               => 'https://www.zohoapis.in/books/v3',
+                'ewaybill_api_service'       => 'inventory',
+                'inventory_api_base_url'     => 'https://www.zohoapis.in/inventory/v1',
+                'oauth_scopes'               => 'ZohoBooks.fullaccess.all,ZohoInventory.fullaccess.all',
                 'conflict_strategy'          => 'manual_review',
                 'preserve_document_numbers'  => 1,
                 'subscription_plan'          => 'free',
@@ -74,6 +82,21 @@ class CreateZohoIntegrationTables extends Migration
             }
             if (!in_array('max_concurrent_connections', $cols, true)) {
                 $db->query("ALTER TABLE `zoho_settings` ADD COLUMN `max_concurrent_connections` INT UNSIGNED NOT NULL DEFAULT 5 AFTER `per_minute_limit`");
+            }
+            if (!in_array('ewaybill_api_service', $cols, true)) {
+                $db->query("ALTER TABLE `zoho_settings` ADD COLUMN `ewaybill_api_service` VARCHAR(20) NOT NULL DEFAULT 'inventory' AFTER `api_base_url`");
+            }
+            if (!in_array('inventory_api_base_url', $cols, true)) {
+                $db->query("ALTER TABLE `zoho_settings` ADD COLUMN `inventory_api_base_url` VARCHAR(255) NOT NULL DEFAULT 'https://www.zohoapis.com/inventory/v1' AFTER `ewaybill_api_service`");
+            }
+            if (!in_array('oauth_scopes', $cols, true)) {
+                $db->query("ALTER TABLE `zoho_settings` ADD COLUMN `oauth_scopes` VARCHAR(500) NOT NULL DEFAULT 'ZohoBooks.fullaccess.all,ZohoInventory.fullaccess.all' AFTER `inventory_api_base_url`");
+            }
+            if (!in_array('ewaybill_gst_username', $cols, true)) {
+                $db->query("ALTER TABLE `zoho_settings` ADD COLUMN `ewaybill_gst_username` VARCHAR(255) NULL AFTER `oauth_scopes`");
+            }
+            if (!in_array('ewaybill_tax_settings_id', $cols, true)) {
+                $db->query("ALTER TABLE `zoho_settings` ADD COLUMN `ewaybill_tax_settings_id` VARCHAR(64) NULL AFTER `ewaybill_gst_username`");
             }
         }
 

@@ -193,9 +193,18 @@ class ZohoApiClient
         $config = $this->settingModel->getConfig(true);
         $dc     = ZohoDataCenterRegistry::get($config['data_center'] ?? 'in');
 
-        $baseUrl = !empty($config['api_base_url'])
-            ? rtrim($config['api_base_url'], '/')
-            : $dc['api_base_url'];
+        $apiService = strtolower((string) ($meta['api_service'] ?? 'books'));
+        if ($apiService === 'inventory') {
+            $baseUrl = !empty($config['inventory_api_base_url'])
+                ? rtrim($config['inventory_api_base_url'], '/')
+                : (!empty($config['api_base_url']) && strpos($config['api_base_url'], '/books/v3') !== false
+                    ? str_replace('/books/v3', '/inventory/v1', rtrim($config['api_base_url'], '/'))
+                    : $dc['inventory_api_base_url']);
+        } else {
+            $baseUrl = !empty($config['api_base_url'])
+                ? rtrim($config['api_base_url'], '/')
+                : $dc['api_base_url'];
+        }
 
         $endpoint = '/' . ltrim($endpoint, '/');
 

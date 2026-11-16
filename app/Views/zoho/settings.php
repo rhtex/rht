@@ -132,20 +132,51 @@
                                 <?php foreach ($dataCenters as $dcCode => $dc): ?>
                                     <option value="<?= esc($dcCode) ?>"
                                             data-api="<?= esc($dc['api_base_url']) ?>"
+                                            data-inventory-api="<?= esc($dc['inventory_api_base_url']) ?>"
                                             <?= ($config['data_center'] ?? 'in') === $dcCode ? 'selected' : '' ?>>
                                         <?= esc($dc['label']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
-                            <small class="text-muted">For Indian GST organizations, select <strong>India (.zoho.in)</strong>.</small>
+                            <small class="text-muted">For Indian GST organizations, select <strong>India (.zoho.in)</strong> or matching Zoho DC.</small>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">API Base URL <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold">Zoho Books v3 API Base URL <span class="text-danger">*</span></label>
                             <input type="url" name="api_base_url" id="apiBaseUrlInput" class="form-control"
                                    value="<?= esc($config['api_base_url'] ?? 'https://www.zohoapis.in/books/v3') ?>" required>
-                            <small class="text-muted">Automatically matched to the selected Data Centre.</small>
+                            <small class="text-muted">Used for Invoices, Customers, Items, Transporters &amp; Ledger Sync.</small>
                         </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">e-Way Bill API Service <span class="badge bg-info-subtle text-info ms-1">Inventory v1 Docs</span></label>
+                            <select name="ewaybill_api_service" class="form-select">
+                                <option value="inventory" <?= ($config['ewaybill_api_service'] ?? 'inventory') === 'inventory' ? 'selected' : '' ?>>
+                                    Zoho Inventory API v1 (/inventory/v1) — Recommended
+                                </option>
+                                <option value="books" <?= ($config['ewaybill_api_service'] ?? '') === 'books' ? 'selected' : '' ?>>
+                                    Zoho Books API v3 (/books/v3)
+                                </option>
+                            </select>
+                            <small class="text-muted">Directs e-Way Bill generation, Part-B, sync &amp; cancellation requests.</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Zoho Inventory v1 API Base URL <span class="text-danger">*</span></label>
+                            <input type="url" name="inventory_api_base_url" id="inventoryApiBaseUrlInput" class="form-control"
+                                   value="<?= esc($config['inventory_api_base_url'] ?? 'https://www.zohoapis.com/inventory/v1') ?>" required>
+                            <small class="text-muted">Used for Zoho e-Way Bills API (<code>/inventory/v1/ewaybills</code>).</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">OAuth 2.0 Scopes</label>
+                        <input type="text" name="oauth_scopes" class="form-control font-monospace small"
+                               value="<?= esc($config['oauth_scopes'] ?? 'ZohoBooks.fullaccess.all,ZohoInventory.fullaccess.all') ?>"
+                               placeholder="ZohoBooks.fullaccess.all,ZohoInventory.fullaccess.all">
+                        <small class="text-muted">Must include both <code>ZohoBooks.fullaccess.all</code> and <code>ZohoInventory.fullaccess.all</code>. Re-authorize after changing scopes.</small>
                     </div>
 
                     <div class="mb-3">
@@ -321,13 +352,20 @@
                 <?php endif; ?>
 
                 <a href="<?= site_url('settings/integrations/zoho/connect') ?>" class="btn btn-success fw-bold py-2 <?= (empty($config['has_client_id']) || empty($config['has_client_secret'])) ? 'opacity-75' : '' ?>">
-                    <i class="fas fa-plug me-2"></i> Connect to Zoho Books (OAuth 2.0)
+                    <i class="fas fa-plug me-2"></i> Connect / Re-Authorize Zoho (Books + Inventory OAuth 2.0)
                 </a>
 
                 <form action="<?= site_url('settings/integrations/zoho/test') ?>" method="post" class="d-grid">
                     <?= csrf_field() ?>
                     <button type="submit" class="btn btn-outline-primary fw-semibold py-2">
                         <i class="fas fa-vial me-2"></i> Test Connection & Fetch Orgs
+                    </button>
+                </form>
+
+                <form action="<?= site_url('settings/integrations/zoho/test-ewaybill') ?>" method="post" class="d-grid">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="btn btn-outline-secondary fw-semibold py-2">
+                        <i class="fas fa-truck-loading me-2"></i> Test e-Way Bill API (Inventory v1)
                     </button>
                 </form>
 
@@ -377,6 +415,65 @@
                         Connect to Zoho Books or click <strong>Test Connection & Fetch Orgs</strong> above to retrieve your available Zoho Books organizations.
                     </p>
                 <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Zoho e-Way Bill Portal (GSP) Settings Card -->
+        <div class="card card-outline card-primary shadow-sm mb-3">
+            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-file-invoice text-primary me-2"></i>Zoho e-Way Bill Portal (GSP)</h3>
+                <?php if (!empty($ewbSettings['is_ewaybill_enabled']) && !empty($ewbSettings['is_active'])): ?>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
+                <?php elseif (!empty($ewbSettings['success'])): ?>
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Inactive</span>
+                <?php else: ?>
+                    <span class="badge bg-secondary-subtle text-secondary border">Unverified</span>
+                <?php endif; ?>
+            </div>
+            <div class="card-body p-3">
+                <?php if (!empty($ewbSettings['needs_reauth']) || !empty($ewbSettings['used_fallback'])): ?>
+                    <div class="alert alert-warning py-2 px-3 small mb-3">
+                        <i class="fas fa-key me-1"></i> Your token does not yet include <code>ZohoInventory.fullaccess.all</code>. Click <strong>Connect / Re-Authorize Zoho (Books + Inventory OAuth 2.0)</strong> above so e-Way Bills route through <code>/inventory/v1</code>.
+                    </div>
+                <?php endif; ?>
+
+                <div class="small mb-3 bg-light p-2 rounded border">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">e-Way Bill Module:</span>
+                        <span class="fw-semibold"><?= !empty($ewbSettings['is_ewaybill_enabled']) ? 'Enabled' : 'Not Verified / Disabled' ?></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">GSTIN:</span>
+                        <span class="fw-semibold font-monospace"><?= esc($ewbSettings['gstin'] ?? '—') ?></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">GSP API Username:</span>
+                        <span class="fw-semibold"><?= esc($ewbSettings['ewaybill_username'] ?? ($config['ewaybill_gst_username'] ?? '—')) ?></span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Tax Settings ID:</span>
+                        <span class="fw-semibold font-monospace"><?= esc($ewbSettings['tax_settings_id'] ?? ($config['ewaybill_tax_settings_id'] ?? '—')) ?></span>
+                    </div>
+                </div>
+
+                <form action="<?= site_url('settings/integrations/zoho/ewaybill-credentials') ?>" method="post" autocomplete="off">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="tax_settings_id" value="<?= esc($ewbSettings['tax_settings_id'] ?? ($config['ewaybill_tax_settings_id'] ?? '')) ?>">
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold mb-1">NIC GSP API Username</label>
+                        <input type="text" name="ewaybill_username" class="form-control form-control-sm"
+                               value="<?= esc($ewbSettings['ewaybill_username'] ?? ($config['ewaybill_gst_username'] ?? '')) ?>"
+                               placeholder="e.g. rasihandlo_API_gow" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold mb-1">NIC GSP API Password</label>
+                        <input type="password" name="ewaybill_password" class="form-control form-control-sm"
+                               placeholder="Enter NIC GSP password to update" autocomplete="new-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary w-100 fw-semibold">
+                        <i class="fas fa-save me-1"></i> Update GSP Credentials in Zoho
+                    </button>
+                </form>
             </div>
         </div>
 
@@ -438,17 +535,22 @@
 <?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const dcSelect = document.getElementById('dataCenterSelect');
-    const apiInput = document.getElementById('apiBaseUrlInput');
-    const copyBtn  = document.getElementById('copyRedirectBtn');
-    const redirInp = document.getElementById('oauthRedirectInput');
+    const dcSelect    = document.getElementById('dataCenterSelect');
+    const apiInput    = document.getElementById('apiBaseUrlInput');
+    const invApiInput = document.getElementById('inventoryApiBaseUrlInput');
+    const copyBtn     = document.getElementById('copyRedirectBtn');
+    const redirInp    = document.getElementById('oauthRedirectInput');
 
     if (dcSelect && apiInput) {
         dcSelect.addEventListener('change', function() {
-            const opt = dcSelect.options[dcSelect.selectedIndex];
-            const url = opt ? opt.getAttribute('data-api') : '';
+            const opt    = dcSelect.options[dcSelect.selectedIndex];
+            const url    = opt ? opt.getAttribute('data-api') : '';
+            const invUrl = opt ? opt.getAttribute('data-inventory-api') : '';
             if (url) {
                 apiInput.value = url;
+            }
+            if (invApiInput && invUrl) {
+                invApiInput.value = invUrl;
             }
         });
     }

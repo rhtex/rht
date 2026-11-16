@@ -346,10 +346,17 @@
                                 </select>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Transporter ID (Zoho ID / GSTIN)</label>
-                                <input type="text" name="transporter_id" id="transporter_id" class="form-control text-uppercase" placeholder="Zoho Transporter ID or 15-digit GSTIN">
-                                <div class="form-text small text-muted">Pass Zoho Transporter ID or Transporter GSTIN.</div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label">Zoho Transporter ID</label>
+                                    <input type="text" name="transporter_id" id="transporter_id" class="form-control bg-light" placeholder="Auto-populated from Zoho" readonly>
+                                    <div class="form-text small text-muted">Zoho Books internal ID (uneditable).</div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Transporter GSTIN / TRANSIN</label>
+                                    <input type="text" name="transporter_gstin" id="transporter_gstin" class="form-control text-uppercase" placeholder="15-digit GSTIN / TRANSIN">
+                                    <div class="form-text small text-muted">Transporter's 15-digit GSTIN number.</div>
+                                </div>
                                 <input type="hidden" name="transporter_name" id="transporter_name" value="">
                             </div>
 
@@ -401,9 +408,12 @@ function applyPresetTransporter(select) {
     const opt = select.options[select.selectedIndex];
     if (opt && opt.value) {
         document.getElementById('transporter_name').value = opt.getAttribute('data-name') || '';
-        const zohoId = opt.getAttribute('data-zoho-id') || '';
-        const gst = opt.getAttribute('data-gst') || '';
-        document.getElementById('transporter_id').value = zohoId ? zohoId : gst;
+        document.getElementById('transporter_id').value = opt.getAttribute('data-zoho-id') || '';
+        document.getElementById('transporter_gstin').value = opt.getAttribute('data-gst') || '';
+    } else {
+        document.getElementById('transporter_name').value = '';
+        document.getElementById('transporter_id').value = '';
+        document.getElementById('transporter_gstin').value = '';
     }
 }
 

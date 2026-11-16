@@ -102,15 +102,16 @@ class ZohoEwayBillService
      *
      * @return array [zoho_transporter_id, transporter_registration_id, transporter_name]
      */
-    public function resolveTransporter(?string $transVal, ?string $transName = null): array
+    public function resolveTransporter(?string $transVal, ?string $transName = null, ?string $transGst = null): array
     {
-        $transVal = trim((string) $transVal);
+        $transVal  = trim((string) $transVal);
         $transName = trim((string) $transName);
+        $transGst  = trim((string) $transGst);
 
         $zohoId = null;
-        $gstin  = null;
+        $gstin  = ($transGst !== '') ? strtoupper($transGst) : null;
 
-        if ($transVal === '' && $transName === '') {
+        if ($transVal === '' && $transName === '' && $gstin === null) {
             return [
                 'zoho_transporter_id'        => null,
                 'transporter_registration_id' => null,
@@ -133,9 +134,10 @@ class ZohoEwayBillService
             }
         }
 
-        // 2. Check if transVal is a 15-character GSTIN/TRANSIN
-        if (!$zohoId && preg_match('/^[0-9]{2}[A-Z0-9]{13}$/i', $transVal)) {
-            $gstin = strtoupper($transVal);
+        // 2. Check if transVal is a 15-character GSTIN/TRANSIN or $gstin is provided
+        $testGst = $gstin ?: (preg_match('/^[0-9]{2}[A-Z0-9]{13}$/i', $transVal) ? strtoupper($transVal) : null);
+        if (!$zohoId && $testGst) {
+            $gstin = $testGst;
             $matched = $this->transportModel->where('branch_gst_number', $gstin)
                 ->where('zoho_transporter_id IS NOT NULL')
                 ->where('zoho_transporter_id !=', '')
@@ -149,7 +151,7 @@ class ZohoEwayBillService
         }
 
         // 3. Check by transport name or local transport ID
-        if (!$zohoId && ($transName !== '' || is_numeric($transVal))) {
+        if (!$zohoId && ($transName !== '' || (is_numeric($transVal) && (int) $transVal < 1000000))) {
             $builder = $this->transportModel->groupStart();
             if ($transName !== '') {
                 $builder->where('LOWER(transport_name)', strtolower($transName));
@@ -290,7 +292,8 @@ class ZohoEwayBillService
         // Transporter resolution: always pass Zoho internal transporter_id to Zoho Books API
         $rawTransId   = $data['transporter_id'] ?? null;
         $rawTransName = $data['transporter_name'] ?? null;
-        $resolvedTrans = $this->resolveTransporter($rawTransId, $rawTransName);
+        $rawTransGst  = $data['transporter_gstin'] ?? ($data['transporter_registration_id'] ?? null);
+        $resolvedTrans = $this->resolveTransporter($rawTransId, $rawTransName, $rawTransGst);
 
         if (!empty($resolvedTrans['zoho_transporter_id'])) {
             $payload['transporter_id'] = $resolvedTrans['zoho_transporter_id'];
@@ -451,8 +454,9 @@ class ZohoEwayBillService
 
         $zohoEwbId = $ewb['zoho_ewaybill_id'] ?? null;
 
-        $rawPartBTransId = $data['transporter_id'] ?? ($ewb['transporter_id'] ?? null);
-        $resolvedPartBTrans = $this->resolveTransporter($rawPartBTransId, $ewb['transporter_name'] ?? null);
+        $rawPartBTransId  = $data['transporter_id'] ?? ($ewb['transporter_id'] ?? null);
+        $rawPartBTransGst = $data['transporter_gstin'] ?? null;
+        $resolvedPartBTrans = $this->resolveTransporter($rawPartBTransId, $ewb['transporter_name'] ?? null, $rawPartBTransGst);
 
         $payload = [
             'vehicle_number'            => strtoupper(trim(str_replace(' ', '', $data['vehicle_number'] ?? ''))),

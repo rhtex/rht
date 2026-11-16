@@ -293,7 +293,7 @@ class EwayBillController extends BaseController
         $rules = [
             'document_type'   => 'required|in_list[invoice,credit_note,delivery_challan,purchase_bill]',
             'document_id'     => 'required|is_natural_no_zero',
-            'transport_mode'  => 'required|in_list[1,2,3,4]',
+            'transport_mode'  => 'required|in_list[1,2,3,4,road,rail,air,ship]',
             'distance_km'     => 'required|numeric',
         ];
 

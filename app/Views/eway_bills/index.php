@@ -232,7 +232,7 @@
                                             <?php endif; ?>
 
                                             <!-- Regenerate e-Way Bill -->
-                                            <?php if (in_array($row['status'], ['cancelled', 'failed']) && can('eway_bill.create')): ?>
+                                            <?php if (in_array($row['status'], ['cancelled', 'failed', 'draft']) && can('eway_bill.create')): ?>
                                                 <a href="<?= site_url('eway_bills/regenerate/' . $row['id']) ?>" class="btn btn-outline-warning" title="Regenerate e-Way Bill (Full Details Page)">
                                                     <i class="fas fa-redo"></i>
                                                 </a>

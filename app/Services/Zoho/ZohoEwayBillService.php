@@ -79,6 +79,47 @@ class ZohoEwayBillService
     }
 
     /**
+     * Map cancel reason (NIC code 1-4 or label) to Zoho Books value
+     */
+    protected function mapCancelReason(mixed $reason): string
+    {
+        $r = strtolower(trim((string) $reason));
+        return match ($r) {
+            '1', 'duplicate', 'duplicate generation'           => 'duplicate',
+            '2', 'order_cancelled', 'order cancelled'           => 'order_cancelled',
+            '3', 'data_entry_mistake', 'data entry mistake'     => 'data_entry_mistake',
+            default                                             => 'others',
+        };
+    }
+
+    /**
+     * Map vehicle (Part-B) update reason to Zoho Books value
+     */
+    protected function mapVehicleUpdateReason(mixed $reason): string
+    {
+        $r = strtolower(trim((string) $reason));
+        return match ($r) {
+            'vehicle breakdown', 'break_down', 'due_to_break_down' => 'due_to_break_down',
+            'transshipment', 'transhipment', 'due_to_transhipment' => 'due_to_transhipment',
+            'first transit', 'first_time'                          => 'first_time',
+            default                                                => 'others',
+        };
+    }
+
+    /**
+     * True if this e-Way Bill number is already known as cancelled for the document (locally).
+     * Prevents re-adopting an old cancelled number as a "new" e-Way Bill.
+     */
+    protected function isCancelledNumber(string $docType, int $docId, string $ewbNumber): bool
+    {
+        return $this->ewayModel->where('document_type', $docType)
+            ->where('document_id', $docId)
+            ->where('ewaybill_number', $ewbNumber)
+            ->where('status', 'cancelled')
+            ->countAllResults() > 0;
+    }
+
+    /**
      * Fetch the mapped Zoho record ID for a local document
      */
     public function getZohoRecordId(string $docType, int $docId): ?string
@@ -335,44 +376,11 @@ class ZohoEwayBillService
 
         $response = $this->client->post('/ewaybills', $payload, [], $meta);
 
-        // Fallback / Auto-recovery:
-        // If Zoho returns "API access is not available" on 'save_generate', Zoho Books might not have
-        // the direct GSP API integration enabled, or the user generates it via Zoho portal (e.g. using IRN portal).
-        // Try 'save' action to persist e-waybill details in Zoho Books, and check if an ewaybill number exists on the invoice.
-        if (empty($response['success']) && ($response['message'] ?? '') === 'API access is not available' && $action === 'save_generate') {
-            $payload['action'] = 'save';
-            $saveResponse = $this->client->post('/ewaybills', $payload, [], $meta);
-            if (!empty($saveResponse['success'])) {
-                // Check if the invoice in Zoho Books already has eway_bill_details or ewaybills attached
-                if ($zohoId && $docType === 'invoice') {
-                    $invRes = $this->client->get("/invoices/{$zohoId}");
-                    if (!empty($invRes['data']['invoice'])) {
-                        $remoteInv = $invRes['data']['invoice'];
-                        $latestEwb = !empty($remoteInv['ewaybills']) ? end($remoteInv['ewaybills']) : null;
-                        $ewbDetails = $remoteInv['eway_bill_details'] ?? null;
-                        
-                        $ewbNum = $latestEwb['ewaybill_number'] ?? ($ewbDetails['eway_bill_number'] ?? null);
-                        if ($ewbNum) {
-                            $response = [
-                                'success' => true,
-                                'data' => [
-                                    'ewaybill' => [
-                                        'ewaybill_id'     => $latestEwb['ewaybill_id'] ?? ($saveResponse['data']['ewaybill']['ewaybill_id'] ?? null),
-                                        'ewaybill_number' => $ewbNum,
-                                        'ewaybill_date'   => $latestEwb['ewaybill_date'] ?? ($ewbDetails['eway_bill_date'] ?? date('Y-m-d H:i:s')),
-                                        'valid_until'     => $latestEwb['ewaybill_expiry_date'] ?? null,
-                                        'status'          => $latestEwb['ewaybill_status'] ?? 'generated',
-                                    ]
-                                ]
-                            ];
-                        } else {
-                            $response = $saveResponse;
-                        }
-                    }
-                } else {
-                    $response = $saveResponse;
-                }
-            }
+        // Zoho code 9 = the organization's Zoho Books plan/setup does not allow e-Way Bill generation via API.
+        // Never fake success here: report clearly so the user knows nothing was generated with NIC.
+        if (empty($response['success']) && (int) ($response['zoho_code'] ?? 0) === 9) {
+            $response['message'] = 'Zoho Books rejected e-Way Bill generation via API ("API access is not available"). '
+                . 'Nothing was generated with the NIC portal. Generate it in Zoho Books, then use Sync to pull the new number.';
         }
 
         $recordData = [
@@ -418,16 +426,26 @@ class ZohoEwayBillService
 
         if (!empty($response['success'])) {
             $ewbData = $response['data']['ewaybill'] ?? ($response['data'] ?? []);
-            
-            $status = 'generated';
-            if ($action === 'generate_part_a' || empty($data['vehicle_number'])) {
-                $status = 'part_a_generated';
-            }
 
-            $ewbNumber   = $ewbData['ewaybill_number'] ?? ($ewbData['eway_bill_number'] ?? null);
+            $ewbNumber   = trim((string) ($ewbData['ewaybill_number'] ?? ($ewbData['eway_bill_number'] ?? '')));
             $zohoEwbId   = $ewbData['ewaybill_id'] ?? null;
-            $ewbDate     = $ewbData['ewaybill_date'] ?? date('Y-m-d H:i:s');
-            $validUntil  = $ewbData['valid_until'] ?? null;
+            $zohoStatus  = strtolower((string) ($ewbData['ewaybill_status'] ?? ''));
+            $validUntil  = !empty($ewbData['ewaybill_expiry_date']) ? $ewbData['ewaybill_expiry_date'] : ($ewbData['valid_until'] ?? null);
+            $ewbDate     = !empty($ewbData['ewaybill_date']) ? $ewbData['ewaybill_date'] : null;
+
+            // A number is only trusted if Zoho reports it as freshly generated with NIC and
+            // it is not a number we already hold as cancelled for this document.
+            $isGenerated = $ewbNumber !== '' && $zohoStatus === 'generated' && !$this->isCancelledNumber($docType, $docId, $ewbNumber);
+
+            if ($isGenerated) {
+                $status = ($action === 'generate_part_a' || empty($data['vehicle_number'])) ? 'part_a_generated' : 'generated';
+            } else {
+                // Saved in Zoho Books only (draft) â€“ not generated with NIC.
+                $status    = 'draft';
+                $ewbNumber = null;
+                $ewbDate   = null;
+                $validUntil = null;
+            }
 
             $recordData['zoho_ewaybill_id'] = $zohoEwbId;
             $recordData['ewaybill_number']  = $ewbNumber;
@@ -435,7 +453,7 @@ class ZohoEwayBillService
             $recordData['valid_until']      = $validUntil;
             $recordData['status']           = $status;
             $recordData['last_sync_at']     = date('Y-m-d H:i:s');
-            $recordData['error_message']    = null;
+            $recordData['error_message']    = $isGenerated ? null : 'Saved in Zoho Books as draft; e-Way Bill not generated with NIC yet.';
 
             if ($targetEwayBillId && $this->ewayModel->find($targetEwayBillId)) {
                 $this->ewayModel->update($targetEwayBillId, $recordData);
@@ -445,8 +463,22 @@ class ZohoEwayBillService
                 $finalId = $this->ewayModel->getInsertID();
             }
 
+            if (!$isGenerated) {
+                $intendedDraft = ($action === 'save');
+                return [
+                    'success' => $intendedDraft,
+                    'id'      => $finalId,
+                    'status'  => $status,
+                    'message' => $intendedDraft
+                        ? 'e-Way Bill details saved in Zoho Books as draft (not generated with NIC yet).'
+                        : 'Zoho Books saved the e-Way Bill details but did not return a generated e-Way Bill number (Zoho status: '
+                            . ($zohoStatus ?: 'unknown') . '). Nothing was generated with NIC.',
+                    'data'    => $ewbData,
+                ];
+            }
+
             // Sync back to local invoice if applicable
-            if ($docType === 'invoice' && $ewbNumber) {
+            if ($docType === 'invoice') {
                 (new InvoiceModel())->update($docId, [
                     'ewaybill_number' => $ewbNumber,
                     'updated_at'      => date('Y-m-d H:i:s'),
@@ -504,9 +536,11 @@ class ZohoEwayBillService
             'vehicle_type'              => !empty($data['vehicle_type']) ? strtolower(str_replace(' ', '_', $data['vehicle_type'])) : 'regular',
             'from_place'                => trim($data['from_place'] ?? ($ewb['from_place'] ?? '')),
             'from_state'                => trim($data['from_state_code'] ?? ($ewb['from_state_code'] ?? '')),
-            'reason_for_transportation' => $data['reason'] ?? 'Transshipment',
-            'transport_document_number' => $data['transporter_doc_number'] ?? null,
-            'transport_document_date'   => $data['transporter_doc_date'] ?? null,
+            'reason'                    => $this->mapVehicleUpdateReason($data['reason'] ?? 'others'),
+            'remarks'                   => trim((string) ($data['remarks'] ?? ($data['reason'] ?? 'Vehicle update'))),
+            'transportation_mode'       => $this->mapTransportationMode($data['transport_mode'] ?? ($ewb['transport_mode'] ?? 'road')),
+            'transporter_document_number' => $data['transporter_doc_number'] ?? null,
+            'transporter_document_date'   => $data['transporter_doc_date'] ?? null,
             'distance'                  => (int) ($data['distance_km'] ?? $ewb['distance_km']),
         ];
 
@@ -517,40 +551,38 @@ class ZohoEwayBillService
             $payload['transporter_registration_id'] = $resolvedPartBTrans['transporter_registration_id'];
         }
 
-        $res = null;
-        if ($zohoEwbId) {
-            $res = $this->client->post("/ewaybills/{$zohoEwbId}/vehicles", $payload, [], [
-                'module'          => 'eway_bills',
-                'local_record_id' => $ewayBillId,
-                'operation'       => 'UPDATE_PART_B_VEHICLE',
-            ]);
+        $payload = array_filter($payload, static fn($v) => $v !== null && $v !== '');
+
+        if (!$zohoEwbId || empty($ewb['ewaybill_number']) || !in_array($ewb['status'], ['generated', 'part_a_generated'], true)) {
+            return ['success' => false, 'message' => 'Vehicle details can only be updated on an e-Way Bill that was actually generated in Zoho Books.'];
         }
 
-        // Update local record
+        $res = $this->client->post("/ewaybills/{$zohoEwbId}/vehicles", $payload, [], [
+            'module'          => 'eway_bills',
+            'local_record_id' => $ewayBillId,
+            'operation'       => 'UPDATE_PART_B_VEHICLE',
+        ]);
+
+        if (empty($res['success'])) {
+            $msg = $res['message'] ?? 'Failed to update Part B in Zoho Books';
+            $this->ewayModel->update($ewayBillId, ['error_message' => $msg, 'updated_at' => date('Y-m-d H:i:s')]);
+            return ['success' => false, 'message' => $msg, 'raw' => $res];
+        }
+
+        // Update local record only after Zoho confirms
         $update = [
-            'vehicle_number'         => $payload['vehicle_number'],
+            'vehicle_number'         => $payload['vehicle_number'] ?? $ewb['vehicle_number'],
             'vehicle_type'           => $data['vehicle_type'] ?? 'Regular',
-            'transporter_doc_number' => $payload['transport_document_number'],
-            'transporter_doc_date'   => $payload['transport_document_date'],
+            'transporter_doc_number' => $data['transporter_doc_number'] ?? null,
+            'transporter_doc_date'   => !empty($data['transporter_doc_date']) ? $data['transporter_doc_date'] : null,
             'transporter_id'              => $resolvedPartBTrans['zoho_transporter_id'] ?? ($resolvedPartBTrans['transporter_registration_id'] ?? $rawPartBTransId),
             'transporter_registration_id' => $resolvedPartBTrans['transporter_registration_id'] ?? $rawPartBTransGst,
-            'distance_km'                 => $payload['distance'],
-            'status'                 => 'generated', // Vehicle assigned, full EWB active
+            'distance_km'            => $payload['distance'] ?? $ewb['distance_km'],
+            'status'                 => 'generated',
+            'error_message'          => null,
             'updated_by'             => $userId,
             'updated_at'             => date('Y-m-d H:i:s'),
         ];
-
-        if ($res && empty($res['success'])) {
-            $update['error_message'] = $res['message'] ?? 'Failed to update Part B in Zoho Books';
-            $this->ewayModel->update($ewayBillId, $update);
-            return [
-                'success' => false,
-                'message' => $update['error_message'],
-                'raw'     => $res,
-            ];
-        }
-
-        $update['error_message'] = null;
         $this->ewayModel->update($ewayBillId, $update);
 
         return [
@@ -576,22 +608,22 @@ class ZohoEwayBillService
         }
 
         $zohoEwbId = $ewb['zoho_ewaybill_id'] ?? null;
+        if (!$zohoEwbId || empty($ewb['ewaybill_number']) || !in_array($ewb['status'], ['generated', 'part_a_generated'], true)) {
+            return ['success' => false, 'message' => 'Only e-Way Bills that were actually generated in Zoho Books can be cancelled.'];
+        }
 
         $payload = [
-            'reason'  => (string) $reasonCode,
+            'reason'  => $this->mapCancelReason($reasonCode),
             'remarks' => $remarks,
         ];
 
-        $res = null;
-        if ($zohoEwbId) {
-            $res = $this->client->post("/ewaybills/{$zohoEwbId}/cancel", $payload, [], [
-                'module'          => 'eway_bills',
-                'local_record_id' => $ewayBillId,
-                'operation'       => 'CANCEL_EWAYBILL',
-            ]);
-        }
+        $res = $this->client->post("/ewaybills/{$zohoEwbId}/cancel", $payload, [], [
+            'module'          => 'eway_bills',
+            'local_record_id' => $ewayBillId,
+            'operation'       => 'CANCEL_EWAYBILL',
+        ]);
 
-        if ($res && empty($res['success'])) {
+        if (empty($res['success'])) {
             $this->ewayModel->update($ewayBillId, [
                 'error_message' => $res['message'] ?? 'Zoho Books cancellation failed.',
                 'updated_at'    => date('Y-m-d H:i:s'),
@@ -672,13 +704,31 @@ class ZohoEwayBillService
         ], $freshData);
 
         // If the original record was 'failed', update that exact record instead of creating a duplicate row
-        $targetId = ($oldEwb['status'] === 'failed') ? $cancelledEwayBillId : null;
+        $targetId = in_array($oldEwb['status'], ['failed', 'draft'], true) ? $cancelledEwayBillId : null; // cancelled rows are never overwritten
 
         return $this->generate($merged, $userId, $targetId);
     }
 
     /**
-     * Sync / Refresh e-Way Bill status from Zoho Books
+     * Map a Zoho Books ewaybill_status to our local status.
+     */
+    protected function mapZohoStatus(string $zohoStatus): string
+    {
+        return match (strtolower(trim($zohoStatus))) {
+            'generated', 'manually_generated' => 'generated',
+            'cancelled'                       => 'cancelled',
+            'expired'                         => 'expired',
+            default                           => 'draft', // yet_to_generate / unknown
+        };
+    }
+
+    /**
+     * Sync / Refresh e-Way Bill status from Zoho Books.
+     *
+     * Rules (to avoid ever showing a stale number as new):
+     *  - A record is only marked generated when Zoho reports it generated AND the number is not one
+     *    already cancelled for the same document.
+     *  - The invoice-level "eway_bill_details" is ignored (Zoho keeps the last number there even after cancel).
      */
     public function syncStatus(int $ewayBillId): array
     {
@@ -687,88 +737,107 @@ class ZohoEwayBillService
             return ['success' => false, 'message' => 'e-Way Bill record not found.'];
         }
 
-        // 1. If we have a zoho_ewaybill_id, query Zoho's /ewaybills/{id}
+        $docType = $ewb['document_type'];
+        $docId   = (int) $ewb['document_id'];
+        $zohoEwb = null;
+
+        // 1. Direct lookup by linked Zoho e-Way Bill id
         if (!empty($ewb['zoho_ewaybill_id'])) {
             $res = $this->client->get("/ewaybills/{$ewb['zoho_ewaybill_id']}", [], [
                 'module'          => 'eway_bills',
                 'local_record_id' => $ewayBillId,
                 'operation'       => 'GET_EWAYBILL',
             ]);
-
             if (!empty($res['success'])) {
-                $zohoData = $res['data']['ewaybill'] ?? ($res['data'] ?? []);
-                $status   = strtolower($zohoData['ewaybill_status'] ?? ($zohoData['status'] ?? ($ewb['status'] ?? 'generated')));
-                $ewbNum   = $zohoData['ewaybill_number'] ?? $ewb['ewaybill_number'];
-
-                $updateData = [
-                    'ewaybill_number' => $ewbNum,
-                    'valid_until'     => $zohoData['ewaybill_expiry_date'] ?? ($zohoData['valid_until'] ?? $ewb['valid_until']),
-                    'status'          => $status,
-                    'error_message'   => null,
-                    'last_sync_at'    => date('Y-m-d H:i:s'),
-                    'updated_at'      => date('Y-m-d H:i:s'),
-                ];
-                $this->ewayModel->update($ewayBillId, $updateData);
-
-                if ($ewb['document_type'] === 'invoice' && $ewbNum) {
-                    (new InvoiceModel())->update($ewb['document_id'], [
-                        'ewaybill_number' => $ewbNum,
-                        'updated_at'      => date('Y-m-d H:i:s'),
-                    ]);
-                }
-
-                return [
-                    'success' => true,
-                    'status'  => $status,
-                    'data'    => $zohoData,
-                ];
+                $zohoEwb = $res['data']['ewaybill'] ?? null;
             }
         }
 
-        // 2. If no zoho_ewaybill_id or GET /ewaybills failed, check the parent document (e.g. invoice) in Zoho Books
-        $zohoDocId = $this->getZohoRecordId($ewb['document_type'], (int) $ewb['document_id']);
-        if ($zohoDocId && $ewb['document_type'] === 'invoice') {
-            $invRes = $this->client->get("/invoices/{$zohoDocId}");
-            if (!empty($invRes['data']['invoice'])) {
-                $remoteInv  = $invRes['data']['invoice'];
-                $ewbDetails = $remoteInv['eway_bill_details'] ?? null;
-                $ewbList    = $remoteInv['ewaybills'] ?? [];
+        // 2. Not linked yet (e.g. generated in Zoho portal): find an unlinked, live e-Way Bill on the invoice
+        if (!$zohoEwb && $docType === 'invoice') {
+            $zohoDocId = $this->getZohoRecordId($docType, $docId);
+            if ($zohoDocId) {
+                $invRes  = $this->client->get("/invoices/{$zohoDocId}");
+                $ewbList = $invRes['data']['invoice']['ewaybills'] ?? [];
 
-                $matchedEwb = null;
-                if (!empty($ewbList)) {
-                    $matchedEwb = end($ewbList);
+                $cancelledNums = [];
+                foreach ($ewbList as $item) {
+                    if (strtolower($item['ewaybill_status'] ?? '') === 'cancelled' && !empty($item['ewaybill_number'])) {
+                        $cancelledNums[] = $item['ewaybill_number'];
+                    }
                 }
 
-                $ewbNum = $matchedEwb['ewaybill_number'] ?? ($ewbDetails['eway_bill_number'] ?? null);
-                if ($ewbNum) {
-                    $status = strtolower($matchedEwb['ewaybill_status'] ?? 'generated');
-                    $updateData = [
-                        'zoho_ewaybill_id' => $matchedEwb['ewaybill_id'] ?? $ewb['zoho_ewaybill_id'],
-                        'ewaybill_number'  => $ewbNum,
-                        'ewaybill_date'    => $matchedEwb['ewaybill_date'] ?? ($ewbDetails['eway_bill_date'] ?? $ewb['ewaybill_date']),
-                        'valid_until'      => $matchedEwb['ewaybill_expiry_date'] ?? $ewb['valid_until'],
-                        'status'           => $status,
-                        'error_message'    => null,
-                        'last_sync_at'     => date('Y-m-d H:i:s'),
-                        'updated_at'       => date('Y-m-d H:i:s'),
-                    ];
-                    $this->ewayModel->update($ewayBillId, $updateData);
-
-                    (new InvoiceModel())->update($ewb['document_id'], [
-                        'ewaybill_number' => $ewbNum,
-                        'updated_at'      => date('Y-m-d H:i:s'),
-                    ]);
-
-                    return [
-                        'success' => true,
-                        'status'  => $status,
-                        'data'    => $matchedEwb ?: $ewbDetails,
-                    ];
+                foreach ($ewbList as $item) {
+                    $num = trim((string) ($item['ewaybill_number'] ?? ''));
+                    if ($num === '' || $this->mapZohoStatus($item['ewaybill_status'] ?? '') !== 'generated') {
+                        continue;
+                    }
+                    if (in_array($num, $cancelledNums, true) || $this->isCancelledNumber($docType, $docId, $num)) {
+                        continue; // stale copy of a cancelled number
+                    }
+                    $linkedElsewhere = $this->ewayModel->where('zoho_ewaybill_id', $item['ewaybill_id'])
+                        ->where('id !=', $ewayBillId)->countAllResults() > 0;
+                    if ($linkedElsewhere) {
+                        continue;
+                    }
+                    $zohoEwb = $item;
+                    break;
                 }
             }
         }
 
-        return ['success' => false, 'message' => 'Unable to find active e-Way Bill details in Zoho Books.'];
+        if (!$zohoEwb) {
+            $this->ewayModel->update($ewayBillId, ['last_sync_at' => date('Y-m-d H:i:s')]);
+            return ['success' => false, 'message' => 'No newly generated e-Way Bill found in Zoho Books for this document.'];
+        }
+
+        $num    = trim((string) ($zohoEwb['ewaybill_number'] ?? ''));
+        $status = $this->mapZohoStatus($zohoEwb['ewaybill_status'] ?? '');
+
+        if ($status === 'generated' && ($num === '' || $this->isCancelledNumber($docType, $docId, $num))) {
+            $status = 'draft';
+        }
+
+        $update = [
+            'zoho_ewaybill_id' => $zohoEwb['ewaybill_id'] ?? $ewb['zoho_ewaybill_id'],
+            'status'           => $status,
+            'last_sync_at'     => date('Y-m-d H:i:s'),
+            'updated_at'       => date('Y-m-d H:i:s'),
+        ];
+        if ($status === 'draft') {
+            $update['ewaybill_number'] = null;
+            $update['valid_until']     = null;
+            $update['error_message']   = 'Not generated with NIC yet (Zoho status: ' . ($zohoEwb['ewaybill_status'] ?? 'unknown') . ').';
+        }
+        if (in_array($status, ['generated', 'cancelled', 'expired'], true) && $num !== '') {
+            $update['ewaybill_number'] = $num;
+            $update['ewaybill_date']   = !empty($zohoEwb['ewaybill_date']) ? $zohoEwb['ewaybill_date'] : $ewb['ewaybill_date'];
+            $update['valid_until']     = !empty($zohoEwb['ewaybill_expiry_date']) ? $zohoEwb['ewaybill_expiry_date'] : $ewb['valid_until'];
+            $update['error_message']   = null;
+        }
+        if ($status === 'cancelled') {
+            $update['cancel_reason_code'] = $zohoEwb['cancel_reason'] ?? $ewb['cancel_reason_code'];
+            $update['cancel_remarks']     = $zohoEwb['cancel_remarks'] ?? $ewb['cancel_remarks'];
+            $update['cancelled_at']       = $ewb['cancelled_at'] ?? date('Y-m-d H:i:s');
+        }
+        $this->ewayModel->update($ewayBillId, $update);
+
+        if ($docType === 'invoice') {
+            $invoiceModel = new InvoiceModel();
+            if ($status === 'generated') {
+                $invoiceModel->update($docId, ['ewaybill_number' => $num, 'updated_at' => date('Y-m-d H:i:s')]);
+            } elseif ($status === 'cancelled') {
+                $inv = $invoiceModel->find($docId);
+                if ($inv && ($inv['ewaybill_number'] ?? null) === $num) {
+                    $invoiceModel->update($docId, ['ewaybill_number' => null, 'updated_at' => date('Y-m-d H:i:s')]);
+                }
+            }
+        }
+
+        return [
+            'success' => true,
+            'status'  => $status,
+            'data'    => $zohoEwb,
+        ];
     }
 }
-

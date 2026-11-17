@@ -72,7 +72,18 @@
                 </div>
                 <div class="card-body p-2">
                     <table class="table table-sm table-borderless mb-0">
-                        <tr><th class="text-muted" width="40%">Customer:</th><td class="fw-bold text-dark"><?= esc($order['customer_name']) ?></td></tr>
+                        <tr>
+                            <th class="text-muted" width="40%">Customer:</th>
+                            <td class="fw-bold text-dark">
+                                <?php if (!empty($order['customer_id'])): ?>
+                                    <a href="<?= site_url('customers/view/' . $order['customer_id']) ?>" class="text-decoration-none text-primary" title="View Customer Details">
+                                        <?= esc($order['customer_name']) ?> <i class="fas fa-external-link-alt small ms-1" style="font-size: 0.72rem;"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <?= esc($order['customer_name']) ?>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
                         <tr><th class="text-muted">P.O Number:</th><td><?= esc($order['reference_number']) ?: '-' ?></td></tr>
                         <?php if (!empty($order['quotation_id'])): ?>
                             <tr><th class="text-muted">Source Quote:</th><td><a href="<?= site_url('quotations/view/' . $order['quotation_id']) ?>" class="badge bg-info text-decoration-none"><?= esc($order['source_quotation_number'] ?? 'QTN #' . $order['quotation_id']) ?></a></td></tr>

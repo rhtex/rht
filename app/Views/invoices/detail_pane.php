@@ -52,7 +52,18 @@
                 </div>
                 <div class="card-body p-2">
                     <table class="table table-sm table-borderless mb-0">
-                        <tr><th class="text-muted" width="40%">Customer:</th><td class="fw-bold text-dark"><?= esc($invoice['customer_name']) ?></td></tr>
+                        <tr>
+                            <th class="text-muted" width="40%">Customer:</th>
+                            <td class="fw-bold text-dark">
+                                <?php if (!empty($invoice['customer_id'])): ?>
+                                    <a href="<?= site_url('customers/view/' . $invoice['customer_id']) ?>" class="text-decoration-none text-primary" title="View Customer Details">
+                                        <?= esc($invoice['customer_name']) ?> <i class="fas fa-external-link-alt small ms-1" style="font-size: 0.72rem;"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <?= esc($invoice['customer_name']) ?>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
                         <?php if (!empty($invoice['customer_state'])): ?>
                             <tr><th class="text-muted">Place of Supply:</th><td><?= esc($invoice['customer_state']) ?></td></tr>
                         <?php endif; ?>

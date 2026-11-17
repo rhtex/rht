@@ -36,7 +36,18 @@
                             <table class="table table-bordered table-sm">
                                 <tr><th width="40%">Receipt #</th><td><?= esc($payment['payment_number']) ?></td></tr>
                                 <tr><th>Date</th><td><?= date('d/m/Y', strtotime($payment['payment_date'])) ?></td></tr>
-                                <tr><th>Customer</th><td><?= esc($payment['customer_name']) ?></td></tr>
+                                <tr>
+                                    <th>Customer</th>
+                                    <td>
+                                        <?php if (!empty($payment['customer_id'])): ?>
+                                            <a href="<?= site_url('customers/view/' . $payment['customer_id']) ?>" class="text-decoration-none text-primary fw-bold" title="View Customer Details">
+                                                <?= esc($payment['customer_name']) ?> <i class="fas fa-external-link-alt small ms-1" style="font-size: 0.72rem;"></i>
+                                            </a>
+                                        <?php else: ?>
+                                            <?= esc($payment['customer_name']) ?>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
                                 <tr><th>Invoice Reference</th><td><a href="<?= site_url('invoices/view/' . $payment['invoice_id']) ?>"><?= esc($payment['invoice_number']) ?></a></td></tr>
                                 <tr><th>Mode</th><td><?= esc($payment['payment_mode']) ?></td></tr>
                                 <tr><th>Reference #</th><td><?= esc($payment['reference_number']) ?: '-' ?></td></tr>

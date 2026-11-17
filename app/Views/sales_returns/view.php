@@ -55,7 +55,15 @@
                         <table class="table table-sm table-borderless mb-0">
                             <tr>
                                 <th width="38%" class="text-muted text-uppercase small">Customer Name:</th>
-                                <td class="fw-bold fs-6 text-dark"><?= esc($return['customer_name']) ?></td>
+                                <td class="fw-bold fs-6 text-dark">
+                                    <?php if (!empty($return['customer_id'])): ?>
+                                        <a href="<?= site_url('customers/view/' . $return['customer_id']) ?>" class="text-decoration-none text-primary" title="View Customer Details">
+                                            <?= esc($return['customer_name']) ?> <i class="fas fa-external-link-alt small ms-1" style="font-size: 0.72rem;"></i>
+                                        </a>
+                                    <?php else: ?>
+                                        <?= esc($return['customer_name']) ?>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                             <?php if (!empty($return['customer_contact_person']) && $return['customer_contact_person'] !== $return['customer_name']): ?>
                                 <tr>

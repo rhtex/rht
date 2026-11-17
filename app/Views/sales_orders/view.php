@@ -64,7 +64,18 @@
                 <div class="col-md-6">
                     <table class="table table-sm">
                         <tr><th width="40%">Order Number:</th><td class="fw-bold"><?= esc($order['sales_order_number']) ?></td></tr>
-                        <tr><th>Customer:</th><td><?= esc($order['customer_name']) ?></td></tr>
+                        <tr>
+                            <th>Customer:</th>
+                            <td>
+                                <?php if (!empty($order['customer_id'])): ?>
+                                    <a href="<?= site_url('customers/view/' . $order['customer_id']) ?>" class="text-decoration-none text-primary fw-bold" title="View Customer Details">
+                                        <?= esc($order['customer_name']) ?> <i class="fas fa-external-link-alt small ms-1" style="font-size: 0.72rem;"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <span class="fw-bold"><?= esc($order['customer_name']) ?></span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
                         <tr><th>P.O number:</th><td><?= esc($order['reference_number']) ?: '-' ?></td></tr>
                         <?php if (!empty($order['quotation_id'])): ?>
                             <tr><th>Source Quotation:</th><td><a href="<?= site_url('quotations/view/' . $order['quotation_id']) ?>" class="badge bg-info text-decoration-none"><i class="fas fa-file-invoice me-1"></i> <?= esc($order['source_quotation_number'] ?? 'QTN #' . $order['quotation_id']) ?></a></td></tr>

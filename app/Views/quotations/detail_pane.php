@@ -82,7 +82,18 @@
                 </div>
                 <div class="card-body p-2">
                     <table class="table table-sm table-borderless mb-0">
-                        <tr><th class="text-muted" width="40%">Customer:</th><td class="fw-bold text-dark"><?= esc($quotation['customer_name']) ?></td></tr>
+                        <tr>
+                            <th class="text-muted" width="40%">Customer:</th>
+                            <td class="fw-bold text-dark">
+                                <?php if (!empty($quotation['customer_id'])): ?>
+                                    <a href="<?= site_url('customers/view/' . $quotation['customer_id']) ?>" class="text-decoration-none text-primary" title="View Customer Details">
+                                        <?= esc($quotation['customer_name']) ?> <i class="fas fa-external-link-alt small ms-1" style="font-size: 0.72rem;"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <?= esc($quotation['customer_name']) ?>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
                         <?php if (!empty($quotation['customer_gstin'])): ?>
                             <tr><th class="text-muted">GSTIN:</th><td><span class="badge bg-light text-dark border"><?= esc($quotation['customer_gstin']) ?></span></td></tr>
                         <?php endif; ?>

@@ -14,7 +14,15 @@
         <div class="row g-3 mb-4">
             <div class="col-sm-6">
                 <small class="text-muted d-block text-uppercase fw-bold">Vendor</small>
-                <div class="fs-5 fw-bold text-dark"><?= esc($credit['vendor_name'] ?? 'N/A') ?></div>
+                <div class="fs-5 fw-bold text-dark">
+                    <?php if (!empty($credit['vendor_id'])): ?>
+                        <a href="<?= site_url('vendors/view/' . $credit['vendor_id']) ?>" class="text-decoration-none text-primary" title="View Vendor Details">
+                            <?= esc($credit['vendor_name'] ?? 'N/A') ?> <i class="fas fa-external-link-alt small ms-1" style="font-size: 0.72rem;"></i>
+                        </a>
+                    <?php else: ?>
+                        <?= esc($credit['vendor_name'] ?? 'N/A') ?>
+                    <?php endif; ?>
+                </div>
                 <?php if (!empty($credit['vendor_phone'])): ?>
                     <div class="small text-muted"><i class="fas fa-phone me-1"></i><?= esc($credit['vendor_phone']) ?></div>
                 <?php endif; ?>

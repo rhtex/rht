@@ -59,7 +59,18 @@
                 <div class="col-md-6">
                     <table class="table table-sm">
                         <tr><th width="40%">Invoice Number:</th><td class="fw-bold"><?= esc($invoice['invoice_number']) ?></td></tr>
-                        <tr><th>Customer:</th><td><?= esc($invoice['customer_name']) ?></td></tr>
+                        <tr>
+                            <th>Customer:</th>
+                            <td>
+                                <?php if (!empty($invoice['customer_id'])): ?>
+                                    <a href="<?= site_url('customers/view/' . $invoice['customer_id']) ?>" class="text-decoration-none text-primary fw-bold" title="View Customer Details">
+                                        <?= esc($invoice['customer_name']) ?> <i class="fas fa-external-link-alt small ms-1" style="font-size: 0.75rem;"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <span class="fw-bold"><?= esc($invoice['customer_name']) ?></span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
                         <tr><th>P.O number:</th><td><?= esc($invoice['reference_number']) ?: '-' ?></td></tr>
                         <tr><th>P.O Date:</th><td><?= $invoice['po_date'] ? date('d/m/Y', strtotime($invoice['po_date'])) : '-' ?></td></tr>
                         <tr><th>Status:</th>

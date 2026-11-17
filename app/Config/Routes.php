@@ -218,7 +218,6 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
 
     // Purchase (Vendors) Management
     $routes->get('vendors', 'VendorController::index', ['filter' => 'permission:vendor.view']);
-    $routes->get('vendors/returns', 'VendorController::pendingReturns', ['filter' => 'permission:vendor.view']);
     $routes->get('vendors/returns/create', 'VendorController::createReturnBatch', ['filter' => 'permission:vendor.edit']);
     $routes->post('vendors/returns/scan', 'VendorController::scanReturnItem', ['filter' => 'permission:vendor.edit']);
     $routes->post('vendors/returns/process', 'VendorController::processReturnBatch', ['filter' => 'permission:vendor.edit']);
@@ -230,7 +229,6 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('vendors/update/(:num)', 'VendorController::update/$1', ['filter' => 'permission:vendor.edit']);
     $routes->get('vendors/delete/(:num)', 'VendorController::delete/$1', ['filter' => 'permission:vendor.delete']);
     $routes->get('vendors/statement/(:num)', 'VendorController::statement/$1', ['filter' => 'permission:vendor.view']);
-    $routes->post('vendors/processReturn/(:num)', 'VendorController::processReturn/$1', ['filter' => 'permission:vendor.edit']);
 
     // Return Shipments
     $routes->get('vendors/returns/shipments', 'VendorController::listShipments', ['filter' => 'permission:vendor.view']);
@@ -280,6 +278,11 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->get('bills/payment/(:num)', 'BillController::recordPayment/$1', ['filter' => 'permission:bill.edit']);
     $routes->post('bills/payment/(:num)', 'BillController::storePayment/$1', ['filter' => 'permission:bill.edit']);
     $routes->get('bills/print/(:num)', 'BillController::print/$1', ['filter' => 'permission:bill.view']);
+
+    // Vendor Credits
+    $routes->get('vendor_credits', 'VendorCreditController::index', ['filter' => 'permission:vendor_credit.view']);
+    $routes->get('vendor_credits/view/(:num)', 'VendorCreditController::view/$1', ['filter' => 'permission:vendor_credit.view']);
+    $routes->get('vendor_credits/sync-zoho', 'VendorCreditController::syncZoho', ['filter' => 'permission:vendor_credit.view']);
 
     // Quotations
     $routes->get('quotations', 'QuotationController::index', ['filter' => 'permission:quotation.view']);

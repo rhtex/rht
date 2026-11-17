@@ -97,10 +97,20 @@ class PaymentModel extends Model
     }
 
     /**
-     * Generate next payment number
+     * Generate next payment number based on Zoho Books sequential numbers
      */
     public function generatePaymentNumber()
     {
+        // Check for numeric payment numbers (Zoho Books sequential numbering)
+        $maxRecord = $this->select('MAX(CAST(payment_number AS UNSIGNED)) as max_num')
+                          ->where("payment_number REGEXP '^[0-9]+$'")
+                          ->first();
+
+        if (!empty($maxRecord['max_num']) && (int) $maxRecord['max_num'] > 0) {
+            return (string) ((int) $maxRecord['max_num'] + 1);
+        }
+
+        // Fallback to legacy format if no numeric numbers exist
         $prefix = 'PAY-' . date('Ym') . '-';
         $lastPayment = $this->like('payment_number', $prefix, 'after')
                             ->orderBy('id', 'DESC')

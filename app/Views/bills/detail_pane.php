@@ -120,22 +120,112 @@
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
-                    <tfoot class="table-light">
-                        <tr><td colspan="6" class="text-end fw-semibold">Subtotal:</td><td class="text-end">₹<?= number_format($bill['subtotal'], 2) ?></td></tr>
-                        <?php if ($bill['discount_amount'] > 0): ?>
-                            <?php $actualDisc = ($bill['discount_type'] == 'Percentage') ? ($bill['subtotal'] * $bill['discount_amount'] / 100) : $bill['discount_amount']; ?>
-                            <tr><td colspan="6" class="text-end text-danger">Discount (<?= $bill['discount_type'] == 'Percentage' ? esc($bill['discount_amount']).'%' : 'Fixed' ?>):</td><td class="text-end text-danger">-₹<?= number_format($actualDisc, 2) ?></td></tr>
-                        <?php endif; ?>
-                        <tr><td colspan="6" class="text-end">Total GST:</td><td class="text-end">₹<?= number_format($bill['tax_amount'] ?? 0, 2) ?></td></tr>
-                        <?php if (!empty($bill['shipping_charge']) && $bill['shipping_charge'] > 0): ?>
-                            <tr><td colspan="6" class="text-end">Shipping / Freight:</td><td class="text-end">₹<?= number_format($bill['shipping_charge'], 2) ?></td></tr>
-                        <?php endif; ?>
-                        <?php if (!empty($bill['roundoff_amount']) && $bill['roundoff_amount'] != 0): ?>
-                            <tr><td colspan="6" class="text-end">Roundoff:</td><td class="text-end">₹<?= number_format($bill['roundoff_amount'], 2) ?></td></tr>
-                        <?php endif; ?>
-                        <tr class="table-primary"><td colspan="6" class="text-end fw-bold fs-5">Total:</td><td class="text-end fw-bold fs-5">₹<?= number_format($bill['total_amount'], 2) ?></td></tr>
-                        <tr><td colspan="6" class="text-end text-success fw-semibold">Amount Paid:</td><td class="text-end text-success fw-bold">₹<?= number_format($bill['paid_amount'], 2) ?></td></tr>
-                        <tr class="table-warning"><td colspan="6" class="text-end fw-bold">Balance Due:</td><td class="text-end fw-bold text-danger">₹<?= number_format($bill['balance'], 2) ?></td></tr>
+                    <?php
+                    $subtotal = (float) ($bill['subtotal'] ?? 0);
+                    $discAmt = (float) ($bill['discount_amount'] ?? 0);
+                    $discType = $bill['discount_type'] ?? 'Amount';
+                    $totalDiscount = ($discType == 'Percentage') ? ($subtotal * $discAmt / 100) : $discAmt;
+                    $isInterState = !empty($bill['is_inter_state']);
+
+                    $taxSlabs = [];
+                    foreach ($bill['items'] as $it) {
+                        $taxRate = (float) ($it['tax_percentage'] ?? 0);
+                        $lineAmt = (float) ($it['quantity'] ?? 0) * (float) ($it['rate'] ?? 0);
+                        $lineDisc = ($subtotal > 0) ? ($lineAmt / $subtotal * $totalDiscount) : 0;
+                        $taxable = max(0, $lineAmt - $lineDisc);
+
+                        if (!isset($taxSlabs[$taxRate])) {
+                            $taxSlabs[$taxRate] = ['taxable' => 0, 'tax' => 0];
+                        }
+                        $taxSlabs[$taxRate]['taxable'] += $taxable;
+                        $taxSlabs[$taxRate]['tax'] += ($taxable * $taxRate / 100);
+                    }
+                    ksort($taxSlabs);
+                    ?>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4" class="border-0 bg-transparent"></td>
+                            <td colspan="3" class="p-0 border-top">
+                                <table class="table table-sm table-borderless mb-0">
+                                    <tr class="border-bottom">
+                                        <td class="ps-3 py-2 fw-semibold text-muted">Sub Total</td>
+                                        <td class="text-end pe-3 py-2 fw-bold text-dark">₹<?= number_format($bill['subtotal'], 2) ?></td>
+                                    </tr>
+                                    <?php if (!empty($bill['discount_amount']) && $bill['discount_amount'] > 0): ?>
+                                        <tr class="border-bottom text-danger">
+                                            <td class="ps-3 py-2">
+                                                Discount <span class="badge bg-danger-subtle text-danger border border-danger-subtle small"><?= ($bill['discount_type'] ?? 'Amount') == 'Percentage' ? ($bill['discount_amount'] + 0) . '%' : 'Fixed' ?></span>
+                                            </td>
+                                            <td class="text-end pe-3 py-2 fw-bold">-₹<?= number_format($totalDiscount, 2) ?></td>
+                                        </tr>
+                                    <?php endif; ?>
+
+                                    <!-- GST Breakdown By Slab -->
+                                    <?php if (!empty($taxSlabs)): ?>
+                                        <?php foreach ($taxSlabs as $rate => $slabData): ?>
+                                            <?php if ($rate > 0): ?>
+                                                <?php if ($isInterState): ?>
+                                                    <tr class="border-bottom text-secondary small bg-white">
+                                                        <td class="ps-3 py-1">
+                                                            <i class="fas fa-tag me-1 text-primary"></i> IGST (<?= $rate + 0 ?>%)
+                                                            <span class="text-muted fst-italic" style="font-size: 0.72rem;">(on ₹<?= number_format($slabData['taxable'], 2) ?>)</span>
+                                                        </td>
+                                                        <td class="text-end pe-3 py-1 fw-semibold text-dark">₹<?= number_format($slabData['tax'], 2) ?></td>
+                                                    </tr>
+                                                <?php else: ?>
+                                                    <tr class="border-bottom text-secondary small bg-white">
+                                                        <td class="ps-3 py-1">
+                                                            <i class="fas fa-tag me-1 text-primary"></i> CGST (<?= ($rate / 2) + 0 ?>%)
+                                                            <span class="text-muted fst-italic" style="font-size: 0.72rem;">(on ₹<?= number_format($slabData['taxable'], 2) ?>)</span>
+                                                        </td>
+                                                        <td class="text-end pe-3 py-1 fw-semibold text-dark">₹<?= number_format($slabData['tax'] / 2, 2) ?></td>
+                                                    </tr>
+                                                    <tr class="border-bottom text-secondary small bg-white">
+                                                        <td class="ps-3 py-1">
+                                                            <i class="fas fa-tag me-1 text-primary"></i> SGST (<?= ($rate / 2) + 0 ?>%)
+                                                            <span class="text-muted fst-italic" style="font-size: 0.72rem;">(on ₹<?= number_format($slabData['taxable'], 2) ?>)</span>
+                                                        </td>
+                                                        <td class="text-end pe-3 py-1 fw-semibold text-dark">₹<?= number_format($slabData['tax'] / 2, 2) ?></td>
+                                                    </tr>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    <?php elseif (!empty($bill['tax_amount']) && $bill['tax_amount'] > 0): ?>
+                                        <tr class="border-bottom text-secondary small bg-white">
+                                            <td class="ps-3 py-1">Total GST</td>
+                                            <td class="text-end pe-3 py-1 fw-semibold text-dark">₹<?= number_format($bill['tax_amount'], 2) ?></td>
+                                        </tr>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($bill['shipping_charge']) && $bill['shipping_charge'] > 0): ?>
+                                        <tr class="border-bottom">
+                                            <td class="ps-3 py-2 text-muted">Shipping / Freight</td>
+                                            <td class="text-end pe-3 py-2 fw-semibold">₹<?= number_format($bill['shipping_charge'], 2) ?></td>
+                                        </tr>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($bill['roundoff_amount']) && $bill['roundoff_amount'] != 0): ?>
+                                        <tr class="border-bottom">
+                                            <td class="ps-3 py-2 text-muted">Round Off</td>
+                                            <td class="text-end pe-3 py-2 fw-semibold"><?= $bill['roundoff_amount'] > 0 ? '+' : '' ?>₹<?= number_format($bill['roundoff_amount'], 2) ?></td>
+                                        </tr>
+                                    <?php endif; ?>
+
+                                    <tr class="bg-primary-subtle text-primary border-top border-2">
+                                        <td class="ps-3 py-2 fw-bold text-uppercase fs-6">Grand Total</td>
+                                        <td class="text-end pe-3 py-2 fw-bolder fs-5">₹<?= number_format($bill['total_amount'], 2) ?></td>
+                                    </tr>
+                                    <tr class="border-top text-success">
+                                        <td class="ps-3 py-2 fw-semibold">Amount Paid</td>
+                                        <td class="text-end pe-3 py-2 fw-bold">₹<?= number_format($bill['paid_amount'], 2) ?></td>
+                                    </tr>
+                                    <tr class="table-warning border-top">
+                                        <td class="ps-3 py-2 fw-bold text-uppercase">Balance Due</td>
+                                        <td class="text-end pe-3 py-2 fw-bolder text-danger fs-6">₹<?= number_format($bill['balance'], 2) ?></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
                     </tfoot>
                 </table>
             </div>
@@ -145,26 +235,43 @@
     <!-- Payments Made -->
     <?php if (!empty($bill['payments'])): ?>
         <div class="card card-outline card-success mb-3 shadow-none border">
-            <div class="card-header py-2 bg-light">
+            <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
                 <h6 class="card-title m-0 fw-bold"><i class="fas fa-money-check-alt text-success me-1"></i> Payments (<?= count($bill['payments']) ?>)</h6>
             </div>
             <div class="card-body p-0">
-                <table class="table table-striped table-sm mb-0">
+                <table class="table table-striped table-sm mb-0 align-middle">
                     <thead class="table-light">
                         <tr>
                             <th>Payment #</th>
                             <th>Date</th>
                             <th>Mode</th>
-                            <th class="text-end">Amount</th>
+                            <th class="text-end">Paid Amount</th>
+                            <th class="text-end">Deductions</th>
+                            <th class="text-center" style="width: 50px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($bill['payments'] as $payment): ?>
+                            <?php
+                            $deductions = (float) ($payment['discount_amount'] ?? 0)
+                                        + (float) ($payment['mahimai_amount'] ?? 0)
+                                        + (float) ($payment['postal_charges'] ?? 0);
+                            ?>
                             <tr>
-                                <td class="fw-bold text-primary"><?= esc($payment['payment_number'] ?? '#'.$payment['id']) ?></td>
+                                <td class="fw-bold text-primary">
+                                    <a href="<?= site_url('payments/view/' . $payment['id']) ?>" class="text-decoration-none">
+                                        <?= esc($payment['payment_number'] ?? '#'.$payment['id']) ?>
+                                    </a>
+                                </td>
                                 <td><?= date('d/m/Y', strtotime($payment['payment_date'])) ?></td>
                                 <td><span class="badge bg-light text-dark border"><?= esc($payment['payment_mode'] ?? 'Bank') ?></span></td>
-                                <td class="text-end fw-bold">₹<?= number_format($payment['amount'], 2) ?></td>
+                                <td class="text-end fw-bold text-success">₹<?= number_format($payment['amount'], 2) ?></td>
+                                <td class="text-end text-danger"><?= $deductions > 0 ? '₹' . number_format($deductions, 2) : '-' ?></td>
+                                <td class="text-center">
+                                    <a href="<?= site_url('payments/view/' . $payment['id']) ?>" class="btn btn-xs btn-outline-primary py-0 px-1" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

@@ -132,11 +132,11 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Bank Account</label>
-                                    <select name="bank_account_id" class="form-select">
+                                    <label class="form-label">Bank Account <span class="text-danger">*</span></label>
+                                    <select name="bank_account_id" class="form-select" required>
                                         <option value="">-- Select Bank Account --</option>
                                         <?php foreach ($bank_accounts as $account): ?>
-                                            <option value="<?= $account['id'] ?>">
+                                            <option value="<?= $account['id'] ?>" <?= (isset($bill['bank_account_id']) && $bill['bank_account_id'] == $account['id']) ? 'selected' : '' ?>>
                                                 <?= esc($account['bank_name']) ?> - <?= esc($account['account_number']) ?>
                                             </option>
                                         <?php endforeach; ?>

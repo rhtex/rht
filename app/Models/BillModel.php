@@ -70,7 +70,35 @@ class BillModel extends Model
         }
 
         if (!empty($filters['status'])) {
-            $builder->where('bills.status', $filters['status']);
+            if ($filters['status'] === 'Unpaid') {
+                $builder->groupStart()
+                    ->whereIn('bills.status', ['Open', 'Partially Paid', 'Overdue'])
+                    ->orGroupStart()
+                        ->where('bills.balance >', 0.01)
+                        ->where('bills.status !=', 'Void')
+                    ->groupEnd()
+                ->groupEnd();
+            } elseif ($filters['status'] === 'DueToday') {
+                $builder->where('bills.due_date', date('Y-m-d'))
+                    ->where('bills.balance >', 0.01)
+                    ->where('bills.status !=', 'Void');
+            } elseif ($filters['status'] === 'DueWithin30') {
+                $builder->where('bills.due_date >=', date('Y-m-d'))
+                    ->where('bills.due_date <=', date('Y-m-d', strtotime('+30 days')))
+                    ->where('bills.balance >', 0.01)
+                    ->where('bills.status !=', 'Void');
+            } elseif ($filters['status'] === 'Overdue') {
+                $builder->groupStart()
+                    ->where('bills.status', 'Overdue')
+                    ->orGroupStart()
+                        ->where('bills.due_date <', date('Y-m-d'))
+                        ->where('bills.balance >', 0.01)
+                        ->where('bills.status !=', 'Void')
+                    ->groupEnd()
+                ->groupEnd();
+            } else {
+                $builder->where('bills.status', $filters['status']);
+            }
         }
 
         if (!empty($filters['date_from'])) {

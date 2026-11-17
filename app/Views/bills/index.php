@@ -29,54 +29,77 @@
 <?= $this->section('content') ?>
 <!-- Summary Stat Cards -->
 <div class="row g-3 mb-3">
+    <!-- Total Outstanding Payables -->
     <div class="col-xl-3 col-sm-6">
-        <a href="<?= site_url('bills') ?>" class="bt-stat bt-g-blue text-decoration-none <?= empty($filters['status']) ? 'active' : '' ?>">
-            <i class="fas fa-file-invoice-dollar bt-stat-icon"></i>
-            <div class="bt-stat-num"><?= number_format($stats['total'] ?? count($bills)) ?></div>
-            <div class="bt-stat-label">Total Bills</div>
-            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
+        <a href="<?= site_url('bills?status=Unpaid') ?>" class="bt-stat bt-g-blue text-decoration-none <?= ($filters['status'] ?? '') === 'Unpaid' ? 'active' : '' ?>">
+            <i class="fas fa-hand-holding-usd bt-stat-icon"></i>
+            <div class="bt-stat-num">₹<?= number_format($stats['unpaid_amount'] ?? 0, 2) ?></div>
+            <div class="bt-stat-label">Total Outstanding Payables (<?= number_format($stats['unpaid_count'] ?? 0) ?>)</div>
+            <div class="progress">
+                <div class="progress-bar" style="width:100%"></div>
+            </div>
         </a>
     </div>
+
+    <!-- Due Today -->
     <div class="col-xl-3 col-sm-6">
-        <div class="bt-stat bt-g-purple" style="cursor:default;">
-            <i class="fas fa-coins bt-stat-icon"></i>
-            <div class="bt-stat-num">₹<?= number_format($stats['total_amount'] ?? 0, 2) ?></div>
-            <div class="bt-stat-label">Total Billed</div>
-            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-sm-6">
-        <a href="<?= site_url('bills?status=Paid') ?>" class="bt-stat bt-g-green text-decoration-none <?= ($filters['status'] ?? '') === 'Paid' ? 'active' : '' ?>">
-            <i class="fas fa-check-circle bt-stat-icon"></i>
-            <div class="bt-stat-num">₹<?= number_format($stats['paid_amount'] ?? 0, 2) ?></div>
-            <div class="bt-stat-label">Paid (<?= $stats['paid_count'] ?? 0 ?> Bills)</div>
-            <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total_amount']) && $stats['total_amount'] > 0) ? min(100, round(($stats['paid_amount'] / $stats['total_amount']) * 100)) : 0 ?>%"></div></div>
+        <a href="<?= site_url('bills?status=DueToday') ?>" class="bt-stat bt-g-amber text-decoration-none <?= ($filters['status'] ?? '') === 'DueToday' ? 'active' : '' ?>">
+            <i class="fas fa-calendar-day bt-stat-icon"></i>
+            <div class="bt-stat-num">₹<?= number_format($stats['due_today_amount'] ?? 0, 2) ?></div>
+            <div class="bt-stat-label">Due Today (<?= number_format($stats['due_today_count'] ?? 0) ?>)</div>
+            <div class="progress">
+                <div class="progress-bar" style="width:<?= (!empty($stats['unpaid_amount']) && $stats['unpaid_amount'] > 0) ? min(100, round(($stats['due_today_amount'] / $stats['unpaid_amount']) * 100)) : 0 ?>%"></div>
+            </div>
         </a>
     </div>
+
+    <!-- Due Within 30 Days -->
     <div class="col-xl-3 col-sm-6">
-        <a href="<?= site_url('bills?status=Open') ?>" class="bt-stat bt-g-amber text-decoration-none <?= in_array($filters['status'] ?? '', ['Open', 'Overdue', 'Partially Paid']) ? 'active' : '' ?>">
-            <i class="fas fa-clock bt-stat-icon"></i>
-            <div class="bt-stat-num">₹<?= number_format($stats['balance'] ?? 0, 2) ?></div>
-            <div class="bt-stat-label">Outstanding Balance</div>
-            <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total_amount']) && $stats['total_amount'] > 0) ? min(100, round(($stats['balance'] / $stats['total_amount']) * 100)) : 0 ?>%"></div></div>
+        <a href="<?= site_url('bills?status=DueWithin30') ?>" class="bt-stat bt-g-green text-decoration-none <?= ($filters['status'] ?? '') === 'DueWithin30' ? 'active' : '' ?>">
+            <i class="fas fa-calendar-alt bt-stat-icon"></i>
+            <div class="bt-stat-num">₹<?= number_format($stats['due_30_amount'] ?? 0, 2) ?></div>
+            <div class="bt-stat-label">Due Within 30 Days (<?= number_format($stats['due_30_count'] ?? 0) ?>)</div>
+            <div class="progress">
+                <div class="progress-bar" style="width:<?= (!empty($stats['unpaid_amount']) && $stats['unpaid_amount'] > 0) ? min(100, round(($stats['due_30_amount'] / $stats['unpaid_amount']) * 100)) : 0 ?>%"></div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Overdue Bills -->
+    <div class="col-xl-3 col-sm-6">
+        <a href="<?= site_url('bills?status=Overdue') ?>" class="bt-stat bt-g-red text-decoration-none <?= ($filters['status'] ?? '') === 'Overdue' ? 'active' : '' ?>">
+            <i class="fas fa-exclamation-triangle bt-stat-icon"></i>
+            <div class="bt-stat-num">₹<?= number_format($stats['overdue_amount'] ?? 0, 2) ?></div>
+            <div class="bt-stat-label">OverDue Bills (<?= number_format($stats['overdue_count'] ?? 0) ?>)</div>
+            <div class="progress">
+                <div class="progress-bar" style="width:<?= (!empty($stats['unpaid_amount']) && $stats['unpaid_amount'] > 0) ? min(100, round(($stats['overdue_amount'] / $stats['unpaid_amount']) * 100)) : 0 ?>%"></div>
+            </div>
         </a>
     </div>
 </div>
 
 <!-- Filter Card -->
 <div class="card card-outline card-primary mb-3 shadow-sm">
-    <div class="card-header py-2">
-        <h3 class="card-title fw-bold"><i class="fas fa-filter me-1"></i> Filter Bills</h3>
+    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold m-0"><i class="fas fa-filter me-1 text-primary"></i> Filter Bills</h3>
+        <?php if (!empty(array_filter($filters ?? []))): ?>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 small">
+                <i class="fas fa-check-circle me-1"></i>Filters Active
+            </span>
+        <?php endif; ?>
     </div>
-    <div class="card-body">
+    <div class="card-body py-3">
         <form method="get" class="row g-2 align-items-end" id="billFilterForm">
-            <div class="col-md-2 col-sm-6">
-                <label class="form-label">Bill #</label>
-                <input type="text" name="bill_number" class="form-control" placeholder="Search Bill #" value="<?= esc($filters['bill_number'] ?? '') ?>">
+            <div class="col-xl-2 col-md-3 col-sm-6">
+                <label class="form-label small fw-semibold text-muted mb-1">Bill #</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light"><i class="fas fa-hashtag text-muted"></i></span>
+                    <input type="text" name="bill_number" class="form-control" placeholder="Search Bill #" value="<?= esc($filters['bill_number'] ?? '') ?>">
+                </div>
             </div>
-            <div class="col-md-3 col-sm-6">
-                <label class="form-label">Vendor</label>
-                <select name="vendor_id" class="form-select select2">
+            <div class="col-xl-3 col-md-3 col-sm-6">
+                <label class="form-label small fw-semibold text-muted mb-1">Vendor</label>
+                <select name="vendor_id" class="form-select form-select-sm select2">
                     <option value="">All Vendors</option>
                     <?php foreach ($vendors as $vendor): ?>
                         <option value="<?= $vendor['id'] ?>" <?= (isset($filters['vendor_id']) && $filters['vendor_id'] == $vendor['id']) ? 'selected' : '' ?>>
@@ -85,29 +108,36 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-2 col-sm-4">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-select">
+            <div class="col-xl-2 col-md-3 col-sm-6">
+                <label class="form-label small fw-semibold text-muted mb-1">Status</label>
+                <select name="status" class="form-select form-select-sm">
                     <option value="">All Statuses</option>
-                    <option value="Draft" <?= (isset($filters['status']) && $filters['status'] == 'Draft') ? 'selected' : '' ?>>Draft</option>
+                    <option value="Unpaid" <?= (isset($filters['status']) && $filters['status'] == 'Unpaid') ? 'selected' : '' ?>>Unpaid (Open / Partial / Overdue)</option>
+                    <option value="DueToday" <?= (isset($filters['status']) && $filters['status'] == 'DueToday') ? 'selected' : '' ?>>Due Today</option>
+                    <option value="DueWithin30" <?= (isset($filters['status']) && $filters['status'] == 'DueWithin30') ? 'selected' : '' ?>>Due Within 30 Days</option>
+                    <option value="Overdue" <?= (isset($filters['status']) && $filters['status'] == 'Overdue') ? 'selected' : '' ?>>Overdue</option>
                     <option value="Open" <?= (isset($filters['status']) && $filters['status'] == 'Open') ? 'selected' : '' ?>>Open</option>
                     <option value="Paid" <?= (isset($filters['status']) && $filters['status'] == 'Paid') ? 'selected' : '' ?>>Paid</option>
                     <option value="Partially Paid" <?= (isset($filters['status']) && $filters['status'] == 'Partially Paid') ? 'selected' : '' ?>>Partially Paid</option>
-                    <option value="Overdue" <?= (isset($filters['status']) && $filters['status'] == 'Overdue') ? 'selected' : '' ?>>Overdue</option>
+                    <option value="Draft" <?= (isset($filters['status']) && $filters['status'] == 'Draft') ? 'selected' : '' ?>>Draft</option>
                     <option value="Void" <?= (isset($filters['status']) && $filters['status'] == 'Void') ? 'selected' : '' ?>>Void</option>
                 </select>
             </div>
-            <div class="col-md-2 col-sm-4">
-                <label class="form-label">From Date</label>
-                <input type="date" name="date_from" class="form-control" value="<?= esc($filters['date_from'] ?? '') ?>">
+            <div class="col-xl-2 col-md-3 col-sm-6">
+                <label class="form-label small fw-semibold text-muted mb-1">From Date</label>
+                <input type="date" name="date_from" class="form-control form-control-sm" value="<?= esc($filters['date_from'] ?? '') ?>">
             </div>
-            <div class="col-md-2 col-sm-4">
-                <label class="form-label">To Date</label>
-                <input type="date" name="date_to" class="form-control" value="<?= esc($filters['date_to'] ?? '') ?>">
+            <div class="col-xl-2 col-md-3 col-sm-6">
+                <label class="form-label small fw-semibold text-muted mb-1">To Date</label>
+                <input type="date" name="date_to" class="form-control form-control-sm" value="<?= esc($filters['date_to'] ?? '') ?>">
             </div>
-            <div class="col-md-1 d-flex gap-1">
-                <button type="submit" class="btn btn-primary w-100" title="Apply Filters"><i class="fas fa-search"></i></button>
-                <a href="<?= site_url('bills') ?>" class="btn btn-outline-secondary" title="Reset Filters"><i class="fas fa-undo"></i></a>
+            <div class="col-xl-1 col-md-3 col-sm-6 d-flex gap-1">
+                <button type="submit" class="btn btn-sm btn-primary flex-fill" title="Apply Filters">
+                    <i class="fas fa-search me-1"></i>Filter
+                </button>
+                <a href="<?= site_url('bills') ?>" class="btn btn-sm btn-outline-secondary" title="Reset Filters">
+                    <i class="fas fa-undo"></i>
+                </a>
             </div>
         </form>
     </div>

@@ -42,8 +42,27 @@ class BillController extends BaseController
             'date_to'     => $this->request->getGet('date_to'),
         ];
 
-        // Overall aggregate stats
-        $summaryBuilder = $this->billModel->select('COUNT(*) as total_count, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(SUM(paid_amount), 0) as paid_amount, COALESCE(SUM(balance), 0) as balance');
+        // Overall aggregate stats across all bills (or filtered by other criteria)
+        $summaryBuilder = $this->billModel->select('
+            COUNT(*) as total_count,
+            COALESCE(SUM(total_amount), 0) as total_amount,
+            COALESCE(SUM(paid_amount), 0) as paid_amount,
+            COALESCE(SUM(balance), 0) as total_balance,
+            COUNT(CASE WHEN (bills.status IN (\'Open\', \'Partially Paid\', \'Overdue\') OR bills.balance > 0.01) AND bills.status != \'Void\' THEN 1 END) as unpaid_count,
+            COALESCE(SUM(CASE WHEN (bills.status IN (\'Open\', \'Partially Paid\', \'Overdue\') OR bills.balance > 0.01) AND bills.status != \'Void\' THEN bills.balance ELSE 0 END), 0) as unpaid_amount,
+            COUNT(CASE WHEN bills.due_date = CURDATE() AND bills.balance > 0.01 AND bills.status != \'Void\' THEN 1 END) as due_today_count,
+            COALESCE(SUM(CASE WHEN bills.due_date = CURDATE() AND bills.balance > 0.01 AND bills.status != \'Void\' THEN bills.balance ELSE 0 END), 0) as due_today_amount,
+            COUNT(CASE WHEN bills.due_date >= CURDATE() AND bills.due_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) AND bills.balance > 0.01 AND bills.status != \'Void\' THEN 1 END) as due_30_count,
+            COALESCE(SUM(CASE WHEN bills.due_date >= CURDATE() AND bills.due_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) AND bills.balance > 0.01 AND bills.status != \'Void\' THEN bills.balance ELSE 0 END), 0) as due_30_amount,
+            COUNT(CASE WHEN (bills.status = \'Overdue\' OR bills.due_date < CURDATE()) AND bills.balance > 0.01 AND bills.status != \'Void\' THEN 1 END) as overdue_count,
+            COALESCE(SUM(CASE WHEN (bills.status = \'Overdue\' OR bills.due_date < CURDATE()) AND bills.balance > 0.01 AND bills.status != \'Void\' THEN bills.balance ELSE 0 END), 0) as overdue_amount,
+            COUNT(CASE WHEN bills.status = \'Open\' THEN 1 END) as open_count,
+            COALESCE(SUM(CASE WHEN bills.status = \'Open\' THEN bills.balance ELSE 0 END), 0) as open_amount,
+            COUNT(CASE WHEN bills.status = \'Partially Paid\' THEN 1 END) as partially_paid_count,
+            COALESCE(SUM(CASE WHEN bills.status = \'Partially Paid\' THEN bills.balance ELSE 0 END), 0) as partially_paid_amount,
+            COUNT(CASE WHEN bills.status = \'Paid\' THEN 1 END) as paid_count,
+            COALESCE(SUM(CASE WHEN bills.status = \'Paid\' THEN bills.paid_amount ELSE 0 END), 0) as paid_total
+        ', false);
         if (!empty($filters['bill_number'])) {
             $summaryBuilder->groupStart()
                 ->like('bills.bill_number', trim($filters['bill_number']))
@@ -54,7 +73,35 @@ class BillController extends BaseController
             $summaryBuilder->where('vendor_id', $filters['vendor_id']);
         }
         if (!empty($filters['status'])) {
-            $summaryBuilder->where('status', $filters['status']);
+            if ($filters['status'] === 'Unpaid') {
+                $summaryBuilder->groupStart()
+                    ->whereIn('bills.status', ['Open', 'Partially Paid', 'Overdue'])
+                    ->orGroupStart()
+                        ->where('bills.balance >', 0.01)
+                        ->where('bills.status !=', 'Void')
+                    ->groupEnd()
+                ->groupEnd();
+            } elseif ($filters['status'] === 'DueToday') {
+                $summaryBuilder->where('bills.due_date', date('Y-m-d'))
+                    ->where('bills.balance >', 0.01)
+                    ->where('bills.status !=', 'Void');
+            } elseif ($filters['status'] === 'DueWithin30') {
+                $summaryBuilder->where('bills.due_date >=', date('Y-m-d'))
+                    ->where('bills.due_date <=', date('Y-m-d', strtotime('+30 days')))
+                    ->where('bills.balance >', 0.01)
+                    ->where('bills.status !=', 'Void');
+            } elseif ($filters['status'] === 'Overdue') {
+                $summaryBuilder->groupStart()
+                    ->where('bills.status', 'Overdue')
+                    ->orGroupStart()
+                        ->where('bills.due_date <', date('Y-m-d'))
+                        ->where('bills.balance >', 0.01)
+                        ->where('bills.status !=', 'Void')
+                    ->groupEnd()
+                ->groupEnd();
+            } else {
+                $summaryBuilder->where('status', $filters['status']);
+            }
         }
         if (!empty($filters['date_from'])) {
             $summaryBuilder->where('bill_date >=', $filters['date_from']);
@@ -84,26 +131,25 @@ class BillController extends BaseController
         $data['filters'] = $filters;
         $data['title'] = 'Purchase Bills';
 
-        $stats = [
-            'total'         => (int) ($totals['total_count'] ?? count($data['bills'])),
-            'total_amount'  => (float) ($totals['total_amount'] ?? 0),
-            'paid_amount'   => (float) ($totals['paid_amount'] ?? 0),
-            'balance'       => (float) ($totals['balance'] ?? 0),
-            'paid_count'    => 0,
-            'open_count'    => 0,
-            'overdue_count' => 0,
+        $data['stats'] = [
+            'total'                 => (int) ($totals['total_count'] ?? 0),
+            'total_amount'          => (float) ($totals['total_amount'] ?? 0),
+            'paid_amount'           => (float) ($totals['paid_amount'] ?? 0),
+            'balance'               => (float) ($totals['total_balance'] ?? 0),
+            'unpaid_amount'         => (float) ($totals['unpaid_amount'] ?? 0),
+            'unpaid_count'          => (int) ($totals['unpaid_count'] ?? 0),
+            'due_today_amount'      => (float) ($totals['due_today_amount'] ?? 0),
+            'due_today_count'       => (int) ($totals['due_today_count'] ?? 0),
+            'due_30_amount'         => (float) ($totals['due_30_amount'] ?? 0),
+            'due_30_count'          => (int) ($totals['due_30_count'] ?? 0),
+            'overdue_amount'        => (float) ($totals['overdue_amount'] ?? 0),
+            'overdue_count'         => (int) ($totals['overdue_count'] ?? 0),
+            'open_amount'           => (float) ($totals['open_amount'] ?? 0),
+            'open_count'            => (int) ($totals['open_count'] ?? 0),
+            'partially_paid_amount' => (float) ($totals['partially_paid_amount'] ?? 0),
+            'partially_paid_count'  => (int) ($totals['partially_paid_count'] ?? 0),
+            'paid_count'            => (int) ($totals['paid_count'] ?? 0),
         ];
-        foreach ($data['bills'] as $b) {
-            $st = $b['status'] ?? '';
-            if ($st === 'Paid') {
-                $stats['paid_count']++;
-            } elseif ($st === 'Overdue') {
-                $stats['overdue_count']++;
-            } elseif ($st === 'Open' || $st === 'Partially Paid') {
-                $stats['open_count']++;
-            }
-        }
-        $data['stats'] = $stats;
 
         return view('bills/index', $data);
     }
@@ -451,9 +497,14 @@ class BillController extends BaseController
 
         $grossSettlement = (float) $this->request->getPost('gross_settlement');
         $amount = (float) $this->request->getPost('amount');
-        $discount = (float) $this->request->getPost('discount_amount') ?? 0;
-        $mahimai = (float) $this->request->getPost('mahimai_amount') ?? 0;
-        $postal = (float) $this->request->getPost('postal_charges') ?? 0;
+        $discount = (float) ($this->request->getPost('discount_amount') ?? 0);
+        $mahimai = (float) ($this->request->getPost('mahimai_amount') ?? 0);
+        $postal = (float) ($this->request->getPost('postal_charges') ?? 0);
+        $bankAccountId = $this->request->getPost('bank_account_id');
+
+        if (empty($bankAccountId)) {
+            return redirect()->back()->withInput()->with('error', 'Bank account is mandatory.');
+        }
 
         if ($grossSettlement > $bill['balance'] + 0.01) {
             return redirect()->back()->withInput()->with('error', 'Gross settlement cannot exceed bill balance.');

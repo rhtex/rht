@@ -258,35 +258,8 @@ class VendorCreditSyncService extends AbstractModuleSyncService
             return ['success' => false, 'action' => 'FAILED', 'message' => 'Could not resolve local vendor for Zoho Vendor Credit ' . $zohoId];
         }
 
-        return ZohoSyncContext::runAsZoho(function () use ($zohoVc, $zohoId, $localCredit, $localVendorId, $normalizedZoho) {
-            $total   = (float) ($zohoVc['total'] ?? 0);
-            $balance = (float) ($zohoVc['balance'] ?? $total);
-            $used    = max(0.0, round($total - $balance, 2));
-
-            $status = 'Unused';
-            if ($balance <= 0.009 && $total > 0) {
-                $status = 'Used';
-            } elseif ($used > 0) {
-                $status = 'Partial';
-            }
-
-            $vcData = [
-                'vendor_id'    => $localVendorId,
-                'amount'       => $total,
-                'reference_no' => trim((string) ($zohoVc['vendor_credit_number'] ?? ($localCredit['reference_no'] ?? ('VCN-' . substr($zohoId, -5))))),
-                'notes'        => $zohoVc['notes'] ?? ($localCredit['notes'] ?? 'Zoho Vendor Credit'),
-                'status'       => $status,
-                'used_amount'  => $used,
-            ];
-
-            if ($localCredit) {
-                $localId = (int) $localCredit['id'];
-                $this->creditModel->skipValidation(true)->update($localId, $vcData);
-                $action = 'UPDATED';
-            } else {
-                $localId = (int) $this->creditModel->skipValidation(true)->insert($vcData, true);
-                $action = 'CREATED';
-            }
+"        return ZohoSyncContext::runAsZoho(function () use ($zohoVc, $zohoId, $localCredit, $localVendorId, $normalizedZoho) {\n            $total   = (float) ($zohoVc['total'] ?? 0);\n            $balance = (float) ($zohoVc['balance'] ?? 0);\n            $used    = (float) ($zohoVc['total_credits_used'] ?? max(0.0, round($total - $balance, 2)));\n\n            $zohoStatus = strtolower((string) ($zohoVc['status'] ?? 'open'));\n            if ($zohoStatus === 'closed' || $balance <= 0.009) {\n                $status = 'Closed';\n            } elseif ($zohoStatus === 'void') {\n                $status = 'Void';\n            } elseif ($zohoStatus === 'draft') {\n                $status = 'Draft';\n            } elseif ($used > 0) {\n                $status = 'Partial';\n            } else {\n                $status = 'Open';\n            }\n\n            // Associate with local bill if referenced\n            $localBillId = null;\n            if (!empty($zohoVc['bill_id'])) {\n                $billMap = $this->mappingModel->findByZoho('bills', (string) $zohoVc['bill_id']);\n                if ($billMap) {\n                    $localBillId = (int) $billMap['local_record_id'];\n                }\n            } elseif (!empty($zohoVc['bills_credited'][0]['bill_id'])) {\n                $billMap = $this->mappingModel->findByZoho('bills', (string) $zohoVc['bills_credited'][0]['bill_id']);\n                if ($billMap) {\n                    $localBillId = (int) $billMap['local_record_id'];\n                }\n            }\n\n            $creditDate = !empty($zohoVc['date']) ? $zohoVc['date'] : date('Y-m-d');\n\n            $vcData = [\n                'vendor_id'        => $localVendorId,\n                'credit_note_date' => $creditDate,\n                'bill_id'          => $localBillId,\n                'amount'           => $total,\n                'balance'          => $balance,\n                'reference_no'     => trim((string) ($zohoVc['vendor_credit_number'] ?? ($localCredit['reference_no'] ?? ('VCN-' . sub
+<truncated 627 bytes>
 
             $updated         = $this->creditModel->find($localId);
             $normalizedLocal = $this->normalizeLocalCredit($updated);

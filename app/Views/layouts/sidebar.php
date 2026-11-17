@@ -18,7 +18,7 @@
                 $segment4 = $uri->getTotalSegments() >= 4 ? $uri->getSegment(4) : '';
                 
                 $isSales = in_array($segment1, ['customers', 'quotations', 'sales_orders', 'invoices', 'eway_bills', 'sales_returns', 'invoice_payments', 'agents', 'agent-payments']);
-                $isPurchases = in_array($segment1, ['vendors', 'bills', 'payments', 'expenses', 'expense_categories']);
+                $isPurchases = in_array($segment1, ['vendors', 'bills', 'vendor_credits', 'payments', 'expenses', 'expense_categories']);
                 $isInventory = in_array($segment1, ['products', 'product_categories']);
                 $isProduction = in_array($segment1, ['production', 'weavers']) || ($segment1 === 'production' && $segment2 === 'colors');
                 $isOperations = in_array($segment1, ['transports', 'vehicles']);
@@ -189,12 +189,6 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="<?= site_url('vendors/returns') ?>" class="nav-link">
-                                <i class="nav-icon fas fa-undo-alt text-danger"></i>
-                                <p><?= lang("App.pending_returns") ?></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a href="<?= site_url('vendors/returns/create') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-shipping-fast text-warning"></i>
                                 <p><?= lang("App.new_return_shipment") ?></p>
@@ -210,13 +204,19 @@
                         
                         <?php if(can('bill.view')): ?>
                         <li class="nav-item">
-                            <a href="<?= site_url('bills') ?>" class="nav-link">
+                            <a href="<?= site_url('bills') ?>" class="nav-link <?= ($segment1 === 'bills') ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-file-invoice-dollar text-primary"></i>
                                 <p><?= lang("App.bills") ?></p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="<?= site_url('payments') ?>" class="nav-link">
+                            <a href="<?= site_url('vendor_credits') ?>" class="nav-link <?= ($segment1 === 'vendor_credits') ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-undo-alt text-warning"></i>
+                                <p>Vendor Credits</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= site_url('payments') ?>" class="nav-link <?= ($segment1 === 'payments') ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-money-check-alt text-success"></i>
                                 <p><?= lang("App.payments") ?></p>
                             </a>

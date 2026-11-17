@@ -695,7 +695,7 @@ class VendorController extends BaseController
             return view('vendors/return_shipment_rows', $data);
         }
 
-        return view('vendors/return_list', $data);
+        return view('vendors/return_shipments', $data);
     }
 
     public function updateShipment($id)

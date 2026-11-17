@@ -105,6 +105,14 @@ class VendorPaymentSyncService extends AbstractModuleSyncService
 
         $zohoPay        = $res['data']['vendorpayment'] ?? [];
         $newZohoId      = (string) ($zohoPay['payment_id'] ?? $zohoId);
+        $zohoPayNumber  = !empty($zohoPay['payment_number']) ? trim((string) $zohoPay['payment_number']) : null;
+
+        // If Zoho Books generated or updated the payment number, sync it back to local payment record
+        if ($zohoPayNumber && $zohoPayNumber !== $payment['payment_number']) {
+            $this->paymentModel->skipValidation(true)->update($localId, ['payment_number' => $zohoPayNumber]);
+            $payment['payment_number'] = $zohoPayNumber;
+        }
+
         $normalizedZoho = !empty($zohoPay) ? $this->normalizeZohoPayment($zohoPay) : $normalizedLocal;
 
         $this->saveMapping(
@@ -336,13 +344,15 @@ class VendorPaymentSyncService extends AbstractModuleSyncService
 
     protected function buildZohoPayload(array $payment, string $zohoVendorId, ?string $zohoBillId): array
     {
-        $amount     = round((float) ($payment['amount'] ?? 0), 2);
+        $netAmount  = round((float) ($payment['amount'] ?? 0), 2);
         $deductions = round(
             (float) ($payment['discount_amount'] ?? 0)
             + (float) ($payment['mahimai_amount'] ?? 0)
             + (float) ($payment['postal_charges'] ?? 0),
             2
         );
+        // Gross payment amount includes net amount + all deductions
+        $grossAmount = round($netAmount + $deductions, 2);
 
         $paidThroughAccId = $this->taxMapper->resolvePaidThroughAccountId(
             !empty($payment['bank_account_id']) ? (int) $payment['bank_account_id'] : null,
@@ -351,13 +361,17 @@ class VendorPaymentSyncService extends AbstractModuleSyncService
 
         $payload = [
             'vendor_id'        => $zohoVendorId,
-            'payment_number'   => (string) ($payment['payment_number'] ?? ''),
             'payment_mode'     => (string) ($payment['payment_mode'] ?: 'Bank Transfer'),
-            'amount'           => $amount,
+            'amount'           => $grossAmount,
             'date'             => $payment['payment_date'],
             'reference_number' => (string) ($payment['reference_number'] ?? $payment['payment_number'] ?? ''),
             'description'      => (string) ($payment['notes'] ?? ''),
         ];
+
+        // Send payment_number if present
+        if (!empty($payment['payment_number'])) {
+            $payload['payment_number'] = (string) $payment['payment_number'];
+        }
 
         if ($paidThroughAccId) {
             $payload['paid_through_account_id'] = $paidThroughAccId;
@@ -366,9 +380,8 @@ class VendorPaymentSyncService extends AbstractModuleSyncService
         if ($zohoBillId) {
             $payload['bills'] = [
                 [
-                    'bill_id'         => $zohoBillId,
-                    'amount_applied'  => $amount,
-                    'discount_amount' => $deductions,
+                    'bill_id'        => $zohoBillId,
+                    'amount_applied' => $grossAmount,
                 ],
             ];
         }
@@ -393,6 +406,11 @@ class VendorPaymentSyncService extends AbstractModuleSyncService
         }
 
         $total   = (float) ($bill['total_amount'] ?? 0);
+        // If the bill was already imported as Paid from Zoho (e.g. settled via vendor credit notes), preserve Paid status and 0 balance
+        if ($bill['status'] === 'Paid' && (float) ($bill['balance'] ?? 0) <= 0.01) {
+            return;
+        }
+
         $balance = max(0.0, round($total - $totalSettled, 2));
         $status  = $bill['status'];
         if ($status !== 'Void') {

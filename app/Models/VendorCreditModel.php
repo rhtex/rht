@@ -13,7 +13,7 @@ class VendorCreditModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'vendor_id', 'amount', 'reference_no', 'notes', 'status', 'used_amount', 'created_by'
+        'vendor_id', 'credit_note_date', 'bill_id', 'amount', 'balance', 'reference_no', 'notes', 'status', 'used_amount', 'created_by', 'updated_by'
     ];
 
     protected $useTimestamps = true;

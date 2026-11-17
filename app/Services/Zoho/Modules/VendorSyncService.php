@@ -62,7 +62,7 @@ class VendorSyncService extends AbstractModuleSyncService
         }
 
         $billing  = $this->addressModel->getBillingAddress('vendor', $localId);
-        $shipping = $this->addressModel->getShippingAddress('vendor', $localId);
+        $shipping = $this->addressModel->getShippingAddress('vendor', $localId) ?: $billing;
 
         $normalizedLocal = $this->normalizeLocalVendor($vendor, $billing);
 

@@ -500,7 +500,9 @@ class VendorSyncService extends AbstractModuleSyncService
             'gstin'           => strtoupper(trim((string) ($vendor['gstin'] ?? ''))),
             'gst_type'        => trim((string) ($vendor['gst_type'] ?? 'Unregistered')),
             'billing_line1'   => trim((string) ($billing['address_line1'] ?? '')),
+            'billing_line2'   => trim((string) ($billing['address_line2'] ?? '')),
             'billing_city'    => trim((string) ($billing['city'] ?? '')),
+            'billing_state'   => trim((string) ($billing['state_name'] ?? '')),
             'billing_pincode' => trim((string) ($billing['pincode'] ?? '')),
             'status'          => strtolower(trim((string) ($vendor['status'] ?? 'active'))),
         ];
@@ -518,7 +520,9 @@ class VendorSyncService extends AbstractModuleSyncService
             'gstin'           => strtoupper(trim((string) ($zoho['gst_no'] ?? ''))),
             'gst_type'        => $this->taxMapper->mapZohoGstTreatmentToLocal($zoho['gst_treatment'] ?? null, true),
             'billing_line1'   => trim((string) ($billing['address'] ?? '')),
+            'billing_line2'   => trim((string) ($billing['street2'] ?? '')),
             'billing_city'    => trim((string) ($billing['city'] ?? '')),
+            'billing_state'   => trim((string) ($billing['state'] ?? '')),
             'billing_pincode' => trim((string) ($billing['zip'] ?? '')),
             'status'          => strtolower(trim((string) ($zoho['status'] ?? 'active'))) === 'inactive' ? 'inactive' : 'active',
         ];

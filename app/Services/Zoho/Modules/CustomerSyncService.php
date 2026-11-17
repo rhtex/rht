@@ -496,16 +496,23 @@ class CustomerSyncService extends AbstractModuleSyncService
     public function normalizeLocalCustomer(array $customer, ?array $billing, ?array $shipping): array
     {
         return [
-            'name'            => trim((string) ($customer['name'] ?? '')),
-            'email'           => trim((string) ($customer['email'] ?? '')),
-            'phone'           => trim((string) ($customer['phone'] ?? '')),
-            'whatsapp_number' => trim((string) ($customer['whatsapp_number'] ?? '')),
-            'gstin'           => strtoupper(trim((string) ($customer['gstin'] ?? ''))),
-            'gst_type'        => trim((string) ($customer['gst_type'] ?? 'Consumer')),
-            'billing_line1'   => trim((string) ($billing['address_line1'] ?? '')),
-            'billing_city'    => trim((string) ($billing['city'] ?? '')),
-            'billing_pincode' => trim((string) ($billing['pincode'] ?? '')),
-            'status'          => strtolower(trim((string) ($customer['status'] ?? 'active'))),
+            'name'             => trim((string) ($customer['name'] ?? '')),
+            'email'            => trim((string) ($customer['email'] ?? '')),
+            'phone'            => trim((string) ($customer['phone'] ?? '')),
+            'whatsapp_number'  => trim((string) ($customer['whatsapp_number'] ?? '')),
+            'gstin'            => strtoupper(trim((string) ($customer['gstin'] ?? ''))),
+            'gst_type'         => trim((string) ($customer['gst_type'] ?? 'Consumer')),
+            'billing_line1'    => trim((string) ($billing['address_line1'] ?? '')),
+            'billing_line2'    => trim((string) ($billing['address_line2'] ?? '')),
+            'billing_city'     => trim((string) ($billing['city'] ?? '')),
+            'billing_state'    => trim((string) ($billing['state_name'] ?? '')),
+            'billing_pincode'  => trim((string) ($billing['pincode'] ?? '')),
+            'shipping_line1'   => trim((string) ($shipping['address_line1'] ?? '')),
+            'shipping_line2'   => trim((string) ($shipping['address_line2'] ?? '')),
+            'shipping_city'    => trim((string) ($shipping['city'] ?? '')),
+            'shipping_state'   => trim((string) ($shipping['state_name'] ?? '')),
+            'shipping_pincode' => trim((string) ($shipping['pincode'] ?? '')),
+            'status'           => strtolower(trim((string) ($customer['status'] ?? 'active'))),
         ];
     }
 
@@ -513,17 +520,25 @@ class CustomerSyncService extends AbstractModuleSyncService
     {
         $primaryPerson = $zoho['contact_persons'][0] ?? [];
         $billing       = $zoho['billing_address'] ?? [];
+        $shipping      = $zoho['shipping_address'] ?? [];
         return [
-            'name'            => trim((string) ($zoho['contact_name'] ?? $zoho['company_name'] ?? '')),
-            'email'           => trim((string) ($zoho['email'] ?? $primaryPerson['email'] ?? '')),
-            'phone'           => trim((string) ($zoho['phone'] ?? $primaryPerson['phone'] ?? '')),
-            'whatsapp_number' => trim((string) ($zoho['mobile'] ?? $primaryPerson['mobile'] ?? '')),
-            'gstin'           => strtoupper(trim((string) ($zoho['gst_no'] ?? ''))),
-            'gst_type'        => $this->taxMapper->mapZohoGstTreatmentToLocal($zoho['gst_treatment'] ?? null, false),
-            'billing_line1'   => trim((string) ($billing['address'] ?? '')),
-            'billing_city'    => trim((string) ($billing['city'] ?? '')),
-            'billing_pincode' => trim((string) ($billing['zip'] ?? '')),
-            'status'          => strtolower(trim((string) ($zoho['status'] ?? 'active'))) === 'inactive' ? 'inactive' : 'active',
+            'name'             => trim((string) ($zoho['contact_name'] ?? $zoho['company_name'] ?? '')),
+            'email'            => trim((string) ($zoho['email'] ?? $primaryPerson['email'] ?? '')),
+            'phone'            => trim((string) ($zoho['phone'] ?? $primaryPerson['phone'] ?? '')),
+            'whatsapp_number'  => trim((string) ($zoho['mobile'] ?? $primaryPerson['mobile'] ?? '')),
+            'gstin'            => strtoupper(trim((string) ($zoho['gst_no'] ?? ''))),
+            'gst_type'         => $this->taxMapper->mapZohoGstTreatmentToLocal($zoho['gst_treatment'] ?? null, false),
+            'billing_line1'    => trim((string) ($billing['address'] ?? '')),
+            'billing_line2'    => trim((string) ($billing['street2'] ?? '')),
+            'billing_city'     => trim((string) ($billing['city'] ?? '')),
+            'billing_state'    => trim((string) ($billing['state'] ?? '')),
+            'billing_pincode'  => trim((string) ($billing['zip'] ?? '')),
+            'shipping_line1'   => trim((string) ($shipping['address'] ?? '')),
+            'shipping_line2'   => trim((string) ($shipping['street2'] ?? '')),
+            'shipping_city'    => trim((string) ($shipping['city'] ?? '')),
+            'shipping_state'   => trim((string) ($shipping['state'] ?? '')),
+            'shipping_pincode' => trim((string) ($shipping['zip'] ?? '')),
+            'status'           => strtolower(trim((string) ($zoho['status'] ?? 'active'))) === 'inactive' ? 'inactive' : 'active',
         ];
     }
 }

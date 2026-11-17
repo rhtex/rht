@@ -328,6 +328,13 @@ class ZohoApiClient
             $zohoCode   = isset($decoded['code']) ? (int) $decoded['code'] : -1;
             $zohoMsg    = (string) ($decoded['message'] ?? '');
 
+            // Retry on transient network connection errors (cURL error 7, 28, 35, etc.)
+            if (!empty($curlErr) && $attempt < $maxRetries) {
+                log_message('warning', "ZohoApiClient transient connection failure: {$curlErr}. Retrying attempt {$attempt}/{$maxRetries}...");
+                sleep(2);
+                continue;
+            }
+
             // Handle 401 Unauthorized once by refreshing access token
             if ($httpCode === 401 && !$forceTokenRefresh) {
                 $forceTokenRefresh = true;

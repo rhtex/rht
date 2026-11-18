@@ -108,7 +108,7 @@
                             <i class="fas fa-wallet"></i>
                         </div>
                     </div>
-                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($totalSales / 1000, 1) ?>K</h3>
+                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($totalSales, 2) ?></h3>
                     <div class="text-muted small fw-semibold" style="font-size: 0.7rem;"><span class="text-success"><i class="fas fa-arrow-up me-1"></i>FY <?= date('Y') ?></span> <?= lang("App.gross_sales") ?></div>
                 </div>
             </div>
@@ -122,7 +122,7 @@
                             <i class="fas fa-chart-pie"></i>
                         </div>
                     </div>
-                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($totalProfit / 1000, 1) ?>K</h3>
+                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($totalProfit, 2) ?></h3>
                     <div class="text-muted small fw-semibold" style="font-size: 0.7rem;"><span class="text-success"><i class="fas fa-check-circle me-1"></i><?= number_format($profitMargin, 1) ?>%</span> <?= lang("App.margin") ?></div>
                 </div>
             </div>
@@ -136,7 +136,7 @@
                             <i class="fas fa-hand-holding-usd"></i>
                         </div>
                     </div>
-                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($accountsReceivable / 1000, 1) ?>K</h3>
+                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($accountsReceivable, 2) ?></h3>
                     <div class="text-muted small fw-semibold" style="font-size: 0.7rem;"><span class="text-warning"><i class="fas fa-clock me-1"></i>Unpaid</span> <?= lang("App.invoices") ?></div>
                 </div>
             </div>
@@ -150,7 +150,7 @@
                             <i class="fas fa-file-invoice-dollar"></i>
                         </div>
                     </div>
-                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($accountsPayable / 1000, 1) ?>K</h3>
+                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($accountsPayable, 2) ?></h3>
                     <div class="text-muted small fw-semibold" style="font-size: 0.7rem;"><span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>Unpaid</span> <?= lang("App.bills") ?></div>
                 </div>
             </div>
@@ -268,7 +268,7 @@
                                     <div class="text-muted" style="font-size: 0.7rem;">Vol: <?= $prod['total_qty'] ?> Units</div>
                                 </div>
                                 <div class="text-end fw-bolder text-success" style="font-size: 0.85rem;">
-                                    ₹<?= number_format($prod['total_revenue'] / 1000, 1) ?>K
+                                    ₹<?= number_format($prod['total_revenue'], 2) ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -298,7 +298,7 @@
                                     <div class="text-muted" style="font-size: 0.7rem;">Orders: <?= $cust['total_orders'] ?></div>
                                 </div>
                                 <div class="text-end fw-bolder text-primary" style="font-size: 0.85rem;">
-                                    ₹<?= number_format($cust['total_spent'] / 1000, 1) ?>K
+                                    ₹<?= number_format($cust['total_spent'], 2) ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -392,7 +392,7 @@
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [2, 2], color: '#f1f5f9' }, ticks: { callback: v => '₹' + (v >= 1000 ? (v / 1000) + 'k' : v) } },
+                    y: { beginAtZero: true, grid: { borderDash: [2, 2], color: '#f1f5f9' }, ticks: { callback: v => '₹' + Number(v).toLocaleString('en-IN') } },
                     x: { grid: { display: false } }
                 }
             }

@@ -117,13 +117,13 @@
             <div class="card kpi-card-v3">
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;"><?= lang("App.net_profit") ?></div>
-                        <div class="kpi-icon-wrap bg-success bg-opacity-10 text-success" style="width: 32px; height: 32px; font-size: 0.9rem;">
-                            <i class="fas fa-chart-pie"></i>
+                        <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;"><?= lang("App.purchases_ytd") ?></div>
+                        <div class="kpi-icon-wrap bg-info bg-opacity-10 text-info" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                            <i class="fas fa-shopping-cart"></i>
                         </div>
                     </div>
-                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($totalProfit, 2) ?></h3>
-                    <div class="text-muted small fw-semibold" style="font-size: 0.7rem;"><span class="text-success"><i class="fas fa-check-circle me-1"></i><?= number_format($profitMargin, 1) ?>%</span> <?= lang("App.margin") ?></div>
+                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($totalPurchases, 2) ?></h3>
+                    <div class="text-muted small fw-semibold" style="font-size: 0.7rem;"><span class="text-primary"><i class="fas fa-file-invoice me-1"></i>FY <?= date('Y') ?></span> <?= lang("App.total_purchases") ?></div>
                 </div>
             </div>
         </div>
@@ -229,7 +229,6 @@
                         <div class="d-flex gap-2 text-white">
                             <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #6366f1; font-size: 10px;"></i> <?= lang("App.revenue") ?></span>
                             <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #f87171; font-size: 10px;"></i> <?= lang("App.expense") ?></span>
-                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #34d399; font-size: 10px;"></i> <?= lang("App.profit") ?></span>
                         </div>
                     </div>
                 </div>
@@ -384,8 +383,7 @@
                 labels: <?= json_encode($chartLabels) ?>,
                 datasets: [
                     { label: 'Revenue', data: <?= json_encode($salesTrend) ?>, backgroundColor: '#4f46e5', borderRadius: 4, barPercentage: 0.6 },
-                    { label: 'Expense', data: <?= json_encode($purchaseTrend) ?>, backgroundColor: '#ef4444', borderRadius: 4, barPercentage: 0.6 },
-                    { label: 'Profit', data: <?= json_encode($profitTrend) ?>, backgroundColor: '#10b981', borderRadius: 4, barPercentage: 0.6 }
+                    { label: 'Expense', data: <?= json_encode($purchaseTrend) ?>, backgroundColor: '#ef4444', borderRadius: 4, barPercentage: 0.6 }
                 ]
             },
             options: {
@@ -407,7 +405,6 @@
                     window.mainChart.data.labels = data.labels;
                     window.mainChart.data.datasets[0].data = data.sales;
                     window.mainChart.data.datasets[1].data = data.purchases;
-                    window.mainChart.data.datasets[2].data = data.profit;
                     window.mainChart.update();
                 })
                 .catch(err => console.error("Error fetching chart data:", err));

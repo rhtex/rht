@@ -34,29 +34,26 @@ class Home extends BaseController
 
         // 3. Financial Totals (Current Year)
         $currentYear = date('Y');
-        $data['totalSales'] = $invoiceModel->selectSum('total_amount')
+        $data['totalSales'] = (float) ($invoiceModel->selectSum('total_amount')
             ->where('status !=', 'Void')
             ->where('status !=', 'Draft')
             ->where('YEAR(invoice_date)', $currentYear)
-            ->get()->getRow()->total_amount ?? 0;
+            ->get()->getRow()->total_amount ?? 0);
 
-        $data['totalPurchases'] = $billModel->selectSum('total_amount')
+        $data['totalPurchases'] = (float) ($billModel->selectSum('total_amount')
             ->where('status !=', 'Void')
             ->where('status !=', 'Draft')
             ->where('YEAR(bill_date)', $currentYear)
-            ->get()->getRow()->total_amount ?? 0;
+            ->get()->getRow()->total_amount ?? 0);
 
-        // 4. Accounts Receivable & Payable
-        $data['accountsReceivable'] = $invoiceModel->selectSum('total_amount')
-            ->whereIn('status', ['Unpaid', 'Partially Paid', 'Overdue'])
-            ->get()->getRow()->total_amount ?? 0;
+        // 4. Accounts Receivable & Payable (Real Outstanding Balances)
+        $data['accountsReceivable'] = (float) ($invoiceModel->selectSum('balance')
+            ->where('status !=', 'Void')
+            ->get()->getRow()->balance ?? 0);
 
-        $data['accountsPayable'] = $billModel->selectSum('total_amount')
-            ->whereIn('status', ['Unpaid', 'Partially Paid', 'Overdue'])
-            ->get()->getRow()->total_amount ?? 0;
-
-        $data['totalProfit'] = $data['totalSales'] - $data['totalPurchases'];
-        $data['profitMargin'] = ($data['totalSales'] > 0) ? ($data['totalProfit'] / $data['totalSales']) * 100 : 0;
+        $data['accountsPayable'] = (float) ($billModel->selectSum('balance')
+            ->where('status !=', 'Void')
+            ->get()->getRow()->balance ?? 0);
 
         // 5. Sales Funnel & Operational Metrics
         $data['pendingQuotations'] = $quotationModel->whereIn('status', ['Draft', 'Sent'])->countAllResults();
@@ -85,7 +82,6 @@ class Home extends BaseController
         $months = [];
         $salesTrend = [];
         $purchaseTrend = [];
-        $profitTrend = [];
 
         for ($i = 5; $i >= 0; $i--) {
             $monthDay = date('Y-m', strtotime("-$i months"));
@@ -104,15 +100,11 @@ class Home extends BaseController
                 ->whereNotIn('status', ['Void', 'Draft'])
                 ->get()->getRow()->total_amount ?? 0;
             $purchaseTrend[] = (float) $pTotal;
-
-            // Profit per month
-            $profitTrend[] = (float) ($sTotal - $pTotal);
         }
 
         $data['chartLabels'] = $months;
         $data['salesTrend'] = $salesTrend;
         $data['purchaseTrend'] = $purchaseTrend;
-        $data['profitTrend'] = $profitTrend;
 
         // 7. Category Performance
         $data['categorySales'] = $db->table('invoice_items')
@@ -185,7 +177,6 @@ class Home extends BaseController
         $months = [];
         $salesTrend = [];
         $purchaseTrend = [];
-        $profitTrend = [];
 
         if ($filter == '6m' || $filter == '12m') {
             $numMonths = ($filter == '12m') ? 11 : 5;
@@ -204,8 +195,6 @@ class Home extends BaseController
                     ->whereNotIn('status', ['Void', 'Draft'])
                     ->get()->getRow()->total_amount ?? 0;
                 $purchaseTrend[] = (float) $pTotal;
-
-                $profitTrend[] = (float) ($sTotal - $pTotal);
             }
         } elseif ($filter == 'fy') {
             $currentMonth = (int)date('m');
@@ -235,8 +224,6 @@ class Home extends BaseController
                     ->whereNotIn('status', ['Void', 'Draft'])
                     ->get()->getRow()->total_amount ?? 0;
                 $purchaseTrend[] = (float) $pTotal;
-
-                $profitTrend[] = (float) ($sTotal - $pTotal);
             }
         } elseif ($filter == 'compare') {
             $currentMonthTime = time();
@@ -258,16 +245,13 @@ class Home extends BaseController
                     ->whereNotIn('status', ['Void', 'Draft'])
                     ->get()->getRow()->total_amount ?? 0;
                 $purchaseTrend[] = (float) $pTotal;
-
-                $profitTrend[] = (float) ($sTotal - $pTotal);
             }
         }
 
         return $this->response->setJSON([
             'labels' => $months,
             'sales' => $salesTrend,
-            'purchases' => $purchaseTrend,
-            'profit' => $profitTrend
+            'purchases' => $purchaseTrend
         ]);
     }
 }

@@ -382,13 +382,24 @@
             data: {
                 labels: <?= json_encode($chartLabels) ?>,
                 datasets: [
-                    { label: 'Revenue', data: <?= json_encode($salesTrend) ?>, backgroundColor: '#4f46e5', borderRadius: 4, barPercentage: 0.6 },
-                    { label: 'Expense', data: <?= json_encode($purchaseTrend) ?>, backgroundColor: '#ef4444', borderRadius: 4, barPercentage: 0.6 }
+                    { label: 'Revenue', data: <?= json_encode($salesTrend) ?>, backgroundColor: '#4f46e5', borderRadius: 4, barPercentage: 0.85, categoryPercentage: 0.75 },
+                    { label: 'Expense', data: <?= json_encode($purchaseTrend) ?>, backgroundColor: '#ef4444', borderRadius: 4, barPercentage: 0.85, categoryPercentage: 0.75 }
                 ]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ₹' + Number(context.raw).toLocaleString('en-IN');
+                            }
+                        }
+                    }
+                },
                 scales: {
                     y: { beginAtZero: true, grid: { borderDash: [2, 2], color: '#f1f5f9' }, ticks: { callback: v => '₹' + Number(v).toLocaleString('en-IN') } },
                     x: { grid: { display: false } }

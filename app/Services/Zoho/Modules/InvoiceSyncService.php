@@ -121,6 +121,10 @@ class InvoiceSyncService extends AbstractModuleSyncService
         $query   = ['ignore_auto_number_generation' => 'true'];
 
         if (!empty($zohoId)) {
+            // When updating a sent/existing invoice, Zoho Books requires a reason string in the payload
+            if (empty($payload['reason'])) {
+                $payload['reason'] = 'Updated invoice details from ERP';
+            }
             $res = $this->client->put("/invoices/{$zohoId}", $payload, $query, [
                 'module'          => 'invoices',
                 'local_record_id' => $localId,

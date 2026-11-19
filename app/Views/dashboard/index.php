@@ -291,11 +291,17 @@
         <!-- Top Products -->
         <div class="col-xl-4 col-md-6 mb-3">
             <div class="card list-card border-0">
-                <div class="card-header fw-bold">
-                    <?= lang("App.top_performing_products") ?>
+                <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+                    <span style="font-size: 0.85rem;"><?= lang("App.top_performing_products") ?></span>
+                    <select id="topProductsFilter" class="form-select form-select-sm border-0 fw-semibold text-white" style="background-color: rgba(255,255,255,0.15); width: auto; font-size: 0.72rem; padding: 2px 24px 2px 8px; cursor: pointer; border-radius: 6px;">
+                        <option value="current_fy" style="color:#000;" selected>This FY</option>
+                        <option value="last_fy" style="color:#000;">Last FY</option>
+                        <option value="12m" style="color:#000;">Last 12M</option>
+                        <option value="compare_both" style="color:#000;">Compare Both FY</option>
+                    </select>
                 </div>
-                <div class="card-body px-3">
-                    <div class="list-group list-group-flush">
+                <div class="card-body px-3" style="min-height: 310px;">
+                    <div id="topProductsContainer" class="list-group list-group-flush">
                         <?php foreach ($topProducts as $index => $prod): ?>
                             <div class="list-group-item px-0 d-flex align-items-center border-bottom border-light">
                                 <div class="bg-primary bg-opacity-10 rounded text-primary fw-bold text-center me-3" style="width: 32px; height: 32px; line-height: 32px;">
@@ -303,7 +309,7 @@
                                 </div>
                                 <div class="flex-grow-1">
                                     <div class="fw-bold text-dark small text-truncate" style="max-width: 150px;"><?= esc($prod['product_name']) ?></div>
-                                    <div class="text-muted" style="font-size: 0.7rem;">Vol: <?= $prod['total_qty'] ?> Units</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Vol: <?= number_format($prod['total_qty']) ?> Units</div>
                                 </div>
                                 <div class="text-end fw-bolder text-success" style="font-size: 0.85rem;">
                                     ₹<?= number_format($prod['total_revenue'], 2) ?>
@@ -321,11 +327,17 @@
         <!-- <?= lang("App.top_customers") ?> -->
         <div class="col-xl-4 col-md-6 mb-3">
             <div class="card list-card border-0">
-                <div class="card-header fw-bold">
-                    <?= lang("App.top_customers") ?>
+                <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+                    <span style="font-size: 0.85rem;"><?= lang("App.top_customers") ?></span>
+                    <select id="topCustomersFilter" class="form-select form-select-sm border-0 fw-semibold text-white" style="background-color: rgba(255,255,255,0.15); width: auto; font-size: 0.72rem; padding: 2px 24px 2px 8px; cursor: pointer; border-radius: 6px;">
+                        <option value="current_fy" style="color:#000;" selected>This FY</option>
+                        <option value="last_fy" style="color:#000;">Last FY</option>
+                        <option value="12m" style="color:#000;">Last 12M</option>
+                        <option value="compare_both" style="color:#000;">Compare Both FY</option>
+                    </select>
                 </div>
-                <div class="card-body px-3">
-                    <div class="list-group list-group-flush">
+                <div class="card-body px-3" style="min-height: 310px;">
+                    <div id="topCustomersContainer" class="list-group list-group-flush">
                         <?php foreach ($topCustomers as $index => $cust): ?>
                             <div class="list-group-item px-0 d-flex align-items-center border-bottom border-light">
                                 <div class="bg-info bg-opacity-10 rounded-circle text-info fw-bold text-center me-3" style="width: 32px; height: 32px; line-height: 32px; font-size: 14px;">
@@ -494,6 +506,142 @@
                 }
             }
         });
+
+        // Top Products Filter
+        const topProductsFilter = document.getElementById('topProductsFilter');
+        if (topProductsFilter) {
+            topProductsFilter.addEventListener('change', function() {
+                const filter = this.value;
+                const container = document.getElementById('topProductsContainer');
+                container.innerHTML = '<div class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
+
+                fetch('<?= site_url('dashboard/top-data') ?>?filter=' + filter)
+                    .then(res => res.json())
+                    .then(data => {
+                        let html = '';
+                        if (data.is_comparison) {
+                            html += '<div class="fw-bold small text-muted text-uppercase mb-2" style="font-size: 0.68rem;">' + data.current_fy_label + ' (Current)</div>';
+                            if (data.current_products && data.current_products.length > 0) {
+                                data.current_products.forEach((prod, i) => {
+                                    html += renderProductRow(prod, i + 1, 'bg-primary text-primary');
+                                });
+                            } else {
+                                html += '<div class="text-muted small py-1">No data</div>';
+                            }
+
+                            html += '<div class="fw-bold small text-muted text-uppercase mt-3 mb-2" style="font-size: 0.68rem;">' + data.last_fy_label + ' (Previous)</div>';
+                            if (data.last_products && data.last_products.length > 0) {
+                                data.last_products.forEach((prod, i) => {
+                                    html += renderProductRow(prod, i + 1, 'bg-secondary text-secondary');
+                                });
+                            } else {
+                                html += '<div class="text-muted small py-1">No data</div>';
+                            }
+                        } else {
+                            if (data.products && data.products.length > 0) {
+                                data.products.forEach((prod, i) => {
+                                    html += renderProductRow(prod, i + 1, 'bg-primary text-primary');
+                                });
+                            } else {
+                                html = '<div class="text-center text-muted small py-4">No data available</div>';
+                            }
+                        }
+                        container.innerHTML = html;
+                    })
+                    .catch(err => {
+                        console.error('Error fetching top products:', err);
+                        container.innerHTML = '<div class="text-center text-danger small py-4">Failed to load data</div>';
+                    });
+            });
+        }
+
+        // Top Customers Filter
+        const topCustomersFilter = document.getElementById('topCustomersFilter');
+        if (topCustomersFilter) {
+            topCustomersFilter.addEventListener('change', function() {
+                const filter = this.value;
+                const container = document.getElementById('topCustomersContainer');
+                container.innerHTML = '<div class="text-center py-4"><div class="spinner-border spinner-border-sm text-info"></div></div>';
+
+                fetch('<?= site_url('dashboard/top-data') ?>?filter=' + filter)
+                    .then(res => res.json())
+                    .then(data => {
+                        let html = '';
+                        if (data.is_comparison) {
+                            html += '<div class="fw-bold small text-muted text-uppercase mb-2" style="font-size: 0.68rem;">' + data.current_fy_label + ' (Current)</div>';
+                            if (data.current_customers && data.current_customers.length > 0) {
+                                data.current_customers.forEach((cust, i) => {
+                                    html += renderCustomerRow(cust, 'bg-info text-info');
+                                });
+                            } else {
+                                html += '<div class="text-muted small py-1">No data</div>';
+                            }
+
+                            html += '<div class="fw-bold small text-muted text-uppercase mt-3 mb-2" style="font-size: 0.68rem;">' + data.last_fy_label + ' (Previous)</div>';
+                            if (data.last_customers && data.last_customers.length > 0) {
+                                data.last_customers.forEach((cust, i) => {
+                                    html += renderCustomerRow(cust, 'bg-secondary text-secondary');
+                                });
+                            } else {
+                                html += '<div class="text-muted small py-1">No data</div>';
+                            }
+                        } else {
+                            if (data.customers && data.customers.length > 0) {
+                                data.customers.forEach((cust, i) => {
+                                    html += renderCustomerRow(cust, 'bg-info text-info');
+                                });
+                            } else {
+                                html = '<div class="text-center text-muted small py-4">No data available</div>';
+                            }
+                        }
+                        container.innerHTML = html;
+                    })
+                    .catch(err => {
+                        console.error('Error fetching top customers:', err);
+                        container.innerHTML = '<div class="text-center text-danger small py-4">Failed to load data</div>';
+                    });
+            });
+        }
+
+        function renderProductRow(prod, rank, badgeClass) {
+            return `
+                <div class="list-group-item px-0 d-flex align-items-center border-bottom border-light">
+                    <div class="${badgeClass} bg-opacity-10 rounded fw-bold text-center me-3" style="width: 32px; height: 32px; line-height: 32px;">
+                        ${rank}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-dark small text-truncate" style="max-width: 150px;">${escapeHtml(prod.product_name)}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">Vol: ${Number(prod.total_qty).toLocaleString()} Units</div>
+                    </div>
+                    <div class="text-end fw-bolder text-success" style="font-size: 0.85rem;">
+                        ₹${Number(prod.total_revenue).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCustomerRow(cust, badgeClass) {
+            const initial = (cust.name || 'C').charAt(0).toUpperCase();
+            return `
+                <div class="list-group-item px-0 d-flex align-items-center border-bottom border-light">
+                    <div class="${badgeClass} bg-opacity-10 rounded-circle fw-bold text-center me-3" style="width: 32px; height: 32px; line-height: 32px; font-size: 14px;">
+                        ${initial}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-dark small text-truncate" style="max-width: 150px;">${escapeHtml(cust.name)}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">Orders: ${cust.total_orders}</div>
+                    </div>
+                    <div class="text-end fw-bolder text-primary" style="font-size: 0.85rem;">
+                        ₹${Number(cust.total_spent).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </div>
+                </div>
+            `;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
     });
 </script>
 <?= $this->endSection() ?>

@@ -145,24 +145,11 @@ class Home extends BaseController
             ->limit(5)
             ->get()->getResultArray();
 
-        // 8. Top Products
-        $data['topProducts'] = $db->table('invoice_items')
-            ->select('products.product_name, SUM(invoice_items.quantity) as total_qty, SUM(invoice_items.amount) as total_revenue')
-            ->join('products', 'products.id = invoice_items.product_id')
-            ->groupBy('invoice_items.product_id')
-            ->orderBy('total_revenue', 'DESC')
-            ->limit(5)
-            ->get()->getResultArray();
+        // 8. Top Products (Default: Current Financial Year)
+        $data['topProducts'] = $this->fetchTopProducts($fyStartDate, $fyEndDate);
 
-        // 9. Top Customers
-        $data['topCustomers'] = $db->table('invoices')
-            ->select('customers.name, COUNT(invoices.id) as total_orders, SUM(invoices.total_amount) as total_spent')
-            ->join('customers', 'customers.id = invoices.customer_id')
-            ->whereNotIn('invoices.status', ['Void', 'Draft'])
-            ->groupBy('invoices.customer_id')
-            ->orderBy('total_spent', 'DESC')
-            ->limit(5)
-            ->get()->getResultArray();
+        // 9. Top Customers (Default: Current Financial Year)
+        $data['topCustomers'] = $this->fetchTopCustomers($fyStartDate, $fyEndDate);
 
         // 10. Recent Lists
         $data['recentInvoices'] = $db->table('invoices')
@@ -352,5 +339,88 @@ class Home extends BaseController
             'sales' => $salesTrend,
             'purchases' => $purchaseTrend
         ]);
+    }
+
+    public function getTopData()
+    {
+        $filter = $this->request->getGet('filter') ?? 'current_fy';
+
+        $currentMonth = (int) date('n');
+        $currentYear  = (int) date('Y');
+        $fyStartYear  = ($currentMonth < 4) ? $currentYear - 1 : $currentYear;
+
+        if ($filter === 'compare_both') {
+            $curStart  = "{$fyStartYear}-04-01";
+            $curEnd    = ($fyStartYear + 1) . "-03-31";
+            $lastStart = ($fyStartYear - 1) . "-04-01";
+            $lastEnd   = "{$fyStartYear}-03-31";
+
+            $curProducts   = $this->fetchTopProducts($curStart, $curEnd);
+            $lastProducts  = $this->fetchTopProducts($lastStart, $lastEnd);
+            $curCustomers  = $this->fetchTopCustomers($curStart, $curEnd);
+            $lastCustomers = $this->fetchTopCustomers($lastStart, $lastEnd);
+
+            return $this->response->setJSON([
+                'is_comparison' => true,
+                'current_fy_label' => "FY {$fyStartYear}-" . substr((string) ($fyStartYear + 1), 2),
+                'last_fy_label'    => "FY " . ($fyStartYear - 1) . "-" . substr((string) $fyStartYear, 2),
+                'current_products' => $curProducts,
+                'last_products'    => $lastProducts,
+                'current_customers' => $curCustomers,
+                'last_customers'   => $lastCustomers
+            ]);
+        }
+
+        if ($filter === 'last_fy') {
+            $startDate = ($fyStartYear - 1) . "-04-01";
+            $endDate   = "{$fyStartYear}-03-31";
+        } elseif ($filter === '12m') {
+            $startDate = date('Y-m-d', strtotime('-12 months'));
+            $endDate   = date('Y-m-d');
+        } else {
+            // Default: current_fy
+            $startDate = "{$fyStartYear}-04-01";
+            $endDate   = ($fyStartYear + 1) . "-03-31";
+        }
+
+        $products  = $this->fetchTopProducts($startDate, $endDate);
+        $customers = $this->fetchTopCustomers($startDate, $endDate);
+
+        return $this->response->setJSON([
+            'is_comparison' => false,
+            'products'      => $products,
+            'customers'     => $customers
+        ]);
+    }
+
+    protected function fetchTopProducts(string $startDate, string $endDate, int $limit = 5): array
+    {
+        $db = \Config\Database::connect();
+        return $db->table('invoice_items')
+            ->select('products.product_name, SUM(invoice_items.quantity) as total_qty, SUM(invoice_items.amount) as total_revenue')
+            ->join('invoices', 'invoices.id = invoice_items.invoice_id')
+            ->join('products', 'products.id = invoice_items.product_id')
+            ->whereNotIn('invoices.status', ['Void', 'Draft'])
+            ->where('invoices.invoice_date >=', $startDate)
+            ->where('invoices.invoice_date <=', $endDate)
+            ->groupBy('invoice_items.product_id')
+            ->orderBy('total_revenue', 'DESC')
+            ->limit($limit)
+            ->get()->getResultArray();
+    }
+
+    protected function fetchTopCustomers(string $startDate, string $endDate, int $limit = 5): array
+    {
+        $db = \Config\Database::connect();
+        return $db->table('invoices')
+            ->select('customers.name, COUNT(invoices.id) as total_orders, SUM(invoices.total_amount) as total_spent')
+            ->join('customers', 'customers.id = invoices.customer_id')
+            ->whereNotIn('invoices.status', ['Void', 'Draft'])
+            ->where('invoices.invoice_date >=', $startDate)
+            ->where('invoices.invoice_date <=', $endDate)
+            ->groupBy('invoices.customer_id')
+            ->orderBy('total_spent', 'DESC')
+            ->limit($limit)
+            ->get()->getResultArray();
     }
 }

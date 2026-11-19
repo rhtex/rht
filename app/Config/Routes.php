@@ -17,6 +17,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->get('dashboard', 'Home::index');
         $routes->get('dashboard/chart-data', 'Home::getChartData');
+        $routes->get('dashboard/top-data', 'Home::getTopData');
 
 
     // Profile

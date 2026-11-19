@@ -43,7 +43,7 @@ class IndiaStatesSeeder extends Seeder
             ['name' => 'Gujarat', 'state_code' => 'GJ', 'gst_state_code' => '24'],
             ['name' => 'Dadra and Nagar Haveli and Daman and Diu', 'state_code' => 'DN', 'gst_state_code' => '26'],
             ['name' => 'Maharashtra', 'state_code' => 'MH', 'gst_state_code' => '27'],
-            ['name' => 'Andhra Pradesh', 'state_code' => 'AP', 'gst_state_code' => '28'],
+            ['name' => 'Andhra Pradesh', 'state_code' => 'AP', 'gst_state_code' => '37'],
             ['name' => 'Karnataka', 'state_code' => 'KA', 'gst_state_code' => '29'],
             ['name' => 'Goa', 'state_code' => 'GA', 'gst_state_code' => '30'],
             ['name' => 'Lakshadweep', 'state_code' => 'LD', 'gst_state_code' => '31'],
@@ -52,7 +52,7 @@ class IndiaStatesSeeder extends Seeder
             ['name' => 'Puducherry', 'state_code' => 'PY', 'gst_state_code' => '34'],
             ['name' => 'Andaman and Nicobar Islands', 'state_code' => 'AN', 'gst_state_code' => '35'],
             ['name' => 'Telangana', 'state_code' => 'TG', 'gst_state_code' => '36'],
-            ['name' => 'Ladakh', 'state_code' => 'LA', 'gst_state_code' => '37'],
+            ['name' => 'Ladakh', 'state_code' => 'LA', 'gst_state_code' => '38'],
         ];
 
         foreach ($states as $state) {

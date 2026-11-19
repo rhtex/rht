@@ -328,8 +328,9 @@ class ZohoSyncOrchestrator
 
     /**
      * Manual / Scheduled: Sync from CI4 ERP -> Zoho Books.
+     * When $onlyUnsynced is true (default), only records that are not yet synced (no mapping or sync_status != 'SYNCED' or no zoho_record_id) are processed.
      */
-    public function syncToZoho(?string $moduleFilter = null, ?int $userId = null, ?callable $progressCallback = null): array
+    public function syncToZoho(?string $moduleFilter = null, ?int $userId = null, ?callable $progressCallback = null, bool $onlyUnsynced = true): array
     {
         $run = $this->historyModel->startRun(
             $moduleFilter ? 'MODULE_SYNC' : 'MANUAL_TO_ZOHO',
@@ -370,13 +371,26 @@ class ZohoSyncOrchestrator
                 }
 
                 $service = $this->getModuleService($modKey);
-                $rows    = $db->table($modMeta['table'])->select('id')->orderBy('id', 'ASC')->get()->getResultArray();
+                $builder = $db->table($modMeta['table'])->select($modMeta['table'] . '.id')->orderBy($modMeta['table'] . '.id', 'ASC');
+
+                if ($onlyUnsynced) {
+                    $builder->join('zoho_sync_mapping', "zoho_sync_mapping.module = '{$modKey}' AND zoho_sync_mapping.local_record_id = {$modMeta['table']}.id", 'left')
+                        ->groupStart()
+                            ->where('zoho_sync_mapping.id IS NULL')
+                            ->orWhere('zoho_sync_mapping.sync_status !=', 'SYNCED')
+                            ->orWhere('zoho_sync_mapping.zoho_record_id IS NULL')
+                            ->orWhere('zoho_sync_mapping.zoho_record_id', '')
+                        ->groupEnd();
+                }
+
+                $rows     = $builder->get()->getResultArray();
                 $modStats = ['processed' => 0, 'synced' => 0, 'skipped' => 0, 'failed' => 0];
                 $rowCount = count($rows);
                 $rowIdx   = 0;
 
                 if ($progressCallback) {
-                    call_user_func($progressCallback, 10, "Found {$rowCount} local {$modKey} record(s) to push...");
+                    $scopeText = $onlyUnsynced ? 'unsynced' : 'total';
+                    call_user_func($progressCallback, 10, "Found {$rowCount} {$scopeText} local {$modKey} record(s) to push...");
                 }
 
                 foreach ($rows as $row) {

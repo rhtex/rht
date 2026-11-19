@@ -522,20 +522,14 @@ class InvoiceSyncService extends AbstractModuleSyncService
             'terms'                   => (string) ($invoice['terms'] ?? ''),
         ];
 
-        // Zoho Books Custom Fields mapping (e.g. cf_no_of_bales, cf_transport)
+        // Zoho Books Custom Fields mapping (e.g. cf_no_of_bales)
+        // Transport field is kept in local app only and not passed to Zoho Books invoices.
         $customFields = [];
         $balesCount = !empty($invoice['bales_count']) ? (int) $invoice['bales_count'] : (!empty($invoice['packages_count']) ? (int) $invoice['packages_count'] : null);
         if ($balesCount !== null) {
             $customFields[] = [
                 'api_name' => 'cf_no_of_bales',
                 'value'    => (int) $balesCount,
-            ];
-        }
-
-        if (!empty($invoice['transport_name'])) {
-            $customFields[] = [
-                'api_name' => 'cf_transport',
-                'value'    => (string) $invoice['transport_name'],
             ];
         }
 

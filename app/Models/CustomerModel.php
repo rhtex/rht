@@ -84,4 +84,16 @@ class CustomerModel extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    /**
+     * Get active customers with billing city for dropdown selection
+     */
+    public function getActiveCustomersWithCity()
+    {
+        return $this->select('customers.id, customers.name, addresses.city')
+            ->join('addresses', 'addresses.owner_id = customers.id AND addresses.owner_type = "customer" AND addresses.address_type = "billing" AND addresses.is_active = 1', 'left')
+            ->where('customers.status', 'active')
+            ->orderBy('customers.name', 'ASC')
+            ->findAll();
+    }
 }

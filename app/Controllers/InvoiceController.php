@@ -115,7 +115,7 @@ class InvoiceController extends BaseController
         $filters['limit']  = 50;
 
         $data['invoices'] = $this->invoiceModel->getInvoicesWithCustomer($filters);
-        $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
+        $data['customers'] = $this->customerModel->getActiveCustomersWithCity();
         $data['filters'] = $filters;
         $data['title'] = 'Invoices';
 
@@ -156,7 +156,7 @@ class InvoiceController extends BaseController
         }
         $data['quotation'] = $quotation;
 
-        $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
+        $data['customers'] = $this->customerModel->getActiveCustomersWithCity();
         $data['agents'] = $this->agentModel->findAll();
         $data['transports'] = $this->transportModel->orderBy('transport_name', 'ASC')->findAll();
         $data['products'] = $this->productModel->getProductsWithCategory();
@@ -376,7 +376,7 @@ class InvoiceController extends BaseController
             return redirect()->to('invoices')->with('error', 'Invoice not found.');
         }
 
-        $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
+        $data['customers'] = $this->customerModel->getActiveCustomersWithCity();
         $data['agents'] = $this->agentModel->findAll();
         $data['transports'] = $this->transportModel->orderBy('transport_name', 'ASC')->findAll();
         $data['products'] = $this->productModel->getProductsWithCategory();

@@ -139,8 +139,12 @@
                     <select name="customer_id" id="customerSelect" class="form-select select2" required>
                         <option value="">-- Search Customer --</option>
                         <?php foreach ($customers as $customer): ?>
+                            <?php 
+                                $cityText = !empty($customer['city']) ? ' - ' . esc($customer['city']) : '';
+                                $customerLabel = esc($customer['name']) . $cityText;
+                            ?>
                             <option value="<?= $customer['id'] ?>" <?= ($selectedCustId == $customer['id']) ? 'selected' : '' ?>>
-                                <?= esc($customer['name']) ?>
+                                <?= $customerLabel ?>
                             </option>
                         <?php endforeach; ?>
                     </select>

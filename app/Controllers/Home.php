@@ -91,14 +91,20 @@ class Home extends BaseController
             $data['pendingWeavingJobs'] = $yarnWeavingDcModel->whereIn('status', ['Open', 'Partially Received'])->countAllResults();
         } catch (\Exception $e) {}
 
-        // 6. Monthly Trend Data (Last 6 Months)
+        // 6. Financial Year Trend Data (Apr to Mar - 12 Months)
+        $currentMonth = (int) date('n');
+        $currentYear = (int) date('Y');
+        $fyStartYear = ($currentMonth < 4) ? $currentYear - 1 : $currentYear;
+        $fyEndYear = $fyStartYear + 1;
+
         $months = [];
         $salesTrend = [];
         $purchaseTrend = [];
 
-        for ($i = 5; $i >= 0; $i--) {
-            $monthDay = date('Y-m', strtotime("-$i months"));
-            $months[] = date('M Y', strtotime("-$i months"));
+        for ($i = 0; $i < 12; $i++) {
+            $loopTime = mktime(0, 0, 0, 4 + $i, 1, $fyStartYear);
+            $monthDay = date('Y-m', $loopTime);
+            $months[] = date('M Y', $loopTime);
 
             // Sales per month
             $sTotal = $invoiceModel->selectSum('total_amount')
@@ -185,14 +191,114 @@ class Home extends BaseController
     {
         $invoiceModel = new \App\Models\InvoiceModel();
         $billModel = new \App\Models\BillModel();
-        $filter = $this->request->getGet('filter') ?? '6m';
+        $filter = $this->request->getGet('filter') ?? 'current_fy';
 
         $months = [];
         $salesTrend = [];
         $purchaseTrend = [];
+        $datasets = [];
 
-        if ($filter == '6m' || $filter == '12m') {
-            $numMonths = ($filter == '12m') ? 11 : 5;
+        $currentMonth = (int) date('n');
+        $currentYear = (int) date('Y');
+        $fyStartYear = ($currentMonth < 4) ? $currentYear - 1 : $currentYear;
+
+        if ($filter === 'compare_last_year') {
+            // Compare 12 months of Current FY (Apr-Mar) with Last FY (Apr-Mar)
+            $lastFyStartYear = $fyStartYear - 1;
+            $monthNames = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
+
+            $curSales = [];
+            $curPurchases = [];
+            $lastSales = [];
+            $lastPurchases = [];
+
+            for ($i = 0; $i < 12; $i++) {
+                $curMonthDay = date('Y-m', mktime(0, 0, 0, 4 + $i, 1, $fyStartYear));
+                $lastMonthDay = date('Y-m', mktime(0, 0, 0, 4 + $i, 1, $lastFyStartYear));
+
+                $s1 = $invoiceModel->selectSum('total_amount')
+                    ->where("DATE_FORMAT(invoice_date, '%Y-%m')", $curMonthDay)
+                    ->whereNotIn('status', ['Void', 'Draft'])
+                    ->get()->getRow()->total_amount ?? 0;
+                $p1 = $billModel->selectSum('total_amount')
+                    ->where("DATE_FORMAT(bill_date, '%Y-%m')", $curMonthDay)
+                    ->whereNotIn('status', ['Void', 'Draft'])
+                    ->get()->getRow()->total_amount ?? 0;
+
+                $s2 = $invoiceModel->selectSum('total_amount')
+                    ->where("DATE_FORMAT(invoice_date, '%Y-%m')", $lastMonthDay)
+                    ->whereNotIn('status', ['Void', 'Draft'])
+                    ->get()->getRow()->total_amount ?? 0;
+                $p2 = $billModel->selectSum('total_amount')
+                    ->where("DATE_FORMAT(bill_date, '%Y-%m')", $lastMonthDay)
+                    ->whereNotIn('status', ['Void', 'Draft'])
+                    ->get()->getRow()->total_amount ?? 0;
+
+                $curSales[] = (float) $s1;
+                $curPurchases[] = (float) $p1;
+                $lastSales[] = (float) $s2;
+                $lastPurchases[] = (float) $p2;
+            }
+
+            return $this->response->setJSON([
+                'labels' => $monthNames,
+                'is_comparison' => true,
+                'datasets' => [
+                    [
+                        'label' => "Revenue (FY {$fyStartYear}-" . substr($fyStartYear + 1, 2) . ")",
+                        'data' => $curSales,
+                        'backgroundColor' => '#15803d',
+                        'borderRadius' => 4,
+                        'barPercentage' => 0.85,
+                        'categoryPercentage' => 0.75
+                    ],
+                    [
+                        'label' => "Expense (FY {$fyStartYear}-" . substr($fyStartYear + 1, 2) . ")",
+                        'data' => $curPurchases,
+                        'backgroundColor' => '#c2410c',
+                        'borderRadius' => 4,
+                        'barPercentage' => 0.85,
+                        'categoryPercentage' => 0.75
+                    ],
+                    [
+                        'label' => "Revenue (FY {$lastFyStartYear}-" . substr($lastFyStartYear + 1, 2) . ")",
+                        'data' => $lastSales,
+                        'backgroundColor' => '#86efac',
+                        'borderRadius' => 4,
+                        'barPercentage' => 0.85,
+                        'categoryPercentage' => 0.75
+                    ],
+                    [
+                        'label' => "Expense (FY {$lastFyStartYear}-" . substr($lastFyStartYear + 1, 2) . ")",
+                        'data' => $lastPurchases,
+                        'backgroundColor' => '#fdba74',
+                        'borderRadius' => 4,
+                        'barPercentage' => 0.85,
+                        'categoryPercentage' => 0.75
+                    ]
+                ]
+            ]);
+        } elseif ($filter === 'last_fy') {
+            $targetStartYear = $fyStartYear - 1;
+            for ($i = 0; $i < 12; $i++) {
+                $loopTime = mktime(0, 0, 0, 4 + $i, 1, $targetStartYear);
+                $monthDay = date('Y-m', $loopTime);
+                $months[] = date('M Y', $loopTime);
+
+                $sTotal = $invoiceModel->selectSum('total_amount')
+                    ->where("DATE_FORMAT(invoice_date, '%Y-%m')", $monthDay)
+                    ->whereNotIn('status', ['Void', 'Draft'])
+                    ->get()->getRow()->total_amount ?? 0;
+                $salesTrend[] = (float) $sTotal;
+
+                $pTotal = $billModel->selectSum('total_amount')
+                    ->where("DATE_FORMAT(bill_date, '%Y-%m')", $monthDay)
+                    ->whereNotIn('status', ['Void', 'Draft'])
+                    ->get()->getRow()->total_amount ?? 0;
+                $purchaseTrend[] = (float) $pTotal;
+            }
+        } elseif ($filter === '6m' || $filter === '12m') {
+            $numMonths = ($filter === '12m') ? 11 : 5;
             for ($i = $numMonths; $i >= 0; $i--) {
                 $monthDay = date('Y-m', strtotime("-$i months"));
                 $months[] = date('M Y', strtotime("-$i months"));
@@ -209,44 +315,13 @@ class Home extends BaseController
                     ->get()->getRow()->total_amount ?? 0;
                 $purchaseTrend[] = (float) $pTotal;
             }
-        } elseif ($filter == 'fy') {
-            $currentMonth = (int)date('m');
-            $currentYear = (int)date('Y');
-            
-            if ($currentMonth < 4) {
-                $startYear = $currentYear - 2;
-            } else {
-                $startYear = $currentYear - 1;
-            }
-            
-            $start = mktime(0,0,0, 4, 1, $startYear);
-            
+        } else {
+            // Default: 'current_fy' (12 months: Apr to Mar)
             for ($i = 0; $i < 12; $i++) {
-                $loopTime = strtotime("+$i months", $start);
+                $loopTime = mktime(0, 0, 0, 4 + $i, 1, $fyStartYear);
                 $monthDay = date('Y-m', $loopTime);
                 $months[] = date('M Y', $loopTime);
 
-                $sTotal = $invoiceModel->selectSum('total_amount')
-                    ->where("DATE_FORMAT(invoice_date, '%Y-%m')", $monthDay)
-                    ->whereNotIn('status', ['Void', 'Draft'])
-                    ->get()->getRow()->total_amount ?? 0;
-                $salesTrend[] = (float) $sTotal;
-
-                $pTotal = $billModel->selectSum('total_amount')
-                    ->where("DATE_FORMAT(bill_date, '%Y-%m')", $monthDay)
-                    ->whereNotIn('status', ['Void', 'Draft'])
-                    ->get()->getRow()->total_amount ?? 0;
-                $purchaseTrend[] = (float) $pTotal;
-            }
-        } elseif ($filter == 'compare') {
-            $currentMonthTime = time();
-            $lastYearMonthTime = strtotime("-1 year");
-            
-            $times = [$lastYearMonthTime, $currentMonthTime];
-            foreach ($times as $t) {
-                $monthDay = date('Y-m', $t);
-                $months[] = date('M Y', $t);
-                
                 $sTotal = $invoiceModel->selectSum('total_amount')
                     ->where("DATE_FORMAT(invoice_date, '%Y-%m')", $monthDay)
                     ->whereNotIn('status', ['Void', 'Draft'])
@@ -263,6 +338,7 @@ class Home extends BaseController
 
         return $this->response->setJSON([
             'labels' => $months,
+            'is_comparison' => false,
             'sales' => $salesTrend,
             'purchases' => $purchaseTrend
         ]);

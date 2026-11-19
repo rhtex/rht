@@ -235,14 +235,21 @@
                     <span id="chartTitle"><?= lang("App.financial_velocity") ?></span>
                     <div class="d-flex align-items-center gap-3">
                         <select id="chartFilter" class="form-select form-select-sm border-0 fw-bold" style="background-color: rgba(255,255,255,0.1); color: #fff; width: auto; cursor: pointer; border-radius: 8px;">
-                            <option value="6m" style="color:#000;"><?= lang("App.last_6_months") ?></option>
+                            <option value="current_fy" style="color:#000;" selected><?= lang("App.financial_year") ?></option>
+                            <option value="compare_last_year" style="color:#000;"><?= lang("App.compare_last_year") ?></option>
+                            <option value="last_fy" style="color:#000;"><?= lang("App.last_financial_year") ?></option>
                             <option value="12m" style="color:#000;"><?= lang("App.last_12_months") ?></option>
-                            <option value="fy" style="color:#000;"><?= lang("App.last_financial_year") ?></option>
-                            <option value="compare" style="color:#000;"><?= lang("App.compare_month") ?></option>
+                            <option value="6m" style="color:#000;"><?= lang("App.last_6_months") ?></option>
                         </select>
-                        <div class="d-flex gap-2 text-white">
+                        <div id="chartLegendNormal" class="d-flex gap-2 text-white">
                             <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #15803d; font-size: 10px;"></i> <?= lang("App.revenue") ?></span>
                             <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #c2410c; font-size: 10px;"></i> <?= lang("App.expense") ?></span>
+                        </div>
+                        <div id="chartLegendCompare" class="d-none gap-2 text-white">
+                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #15803d; font-size: 10px;"></i> Rev (Cur FY)</span>
+                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #c2410c; font-size: 10px;"></i> Exp (Cur FY)</span>
+                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #86efac; font-size: 10px;"></i> Rev (Last FY)</span>
+                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #fdba74; font-size: 10px;"></i> Exp (Last FY)</span>
                         </div>
                     </div>
                 </div>
@@ -428,8 +435,22 @@
                 .then(res => res.json())
                 .then(data => {
                     window.mainChart.data.labels = data.labels;
-                    window.mainChart.data.datasets[0].data = data.sales;
-                    window.mainChart.data.datasets[1].data = data.purchases;
+                    if (data.is_comparison && data.datasets) {
+                        window.mainChart.data.datasets = data.datasets;
+                        document.getElementById('chartLegendNormal').classList.remove('d-flex');
+                        document.getElementById('chartLegendNormal').classList.add('d-none');
+                        document.getElementById('chartLegendCompare').classList.remove('d-none');
+                        document.getElementById('chartLegendCompare').classList.add('d-flex');
+                    } else {
+                        window.mainChart.data.datasets = [
+                            { label: 'Revenue', data: data.sales, backgroundColor: '#15803d', borderRadius: 4, barPercentage: 0.85, categoryPercentage: 0.75 },
+                            { label: 'Expense', data: data.purchases, backgroundColor: '#c2410c', borderRadius: 4, barPercentage: 0.85, categoryPercentage: 0.75 }
+                        ];
+                        document.getElementById('chartLegendCompare').classList.remove('d-flex');
+                        document.getElementById('chartLegendCompare').classList.add('d-none');
+                        document.getElementById('chartLegendNormal').classList.remove('d-none');
+                        document.getElementById('chartLegendNormal').classList.add('d-flex');
+                    }
                     window.mainChart.update();
                 })
                 .catch(err => console.error("Error fetching chart data:", err));

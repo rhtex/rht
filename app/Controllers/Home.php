@@ -32,18 +32,28 @@ class Home extends BaseController
         // 2. Stock Management
         $data['itemsInStock'] = $productModel->selectSum('total_stock')->get()->getRow()->total_stock ?? 0;
 
-        // 3. Financial Totals (Current Year)
-        $currentYear = date('Y');
+        // 3. Financial Totals (Current Financial Year: Apr to Mar)
+        $currentMonth = (int) date('n');
+        $currentYear  = (int) date('Y');
+        $fyStartYear  = ($currentMonth < 4) ? $currentYear - 1 : $currentYear;
+        $fyEndYear    = $fyStartYear + 1;
+        $fyStartDate  = "{$fyStartYear}-04-01";
+        $fyEndDate    = "{$fyEndYear}-03-31";
+
+        $data['fyLabel'] = "FY {$fyStartYear}-" . substr((string) $fyEndYear, 2);
+
         $data['totalSales'] = (float) ($invoiceModel->selectSum('total_amount')
             ->where('status !=', 'Void')
             ->where('status !=', 'Draft')
-            ->where('YEAR(invoice_date)', $currentYear)
+            ->where('invoice_date >=', $fyStartDate)
+            ->where('invoice_date <=', $fyEndDate)
             ->get()->getRow()->total_amount ?? 0);
 
         $data['totalPurchases'] = (float) ($billModel->selectSum('total_amount')
             ->where('status !=', 'Void')
             ->where('status !=', 'Draft')
-            ->where('YEAR(bill_date)', $currentYear)
+            ->where('bill_date >=', $fyStartDate)
+            ->where('bill_date <=', $fyEndDate)
             ->get()->getRow()->total_amount ?? 0);
 
         // 4. Accounts Receivable & Payable (Real Outstanding Balances without date restriction)

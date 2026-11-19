@@ -99,47 +99,63 @@
 
     <!-- Top Row: Financial KPIs -->
     <div class="row compact-row mb-3">
-        <div class="col-xl-3 col-sm-6 mb-2">
-            <div class="card kpi-card-v3">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;"><?= lang("App.revenue_ytd") ?></div>
-                        <div class="kpi-icon-wrap bg-primary bg-opacity-10 text-primary" style="width: 32px; height: 32px; font-size: 0.9rem;">
-                            <i class="fas fa-wallet"></i>
+        <div class="col-xl-3 col-sm-6 mb-2 d-flex">
+            <div class="card kpi-card-v3 flex-fill">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div>
+                                <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;"><?= lang("App.revenue_ytd") ?></div>
+                                <div class="text-secondary fw-semibold" style="font-size: 0.7rem;"><?= $fyLabel ?> Gross Sales</div>
+                            </div>
+                            <div class="kpi-icon-wrap bg-primary bg-opacity-10 text-primary" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                                <i class="fas fa-wallet"></i>
+                            </div>
                         </div>
+                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($totalSales, 2) ?></h3>
                     </div>
-                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($totalSales, 2) ?></h3>
-                    <div class="text-muted small fw-semibold" style="font-size: 0.7rem;"><span class="text-success"><i class="fas fa-arrow-up me-1"></i>FY <?= date('Y') ?></span> <?= lang("App.gross_sales") ?></div>
+                    <div class="text-muted small fw-semibold" style="font-size: 0.72rem;">
+                        <span class="text-success"><i class="fas fa-calendar-check me-1"></i><?= $fyLabel ?></span> Total Revenue
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-2">
-            <div class="card kpi-card-v3">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;"><?= lang("App.purchases_ytd") ?></div>
-                        <div class="kpi-icon-wrap bg-info bg-opacity-10 text-info" style="width: 32px; height: 32px; font-size: 0.9rem;">
-                            <i class="fas fa-shopping-cart"></i>
+        <div class="col-xl-3 col-sm-6 mb-2 d-flex">
+            <div class="card kpi-card-v3 flex-fill">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div>
+                                <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;"><?= lang("App.purchases_ytd") ?></div>
+                                <div class="text-secondary fw-semibold" style="font-size: 0.7rem;"><?= $fyLabel ?> Total Purchases</div>
+                            </div>
+                            <div class="kpi-icon-wrap bg-info bg-opacity-10 text-info" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
                         </div>
+                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($totalPurchases, 2) ?></h3>
                     </div>
-                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($totalPurchases, 2) ?></h3>
-                    <div class="text-muted small fw-semibold" style="font-size: 0.7rem;"><span class="text-primary"><i class="fas fa-file-invoice me-1"></i>FY <?= date('Y') ?></span> <?= lang("App.total_purchases") ?></div>
+                    <div class="text-muted small fw-semibold" style="font-size: 0.72rem;">
+                        <span class="text-primary"><i class="fas fa-calendar-check me-1"></i><?= $fyLabel ?></span> Total Purchases
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-2">
-            <div class="card kpi-card-v3">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <div>
-                            <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Receivables</div>
-                            <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Total Unpaid Invoices</div>
+        <div class="col-xl-3 col-sm-6 mb-2 d-flex">
+            <div class="card kpi-card-v3 flex-fill">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div>
+                                <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Receivables</div>
+                                <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Total Unpaid Invoices</div>
+                            </div>
+                            <div class="kpi-icon-wrap bg-warning bg-opacity-10 text-warning" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                                <i class="fas fa-hand-holding-usd"></i>
+                            </div>
                         </div>
-                        <div class="kpi-icon-wrap bg-warning bg-opacity-10 text-warning" style="width: 32px; height: 32px; font-size: 0.9rem;">
-                            <i class="fas fa-hand-holding-usd"></i>
-                        </div>
+                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($accountsReceivable, 2) ?></h3>
                     </div>
-                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($accountsReceivable, 2) ?></h3>
                     <div class="text-muted small fw-semibold d-flex flex-wrap gap-2" style="font-size: 0.72rem;">
                         <span>Current : <strong class="text-success">₹<?= number_format($receivableCurrent, 2) ?></strong></span>
                         <span class="text-muted">|</span>
@@ -148,19 +164,21 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-2">
-            <div class="card kpi-card-v3">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <div>
-                            <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Payables</div>
-                            <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Total Unpaid Bills</div>
+        <div class="col-xl-3 col-sm-6 mb-2 d-flex">
+            <div class="card kpi-card-v3 flex-fill">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div>
+                                <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Payables</div>
+                                <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Total Unpaid Bills</div>
+                            </div>
+                            <div class="kpi-icon-wrap bg-danger bg-opacity-10 text-danger" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </div>
                         </div>
-                        <div class="kpi-icon-wrap bg-danger bg-opacity-10 text-danger" style="width: 32px; height: 32px; font-size: 0.9rem;">
-                            <i class="fas fa-file-invoice-dollar"></i>
-                        </div>
+                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($accountsPayable, 2) ?></h3>
                     </div>
-                    <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($accountsPayable, 2) ?></h3>
                     <div class="text-muted small fw-semibold d-flex flex-wrap gap-2" style="font-size: 0.72rem;">
                         <span>Current : <strong class="text-success">₹<?= number_format($payableCurrent, 2) ?></strong></span>
                         <span class="text-muted">|</span>

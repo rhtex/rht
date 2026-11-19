@@ -417,6 +417,20 @@
         <div class="row g-0">
             <!-- LEFT: Notes -->
             <div class="col-md-7 border-end border-secondary-subtle p-3 d-flex flex-column">
+                <?php if (!empty($invoice)): ?>
+                <div class="mb-3 p-3 rounded border border-warning-subtle bg-warning-subtle bg-opacity-25">
+                    <label class="form-label text-warning-emphasis fw-bold mb-1">
+                        <i class="fas fa-edit me-1"></i> Reason for Updating Sent Invoice (Zoho Books)
+                    </label>
+                    <input type="text" name="zoho_update_reason" class="form-control bg-white"
+                        placeholder="e.g. Quantity adjusted, price updated, terms revised"
+                        value="Updated invoice details from ERP">
+                    <small class="text-muted d-block mt-1">
+                        Zoho Books requires a mandatory reason when modifying an invoice that is already created or sent.
+                    </small>
+                </div>
+                <?php endif; ?>
+
                 <div class="mb-3">
                     <label class="form-label">Notes</label>
                     <textarea name="notes" class="form-control bg-light" rows="3" placeholder="Add notes for the customer..."><?= esc($invoice['notes'] ?? '') ?></textarea>

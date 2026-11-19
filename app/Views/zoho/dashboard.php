@@ -632,7 +632,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Global Universal Sync Runner for all action buttons (Pull, Push, Full Sync)
-    window.runLiveSyncAction = function(url, title, initialStage) {
+    window.runLiveSyncAction = function(url, title, initialStage, extraFormData) {
         const modalEl = document.getElementById('liveSyncModal');
         const modal = new bootstrap.Modal(modalEl);
         modal.show();
@@ -703,9 +703,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 800);
 
         // Send POST request
-        const fd = new FormData();
-        fd.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
-        fd.append('sync_key', syncKey);
+        const fd = extraFormData instanceof FormData ? extraFormData : new FormData();
+        if (!fd.has('<?= csrf_token() ?>')) {
+            fd.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+        }
+        fd.set('sync_key', syncKey);
 
         fetch(url, {
             method: 'POST',
@@ -753,7 +755,8 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const actionTitle = form.getAttribute('data-sync-title') || 'Zoho Synchronization';
             const actionUrl   = form.action;
-            window.runLiveSyncAction(actionUrl, actionTitle, 'Starting task...');
+            const formData    = new FormData(form);
+            window.runLiveSyncAction(actionUrl, actionTitle, 'Starting task...', formData);
         });
     });
     const syncForm = document.getElementById('syncModuleForm');

@@ -46,14 +46,27 @@ class Home extends BaseController
             ->where('YEAR(bill_date)', $currentYear)
             ->get()->getRow()->total_amount ?? 0);
 
-        // 4. Accounts Receivable & Payable (Real Outstanding Balances)
-        $data['accountsReceivable'] = (float) ($invoiceModel->selectSum('balance')
-            ->where('status !=', 'Void')
-            ->get()->getRow()->balance ?? 0);
+        // 4. Accounts Receivable & Payable (Real Outstanding Balances without date restriction)
+        $today = date('Y-m-d');
+        $invoiceBalances = $invoiceModel->select("
+            COALESCE(SUM(balance), 0) as total,
+            COALESCE(SUM(CASE WHEN due_date >= '$today' THEN balance ELSE 0 END), 0) as current,
+            COALESCE(SUM(CASE WHEN due_date < '$today' THEN balance ELSE 0 END), 0) as overdue
+        ")->where('status !=', 'Void')->where('balance >', 0)->first();
 
-        $data['accountsPayable'] = (float) ($billModel->selectSum('balance')
-            ->where('status !=', 'Void')
-            ->get()->getRow()->balance ?? 0);
+        $billBalances = $billModel->select("
+            COALESCE(SUM(balance), 0) as total,
+            COALESCE(SUM(CASE WHEN due_date >= '$today' THEN balance ELSE 0 END), 0) as current,
+            COALESCE(SUM(CASE WHEN due_date < '$today' THEN balance ELSE 0 END), 0) as overdue
+        ")->where('status !=', 'Void')->where('balance >', 0)->first();
+
+        $data['accountsReceivable']        = (float) ($invoiceBalances['total'] ?? 0);
+        $data['receivableCurrent']         = (float) ($invoiceBalances['current'] ?? 0);
+        $data['receivableOverdue']         = (float) ($invoiceBalances['overdue'] ?? 0);
+
+        $data['accountsPayable']           = (float) ($billBalances['total'] ?? 0);
+        $data['payableCurrent']            = (float) ($billBalances['current'] ?? 0);
+        $data['payableOverdue']            = (float) ($billBalances['overdue'] ?? 0);
 
         // 5. Sales Funnel & Operational Metrics
         $data['pendingQuotations'] = $quotationModel->whereIn('status', ['Draft', 'Sent'])->countAllResults();

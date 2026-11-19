@@ -130,28 +130,42 @@
         <div class="col-xl-3 col-sm-6 mb-2">
             <div class="card kpi-card-v3">
                 <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;"><?= lang("App.ac_receivable") ?></div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div>
+                            <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Receivables</div>
+                            <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Total Unpaid Invoices</div>
+                        </div>
                         <div class="kpi-icon-wrap bg-warning bg-opacity-10 text-warning" style="width: 32px; height: 32px; font-size: 0.9rem;">
                             <i class="fas fa-hand-holding-usd"></i>
                         </div>
                     </div>
                     <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($accountsReceivable, 2) ?></h3>
-                    <div class="text-muted small fw-semibold" style="font-size: 0.7rem;"><span class="text-warning"><i class="fas fa-clock me-1"></i>Unpaid</span> <?= lang("App.invoices") ?></div>
+                    <div class="text-muted small fw-semibold d-flex flex-wrap gap-2" style="font-size: 0.72rem;">
+                        <span>Current : <strong class="text-success">₹<?= number_format($receivableCurrent, 2) ?></strong></span>
+                        <span class="text-muted">|</span>
+                        <span>Overdue : <strong class="text-danger">₹<?= number_format($receivableOverdue, 2) ?></strong></span>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6 mb-2">
             <div class="card kpi-card-v3">
                 <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;"><?= lang("App.ac_payable") ?></div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div>
+                            <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Payables</div>
+                            <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Total Unpaid Bills</div>
+                        </div>
                         <div class="kpi-icon-wrap bg-danger bg-opacity-10 text-danger" style="width: 32px; height: 32px; font-size: 0.9rem;">
                             <i class="fas fa-file-invoice-dollar"></i>
                         </div>
                     </div>
                     <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($accountsPayable, 2) ?></h3>
-                    <div class="text-muted small fw-semibold" style="font-size: 0.7rem;"><span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>Unpaid</span> <?= lang("App.bills") ?></div>
+                    <div class="text-muted small fw-semibold d-flex flex-wrap gap-2" style="font-size: 0.72rem;">
+                        <span>Current : <strong class="text-success">₹<?= number_format($payableCurrent, 2) ?></strong></span>
+                        <span class="text-muted">|</span>
+                        <span>Overdue : <strong class="text-danger">₹<?= number_format($payableOverdue, 2) ?></strong></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -227,8 +241,8 @@
                             <option value="compare" style="color:#000;"><?= lang("App.compare_month") ?></option>
                         </select>
                         <div class="d-flex gap-2 text-white">
-                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #6366f1; font-size: 10px;"></i> <?= lang("App.revenue") ?></span>
-                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #f87171; font-size: 10px;"></i> <?= lang("App.expense") ?></span>
+                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #15803d; font-size: 10px;"></i> <?= lang("App.revenue") ?></span>
+                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #c2410c; font-size: 10px;"></i> <?= lang("App.expense") ?></span>
                         </div>
                     </div>
                 </div>
@@ -382,8 +396,8 @@
             data: {
                 labels: <?= json_encode($chartLabels) ?>,
                 datasets: [
-                    { label: 'Revenue', data: <?= json_encode($salesTrend) ?>, backgroundColor: '#4f46e5', borderRadius: 4, barPercentage: 0.85, categoryPercentage: 0.75 },
-                    { label: 'Expense', data: <?= json_encode($purchaseTrend) ?>, backgroundColor: '#ef4444', borderRadius: 4, barPercentage: 0.85, categoryPercentage: 0.75 }
+                    { label: 'Revenue', data: <?= json_encode($salesTrend) ?>, backgroundColor: '#15803d', borderRadius: 4, barPercentage: 0.85, categoryPercentage: 0.75 },
+                    { label: 'Expense', data: <?= json_encode($purchaseTrend) ?>, backgroundColor: '#c2410c', borderRadius: 4, barPercentage: 0.85, categoryPercentage: 0.75 }
                 ]
             },
             options: {

@@ -97,7 +97,7 @@
                                             <th>Date</th>
                                             <th>Customer</th>
                                             <th>Waybill #</th>
-                                            <th>Packages</th>
+                                            <th>No. of Bales</th>
                                             <th>Amount</th>
                                             <th>Status</th>
                                         </tr>
@@ -109,7 +109,7 @@
                                                 <td><?= date('d M Y', strtotime($inv['invoice_date'])) ?></td>
                                                 <td><?= esc($inv['customer_name'] ?? 'N/A') ?></td>
                                                 <td><?= esc($inv['waybill_number'] ?: '-') ?></td>
-                                                <td><?= esc($inv['packages_count'] ?: '-') ?></td>
+                                                <td><?= esc($inv['bales_count'] ?? ($inv['packages_count'] ?: '-')) ?></td>
                                                 <td class="fw-bold">₹<?= number_format($inv['total_amount'], 2) ?></td>
                                                 <td><span class="badge bg-secondary"><?= $inv['status'] ?></span></td>
                                             </tr>

@@ -8,10 +8,10 @@
             <?php if($shipment['waybill_number']): ?>
                 <div><?= esc($shipment['waybill_number']) ?></div>
                 <small class="text-muted"><?= $shipment['waybill_date'] ? date('d/m/Y', strtotime($shipment['waybill_date'])) : '' ?></small>
-                <?php if(!empty($shipment['packages_count']) || !empty($shipment['bales_count'])): ?>
+                <?php $bales = !empty($shipment['bales_count']) ? $shipment['bales_count'] : (!empty($shipment['packages_count']) ? $shipment['packages_count'] : ''); ?>
+                <?php if(!empty($bales)): ?>
                     <div class="small text-muted">
-                        <?php if(!empty($shipment['packages_count'])): ?><span>Pkg: <?= esc($shipment['packages_count']) ?></span><?php endif; ?>
-                        <?php if(!empty($shipment['bales_count'])): ?><span class="badge bg-secondary ms-1"><?= esc($shipment['bales_count']) ?> Bales</span><?php endif; ?>
+                        <span class="badge bg-secondary"><?= esc($bales) ?> Bales</span>
                     </div>
                 <?php endif; ?>
                 <?php if($shipment['waybill_image']): ?>

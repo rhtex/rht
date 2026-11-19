@@ -93,8 +93,7 @@
                         <tr><th>Transport:</th><td><?= esc($invoice['transport_name']) ?: '-' ?></td></tr>
                         <tr><th>Waybill / LR:</th><td><?= esc($invoice['waybill_number']) ?: '-' ?></td></tr>
                         <tr><th>Waybill Date:</th><td><?= $invoice['waybill_date'] ? date('d/m/Y', strtotime($invoice['waybill_date'])) : '-' ?></td></tr>
-                        <tr><th>Packages:</th><td><?= esc($invoice['packages_count']) ?: '-' ?></td></tr>
-                        <tr><th>No. of Bales:</th><td><?= esc($invoice['bales_count'] ?? '') !== '' ? esc($invoice['bales_count']) : '-' ?></td></tr>
+                        <tr><th>No. of Bales:</th><td><?= esc($invoice['bales_count'] ?? ($invoice['packages_count'] ?? '')) !== '' ? esc($invoice['bales_count'] ?? $invoice['packages_count']) : '-' ?></td></tr>
                         <tr>
                             <th>Delivery Status:</th>
                             <td>

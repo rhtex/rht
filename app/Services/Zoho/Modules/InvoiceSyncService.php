@@ -354,6 +354,19 @@ class InvoiceSyncService extends AbstractModuleSyncService
             ];
             $localStatus = $statusMap[$zohoStatus] ?? 'Open';
 
+            // Extract custom fields from Zoho if present (e.g. cf_no_of_bales, cf_transport)
+            $balesCount = null;
+            if (isset($zohoInv['custom_field_hash']['cf_no_of_bales'])) {
+                $balesCount = (int) $zohoInv['custom_field_hash']['cf_no_of_bales'];
+            } elseif (!empty($zohoInv['custom_fields']) && is_array($zohoInv['custom_fields'])) {
+                foreach ($zohoInv['custom_fields'] as $cf) {
+                    if (($cf['api_name'] ?? '') === 'cf_no_of_bales' || stripos($cf['label'] ?? '', 'bale') !== false) {
+                        $balesCount = (int) ($cf['value'] ?? null);
+                        break;
+                    }
+                }
+            }
+
             $invData = [
                 'customer_id'      => $localCustomerId,
                 'invoice_number'   => trim((string) ($zohoInv['invoice_number'] ?? ($localInv['invoice_number'] ?? $this->invoiceModel->generateInvoiceNumber()))),
@@ -361,6 +374,8 @@ class InvoiceSyncService extends AbstractModuleSyncService
                 'due_date'         => $zohoInv['due_date'] ?? ($zohoInv['date'] ?? date('Y-m-d')),
                 'reference_number' => $zohoInv['reference_number'] ?? null,
                 'ewaybill_number'  => $zohoInv['ewaybill_number'] ?? ($localInv['ewaybill_number'] ?? null),
+                'packages_count'   => $balesCount ?? ($localInv['packages_count'] ?? ($localInv['bales_count'] ?? null)),
+                'bales_count'      => $balesCount ?? ($localInv['bales_count'] ?? null),
                 'status'           => $localStatus,
                 'is_inter_state'   => $isInterState,
                 'subtotal'         => (float) ($zohoInv['sub_total'] ?? 0),
@@ -506,6 +521,27 @@ class InvoiceSyncService extends AbstractModuleSyncService
             'notes'                   => (string) ($invoice['notes'] ?? ''),
             'terms'                   => (string) ($invoice['terms'] ?? ''),
         ];
+
+        // Zoho Books Custom Fields mapping (e.g. cf_no_of_bales, cf_transport)
+        $customFields = [];
+        $balesCount = !empty($invoice['bales_count']) ? (int) $invoice['bales_count'] : (!empty($invoice['packages_count']) ? (int) $invoice['packages_count'] : null);
+        if ($balesCount !== null) {
+            $customFields[] = [
+                'api_name' => 'cf_no_of_bales',
+                'value'    => (int) $balesCount,
+            ];
+        }
+
+        if (!empty($invoice['transport_name'])) {
+            $customFields[] = [
+                'api_name' => 'cf_transport',
+                'value'    => (string) $invoice['transport_name'],
+            ];
+        }
+
+        if (!empty($customFields)) {
+            $payload['custom_fields'] = $customFields;
+        }
 
         return $payload;
     }

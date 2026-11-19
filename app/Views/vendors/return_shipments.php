@@ -113,22 +113,17 @@
                         <input type="text" name="waybill_number" id="modalLR" class="form-control" required>
                     </div>
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Waybill Date <span class="text-danger">*</span></label>
                                 <input type="date" name="waybill_date" id="modalDate" class="form-control" required>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">No. of Packages</label>
-                                <input type="number" name="packages_count" id="modalPackages" class="form-control">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">No. of Bales</label>
-                                <input type="number" name="bales_count" id="modalBales" class="form-control" placeholder="Bales">
+                                <label class="form-label">No. of Bales <span class="text-danger">*</span></label>
+                                <input type="number" name="bales_count" id="modalBales" class="form-control" placeholder="No. of Bales" min="1" step="1" required>
+                                <input type="hidden" name="packages_count" id="modalPackages">
                             </div>
                         </div>
                     </div>
@@ -223,8 +218,8 @@ function openWaybillModal(data) {
     $('#modalTransport').val(data.transport_name || '');
     $('#modalLR').val(data.waybill_number || '');
     $('#modalDate').val(data.waybill_date || '');
-    $('#modalPackages').val(data.packages_count || '');
-    $('#modalBales').val(data.bales_count || '');
+    $('#modalBales').val(data.bales_count || data.packages_count || '');
+    $('#modalPackages').val(data.bales_count || data.packages_count || '');
     
     $('#waybillForm').attr('action', '<?= site_url('vendors/returns/shipments/update/') ?>' + data.id);
     modal.show();

@@ -62,13 +62,13 @@ class Home extends BaseController
             COALESCE(SUM(balance), 0) as total,
             COALESCE(SUM(CASE WHEN due_date >= '$today' THEN balance ELSE 0 END), 0) as current,
             COALESCE(SUM(CASE WHEN due_date < '$today' THEN balance ELSE 0 END), 0) as overdue
-        ")->where('status !=', 'Void')->where('balance >', 0)->first();
+        ")->whereNotIn('status', ['Void', 'Draft'])->where('balance >', 0)->first();
 
         $billBalances = $billModel->select("
             COALESCE(SUM(balance), 0) as total,
             COALESCE(SUM(CASE WHEN due_date >= '$today' THEN balance ELSE 0 END), 0) as current,
             COALESCE(SUM(CASE WHEN due_date < '$today' THEN balance ELSE 0 END), 0) as overdue
-        ")->where('status !=', 'Void')->where('balance >', 0)->first();
+        ")->whereNotIn('status', ['Void', 'Draft'])->where('balance >', 0)->first();
 
         $data['accountsReceivable']        = (float) ($invoiceBalances['total'] ?? 0);
         $data['receivableCurrent']         = (float) ($invoiceBalances['current'] ?? 0);

@@ -391,8 +391,8 @@
                                     <input type="text" name="items[0][description]" class="form-control form-control-sm mt-1 desc-input" placeholder="Item specifications / notes...">
                                 </td>
                                 <td><input type="text" name="items[0][hsn_code]" class="form-control text-center hsn"></td>
-                                <td><input type="number" name="items[0][quantity]" class="form-control text-end qty" value="1" step="0.01" min="0.01" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
-                                <td><input type="number" name="items[0][rate]" class="form-control text-end rate" value="0.00" step="0.01" min="0" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
+                                <td><input type="number" name="items[0][quantity]" class="form-control text-end qty" value="1" step="0.01" min="0.01" oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
+                                <td><input type="number" name="items[0][rate]" class="form-control text-end rate" value="0.00" step="0.01" min="0" oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
                                 <td>
                                     <select name="items[0][tax_percentage]" class="form-select text-end gst" onchange="calculateRow(this)">
                                         <option value="0">0%</option>
@@ -530,11 +530,13 @@
         document.getElementById('dueDate').value = `${year}-${month}-${day}`;
     }
 
-    function addLineItem() {
+    function addLineItem(silent = false) {
         const customerId = $('#customerSelect').val();
         if (!customerId) {
-            alert('Please select a customer first.');
-            $('#customerSelect').select2('open');
+            if (!silent) {
+                alert('Please select a customer first.');
+                $('#customerSelect').select2('open');
+            }
             return;
         }
 
@@ -554,8 +556,8 @@
                 <input type="text" name="items[${rowIndex}][description]" class="form-control form-control-sm mt-1 desc-input" placeholder="Item specifications / notes...">
             </td>
             <td><input type="text" name="items[${rowIndex}][hsn_code]" class="form-control text-center hsn"></td>
-            <td><input type="number" name="items[${rowIndex}][quantity]" class="form-control text-end qty" value="1" step="0.01" min="0.01" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
-            <td><input type="number" name="items[${rowIndex}][rate]" class="form-control text-end rate" value="0.00" step="0.01" min="0" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
+            <td><input type="number" name="items[${rowIndex}][quantity]" class="form-control text-end qty" value="1" step="0.01" min="0.01" oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
+            <td><input type="number" name="items[${rowIndex}][rate]" class="form-control text-end rate" value="0.00" step="0.01" min="0" oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
             <td>
                 <select name="items[${rowIndex}][tax_percentage]" class="form-select text-end gst" onchange="calculateRow(this)">
                     ${taxOptions}
@@ -602,7 +604,7 @@
             descInput.value = prodName;
         }
 
-        // Match GST percentage
+        // Match GST percentage based on product's configured tax percentage
         if (gstAttr !== undefined && gstAttr !== null && gstAttr !== '') {
             const gstVal = parseFloat(gstAttr);
             const gstSelect = row.querySelector('.gst');
@@ -621,7 +623,20 @@
             }
         }
 
+        // Ensure tax_type is properly set based on customer inter-state status
+        const taxTypeInput = row.querySelector('.tax_type');
+        if (taxTypeInput) {
+            taxTypeInput.value = isInterState ? 'IGST' : 'CGST_SGST';
+        }
+
         calculateRow(select);
+
+        // Automatically append a new blank row at the bottom if this is the last row
+        const $allRows = $('#itemsBody tr.item-row');
+        const isLastRow = $select.closest('tr').is($allRows.last());
+        if (isLastRow) {
+            addLineItem(true);
+        }
     }
 
     function removeRow(btn) {

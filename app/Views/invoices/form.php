@@ -605,21 +605,30 @@
         }
 
         // Match GST percentage based on product's configured tax percentage
-        if (gstAttr !== undefined && gstAttr !== null && gstAttr !== '') {
-            const gstVal = parseFloat(gstAttr);
-            const gstSelect = row.querySelector('.gst');
+        const gstSelect = row.querySelector('.gst');
+        if (gstSelect) {
             let matched = false;
+            // Determine desired tax percentage: from product data-gst or fallback default (5%)
+            let targetGst = 5.0;
+            if (gstAttr !== undefined && gstAttr !== null && gstAttr !== '') {
+                targetGst = parseFloat(gstAttr);
+            }
 
             for (let i = 0; i < gstSelect.options.length; i++) {
-                if (parseFloat(gstSelect.options[i].value) === gstVal) {
+                if (parseFloat(gstSelect.options[i].value) === targetGst) {
                     gstSelect.selectedIndex = i;
                     matched = true;
                     break;
                 }
             }
 
-            if (!matched) {
-                gstSelect.value = "0";
+            if (!matched && gstSelect.options.length > 0) {
+                // If 5% or product GST is not in options, fallback to first non-zero option or 0
+                if (gstSelect.options.length > 1) {
+                    gstSelect.selectedIndex = 1;
+                } else {
+                    gstSelect.value = "0";
+                }
             }
         }
 
@@ -831,6 +840,28 @@
 
                 updateAllTaxOptions(isInterState);
                 enforceTaxType(isInterState);
+
+                // Auto-refresh GST selection on existing rows if product is selected
+                document.querySelectorAll('.item-row').forEach(row => {
+                    const prodSelect = row.querySelector('.product-select');
+                    if (prodSelect && prodSelect.value) {
+                        const opt = prodSelect.options[prodSelect.selectedIndex];
+                        const gstAttr = opt ? opt.getAttribute('data-gst') : null;
+                        const gstSelect = row.querySelector('.gst');
+                        if (gstSelect) {
+                            let targetGst = 5.0;
+                            if (gstAttr !== undefined && gstAttr !== null && gstAttr !== '') {
+                                targetGst = parseFloat(gstAttr);
+                            }
+                            for (let i = 0; i < gstSelect.options.length; i++) {
+                                if (parseFloat(gstSelect.options[i].value) === targetGst) {
+                                    gstSelect.selectedIndex = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
 
                 // Auto select agent if customer has agent assigned and not already set
                 if (data.agent_id && !$('#agentSelect').val()) {

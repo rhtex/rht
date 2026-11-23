@@ -17,7 +17,7 @@
             <div class="card-header">
                 <h3 class="card-title">General Settings</h3>
             </div>
-            <form action="<?= site_url('settings/update') ?>" method="post">
+            <form action="<?= site_url('settings/update') ?>" method="post" enctype="multipart/form-data">
                 <?= csrf_field() ?>
                 <div class="card-body">
                     <div class="mb-3">
@@ -192,12 +192,19 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Custom Logo Image URL</label>
-                            <input type="text" class="form-control" name="settings[company_logo_url]" value="<?= esc($settings['company_logo_url'] ?? '') ?>" placeholder="e.g. /uploads/company/logo.png or leave empty for monogram 'R'">
-                            <small class="text-muted">If blank, standard blue/gold monogram circle is rendered.</small>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Upload Company Logo (From Local File)</label>
+                            <input type="file" class="form-control" name="company_logo_file" accept="image/*">
+                            <small class="text-muted">Select an image file from your computer (PNG, JPG, SVG). It will be saved and used in the top-left monogram/logo circle.</small>
+                            <?php if (!empty($settings['company_logo_url'])): ?>
+                                <div class="mt-2 d-flex align-items-center gap-2">
+                                    <span class="small text-success"><i class="fas fa-check-circle"></i> Current Logo:</span>
+                                    <img src="<?= esc($settings['company_logo_url']) ?>" alt="Logo Preview" style="height: 38px; max-width: 100px; object-fit: contain; border: 1px solid #ddd; padding: 2px; border-radius: 4px;">
+                                </div>
+                            <?php endif; ?>
+                            <input type="hidden" name="settings[company_logo_url]" value="<?= esc($settings['company_logo_url'] ?? '') ?>">
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Print Font Family</label>
                             <select class="form-select" name="settings[print_header_font]">
                                 <?php $currFont = $settings['print_header_font'] ?? "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"; ?>
@@ -207,7 +214,7 @@
                                 <option value="'Times New Roman', Times, serif" <?= $currFont === "'Times New Roman', Times, serif" ? 'selected' : '' ?>>Times New Roman (Serif)</option>
                             </select>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Base Font Size</label>
                             <select class="form-select" name="settings[print_font_size]">
                                 <?php $currSize = $settings['print_font_size'] ?? "13px"; ?>
@@ -219,14 +226,41 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Default Document Notes (Footer Message)</label>
-                            <textarea class="form-control" name="settings[print_default_notes]" rows="2"><?= esc($settings['print_default_notes'] ?? 'Thank you for choosing us. We look forward to serving you again!') ?></textarea>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Bank Accounts to Print on Documents</label>
+                            <div class="card p-3 bg-light border">
+                                <small class="text-muted d-block mb-2">Check up to 2 active bank accounts to display in the bottom Bank Details box of printed invoices and bills:</small>
+                                <?php 
+                                $selectedBankIds = !empty($settings['print_selected_bank_ids']) ? json_decode($settings['print_selected_bank_ids'], true) : [];
+                                if (!is_array($selectedBankIds)) $selectedBankIds = [];
+                                ?>
+                                <div class="row">
+                                    <?php if (!empty($bankAccounts)): ?>
+                                        <?php foreach ($bankAccounts as $bk): ?>
+                                            <div class="col-md-6 mb-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="print_bank_accounts[]" value="<?= $bk['id'] ?>" id="bank_chk_<?= $bk['id'] ?>" <?= (empty($selectedBankIds) || in_array($bk['id'], $selectedBankIds)) ? 'checked' : '' ?>>
+                                                    <label class="form-check-label fw-bold" for="bank_chk_<?= $bk['id'] ?>">
+                                                        <?= esc($bk['bank_name']) ?> - <?= esc($bk['account_number']) ?>
+                                                        <span class="badge bg-secondary fw-normal ms-1"><?= esc($bk['branch_name']) ?></span>
+                                                    </label>
+                                                    <small class="d-block text-muted ms-3">IFSC: <?= esc($bk['ifsc_code']) ?></small>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <div class="col-12 text-muted">No active bank accounts found. Add accounts in Bank Accounts menu.</div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Default Terms & Conditions</label>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Terms & Conditions (Sole Footer Message)</label>
                             <textarea class="form-control" name="settings[print_default_terms]" rows="4"><?= esc($settings['print_default_terms'] ?? "1. All disputes will be resolved under Rasipuram jurisdiction.\n2. Please ensure payment is made before the due date to avoid an interest charge of 24% on the outstanding amount.\n3. We are not liable for any loss or damage occurring during transit.\n4. Goods once sold are non-returnable under any circumstances.") ?></textarea>
-                            <small class="text-muted">Terms shown in bottom box if document doesn't override them.</small>
+                            <small class="text-muted">Numbered or bulleted list of terms shown in the footer box. (General notes are omitted per your preference so Terms & Conditions remains the sole footer message).</small>
                         </div>
                     </div>
                 </div>

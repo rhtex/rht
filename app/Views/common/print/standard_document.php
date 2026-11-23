@@ -2,16 +2,15 @@
 /**
  * Unified Standard Print Template
  * Matches standard format:
- * - Company header with circular monogram/logo, company name, address, phones, email, GSTIN
- * - Right title header (TAX INVOICE / PURCHASE BILL / SALES ORDER / CREDIT NOTE / DEBIT NOTE / ESTIMATE)
- * - Meta grid (Date, Terms, Due Date, E-Way Bill#, Transport, No of Bales)
- * - Bill To and Ship To blocks with customer/vendor name, GSTIN, full address, phone
- * - Place of Supply bar
- * - Items table (#, Item Description, Meters/Unit, HSN/SAC, Qty, Rate, Amount)
- * - Items in total, Notes, and Totals box (Sub Total, CGST, SGST, IGST, Discount, Shipping, Round Off, Total)
- * - Total in Words
- * - Bank Accounts box (up to 2 accounts), Terms & Conditions, and Authorized Signature box
- * - Footer layout with page numbering / powered by
+ * - Clean solid outer borders around every section and cell
+ * - Header with logo circle and company details, right-aligned doc heading
+ * - 3-column boxed grid (Meta, Bill To, Ship To) with vertical dividers
+ * - Boxed Place of Supply bar
+ * - Complete boxed Line Items table with vertical and horizontal cell borders
+ * - Boxed Totals & Items in total
+ * - Boxed Total in words
+ * - Boxed Bottom section: Configurable Bank Account Details (left), Sole Footer message (Terms & Conditions), and Authorized Signature (right)
+ * - Powered by footer
  */
 
 $docTitle       = $document_title ?? 'TAX INVOICE';
@@ -35,16 +34,23 @@ $companyLogoUrl = get_setting('company_logo_url', '');
 $headerFont     = get_setting('print_header_font', "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif");
 $printFontSize  = get_setting('print_font_size', '13px');
 
-// Bank accounts
+// Bank accounts: resolve selected bank accounts from configuration
 $bankAccounts = $bank_accounts ?? [];
 if (empty($bankAccounts)) {
     try {
         $bankModel = new \App\Models\BankAccountModel();
-        $bankAccounts = $bankModel->where('account_type', 'Bank')->where('status', 'active')->limit(2)->findAll();
+        $selectedIdsJson = get_setting('print_selected_bank_ids', '');
+        $selectedIds = !empty($selectedIdsJson) ? json_decode($selectedIdsJson, true) : [];
+        if (!empty($selectedIds) && is_array($selectedIds)) {
+            $bankAccounts = $bankModel->whereIn('id', $selectedIds)->where('status', 'active')->limit(2)->findAll();
+        }
+        if (empty($bankAccounts)) {
+            $bankAccounts = $bankModel->where('account_type', 'Bank')->where('status', 'active')->limit(2)->findAll();
+        }
     } catch (\Throwable $e) {}
 }
 
-// Terms & Conditions
+// Terms & Conditions (Sole footer message)
 $termsList = $terms ?? [];
 if (is_string($termsList)) {
     $termsList = array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $termsList)));
@@ -53,9 +59,6 @@ if (empty($termsList)) {
     $defaultTermsSetting = get_setting('print_default_terms', "1. All disputes will be resolved under Rasipuram jurisdiction.\n2. Please ensure payment is made before the due date to avoid an interest charge of 24% on the outstanding amount.\n3. We are not liable for any loss or damage occurring during transit.\n4. Goods once sold are non-returnable under any circumstances.");
     $termsList = array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $defaultTermsSetting)));
 }
-
-// Notes
-$docNotes = !empty($notes) ? $notes : get_setting('print_default_notes', 'Thank you for choosing us. We look forward to serving you again!');
 
 // Number in words
 $totalAmountFloat = (float) ($total_amount ?? 0);
@@ -76,7 +79,7 @@ foreach (($items ?? []) as $it) {
     <style>
         @page {
             size: A4 portrait;
-            margin: 10mm 10mm 12mm 10mm;
+            margin: 8mm 10mm 10mm 10mm;
         }
 
         * {
@@ -101,18 +104,19 @@ foreach (($items ?? []) as $it) {
             margin: 0 auto;
             background: #fff;
             position: relative;
+            /* Outermost enclosing border */
+            border: 1.5px solid #000;
         }
 
-        /* Top Header Grid */
+        /* 1. Top Header Box */
         .top-header-table {
             width: 100%;
             border-collapse: collapse;
-            border-bottom: 2px solid #000;
-            margin-bottom: 0px;
+            border-bottom: 1.5px solid #000;
         }
 
         .top-header-table td {
-            padding: 8px 6px;
+            padding: 8px 8px;
             vertical-align: top;
         }
 
@@ -120,11 +124,12 @@ foreach (($items ?? []) as $it) {
             width: 95px;
             text-align: center;
             vertical-align: middle !important;
+            border-right: 1.5px solid #000;
         }
 
         .logo-circle {
-            width: 82px;
-            height: 82px;
+            width: 78px;
+            height: 78px;
             border-radius: 50%;
             border: 2px solid #003366;
             display: inline-flex;
@@ -133,17 +138,18 @@ foreach (($items ?? []) as $it) {
             position: relative;
             background: #fff;
             overflow: hidden;
+            margin: 0 auto;
         }
 
         .logo-circle .monogram-r {
             font-family: 'Times New Roman', serif;
-            font-size: 58px;
+            font-size: 54px;
             font-weight: bold;
             font-style: italic;
             color: #e6b800;
             text-shadow: 2px 2px 0 #002244, -1px -1px 0 #002244;
             line-height: 1;
-            margin-left: -4px;
+            margin-left: -3px;
         }
 
         .logo-circle img {
@@ -163,21 +169,22 @@ foreach (($items ?? []) as $it) {
 
         .company-details-cell {
             padding-left: 10px !important;
+            border-right: 1.5px solid #000;
         }
 
         .company-title {
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 800;
             letter-spacing: 0.5px;
             color: #002244;
-            margin: 0 0 4px 0;
+            margin: 0 0 3px 0;
             text-transform: uppercase;
         }
 
         .company-meta-line {
-            font-size: 11.5px;
+            font-size: 11px;
             line-height: 1.35;
-            color: #222;
+            color: #111;
         }
 
         .company-meta-line strong {
@@ -187,11 +194,12 @@ foreach (($items ?? []) as $it) {
         .doc-title-cell {
             text-align: right;
             vertical-align: middle !important;
-            width: 250px;
+            width: 240px;
+            padding-right: 12px !important;
         }
 
         .doc-heading {
-            font-size: 19px;
+            font-size: 18px;
             font-weight: 800;
             letter-spacing: 1px;
             color: #117a38;
@@ -205,7 +213,7 @@ foreach (($items ?? []) as $it) {
             color: #000;
         }
 
-        /* 3-Column Info Table: Meta | Bill To | Ship To */
+        /* 2. 3-Column Box (Meta | Bill To | Ship To) */
         .info-grid-table {
             width: 100%;
             border-collapse: collapse;
@@ -215,7 +223,7 @@ foreach (($items ?? []) as $it) {
         .info-grid-table td {
             vertical-align: top;
             padding: 6px 8px;
-            font-size: 11.5px;
+            font-size: 11px;
             border-right: 1.5px solid #000;
         }
 
@@ -224,11 +232,11 @@ foreach (($items ?? []) as $it) {
         }
 
         .meta-col {
-            width: 32%;
+            width: 33%;
         }
 
         .bill-col, .ship-col {
-            width: 34%;
+            width: 33.5%;
         }
 
         .meta-row {
@@ -241,11 +249,11 @@ foreach (($items ?? []) as $it) {
         .meta-label {
             font-weight: 600;
             color: #111;
-            width: 90px;
+            width: 88px;
         }
 
         .meta-sep {
-            margin: 0 4px;
+            margin: 0 3px;
         }
 
         .meta-val {
@@ -255,14 +263,15 @@ foreach (($items ?? []) as $it) {
         }
 
         .party-heading {
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: bold;
             color: #000;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
+            text-decoration: underline;
         }
 
         .party-name {
-            font-size: 13px;
+            font-size: 12.5px;
             font-weight: 800;
             color: #002266;
             margin-bottom: 2px;
@@ -270,28 +279,28 @@ foreach (($items ?? []) as $it) {
         }
 
         .party-gstin-highlight {
-            font-size: 13px;
+            font-size: 12.5px;
             font-weight: 800;
             color: #002266;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
         .party-address-text {
-            font-size: 11px;
+            font-size: 10.5px;
             line-height: 1.35;
             color: #222;
         }
 
-        /* Place of Supply Banner */
+        /* 3. Place of Supply Banner Box */
         .place-of-supply-banner {
             border-bottom: 1.5px solid #000;
             padding: 4px 8px;
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: bold;
             background: #fff;
         }
 
-        /* Line Items Table */
+        /* 4. Complete Boxed Line Items Table */
         .items-table {
             width: 100%;
             border-collapse: collapse;
@@ -302,7 +311,7 @@ foreach (($items ?? []) as $it) {
             border-bottom: 1.5px solid #000;
             border-right: 1px solid #000;
             padding: 5px 6px;
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: bold;
             background: #fff;
             text-align: left;
@@ -313,10 +322,15 @@ foreach (($items ?? []) as $it) {
         }
 
         .items-table td {
+            border-bottom: 1px solid #000;
             border-right: 1px solid #000;
             padding: 4px 6px;
             font-size: 11px;
             vertical-align: top;
+        }
+
+        .items-table tr:last-child td {
+            border-bottom: none;
         }
 
         .items-table td:last-child {
@@ -327,7 +341,7 @@ foreach (($items ?? []) as $it) {
         .text-right { text-align: right; }
         .fw-bold { font-weight: bold; }
 
-        /* Items Total / Notes / Totals summary table */
+        /* 5. Summary Box (Items in Total on Left | Totals Table on Right) */
         .summary-wrapper-table {
             width: 100%;
             border-collapse: collapse;
@@ -343,6 +357,8 @@ foreach (($items ?? []) as $it) {
             width: 62%;
             border-right: 1.5px solid #000;
             font-size: 11.5px;
+            display: flex;
+            align-items: center;
         }
 
         .totals-column {
@@ -357,29 +373,34 @@ foreach (($items ?? []) as $it) {
 
         .totals-subtable td {
             padding: 3px 8px;
-            font-size: 12px;
+            font-size: 11.5px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .totals-subtable tr:last-child td {
+            border-bottom: none;
         }
 
         .totals-subtable tr.grand-total td {
             font-size: 13.5px;
             font-weight: 800;
             border-top: 1.5px solid #000;
+            border-bottom: none;
             padding: 5px 8px;
         }
 
-        /* Total In Words Banner */
+        /* 6. Total In Words Box */
         .total-words-banner {
             border-bottom: 1.5px solid #000;
             padding: 5px 8px;
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: bold;
         }
 
-        /* Bottom Section: Bank Accounts + Terms + Signature */
+        /* 7. Bottom Section: Bank Accounts + Terms + Signature Box */
         .bottom-section-table {
             width: 100%;
             border-collapse: collapse;
-            border-bottom: 1.5px solid #000;
         }
 
         .bottom-section-table td {
@@ -390,7 +411,7 @@ foreach (($items ?? []) as $it) {
         .bank-terms-cell {
             width: 62%;
             border-right: 1.5px solid #000;
-            font-size: 11px;
+            font-size: 10.5px;
             padding-right: 8px;
         }
 
@@ -398,13 +419,13 @@ foreach (($items ?? []) as $it) {
             width: 38%;
             text-align: center;
             vertical-align: bottom !important;
-            padding-bottom: 18px;
+            padding-bottom: 16px;
             font-size: 12px;
             font-weight: bold;
         }
 
         .bank-details-title {
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: bold;
             text-decoration: underline;
             margin-bottom: 4px;
@@ -413,44 +434,42 @@ foreach (($items ?? []) as $it) {
         .bank-accounts-grid {
             display: flex;
             gap: 12px;
-            margin-bottom: 8px;
-            font-size: 10.5px;
+            margin-bottom: 6px;
+            font-size: 10px;
             line-height: 1.3;
         }
 
         .bank-col {
             flex: 1;
+            border-right: 1px dashed #bbb;
+            padding-right: 6px;
+        }
+
+        .bank-col:last-child {
+            border-right: none;
+            padding-right: 0;
         }
 
         .terms-block {
-            border-top: 1px dashed #777;
-            padding-top: 6px;
+            border-top: 1px solid #000;
+            padding-top: 5px;
             margin-top: 4px;
-            font-size: 10.5px;
+            font-size: 10px;
             line-height: 1.35;
         }
 
         .terms-title {
             font-weight: bold;
-            margin-bottom: 2px;
         }
 
-        .terms-list {
-            margin: 0;
-            padding-left: 14px;
-        }
-
-        .terms-list li {
-            margin-bottom: 1px;
-        }
-
+        /* 8. Outer Footer (Outside the box) */
         .page-footer {
-            margin-top: 12px;
+            margin-top: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 10px;
-            color: #666;
+            color: #444;
             letter-spacing: 0.5px;
         }
 
@@ -462,7 +481,7 @@ foreach (($items ?? []) as $it) {
         @media print {
             .no-print { display: none !important; }
             body { padding: 0; }
-            .print-container { max-width: 100%; border: none; }
+            .print-container { max-width: 100%; }
         }
 
         .no-print-toolbar {
@@ -494,18 +513,20 @@ foreach (($items ?? []) as $it) {
 </head>
 <body onload="<?= !empty($auto_print) ? 'window.print()' : '' ?>">
 
-    <div class="print-container">
-        <!-- Floating toolbar when viewing in browser -->
-        <div class="no-print no-print-toolbar">
-            <div>
-                <strong><?= esc($docTitle) ?> Preview:</strong> <?= esc($docNumber) ?>
-            </div>
-            <div>
-                <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Print Document</button>
-            </div>
+    <!-- Floating toolbar when viewing in browser -->
+    <div class="no-print no-print-toolbar">
+        <div>
+            <strong><?= esc($docTitle) ?> Preview:</strong> <?= esc($docNumber) ?>
         </div>
+        <div>
+            <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Print Document</button>
+        </div>
+    </div>
 
-        <!-- 1. HEADER SECTION -->
+    <!-- MAIN ENCLOSED DOCUMENT BOX -->
+    <div class="print-container">
+
+        <!-- 1. HEADER SECTION BOX -->
         <table class="top-header-table">
             <tr>
                 <td class="logo-cell">
@@ -540,7 +561,7 @@ foreach (($items ?? []) as $it) {
             </tr>
         </table>
 
-        <!-- 2. THREE-COLUMN INFO GRID (Meta | Bill To | Ship To) -->
+        <!-- 2. THREE-COLUMN INFO BOX (Meta | Bill To | Ship To) -->
         <table class="info-grid-table">
             <tr>
                 <!-- Column 1: Document Meta -->
@@ -650,14 +671,14 @@ foreach (($items ?? []) as $it) {
             </tr>
         </table>
 
-        <!-- 3. PLACE OF SUPPLY BANNER -->
+        <!-- 3. PLACE OF SUPPLY BANNER BOX -->
         <?php if (!empty($place_of_supply)): ?>
             <div class="place-of-supply-banner">
                 Place Of Supply : <?= esc($place_of_supply) ?>
             </div>
         <?php endif; ?>
 
-        <!-- 4. LINE ITEMS TABLE -->
+        <!-- 4. FULLY BOXED LINE ITEMS TABLE -->
         <table class="items-table">
             <thead>
                 <tr>
@@ -696,14 +717,11 @@ foreach (($items ?? []) as $it) {
             </tbody>
         </table>
 
-        <!-- 5. SUMMARY WRAPPER (Notes & Total Items on left | Taxes & Totals on right) -->
+        <!-- 5. SUMMARY BOX (Items in Total on Left | Totals on Right) -->
         <table class="summary-wrapper-table">
             <tr>
                 <td class="notes-column">
-                    <div class="fw-bold mb-2">Items in Total <?= (int) $totalQty ?></div>
-                    <div>
-                        <strong>Notes :</strong> <?= nl2br(esc($docNotes)) ?>
-                    </div>
+                    <span class="fw-bold">Items in Total <?= (int) $totalQty ?></span>
                 </td>
                 <td class="totals-column">
                     <table class="totals-subtable">
@@ -756,12 +774,12 @@ foreach (($items ?? []) as $it) {
             </tr>
         </table>
 
-        <!-- 6. TOTAL IN WORDS BANNER -->
+        <!-- 6. TOTAL IN WORDS BOX -->
         <div class="total-words-banner">
             Total In Words : <?= esc($totalInWords) ?>
         </div>
 
-        <!-- 7. BOTTOM SECTION: BANK DETAILS, TERMS & SIGNATURE -->
+        <!-- 7. BOTTOM SECTION: BANK DETAILS, TERMS (SOLE FOOTER MESSAGE) & SIGNATURE BOX -->
         <table class="bottom-section-table">
             <tr>
                 <td class="bank-terms-cell">
@@ -772,7 +790,7 @@ foreach (($items ?? []) as $it) {
                                 <div class="bank-col">
                                     <div><strong>Bank Name:</strong> <?= esc($bk['bank_name']) ?></div>
                                     <div><strong>Account Number:</strong> <?= esc($bk['account_number']) ?></div>
-                                    <div><strong>Account Name:</strong><br><?= esc($companyName) ?></div>
+                                    <div><strong>Account Name:</strong> <?= esc($companyName) ?></div>
                                     <div><strong>Branch:</strong> <?= esc($bk['branch_name'] ?? 'Rasipuram') ?></div>
                                     <div><strong>IFSC Code:</strong> <?= esc($bk['ifsc_code']) ?></div>
                                 </div>
@@ -795,11 +813,12 @@ foreach (($items ?? []) as $it) {
             </tr>
         </table>
 
-        <!-- 8. FOOTER -->
-        <div class="page-footer">
-            <div class="powered-by">POWERED BY <?= esc($companyName) ?></div>
-            <div>1</div>
-        </div>
+    </div><!-- END .print-container -->
+
+    <!-- 8. FOOTER BELOW BOX -->
+    <div class="page-footer" style="max-width: 820px; margin: 8px auto 0 auto;">
+        <div class="powered-by">POWERED BY <?= esc($companyName) ?></div>
+        <div>1</div>
     </div>
 
 </body>

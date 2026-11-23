@@ -36,7 +36,7 @@
                 </a>
                 <?php endif; ?>
             <?php endif; ?>
-            <a href="<?= site_url('sales_orders/print/' . $order['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white">
+            <a href="<?= site_url('sales_orders/print/' . $order['id']) ?>?pdf=1" target="_blank" class="btn btn-sm btn-info text-white">
                 <i class="fas fa-print me-1"></i> Print
             </a>
         </div>

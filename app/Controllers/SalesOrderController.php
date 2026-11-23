@@ -429,6 +429,26 @@ class SalesOrderController extends BaseController
         $data['company_gstin'] = get_setting('company_gstin', '');
         $data['title'] = 'Sales Order ' . $data['order']['sales_order_number'];
 
+        if ($this->request->getGet('pdf') || $this->request->getGet('format') === 'pdf') {
+            try {
+                $options = new \Dompdf\Options();
+                $options->set('isRemoteEnabled', true);
+                $options->set('isHtml5ParserEnabled', true);
+                $dompdf = new \Dompdf\Dompdf($options);
+                $html = view('sales_orders/print', array_merge($data, ['auto_print' => false]));
+                $dompdf->loadHtml($html);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+                $filename = 'SalesOrder_' . preg_replace('/[^A-Za-z0-9_-]/', '_', $data['order']['sales_order_number']) . '.pdf';
+                return $this->response
+                    ->setHeader('Content-Type', 'application/pdf')
+                    ->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"')
+                    ->setBody($dompdf->output());
+            } catch (\Throwable $e) {
+                log_message('error', 'Sales Order PDF generation error: ' . $e->getMessage());
+            }
+        }
+
         return view('sales_orders/print', $data);
     }
 }

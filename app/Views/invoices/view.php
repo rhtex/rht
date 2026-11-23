@@ -44,7 +44,7 @@
                         <i class="fas fa-money-bill me-1"></i> Record Payment
                     </a>
                 <?php endif; ?>
-                <a href="<?= site_url('invoices/print/' . $invoice['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white">
+                <a href="<?= site_url('invoices/print/' . $invoice['id']) ?>?pdf=1" target="_blank" class="btn btn-sm btn-info text-white">
                     <i class="fas fa-print me-1"></i> Print
                 </a>
                 <?php if (can('eway_bill.create')): ?>

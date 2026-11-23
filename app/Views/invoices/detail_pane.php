@@ -37,7 +37,7 @@
                     <i class="fas fa-money-bill-wave me-1"></i> Payment
                 </a>
             <?php endif; ?>
-            <a href="<?= site_url('invoices/print/' . $invoice['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white">
+            <a href="<?= site_url('invoices/print/' . $invoice['id']) ?>?pdf=1" target="_blank" class="btn btn-sm btn-info text-white">
                 <i class="fas fa-print me-1"></i> Print
             </a>
         </div>

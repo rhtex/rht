@@ -117,16 +117,18 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center gap-2">
+                                    <?php $hasImg = !empty($d['image']) && file_exists(FCPATH . $d['image']); ?>
+                                    <input type="hidden" name="designs[<?= $idx ?>][existing_image]" class="co-existing-image" value="<?= esc($d['image'] ?? '') ?>">
+                                    <div class="co-image-input-wrap <?= $hasImg ? 'd-none' : '' ?>">
+                                        <input type="file" name="designs[<?= $idx ?>][image_file]" class="form-control form-control-sm co-image-input" accept="image/*">
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 co-image-display-wrap <?= $hasImg ? '' : 'd-none' ?>">
                                         <div class="img-thumb-wrap">
-                                            <?php if (!empty($d['image']) && file_exists(FCPATH . $d['image'])): ?>
+                                            <?php if ($hasImg): ?>
                                                 <img src="<?= base_url($d['image']) ?>" alt="Design" style="width:42px;height:42px;object-fit:cover;border-radius:4px;border:1px solid #ddd;">
-                                            <?php else: ?>
-                                                <span class="badge bg-light text-muted border">No Img</span>
                                             <?php endif; ?>
                                         </div>
-                                        <input type="hidden" name="designs[<?= $idx ?>][existing_image]" class="co-existing-image" value="<?= esc($d['image'] ?? '') ?>">
-                                        <input type="file" name="designs[<?= $idx ?>][image_file]" class="form-control form-control-sm co-image-input" accept="image/*">
+                                        <button type="button" class="btn btn-sm btn-danger btn-clear-image" title="Remove Image &amp; Re-upload"><i class="fas fa-times"></i></button>
                                     </div>
                                 </td>
                                 <td>
@@ -180,9 +182,10 @@ $(function() {
     function buildDesignRow(preset = {}) {
         const idx = nextIdx++;
         const hasSelected = !!(preset.product_id || preset.product_name);
-        const imgHtml = preset.image
+        const hasImg = !!preset.image;
+        const imgHtml = hasImg
             ? `<img src="${baseUrl}${preset.image}" alt="Design" style="width:42px;height:42px;object-fit:cover;border-radius:4px;border:1px solid #ddd;">`
-            : `<span class="badge bg-light text-muted border">No Img</span>`;
+            : '';
 
         const tr = $(`
             <tr class="design-row">
@@ -202,10 +205,13 @@ $(function() {
                     </div>
                 </td>
                 <td>
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="img-thumb-wrap">${imgHtml}</div>
-                        <input type="hidden" name="designs[${idx}][existing_image]" class="co-existing-image" value="${$('<div>').text(preset.image || '').html()}">
+                    <input type="hidden" name="designs[${idx}][existing_image]" class="co-existing-image" value="${$('<div>').text(preset.image || '').html()}">
+                    <div class="co-image-input-wrap ${hasImg ? 'd-none' : ''}">
                         <input type="file" name="designs[${idx}][image_file]" class="form-control form-control-sm co-image-input" accept="image/*">
+                    </div>
+                    <div class="d-flex align-items-center gap-2 co-image-display-wrap ${hasImg ? '' : 'd-none'}">
+                        <div class="img-thumb-wrap">${imgHtml}</div>
+                        <button type="button" class="btn btn-sm btn-danger btn-clear-image" title="Remove Image &amp; Re-upload"><i class="fas fa-times"></i></button>
                     </div>
                 </td>
                 <td>
@@ -271,14 +277,28 @@ $(function() {
         row.find('.co-product-select-wrap').removeClass('d-none');
     });
 
-    // Live thumbnail preview on image choose
+    // Live thumbnail preview on image choose -> hide file input, show thumbnail + red X
     $('#designsBody').on('change', '.co-image-input', function() {
         const file = this.files && this.files[0];
         if (!file) return;
-        const wrap = $(this).closest('.design-row').find('.img-thumb-wrap');
+        const row = $(this).closest('.design-row');
         const reader = new FileReader();
-        reader.onload = e => wrap.html(`<img src="${e.target.result}" style="width:42px;height:42px;object-fit:cover;border-radius:4px;border:1px solid #ddd;">`);
+        reader.onload = e => {
+            row.find('.img-thumb-wrap').html(`<img src="${e.target.result}" style="width:42px;height:42px;object-fit:cover;border-radius:4px;border:1px solid #ddd;">`);
+            row.find('.co-image-input-wrap').addClass('d-none');
+            row.find('.co-image-display-wrap').removeClass('d-none');
+        };
         reader.readAsDataURL(file);
+    });
+
+    // Red X button for image: clear image, hide thumbnail, show file input again
+    $('#designsBody').on('click', '.btn-clear-image', function() {
+        const row = $(this).closest('.design-row');
+        row.find('.co-existing-image').val('');
+        row.find('.co-image-input').val('');
+        row.find('.img-thumb-wrap').empty();
+        row.find('.co-image-display-wrap').addClass('d-none');
+        row.find('.co-image-input-wrap').removeClass('d-none');
     });
 
     // Clone Design (insert before trailing empty row so empty row stays at bottom)

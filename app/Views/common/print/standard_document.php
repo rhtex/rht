@@ -133,7 +133,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             margin: 0;
             background: #fff;
             color: #000;
-            border: 1.2px solid #000;
+            border: 1px solid #000;
             box-sizing: border-box;
         }
 
@@ -143,7 +143,7 @@ if ($itemCount > 0 && $itemCount < 14) {
         .header-table {
             width: 100%;
             border-collapse: collapse;
-            border-bottom: 1.2px solid #000;
+            border-bottom: 1px solid #000;
             margin-bottom: 0px;
             padding: 0;
         }
@@ -249,7 +249,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-top: none;
             border-left: none;
             border-right: none;
-            border-bottom: 1.2px solid #000;
+            border-bottom: 1px solid #000;
             margin-bottom: 0px;
         }
 
@@ -257,7 +257,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             vertical-align: top;
             padding: 5px 7px;
             font-size: 11px;
-            border-right: 1.2px solid #000;
+            border-right: 1px solid #000;
             border-top: none;
             border-bottom: none;
             border-left: none;
@@ -343,7 +343,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-left: none;
             border-right: none;
             border-top: none;
-            border-bottom: 1.2px solid #000;
+            border-bottom: 1px solid #000;
         }
 
         .pos-bar-table td {
@@ -364,16 +364,16 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-left: none;
             border-right: none;
             border-top: none;
-            border-bottom: 1.2px solid #000;
+            border-bottom: 1px solid #000;
             color: #000;
             table-layout: fixed;
         }
 
         .items-grid-table th {
             border-top: none;
-            border-bottom: 1.2px solid #000;
+            border-bottom: 1px solid #000;
             border-left: none;
-            border-right: 1.2px solid #000;
+            border-right: 1px solid #000;
             padding: 6px 6px;
             font-size: 11.5px;
             font-weight: 800;
@@ -388,9 +388,9 @@ if ($itemCount > 0 && $itemCount < 14) {
 
         .items-grid-table td {
             border-top: none;
-            border-bottom: 1.2px solid #000;
+            border-bottom: 1px solid #000;
             border-left: none;
-            border-right: 1.2px solid #000;
+            border-right: 1px solid #000;
             padding: 4px 6px;
             font-size: 11px;
             font-weight: 550;
@@ -403,9 +403,9 @@ if ($itemCount > 0 && $itemCount < 14) {
             height: 22px;
             padding: 0 6px;
             border-top: none;
-            border-bottom: 1.2px solid #000;
+            border-bottom: 1px solid #000;
             border-left: none;
-            border-right: 1.2px solid #000;
+            border-right: 1px solid #000;
             color: transparent;
         }
 
@@ -419,7 +419,7 @@ if ($itemCount > 0 && $itemCount < 14) {
 
         /* Summary row inside the table */
         .summary-notes-td {
-            border-right: 1.2px solid #000 !important;
+            border-right: 1px solid #000 !important;
             border-bottom: none !important;
             padding: 8px !important;
             vertical-align: top !important;
@@ -462,7 +462,7 @@ if ($itemCount > 0 && $itemCount < 14) {
         }
 
         .totals-inner-table tr.total-row td {
-            border-top: 1.2px solid #000 !important;
+            border-top: 1px solid #000 !important;
             font-size: 14px;
             font-weight: 900;
             padding: 6px 8px;
@@ -478,7 +478,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-left: none;
             border-right: none;
             border-top: none;
-            border-bottom: 1.2px solid #000;
+            border-bottom: 1px solid #000;
         }
 
         .total-words-table td {
@@ -498,7 +498,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-left: none;
             border-right: none;
             border-top: none;
-            border-bottom: 1.2px solid #000;
+            border-bottom: 1px solid #000;
             color: #000;
         }
 
@@ -511,7 +511,7 @@ if ($itemCount > 0 && $itemCount < 14) {
 
         .bank-terms-left {
             width: 63%;
-            border-right: 1.2px solid #000 !important;
+            border-right: 1px solid #000 !important;
             border-left: none !important;
             font-size: 11px;
             padding-right: 8px;
@@ -554,7 +554,7 @@ if ($itemCount > 0 && $itemCount < 14) {
         }
 
         .bank-entry-cell:first-child {
-            border-right: 1.2px solid #000;
+            border-right: 1px solid #000;
             padding-right: 8px;
         }
 
@@ -563,7 +563,7 @@ if ($itemCount > 0 && $itemCount < 14) {
         }
 
         .terms-wrap {
-            border-top: 1.2px solid #000;
+            border-top: 1px solid #000;
             padding-top: 5px;
             margin-top: 4px;
             font-size: 10.5px;
@@ -585,7 +585,7 @@ if ($itemCount > 0 && $itemCount < 14) {
 
         .items-grid-table thead th {
             border-top: none;
-            border-bottom: 1.2px solid #000;
+            border-bottom: 1px solid #000;
         }
 
         .items-grid-table tfoot {
@@ -596,7 +596,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             height: 0px !important;
             padding: 0 !important;
             margin: 0 !important;
-            border-top: 1.2px solid #000 !important;
+            border-top: 1px solid #000 !important;
             border-bottom: none !important;
             border-left: none !important;
             border-right: none !important;
@@ -640,7 +640,7 @@ if ($itemCount > 0 && $itemCount < 14) {
                 width: 100%;
                 max-width: 100%;
                 margin: 0;
-                border: 1.2px solid #000 !important;
+                border: 1px solid #000 !important;
                 box-sizing: border-box;
                 page-break-after: avoid;
             }
@@ -652,13 +652,13 @@ if ($itemCount > 0 && $itemCount < 14) {
             }
             .items-grid-table thead th {
                 border-top: none !important;
-                border-bottom: 1.2px solid #000 !important;
+                border-bottom: 1px solid #000 !important;
             }
             .items-grid-table tfoot {
                 display: table-footer-group !important;
             }
             .items-grid-table tfoot td {
-                border-top: 1.2px solid #000 !important;
+                border-top: 1px solid #000 !important;
                 height: 0px !important;
                 padding: 0 !important;
             }

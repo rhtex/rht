@@ -16,7 +16,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<form action="<?= site_url($order ? 'customer_orders/update/' . $order['id'] : 'customer_orders/store') ?>" method="post" enctype="multipart/form-data">
+<form action="<?= site_url($order ? 'customer_orders/update/' . $order['id'] : 'customer_orders/store') ?>" method="post" enctype="multipart/form-data" id="customerOrderForm">
     <?= csrf_field() ?>
 
     <!-- Master Order Card -->
@@ -70,9 +70,7 @@
     <div class="card card-outline card-info">
         <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
             <strong>Design Line Items</strong>
-            <button type="button" class="btn btn-sm btn-success" id="btnAddDesign">
-                <i class="fas fa-plus me-1"></i> Add Design (+)
-            </button>
+            <small class="text-muted">Selecting a product automatically adds the next design row</small>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -87,26 +85,36 @@
                         </tr>
                     </thead>
                     <tbody id="designsBody">
-                        <?php $rows = !empty($designs) ? $designs : [['product_id' => '', 'product_name' => '', 'rate' => '0.00', 'image' => '']]; ?>
+                        <?php
+                        $rows = !empty($designs) ? $designs : [];
+                        // Always ensure one empty trailing row at the end for instant entry
+                        $rows[] = ['product_id' => '', 'product_name' => '', 'rate' => '0.00', 'image' => ''];
+                        ?>
                         <?php foreach ($rows as $idx => $d): ?>
+                            <?php $hasSelected = !empty($d['product_id']) || !empty($d['product_name']); ?>
                             <tr class="design-row">
                                 <td class="text-center">
                                     <span class="badge bg-info text-dark fs-6 design-no-badge"><?= $idx + 1 ?></span>
                                     <input type="hidden" name="designs[<?= $idx ?>][design_no]" class="design-no-val" value="<?= $idx + 1 ?>">
                                 </td>
                                 <td>
-                                    <select name="designs[<?= $idx ?>][product_id]" class="form-select form-select-sm mb-1 co-product-select select2-row">
-                                        <option value="">-- Select Product (or type below) --</option>
-                                        <?php foreach ($products as $p): ?>
-                                            <option value="<?= $p['id'] ?>"
-                                                    data-name="<?= esc($p['product_name']) ?>"
-                                                    data-rate="<?= esc($p['selling_price']) ?>"
-                                                    <?= ((int) ($d['product_id'] ?? 0) === (int) $p['id']) ? 'selected' : '' ?>>
-                                                <?= esc($p['product_name']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <input type="text" name="designs[<?= $idx ?>][product_name]" class="form-control form-control-sm co-product-name" value="<?= esc($d['product_name'] ?? '') ?>" required placeholder="Product name...">
+                                    <div class="co-product-select-wrap <?= $hasSelected ? 'd-none' : '' ?>">
+                                        <select name="designs[<?= $idx ?>][product_id]" class="form-select form-select-sm co-product-select select2-row">
+                                            <option value="">-- Select Product --</option>
+                                            <?php foreach ($products as $p): ?>
+                                                <option value="<?= $p['id'] ?>"
+                                                        data-name="<?= esc($p['product_name']) ?>"
+                                                        data-rate="<?= esc($p['selling_price']) ?>"
+                                                        <?= ((int) ($d['product_id'] ?? 0) === (int) $p['id']) ? 'selected' : '' ?>>
+                                                    <?= esc($p['product_name']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="input-group input-group-sm co-product-display-wrap <?= $hasSelected ? '' : 'd-none' ?>">
+                                        <input type="text" name="designs[<?= $idx ?>][product_name]" class="form-control fw-bold co-product-name" value="<?= esc($d['product_name'] ?? '') ?>" placeholder="Product name...">
+                                        <button type="button" class="btn btn-danger btn-clear-product" title="Remove Product &amp; Reselect"><i class="fas fa-times"></i></button>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
@@ -122,7 +130,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <input type="number" name="designs[<?= $idx ?>][rate]" class="form-control form-control-sm text-end co-rate" step="0.01" min="0" value="<?= esc(number_format((float) ($d['rate'] ?? 0), 2, '.', '')) ?>" required>
+                                    <input type="number" name="designs[<?= $idx ?>][rate]" class="form-control form-control-sm text-end co-rate" step="0.01" min="0" value="<?= esc(number_format((float) ($d['rate'] ?? 0), 2, '.', '')) ?>">
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm">
@@ -137,14 +145,9 @@
                 </table>
             </div>
         </div>
-        <div class="card-footer d-flex justify-content-between align-items-center">
-            <button type="button" class="btn btn-sm btn-outline-success fw-bold" id="btnAddDesignBottom">
-                <i class="fas fa-plus me-1"></i> Add Another Product / Design
-            </button>
-            <div>
-                <a href="<?= site_url('customer_orders') ?>" class="btn btn-secondary me-2">Cancel</a>
-                <button type="submit" class="btn btn-primary fw-bold"><i class="fas fa-save me-1"></i> <?= $order ? 'Update Customer Order' : 'Save Customer Order' ?></button>
-            </div>
+        <div class="card-footer text-end">
+            <a href="<?= site_url('customer_orders') ?>" class="btn btn-secondary me-2">Cancel</a>
+            <button type="submit" class="btn btn-primary fw-bold"><i class="fas fa-save me-1"></i> <?= $order ? 'Update Customer Order' : 'Save Customer Order' ?></button>
         </div>
     </div>
 </form>
@@ -158,7 +161,7 @@ $(function() {
 
     const baseUrl = '<?= base_url() ?>';
     const productOptionsHtml = `
-        <option value="">-- Select Product (or type below) --</option>
+        <option value="">-- Select Product --</option>
         <?php foreach ($products as $p): ?>
             <option value="<?= $p['id'] ?>" data-name="<?= esc($p['product_name']) ?>" data-rate="<?= esc($p['selling_price']) ?>"><?= esc($p['product_name']) ?></option>
         <?php endforeach; ?>
@@ -174,8 +177,9 @@ $(function() {
         });
     }
 
-    function appendDesignRow(preset = {}) {
+    function buildDesignRow(preset = {}) {
         const idx = nextIdx++;
+        const hasSelected = !!(preset.product_id || preset.product_name);
         const imgHtml = preset.image
             ? `<img src="${baseUrl}${preset.image}" alt="Design" style="width:42px;height:42px;object-fit:cover;border-radius:4px;border:1px solid #ddd;">`
             : `<span class="badge bg-light text-muted border">No Img</span>`;
@@ -187,10 +191,15 @@ $(function() {
                     <input type="hidden" name="designs[${idx}][design_no]" class="design-no-val" value="1">
                 </td>
                 <td>
-                    <select name="designs[${idx}][product_id]" class="form-select form-select-sm mb-1 co-product-select select2-row">
-                        ${productOptionsHtml}
-                    </select>
-                    <input type="text" name="designs[${idx}][product_name]" class="form-control form-control-sm co-product-name" value="${$('<div>').text(preset.product_name || '').html()}" required placeholder="Product name...">
+                    <div class="co-product-select-wrap ${hasSelected ? 'd-none' : ''}">
+                        <select name="designs[${idx}][product_id]" class="form-select form-select-sm co-product-select select2-row">
+                            ${productOptionsHtml}
+                        </select>
+                    </div>
+                    <div class="input-group input-group-sm co-product-display-wrap ${hasSelected ? '' : 'd-none'}">
+                        <input type="text" name="designs[${idx}][product_name]" class="form-control fw-bold co-product-name" value="${$('<div>').text(preset.product_name || '').html()}" placeholder="Product name...">
+                        <button type="button" class="btn btn-danger btn-clear-product" title="Remove Product &amp; Reselect"><i class="fas fa-times"></i></button>
+                    </div>
                 </td>
                 <td>
                     <div class="d-flex align-items-center gap-2">
@@ -200,7 +209,7 @@ $(function() {
                     </div>
                 </td>
                 <td>
-                    <input type="number" name="designs[${idx}][rate]" class="form-control form-control-sm text-end co-rate" step="0.01" min="0" value="${parseFloat(preset.rate || 0).toFixed(2)}" required>
+                    <input type="number" name="designs[${idx}][rate]" class="form-control form-control-sm text-end co-rate" step="0.01" min="0" value="${parseFloat(preset.rate || 0).toFixed(2)}">
                 </td>
                 <td class="text-center">
                     <div class="btn-group btn-group-sm">
@@ -212,7 +221,18 @@ $(function() {
             </tr>
         `);
 
-        $('#designsBody').append(tr);
+        return tr;
+    }
+
+    function appendDesignRow(preset = {}, beforeLastEmpty = false) {
+        const tr = buildDesignRow(preset);
+        const $last = $('#designsBody .design-row').last();
+        const lastIsEmpty = $last.length && !$last.find('.co-product-select').val() && !$last.find('.co-product-name').val().trim();
+        if (beforeLastEmpty && lastIsEmpty) {
+            tr.insertBefore($last);
+        } else {
+            $('#designsBody').append(tr);
+        }
         const $sel = tr.find('.co-product-select');
         if (preset.product_id) {
             $sel.val(preset.product_id);
@@ -221,17 +241,34 @@ $(function() {
         resequenceDesigns();
     }
 
-    $('#btnAddDesign, #btnAddDesignBottom').on('click', function() {
-        appendDesignRow();
-    });
+    function ensureTrailingEmptyRow() {
+        const $last = $('#designsBody .design-row').last();
+        if (!$last.length || $last.find('.co-product-select').val() || $last.find('.co-product-name').val().trim() !== '') {
+            appendDesignRow();
+        }
+    }
 
+    // Selecting a product hides dropdown, keeps product name + red X, fetches rate, and auto-adds next row
     $('#designsBody').on('change', '.co-product-select', function() {
         const opt = $(this).find('option:selected');
         const row = $(this).closest('.design-row');
         if (opt.val()) {
             row.find('.co-product-name').val(opt.data('name'));
             row.find('.co-rate').val(parseFloat(opt.data('rate') || 0).toFixed(2));
+            row.find('.co-product-select-wrap').addClass('d-none');
+            row.find('.co-product-display-wrap').removeClass('d-none');
+            ensureTrailingEmptyRow();
         }
+    });
+
+    // Red X button: clear product name & rate, show dropdown again
+    $('#designsBody').on('click', '.btn-clear-product', function() {
+        const row = $(this).closest('.design-row');
+        row.find('.co-product-name').val('');
+        row.find('.co-rate').val('0.00');
+        row.find('.co-product-select').val('').trigger('change.select2');
+        row.find('.co-product-display-wrap').addClass('d-none');
+        row.find('.co-product-select-wrap').removeClass('d-none');
     });
 
     // Live thumbnail preview on image choose
@@ -244,31 +281,51 @@ $(function() {
         reader.readAsDataURL(file);
     });
 
-    // Clone Design
+    // Clone Design (insert before trailing empty row so empty row stays at bottom)
     $('#designsBody').on('click', '.btn-clone-design', function() {
         const row = $(this).closest('.design-row');
+        if (!row.find('.co-product-select').val() && !row.find('.co-product-name').val().trim()) return;
         appendDesignRow({
             product_id:   row.find('.co-product-select').val(),
             product_name: row.find('.co-product-name').val(),
             rate:         row.find('.co-rate').val(),
             image:        row.find('.co-existing-image').val(),
-        });
+        }, true);
     });
 
-    // Edit Design (focuses row product name)
+    // Edit Design
     $('#designsBody').on('click', '.btn-edit-design', function() {
         const row = $(this).closest('.design-row');
-        row.find('.co-product-name').focus().select();
+        if (!row.find('.co-product-display-wrap').hasClass('d-none')) {
+            row.find('.co-product-name').focus().select();
+        } else {
+            row.find('.co-product-select').select2('open');
+        }
     });
 
     // Delete Design
     $('#designsBody').on('click', '.btn-delete-design', function() {
         if ($('#designsBody .design-row').length <= 1) {
-            alert('At least one design line item is required.');
+            $(this).closest('.design-row').find('.btn-clear-product').click();
             return;
         }
         $(this).closest('.design-row').remove();
+        ensureTrailingEmptyRow();
         resequenceDesigns();
+    });
+
+    // Validate at least one design is filled before submit
+    $('#customerOrderForm').on('submit', function(e) {
+        let filled = 0;
+        $('#designsBody .design-row').each(function() {
+            if ($(this).find('.co-product-select').val() || $(this).find('.co-product-name').val().trim() !== '') {
+                filled++;
+            }
+        });
+        if (filled === 0) {
+            e.preventDefault();
+            alert('Please add at least one design product.');
+        }
     });
 });
 </script>

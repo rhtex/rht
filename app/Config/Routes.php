@@ -322,10 +322,12 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
 
     // Customer Orders
     $routes->get('customer_orders', 'CustomerOrderController::index', ['filter' => 'permission:sales_order.view']);
+    $routes->get('customer_orders/view/(:num)', 'CustomerOrderController::view/$1', ['filter' => 'permission:sales_order.view']);
     $routes->get('customer_orders/create', 'CustomerOrderController::create', ['filter' => 'permission:sales_order.create']);
     $routes->post('customer_orders/store', 'CustomerOrderController::store', ['filter' => 'permission:sales_order.create']);
     $routes->get('customer_orders/edit/(:num)', 'CustomerOrderController::edit/$1', ['filter' => 'permission:sales_order.edit']);
     $routes->post('customer_orders/update/(:num)', 'CustomerOrderController::update/$1', ['filter' => 'permission:sales_order.edit']);
+    $routes->get('customer_orders/toggle-status/(:num)', 'CustomerOrderController::toggleStatus/$1', ['filter' => 'permission:sales_order.edit']);
     $routes->get('customer_orders/delete/(:num)', 'CustomerOrderController::delete/$1', ['filter' => 'permission:sales_order.delete']);
     $routes->get('customer_orders/by-customer/(:num)', 'CustomerOrderController::byCustomer/$1', ['filter' => 'permission:invoice.view']);
 
@@ -654,10 +656,12 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
 
     // Customer Orders
     $routes->get('customer_orders', 'CustomerOrderController::index', ['filter' => 'permission:sales_order.view']);
+    $routes->get('customer_orders/view/(:num)', 'CustomerOrderController::view/$1', ['filter' => 'permission:sales_order.view']);
     $routes->get('customer_orders/create', 'CustomerOrderController::create', ['filter' => 'permission:sales_order.create']);
     $routes->post('customer_orders/store', 'CustomerOrderController::store', ['filter' => 'permission:sales_order.create']);
     $routes->get('customer_orders/edit/(:num)', 'CustomerOrderController::edit/$1', ['filter' => 'permission:sales_order.edit']);
     $routes->post('customer_orders/update/(:num)', 'CustomerOrderController::update/$1', ['filter' => 'permission:sales_order.edit']);
+    $routes->get('customer_orders/toggle-status/(:num)', 'CustomerOrderController::toggleStatus/$1', ['filter' => 'permission:sales_order.edit']);
     $routes->get('customer_orders/delete/(:num)', 'CustomerOrderController::delete/$1', ['filter' => 'permission:sales_order.delete']);
     $routes->get('customer_orders/by-customer/(:num)', 'CustomerOrderController::byCustomer/$1', ['filter' => 'permission:invoice.view']);
 

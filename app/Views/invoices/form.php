@@ -533,9 +533,9 @@
     function buildDesignOrderOptionsHtml(selectedId = '') {
         let html = '<option value="">-- Select Order Design No --</option>';
         _customerOrders.forEach(o => {
-            const sel = (selectedId && String(selectedId) === String(o.id)) ? 'selected' : '';
-            const label = `${escHtml(o.design_no)} - ${escHtml(o.product_name)} (₹${parseFloat(o.rate || 0).toFixed(2)})`;
-            html += `<option value="${o.id}" data-design="${escHtml(o.design_no)}" data-product-id="${o.product_id || ''}" data-rate="${o.rate || 0}" ${sel}>${label}</option>`;
+            const sel = (selectedId && String(selectedId) === String(o.customer_order_id)) ? 'selected' : '';
+            const label = escHtml(o.label || (`#${o.design_no} - ${o.product_name}`)) + ` (₹${parseFloat(o.rate || 0).toFixed(2)})`;
+            html += `<option value="${o.customer_order_id}" data-design="${escHtml(o.design_no)}" data-product-id="${o.product_id || ''}" data-rate="${o.rate || 0}" ${sel}>${label}</option>`;
         });
         return html;
     }

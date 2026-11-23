@@ -175,6 +175,18 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-qrcode text-primary me-1"></i> UPI ID (for Invoice / Estimate Payment QR Code)</label>
+                            <input type="text" class="form-control" name="settings[company_upi_id]" value="<?= esc($settings['company_upi_id'] ?? '') ?>" placeholder="e.g. rht@okicici or 9626077333@ybl">
+                            <small class="text-muted">Used to auto-generate a scannable UPI QR code with invoice/estimate number, customer name, and payable amount.</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">UPI Payee Name (Optional)</label>
+                            <input type="text" class="form-control" name="settings[company_upi_name]" value="<?= esc($settings['company_upi_name'] ?? '') ?>" placeholder="Defaults to Print Company Name">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">Print Header From-Address</label>
                             <?php 
                             $defaultPrintAddr = $settings['company_print_address'] ?? '';

@@ -50,6 +50,7 @@ $companyEmail   = trim((string) get_setting('company_print_email', get_setting('
 $companyGstin   = trim((string) get_setting('company_print_gstin', get_setting('company_gstin', '')));
 $companyWebsite = trim((string) get_setting('company_website', get_setting('app_url', '')));
 $companyUpi     = trim((string) get_setting('company_upi_id', ''));
+$companyUpiName = trim((string) get_setting('company_upi_name', $companyName));
 
 $companyLogoUrl      = trim((string) get_setting('company_logo_url', ''));
 $defaultMonogramPath = FCPATH . 'assets/images/default_monogram_r.png';
@@ -201,6 +202,17 @@ foreach ($cfgFields as $k => $def) {
 
 $showBank        = $isVis('bank_details') && !empty($bankAccounts);
 $showUpi         = $isVis('upi_details') && !empty($companyUpi);
+$showUpiQr       = in_array($docType, ['invoice', 'quotation'], true) && $isVis('upi_qr_code') && $companyUpi !== '' && $totalAmountFloat > 0;
+$upiQrDataUri    = '';
+if ($showUpiQr) {
+    try {
+        $qrDesc       = trim($docNumber . ' - ' . ($billing_name ?? ''));
+        $upiUri       = \App\Libraries\QrCodeGenerator::buildUpiUri($companyUpi, $companyUpiName ?: $companyName, $totalAmountFloat, $qrDesc);
+        $upiQrDataUri = \App\Libraries\QrCodeGenerator::toDataUri($upiUri, 3, 2);
+    } catch (\Throwable $e) {
+        $showUpiQr = false;
+    }
+}
 $showTerms       = $isVis('terms_conditions') && !empty($termsList);
 $showSig         = $isVis('authorised_signature');
 $showPrepared    = $isVis('prepared_by');
@@ -275,6 +287,13 @@ $showBottomBox   = $showBottomLeft || $showBottomRight;
                             <div class="company-text-line" style="<?= $fldStyle('company_website') ?>"><?= esc($cf['label']) ?> <?= esc($companyWebsite) ?></div>
                         <?php endif; ?>
                     <?php endforeach; ?>
+                </td>
+                <?php endif; ?>
+
+                <?php if ($showUpiQr && $upiQrDataUri !== ''): ?>
+                <td class="header-qr-cell">
+                    <img src="<?= $upiQrDataUri ?>" alt="UPI QR">
+                    <div class="header-qr-label" style="<?= $fldStyle('upi_qr_code') ?>"><?= esc($f('upi_qr_code')['label']) ?></div>
                 </td>
                 <?php endif; ?>
 

@@ -425,6 +425,11 @@ class PrintConfig
                 'visible' => false, 'bold' => true, 'align' => 'left', 'font_size' => '9.5px',
                 'has_align' => false, 'has_label' => true, 'mandatory' => false, 'docs' => $allDocs,
             ],
+            'upi_qr_code' => [
+                'section' => 'extra', 'name' => 'UPI Payment QR Code', 'label' => 'Scan to Pay',
+                'visible' => true, 'bold' => true, 'align' => 'center', 'font_size' => '8.5px',
+                'has_align' => false, 'has_label' => true, 'mandatory' => false, 'docs' => ['invoice', 'quotation'],
+            ],
             'prepared_by' => [
                 'section' => 'extra', 'name' => 'Prepared By', 'label' => 'Prepared By',
                 'visible' => false, 'bold' => true, 'align' => 'center', 'font_size' => '10px',

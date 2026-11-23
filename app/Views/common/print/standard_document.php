@@ -1,16 +1,24 @@
 <?php
 /**
- * Unified Standard Print Template
- * Matches standard format:
- * - Clean solid outer borders around every section and cell
- * - Header with logo circle and company details, right-aligned doc heading
- * - 3-column boxed grid (Meta, Bill To, Ship To) with vertical dividers
- * - Boxed Place of Supply bar
- * - Complete boxed Line Items table with vertical and horizontal cell borders
- * - Boxed Totals & Items in total
- * - Boxed Total in words
- * - Boxed Bottom section: Configurable Bank Account Details (left), Sole Footer message (Terms & Conditions), and Authorized Signature (right)
- * - Powered by footer
+ * Exact Standard Boxed Document Print Layout
+ * Perfectly replicated from the original standard invoice layout:
+ * 
+ * 1. Top Header: Borderless layout with circular logo on left, company details in middle, Document heading & Number on right.
+ * 2. Invoice Details Box: Solid outer border with 3 columns:
+ *    - Col 1: Invoice Date, Terms, Due Date, E-Way Bill#, Transport, No of Bales (with vertical right border)
+ *    - Col 2: Bill To party details (with vertical right border)
+ *    - Col 3: Ship To party details
+ * 3. Place of Supply bar: Full width bordered bar.
+ * 4. Line Items Table:
+ *    - Boxed table with outer border.
+ *    - Bold table header with vertical column separators (#, Item, Meters, HSN/SAC, Qty, Rate, Amount).
+ *    - Items rows with vertical dividers between all columns.
+ *    - Bottom row of table: Left cell has Items in Total + Notes; Right cell has Sub Total, CGST, SGST, IGST, Total.
+ * 5. Total In Words bar: Enclosed box below items table.
+ * 6. Bottom Box: Enclosed box containing:
+ *    - Left: Bank Account Details (2 columns separated by vertical line), followed by horizontal divider and Terms & Conditions.
+ *    - Right: Authorized Signature area separated by vertical line.
+ * 7. Page footer: POWERED BY on left, page number on right.
  */
 
 $docTitle       = $document_title ?? 'TAX INVOICE';
@@ -27,7 +35,6 @@ if (trim($companyAddress) === '') {
     ]);
     $companyAddress = implode(",\n", $lines);
 }
-// Normalize literal '\n' if stored by forms into real newlines
 $companyAddress = str_replace(['\r\n', '\r', '\n'], "\n", $companyAddress);
 
 $companyPhone   = trim((string) get_setting('company_print_phone', get_setting('company_phone', get_setting('company_mobile', ''))));
@@ -35,9 +42,9 @@ $companyEmail   = trim((string) get_setting('company_print_email', get_setting('
 $companyGstin   = trim((string) get_setting('company_print_gstin', get_setting('company_gstin', '')));
 $companyLogoUrl = trim((string) get_setting('company_logo_url', ''));
 $headerFont     = get_setting('print_header_font', "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif");
-$printFontSize  = get_setting('print_font_size', '13px');
+$printFontSize  = get_setting('print_font_size', '12px');
 
-// Bank accounts: resolve selected bank accounts from configuration
+// Bank accounts
 $bankAccounts = $bank_accounts ?? [];
 if (empty($bankAccounts)) {
     try {
@@ -101,33 +108,31 @@ foreach (($items ?? []) as $it) {
             line-height: 1.35;
         }
 
-        .print-container {
+        .document-wrapper {
             width: 100%;
             max-width: 820px;
             margin: 0 auto;
             background: #fff;
-            position: relative;
-            /* Outermost enclosing border */
-            border: 1.5px solid #000;
         }
 
-        /* 1. Top Header Box */
-        .top-header-table {
+        /* ----------------------------------------------------
+           1. TOP HEADER (BORDERLESS)
+           ---------------------------------------------------- */
+        .header-table {
             width: 100%;
             border-collapse: collapse;
-            border-bottom: 1.5px solid #000;
+            margin-bottom: 12px;
         }
 
-        .top-header-table td {
-            padding: 8px 8px;
+        .header-table td {
             vertical-align: top;
+            padding: 0;
         }
 
-        .logo-cell {
-            width: 95px;
-            text-align: center;
+        .header-logo-cell {
+            width: 90px;
+            text-align: left;
             vertical-align: middle !important;
-            border-right: 1.5px solid #000;
         }
 
         .logo-circle {
@@ -138,10 +143,8 @@ foreach (($items ?? []) as $it) {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            position: relative;
             background: #fff;
             overflow: hidden;
-            margin: 0 auto;
         }
 
         .logo-circle .monogram-r {
@@ -167,15 +170,15 @@ foreach (($items ?? []) as $it) {
             color: #222;
             text-align: center;
             margin-top: 2px;
+            width: 78px;
             letter-spacing: 0.5px;
         }
 
-        .company-details-cell {
-            padding-left: 10px !important;
-            border-right: 1.5px solid #000;
+        .header-company-cell {
+            padding-left: 12px !important;
         }
 
-        .company-title {
+        .company-name {
             font-size: 19px;
             font-weight: 800;
             letter-spacing: 0.5px;
@@ -184,25 +187,20 @@ foreach (($items ?? []) as $it) {
             text-transform: uppercase;
         }
 
-        .company-meta-line {
+        .company-text-line {
             font-size: 11px;
             line-height: 1.35;
             color: #111;
         }
 
-        .company-meta-line strong {
-            color: #000;
-        }
-
-        .doc-title-cell {
+        .header-title-cell {
             text-align: right;
             vertical-align: middle !important;
-            width: 240px;
-            padding-right: 12px !important;
+            width: 250px;
         }
 
-        .doc-heading {
-            font-size: 18px;
+        .doc-title-main {
+            font-size: 19px;
             font-weight: 800;
             letter-spacing: 1px;
             color: #117a38;
@@ -210,70 +208,72 @@ foreach (($items ?? []) as $it) {
             text-transform: uppercase;
         }
 
-        .doc-number-line {
+        .doc-number-main {
             font-size: 13.5px;
             font-weight: bold;
             color: #000;
         }
 
-        /* 2. 3-Column Box (Meta | Bill To | Ship To) */
-        .info-grid-table {
+        /* ----------------------------------------------------
+           2. INVOICE DETAILS BOX (OUTER BORDER + 3 COLUMNS)
+           ---------------------------------------------------- */
+        .invoice-details-box {
             width: 100%;
             border-collapse: collapse;
-            border-bottom: 1.5px solid #000;
+            border: 1px solid #000;
+            margin-bottom: 0px;
         }
 
-        .info-grid-table td {
+        .invoice-details-box td {
             vertical-align: top;
             padding: 6px 8px;
             font-size: 11px;
-            border-right: 1.5px solid #000;
+            border-right: 1px solid #000;
         }
 
-        .info-grid-table td:last-child {
+        .invoice-details-box td:last-child {
             border-right: none;
         }
 
         .meta-col {
-            width: 33%;
+            width: 32%;
         }
 
         .bill-col, .ship-col {
-            width: 33.5%;
+            width: 34%;
         }
 
-        .meta-row {
+        .meta-line {
             display: flex;
-            justify-content: space-between;
             margin-bottom: 2px;
             line-height: 1.35;
         }
 
-        .meta-label {
+        .meta-line .lbl {
+            width: 85px;
             font-weight: 600;
             color: #111;
-            width: 88px;
         }
 
-        .meta-sep {
-            margin: 0 3px;
+        .meta-line .sep {
+            width: 12px;
+            text-align: center;
         }
 
-        .meta-val {
+        .meta-line .val {
             flex: 1;
             font-weight: bold;
             color: #000;
         }
 
-        .party-heading {
+        .party-lbl {
             font-size: 11px;
             font-weight: bold;
             color: #000;
-            margin-bottom: 2px;
-            text-decoration: underline;
+            margin-bottom: 3px;
         }
 
-        .party-name {
+        .party-name-bold {
             font-size: 12.5px;
             font-weight: 800;
             color: #002266;
@@ -281,37 +281,46 @@ foreach (($items ?? []) as $it) {
             text-transform: uppercase;
         }
 
-        .party-gstin-highlight {
+        .party-gst-bold {
             font-size: 12.5px;
             font-weight: 800;
             color: #002266;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
         }
 
-        .party-address-text {
+        .party-addr-text {
             font-size: 10.5px;
             line-height: 1.35;
             color: #222;
         }
 
-        /* 3. Place of Supply Banner Box */
-        .place-of-supply-banner {
-            border-bottom: 1.5px solid #000;
+        /* ----------------------------------------------------
+           3. PLACE OF SUPPLY BAR (ENCLOSED BOX)
+           ---------------------------------------------------- */
+        .pos-bar-box {
+            width: 100%;
+            border-left: 1px solid #000;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
             padding: 4px 8px;
             font-size: 11.5px;
             font-weight: bold;
             background: #fff;
         }
 
-        /* 4. Complete Boxed Line Items Table */
-        .items-table {
+        /* ----------------------------------------------------
+           4. LINE ITEMS TABLE (FULLY BOXED GRID)
+           ---------------------------------------------------- */
+        .items-grid-table {
             width: 100%;
             border-collapse: collapse;
-            border-bottom: 1.5px solid #000;
+            border-left: 1px solid #000;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
         }
 
-        .items-table th {
-            border-bottom: 1.5px solid #000;
+        .items-grid-table th {
+            border-bottom: 1px solid #000;
             border-right: 1px solid #000;
             padding: 5px 6px;
             font-size: 11px;
@@ -320,11 +329,11 @@ foreach (($items ?? []) as $it) {
             text-align: left;
         }
 
-        .items-table th:last-child {
+        .items-grid-table th:last-child {
             border-right: none;
         }
 
-        .items-table td {
+        .items-grid-table td {
             border-bottom: 1px solid #000;
             border-right: 1px solid #000;
             padding: 4px 6px;
@@ -332,11 +341,7 @@ foreach (($items ?? []) as $it) {
             vertical-align: top;
         }
 
-        .items-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .items-table td:last-child {
+        .items-grid-table td:last-child {
             border-right: none;
         }
 
@@ -344,82 +349,74 @@ foreach (($items ?? []) as $it) {
         .text-right { text-align: right; }
         .fw-bold { font-weight: bold; }
 
-        /* 5. Summary Box (Items in Total on Left | Totals Table on Right) */
-        .summary-wrapper-table {
-            width: 100%;
-            border-collapse: collapse;
-            border-bottom: 1.5px solid #000;
+        /* Summary row inside the table */
+        .summary-notes-td {
+            border-right: 1px solid #000 !important;
+            padding: 8px !important;
+            vertical-align: top !important;
         }
 
-        .summary-wrapper-table td {
-            vertical-align: top;
-            padding: 6px 8px;
-        }
-
-        .notes-column {
-            width: 62%;
-            border-right: 1.5px solid #000;
-            font-size: 11.5px;
-            display: flex;
-            align-items: center;
-        }
-
-        .totals-column {
-            width: 38%;
+        .summary-totals-td {
             padding: 0 !important;
+            vertical-align: top !important;
         }
 
-        .totals-subtable {
+        .totals-inner-table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        .totals-subtable td {
+        .totals-inner-table td {
+            border: none !important;
             padding: 3px 8px;
             font-size: 11.5px;
-            border-bottom: 1px solid #e0e0e0;
         }
 
-        .totals-subtable tr:last-child td {
-            border-bottom: none;
-        }
-
-        .totals-subtable tr.grand-total td {
+        .totals-inner-table tr.total-row td {
+            border-top: 1px solid #000 !important;
             font-size: 13.5px;
             font-weight: 800;
-            border-top: 1.5px solid #000;
-            border-bottom: none;
             padding: 5px 8px;
         }
 
-        /* 6. Total In Words Box */
-        .total-words-banner {
-            border-bottom: 1.5px solid #000;
+        /* ----------------------------------------------------
+           5. TOTAL IN WORDS BAR (BOXED)
+           ---------------------------------------------------- */
+        .total-words-box {
+            width: 100%;
+            border-left: 1px solid #000;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
             padding: 5px 8px;
             font-size: 11.5px;
             font-weight: bold;
         }
 
-        /* 7. Bottom Section: Bank Accounts + Terms + Signature Box */
-        .bottom-section-table {
+        /* ----------------------------------------------------
+           6. BOTTOM BANK ACCOUNTS & TERMS BOX
+           ---------------------------------------------------- */
+        .bottom-details-box {
             width: 100%;
             border-collapse: collapse;
+            border-left: 1px solid #000;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
         }
 
-        .bottom-section-table td {
+        .bottom-details-box td {
             vertical-align: top;
             padding: 6px 8px;
         }
 
-        .bank-terms-cell {
-            width: 62%;
-            border-right: 1.5px solid #000;
+        .bank-terms-left {
+            width: 63%;
+            border-right: 1px solid #000;
             font-size: 10.5px;
             padding-right: 8px;
         }
 
-        .signature-cell {
-            width: 38%;
+        .signature-right {
+            width: 37%;
             text-align: center;
             vertical-align: bottom !important;
             padding-bottom: 16px;
@@ -427,33 +424,32 @@ foreach (($items ?? []) as $it) {
             font-weight: bold;
         }
 
-        .bank-details-title {
+        .bank-sec-title {
             font-size: 11px;
             font-weight: bold;
             text-decoration: underline;
             margin-bottom: 4px;
         }
 
-        .bank-accounts-grid {
+        .bank-accounts-wrap {
             display: flex;
-            gap: 12px;
+            width: 100%;
             margin-bottom: 6px;
-            font-size: 10px;
-            line-height: 1.3;
         }
 
-        .bank-col {
+        .bank-entry {
             flex: 1;
-            border-right: 1px dashed #bbb;
-            padding-right: 6px;
+            padding-right: 8px;
+            font-size: 10px;
+            line-height: 1.35;
         }
 
-        .bank-col:last-child {
-            border-right: none;
-            padding-right: 0;
+        .bank-entry:first-child {
+            border-right: 1px solid #000;
+            margin-right: 8px;
         }
 
-        .terms-block {
+        .terms-wrap {
             border-top: 1px solid #000;
             padding-top: 5px;
             margin-top: 4px;
@@ -461,12 +457,10 @@ foreach (($items ?? []) as $it) {
             line-height: 1.35;
         }
 
-        .terms-title {
-            font-weight: bold;
-        }
-
-        /* 8. Outer Footer (Outside the box) */
-        .page-footer {
+        /* ----------------------------------------------------
+           7. PAGE FOOTER
+           ---------------------------------------------------- */
+        .footer-line {
             margin-top: 8px;
             display: flex;
             justify-content: space-between;
@@ -476,7 +470,7 @@ foreach (($items ?? []) as $it) {
             letter-spacing: 0.5px;
         }
 
-        .page-footer .powered-by {
+        .footer-line .powered {
             font-weight: bold;
             color: #333;
         }
@@ -484,7 +478,6 @@ foreach (($items ?? []) as $it) {
         @media print {
             .no-print { display: none !important; }
             body { padding: 0; }
-            .print-container { max-width: 100%; }
         }
 
         .no-print-toolbar {
@@ -526,13 +519,12 @@ foreach (($items ?? []) as $it) {
         </div>
     </div>
 
-    <!-- MAIN ENCLOSED DOCUMENT BOX -->
-    <div class="print-container">
+    <div class="document-wrapper">
 
-        <!-- 1. HEADER SECTION BOX -->
-        <table class="top-header-table">
+        <!-- 1. TOP HEADER (BORDERLESS WITH MONOGRAM / LOGO) -->
+        <table class="header-table">
             <tr>
-                <td class="logo-cell">
+                <td class="header-logo-cell">
                     <?php if (!empty($companyLogoUrl)): ?>
                         <div class="logo-circle">
                             <img src="<?= esc($companyLogoUrl) ?>" alt="Logo">
@@ -544,95 +536,95 @@ foreach (($items ?? []) as $it) {
                         <div class="logo-subtext">Since 1969</div>
                     <?php endif; ?>
                 </td>
-                <td class="company-details-cell">
-                    <div class="company-title"><?= esc($companyName) ?></div>
-                    <div class="company-meta-line"><?= nl2br(esc($companyAddress)) ?></div>
+                <td class="header-company-cell">
+                    <div class="company-name"><?= esc($companyName) ?></div>
+                    <div class="company-text-line"><?= nl2br(esc($companyAddress)) ?></div>
                     <?php if (!empty($companyPhone)): ?>
-                        <div class="company-meta-line"><strong>Mobile:</strong> <?= esc($companyPhone) ?></div>
+                        <div class="company-text-line"><strong>Mobile:</strong> <?= esc($companyPhone) ?></div>
                     <?php endif; ?>
                     <?php if (!empty($companyEmail)): ?>
-                        <div class="company-meta-line"><strong>Email :</strong> <?= esc($companyEmail) ?></div>
+                        <div class="company-text-line"><strong>Email :</strong> <?= esc($companyEmail) ?></div>
                     <?php endif; ?>
                     <?php if (!empty($companyGstin)): ?>
-                        <div class="company-meta-line"><strong>GSTIN :</strong> <?= esc($companyGstin) ?></div>
+                        <div class="company-text-line"><strong>GSTIN :</strong> <?= esc($companyGstin) ?></div>
                     <?php endif; ?>
                 </td>
-                <td class="doc-title-cell">
-                    <div class="doc-heading"><?= esc($docTitle) ?></div>
-                    <div class="doc-number-line"><?= esc($docNumberLabel) ?> <?= esc($docNumber) ?></div>
+                <td class="header-title-cell">
+                    <div class="doc-title-main"><?= esc($docTitle) ?></div>
+                    <div class="doc-number-main"><?= esc($docNumberLabel) ?> <?= esc($docNumber) ?></div>
                 </td>
             </tr>
         </table>
 
-        <!-- 2. THREE-COLUMN INFO BOX (Meta | Bill To | Ship To) -->
-        <table class="info-grid-table">
+        <!-- 2. INVOICE DETAILS BOX (OUTER BORDER + 3 VERTICAL SECTIONS) -->
+        <table class="invoice-details-box">
             <tr>
-                <!-- Column 1: Document Meta -->
+                <!-- Col 1: Metadata -->
                 <td class="meta-col">
-                    <div class="meta-row">
-                        <span class="meta-label"><?= esc($date_label ?? 'Invoice Date') ?></span>
-                        <span class="meta-sep">:</span>
-                        <span class="meta-val"><?= !empty($document_date) ? date('d-m-Y', strtotime($document_date)) : '-' ?></span>
+                    <div class="meta-line">
+                        <span class="lbl"><?= esc($date_label ?? 'Invoice Date') ?></span>
+                        <span class="sep">:</span>
+                        <span class="val"><?= !empty($document_date) ? date('d-m-Y', strtotime($document_date)) : '-' ?></span>
                     </div>
                     <?php if (!empty($payment_terms)): ?>
-                        <div class="meta-row">
-                            <span class="meta-label">Terms</span>
-                            <span class="meta-sep">:</span>
-                            <span class="meta-val"><?= esc($payment_terms) ?></span>
+                        <div class="meta-line">
+                            <span class="lbl">Terms</span>
+                            <span class="sep">:</span>
+                            <span class="val"><?= esc($payment_terms) ?></span>
                         </div>
                     <?php endif; ?>
                     <?php if (!empty($due_date)): ?>
-                        <div class="meta-row">
-                            <span class="meta-label">Due Date</span>
-                            <span class="meta-sep">:</span>
-                            <span class="meta-val"><?= date('d-m-Y', strtotime($due_date)) ?></span>
+                        <div class="meta-line">
+                            <span class="lbl">Due Date</span>
+                            <span class="sep">:</span>
+                            <span class="val"><?= date('d-m-Y', strtotime($due_date)) ?></span>
                         </div>
                     <?php endif; ?>
                     <?php if (!empty($ewaybill_number)): ?>
-                        <div class="meta-row">
-                            <span class="meta-label">E-Way Bill#</span>
-                            <span class="meta-sep">:</span>
-                            <span class="meta-val"><?= esc($ewaybill_number) ?></span>
+                        <div class="meta-line">
+                            <span class="lbl">E-Way Bill#</span>
+                            <span class="sep">:</span>
+                            <span class="val"><?= esc($ewaybill_number) ?></span>
                         </div>
                     <?php endif; ?>
                     <?php if (!empty($transport_name)): ?>
-                        <div class="meta-row">
-                            <span class="meta-label">Transport</span>
-                            <span class="meta-sep">:</span>
-                            <span class="meta-val"><?= esc($transport_name) ?></span>
+                        <div class="meta-line">
+                            <span class="lbl">Transport</span>
+                            <span class="sep">:</span>
+                            <span class="val"><?= esc($transport_name) ?></span>
                         </div>
                     <?php endif; ?>
                     <?php if (!empty($waybill_number)): ?>
-                        <div class="meta-row">
-                            <span class="meta-label">Waybill/LR#</span>
-                            <span class="meta-sep">:</span>
-                            <span class="meta-val"><?= esc($waybill_number) ?></span>
+                        <div class="meta-line">
+                            <span class="lbl">Waybill/LR#</span>
+                            <span class="sep">:</span>
+                            <span class="val"><?= esc($waybill_number) ?></span>
                         </div>
                     <?php endif; ?>
                     <?php if (!empty($bales_count)): ?>
-                        <div class="meta-row">
-                            <span class="meta-label">No of Bales</span>
-                            <span class="meta-sep">:</span>
-                            <span class="meta-val"><?= esc($bales_count) ?></span>
+                        <div class="meta-line">
+                            <span class="lbl">No of Bales</span>
+                            <span class="sep">:</span>
+                            <span class="val"><?= esc($bales_count) ?></span>
                         </div>
                     <?php endif; ?>
                     <?php if (!empty($reference_number)): ?>
-                        <div class="meta-row">
-                            <span class="meta-label">Ref / PO#</span>
-                            <span class="meta-sep">:</span>
-                            <span class="meta-val"><?= esc($reference_number) ?></span>
+                        <div class="meta-line">
+                            <span class="lbl">Ref / PO#</span>
+                            <span class="sep">:</span>
+                            <span class="val"><?= esc($reference_number) ?></span>
                         </div>
                     <?php endif; ?>
                 </td>
 
-                <!-- Column 2: Bill To -->
+                <!-- Col 2: Bill To -->
                 <td class="bill-col">
-                    <div class="party-heading"><?= esc($bill_to_heading ?? 'Bill To :') ?></div>
-                    <div class="party-name"><?= esc($billing_name ?? '-') ?></div>
+                    <div class="party-lbl"><?= esc($bill_to_heading ?? 'Bill To :') ?></div>
+                    <div class="party-name-bold"><?= esc($billing_name ?? '-') ?></div>
                     <?php if (!empty($billing_gstin)): ?>
-                        <div class="party-gstin-highlight">GST: <?= esc($billing_gstin) ?></div>
+                        <div class="party-gst-bold">GST: <?= esc($billing_gstin) ?></div>
                     <?php endif; ?>
-                    <div class="party-address-text">
+                    <div class="party-addr-text">
                         <?php if (!empty($billing_address)): ?>
                             <?= nl2br(esc($billing_address)) ?><br>
                         <?php endif; ?>
@@ -640,19 +632,19 @@ foreach (($items ?? []) as $it) {
                             <?= esc(implode(', ', array_filter([$billing_city ?? '', !empty($billing_pincode) ? $billing_pincode : '', $billing_state ?? '']))) ?><br>
                         <?php endif; ?>
                         <?php if (!empty($billing_phone)): ?>
-                            <strong>Phone:</strong> <?= esc($billing_phone) ?>
+                            Phone: <?= esc($billing_phone) ?>
                         <?php endif; ?>
                     </div>
                 </td>
 
-                <!-- Column 3: Ship To -->
+                <!-- Col 3: Ship To -->
                 <td class="ship-col">
-                    <div class="party-heading"><?= esc($ship_to_heading ?? 'Ship To :') ?></div>
-                    <div class="party-name"><?= esc($shipping_name ?? ($billing_name ?? '-')) ?></div>
+                    <div class="party-lbl"><?= esc($ship_to_heading ?? 'Ship To :') ?></div>
+                    <div class="party-name-bold"><?= esc($shipping_name ?? ($billing_name ?? '-')) ?></div>
                     <?php if (!empty($shipping_gstin) || !empty($billing_gstin)): ?>
-                        <div class="party-gstin-highlight">GST: <?= esc($shipping_gstin ?? $billing_gstin) ?></div>
+                        <div class="party-gst-bold">GST: <?= esc($shipping_gstin ?? $billing_gstin) ?></div>
                     <?php endif; ?>
-                    <div class="party-address-text">
+                    <div class="party-addr-text">
                         <?php if (!empty($shipping_address)): ?>
                             <?= nl2br(esc($shipping_address)) ?><br>
                         <?php elseif (!empty($billing_address)): ?>
@@ -667,22 +659,22 @@ foreach (($items ?? []) as $it) {
                             <?= esc(implode(', ', array_filter([$sCity, $sPin, $sState]))) ?><br>
                         <?php endif; ?>
                         <?php if (!empty($shipping_phone) || !empty($billing_phone)): ?>
-                            <strong>Phone:</strong> <?= esc($shipping_phone ?? $billing_phone) ?>
+                            Phone: <?= esc($shipping_phone ?? $billing_phone) ?>
                         <?php endif; ?>
                     </div>
                 </td>
             </tr>
         </table>
 
-        <!-- 3. PLACE OF SUPPLY BANNER BOX -->
+        <!-- 3. PLACE OF SUPPLY BAR (BOXED) -->
         <?php if (!empty($place_of_supply)): ?>
-            <div class="place-of-supply-banner">
+            <div class="pos-bar-box">
                 Place Of Supply : <?= esc($place_of_supply) ?>
             </div>
         <?php endif; ?>
 
         <!-- 4. FULLY BOXED LINE ITEMS TABLE -->
-        <table class="items-table">
+        <table class="items-grid-table">
             <thead>
                 <tr>
                     <th class="text-center" style="width: 5%;">#</th>
@@ -700,7 +692,7 @@ foreach (($items ?? []) as $it) {
                         <tr>
                             <td class="text-center"><?= $idx++ ?></td>
                             <td>
-                                <span class="fw-bold"><?= esc($item['description'] ?? ($item['name'] ?? '-')) ?></span>
+                                <span><?= esc($item['description'] ?? ($item['name'] ?? '-')) ?></span>
                                 <?php if (!empty($item['extra_notes'])): ?>
                                     <div class="text-muted" style="font-size: 10px;"><?= esc($item['extra_notes']) ?></div>
                                 <?php endif; ?>
@@ -709,7 +701,7 @@ foreach (($items ?? []) as $it) {
                             <td class="text-center"><?= esc($item['hsn_code'] ?? ($item['hsn_or_sac'] ?? '-')) ?></td>
                             <td class="text-center"><?= (float) ($item['quantity'] ?? 0) ?></td>
                             <td class="text-right"><?= number_format((float) ($item['rate'] ?? 0), 2) ?></td>
-                            <td class="text-right fw-bold"><?= number_format((float) ($item['amount'] ?? 0), 2) ?></td>
+                            <td class="text-right"><?= number_format((float) ($item['amount'] ?? 0), 2) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -717,83 +709,84 @@ foreach (($items ?? []) as $it) {
                         <td colspan="7" class="text-center py-3">No line items found.</td>
                     </tr>
                 <?php endif; ?>
+
+                <!-- Table Summary Row (Items in Total & Notes on left | Financial Totals on right) -->
+                <tr>
+                    <td colspan="5" class="summary-notes-td">
+                        <div class="fw-bold mb-2">Items in Total <?= (int) $totalQty ?></div>
+                        <?php if (!empty($notes)): ?>
+                            <div><strong>Notes :</strong> <?= nl2br(esc($notes)) ?></div>
+                        <?php endif; ?>
+                    </td>
+                    <td colspan="2" class="summary-totals-td">
+                        <table class="totals-inner-table">
+                            <tr>
+                                <td>Sub Total</td>
+                                <td class="text-right"><?= number_format((float) ($subtotal ?? 0), 2) ?></td>
+                            </tr>
+                            <?php if (!empty($discount_amount) && (float) $discount_amount > 0): ?>
+                                <tr>
+                                    <td>Discount</td>
+                                    <td class="text-right">-<?= number_format((float) $discount_amount, 2) ?></td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php if (!empty($cgst_amount) && (float) $cgst_amount > 0): ?>
+                                <tr>
+                                    <td>CGST (<?= !empty($cgst_rate) ? esc($cgst_rate) : '2.5' ?>%)</td>
+                                    <td class="text-right"><?= number_format((float) $cgst_amount, 2) ?></td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php if (!empty($sgst_amount) && (float) $sgst_amount > 0): ?>
+                                <tr>
+                                    <td>SGST (<?= !empty($sgst_rate) ? esc($sgst_rate) : '2.5' ?>%)</td>
+                                    <td class="text-right"><?= number_format((float) $sgst_amount, 2) ?></td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php if (!empty($igst_amount) && (float) $igst_amount > 0): ?>
+                                <tr>
+                                    <td>IGST (<?= !empty($igst_rate) ? esc($igst_rate) : '5.0' ?>%)</td>
+                                    <td class="text-right"><?= number_format((float) $igst_amount, 2) ?></td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php if (!empty($shipping_charge) && (float) $shipping_charge > 0): ?>
+                                <tr>
+                                    <td>Shipping Charge</td>
+                                    <td class="text-right"><?= number_format((float) $shipping_charge, 2) ?></td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php if (!empty($roundoff_amount) && abs((float) $roundoff_amount) > 0): ?>
+                                <tr>
+                                    <td>Round Off</td>
+                                    <td class="text-right"><?= number_format((float) $roundoff_amount, 2) ?></td>
+                                </tr>
+                            <?php endif; ?>
+                            <tr class="total-row">
+                                <td>Total</td>
+                                <td class="text-right"><?= number_format($totalAmountFloat, 2) ?></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
             </tbody>
         </table>
 
-        <!-- 5. SUMMARY BOX (Items in Total on Left | Totals on Right) -->
-        <table class="summary-wrapper-table">
-            <tr>
-                <td class="notes-column">
-                    <span class="fw-bold">Items in Total <?= (int) $totalQty ?></span>
-                </td>
-                <td class="totals-column">
-                    <table class="totals-subtable">
-                        <tr>
-                            <td class="fw-bold">Sub Total</td>
-                            <td class="text-right fw-bold"><?= number_format((float) ($subtotal ?? 0), 2) ?></td>
-                        </tr>
-                        <?php if (!empty($discount_amount) && (float) $discount_amount > 0): ?>
-                            <tr>
-                                <td>Discount</td>
-                                <td class="text-right">-<?= number_format((float) $discount_amount, 2) ?></td>
-                            </tr>
-                        <?php endif; ?>
-                        <?php if (!empty($cgst_amount) && (float) $cgst_amount > 0): ?>
-                            <tr>
-                                <td>CGST (<?= !empty($cgst_rate) ? esc($cgst_rate) : '2.5' ?>%)</td>
-                                <td class="text-right"><?= number_format((float) $cgst_amount, 2) ?></td>
-                            </tr>
-                        <?php endif; ?>
-                        <?php if (!empty($sgst_amount) && (float) $sgst_amount > 0): ?>
-                            <tr>
-                                <td>SGST (<?= !empty($sgst_rate) ? esc($sgst_rate) : '2.5' ?>%)</td>
-                                <td class="text-right"><?= number_format((float) $sgst_amount, 2) ?></td>
-                            </tr>
-                        <?php endif; ?>
-                        <?php if (!empty($igst_amount) && (float) $igst_amount > 0): ?>
-                            <tr>
-                                <td>IGST (<?= !empty($igst_rate) ? esc($igst_rate) : '5.0' ?>%)</td>
-                                <td class="text-right"><?= number_format((float) $igst_amount, 2) ?></td>
-                            </tr>
-                        <?php endif; ?>
-                        <?php if (!empty($shipping_charge) && (float) $shipping_charge > 0): ?>
-                            <tr>
-                                <td>Shipping Charge</td>
-                                <td class="text-right"><?= number_format((float) $shipping_charge, 2) ?></td>
-                            </tr>
-                        <?php endif; ?>
-                        <?php if (!empty($roundoff_amount) && abs((float) $roundoff_amount) > 0): ?>
-                            <tr>
-                                <td>Round Off</td>
-                                <td class="text-right"><?= number_format((float) $roundoff_amount, 2) ?></td>
-                            </tr>
-                        <?php endif; ?>
-                        <tr class="grand-total">
-                            <td>Total</td>
-                            <td class="text-right">₹<?= number_format($totalAmountFloat, 2) ?></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-
-        <!-- 6. TOTAL IN WORDS BOX -->
-        <div class="total-words-banner">
+        <!-- 5. TOTAL IN WORDS BAR (BOXED) -->
+        <div class="total-words-box">
             Total In Words : <?= esc($totalInWords) ?>
         </div>
 
-        <!-- 7. BOTTOM SECTION: BANK DETAILS, TERMS (SOLE FOOTER MESSAGE) & SIGNATURE BOX -->
-        <table class="bottom-section-table">
+        <!-- 6. BOTTOM BANK ACCOUNTS & TERMS BOX -->
+        <table class="bottom-details-box">
             <tr>
-                <td class="bank-terms-cell">
+                <td class="bank-terms-left">
                     <?php if (!empty($bankAccounts)): ?>
-                        <div class="bank-details-title">Bank Account Details</div>
-                        <div class="bank-accounts-grid">
+                        <div class="bank-sec-title">Bank Account Details</div>
+                        <div class="bank-accounts-wrap">
                             <?php foreach ($bankAccounts as $bk): ?>
-                                <div class="bank-col">
+                                <div class="bank-entry">
                                     <div><strong>Bank Name:</strong> <?= esc($bk['bank_name']) ?></div>
                                     <div><strong>Account Number:</strong> <?= esc($bk['account_number']) ?></div>
-                                    <div><strong>Account Name:</strong> <?= esc($companyName) ?></div>
+                                    <div><strong>Account Name:</strong><br><?= esc($companyName) ?></div>
                                     <div><strong>Branch:</strong> <?= esc($bk['branch_name'] ?? 'Rasipuram') ?></div>
                                     <div><strong>IFSC Code:</strong> <?= esc($bk['ifsc_code']) ?></div>
                                 </div>
@@ -802,27 +795,27 @@ foreach (($items ?? []) as $it) {
                     <?php endif; ?>
 
                     <?php if (!empty($termsList)): ?>
-                        <div class="terms-block">
-                            <span class="terms-title">Terms & Conditions : </span>
+                        <div class="terms-wrap">
+                            <strong>Terms & Conditions : </strong>
                             <?php foreach ($termsList as $tIdx => $termLine): ?>
                                 <span><?= esc($termLine) ?> </span>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
                 </td>
-                <td class="signature-cell">
+                <td class="signature-right">
                     <div>Authorized Signature</div>
                 </td>
             </tr>
         </table>
 
-    </div><!-- END .print-container -->
+        <!-- 7. PAGE FOOTER -->
+        <div class="footer-line">
+            <div class="powered">POWERED BY <?= esc($companyName) ?></div>
+            <div>1</div>
+        </div>
 
-    <!-- 8. FOOTER BELOW BOX -->
-    <div class="page-footer" style="max-width: 820px; margin: 8px auto 0 auto;">
-        <div class="powered-by">POWERED BY <?= esc($companyName) ?></div>
-        <div>1</div>
-    </div>
+    </div><!-- END .document-wrapper -->
 
 </body>
 </html>

@@ -93,6 +93,18 @@
                         <tr><th>Transport:</th><td><?= esc($invoice['transport_name']) ?: '-' ?></td></tr>
                         <tr><th>Waybill / LR:</th><td><?= esc($invoice['waybill_number']) ?: '-' ?></td></tr>
                         <tr><th>Waybill Date:</th><td><?= $invoice['waybill_date'] ? date('d/m/Y', strtotime($invoice['waybill_date'])) : '-' ?></td></tr>
+                        <tr>
+                            <th>e-Way Bill No:</th>
+                            <td>
+                                <?php if (!empty($invoice['ewaybill_number'])): ?>
+                                    <span class="badge bg-success font-monospace fs-6">
+                                        <i class="fas fa-truck-loading me-1"></i><?= esc($invoice['ewaybill_number']) ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="text-muted">-</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
                         <tr><th>No. of Bales:</th><td><?= esc($invoice['bales_count'] ?? ($invoice['packages_count'] ?? '')) !== '' ? esc($invoice['bales_count'] ?? $invoice['packages_count']) : '-' ?></td></tr>
                         <tr>
                             <th>Delivery Status:</th>

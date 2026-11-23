@@ -153,6 +153,9 @@
                 <?php if ($invoice['waybill_number']): ?>
                     <p><strong>Waybill / LR:</strong> <?= esc($invoice['waybill_number']) ?></p>
                 <?php endif; ?>
+                <?php if (!empty($invoice['ewaybill_number'])): ?>
+                    <p><strong>e-Way Bill No:</strong> <?= esc($invoice['ewaybill_number']) ?></p>
+                <?php endif; ?>
                 <?php $bales = !empty($invoice['bales_count']) ? $invoice['bales_count'] : (!empty($invoice['packages_count']) ? $invoice['packages_count'] : ''); ?>
                 <?php if (!empty($bales)): ?>
                     <p><strong>No. of Bales:</strong> <?= esc($bales) ?></p>

@@ -367,13 +367,37 @@ class InvoiceSyncService extends AbstractModuleSyncService
                 }
             }
 
+            // Extract e-Way bill details from Zoho
+            $zohoEwaybillNumber = !empty($zohoInv['ewaybill_number']) ? trim((string) $zohoInv['ewaybill_number']) : null;
+            $zohoEwbDetails     = !empty($zohoInv['eway_bill_details']) && is_array($zohoInv['eway_bill_details']) ? $zohoInv['eway_bill_details'] : [];
+            $zohoEwbList        = !empty($zohoInv['ewaybills']) && is_array($zohoInv['ewaybills']) ? $zohoInv['ewaybills'] : [];
+
+            $ewbNumber   = $zohoEwaybillNumber ?: ($zohoEwbDetails['ewaybill_number'] ?? null);
+            $ewbId       = $zohoEwbDetails['ewaybill_id'] ?? null;
+            $ewbExpiry   = $zohoEwbDetails['ewaybill_expiry_date'] ?? ($zohoEwbDetails['valid_until'] ?? null);
+            $ewbDate     = $zohoEwbDetails['ewaybill_date'] ?? null;
+            $ewbStatus   = $zohoEwbDetails['ewaybill_status'] ?? ($zohoEwbDetails['status'] ?? null);
+
+            if (empty($ewbNumber) && !empty($zohoEwbList)) {
+                foreach ($zohoEwbList as $ewbItem) {
+                    if (!empty($ewbItem['ewaybill_number'])) {
+                        $ewbNumber = trim((string) $ewbItem['ewaybill_number']);
+                        $ewbId     = $ewbItem['ewaybill_id'] ?? $ewbId;
+                        $ewbExpiry = $ewbItem['ewaybill_expiry_date'] ?? ($ewbItem['valid_until'] ?? $ewbExpiry);
+                        $ewbDate   = $ewbItem['ewaybill_date'] ?? $ewbDate;
+                        $ewbStatus = $ewbItem['ewaybill_status'] ?? ($ewbItem['status'] ?? $ewbStatus);
+                        break;
+                    }
+                }
+            }
+
             $invData = [
                 'customer_id'      => $localCustomerId,
                 'invoice_number'   => trim((string) ($zohoInv['invoice_number'] ?? ($localInv['invoice_number'] ?? $this->invoiceModel->generateInvoiceNumber()))),
                 'invoice_date'     => $zohoInv['date'] ?? date('Y-m-d'),
                 'due_date'         => $zohoInv['due_date'] ?? ($zohoInv['date'] ?? date('Y-m-d')),
                 'reference_number' => $zohoInv['reference_number'] ?? null,
-                'ewaybill_number'  => $zohoInv['ewaybill_number'] ?? ($localInv['ewaybill_number'] ?? null),
+                'ewaybill_number'  => $ewbNumber ?? ($localInv['ewaybill_number'] ?? null),
                 'packages_count'   => $balesCount ?? ($localInv['packages_count'] ?? ($localInv['bales_count'] ?? null)),
                 'bales_count'      => $balesCount ?? ($localInv['bales_count'] ?? null),
                 'status'           => $localStatus,
@@ -446,6 +470,68 @@ class InvoiceSyncService extends AbstractModuleSyncService
 
             $updated         = $this->invoiceModel->getInvoiceById($localId);
             $normalizedLocal = $this->normalizeLocalInvoice($updated, $updated['items'] ?? []);
+
+            // Synchronize e-Way Bill record if eway bill details exist in Zoho
+            if (!empty($ewbNumber)) {
+                try {
+                    $ewayModel = new \App\Models\EwayBillModel();
+                    $existingEwb = $ewayModel->where('document_type', 'invoice')
+                        ->where('document_id', $localId)
+                        ->first();
+
+                    $validUntil = null;
+                    if (!empty($ewbExpiry)) {
+                        $parsedTime = strtotime($ewbExpiry);
+                        if ($parsedTime !== false) {
+                            $validUntil = date('Y-m-d H:i:s', $parsedTime);
+                        }
+                    }
+
+                    $ewbDateFormatted = null;
+                    if (!empty($ewbDate)) {
+                        $parsedDate = strtotime($ewbDate);
+                        if ($parsedDate !== false) {
+                            $ewbDateFormatted = date('Y-m-d', $parsedDate);
+                        }
+                    }
+
+                    $ewbStatusNormalized = 'generated';
+                    if (!empty($ewbStatus) && strtolower($ewbStatus) === 'cancelled') {
+                        $ewbStatusNormalized = 'cancelled';
+                    }
+
+                    $ewbPayload = [
+                        'ewaybill_number'  => $ewbNumber,
+                        'status'           => $ewbStatusNormalized,
+                        'last_sync_at'     => date('Y-m-d H:i:s'),
+                    ];
+                    if (!empty($ewbId)) {
+                        $ewbPayload['zoho_ewaybill_id'] = (string) $ewbId;
+                    }
+                    if ($validUntil) {
+                        $ewbPayload['valid_until'] = $validUntil;
+                    }
+                    if ($ewbDateFormatted) {
+                        $ewbPayload['ewaybill_date'] = $ewbDateFormatted;
+                    }
+
+                    if ($existingEwb) {
+                        $ewayModel->update($existingEwb['id'], $ewbPayload);
+                    } else {
+                        $ewbPayload['document_type']   = 'invoice';
+                        $ewbPayload['document_id']     = $localId;
+                        $ewbPayload['document_number'] = $updated['invoice_number'];
+                        $ewbPayload['document_date']   = $updated['invoice_date'];
+                        $ewbPayload['total_amount']    = $updated['total_amount'];
+                        $ewbPayload['cgst_amount']     = $updated['cgst_amount'];
+                        $ewbPayload['sgst_amount']     = $updated['sgst_amount'];
+                        $ewbPayload['igst_amount']     = $updated['igst_amount'];
+                        $ewayModel->insert($ewbPayload);
+                    }
+                } catch (\Throwable $e) {
+                    log_message('error', 'InvoiceSyncService e-Way Bill sync error: ' . $e->getMessage());
+                }
+            }
 
             $this->saveMapping(
                 $localId,

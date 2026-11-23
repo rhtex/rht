@@ -516,9 +516,66 @@ foreach (($items ?? []) as $it) {
             color: #333;
         }
 
+        /* ----------------------------------------------------
+           PRINT PAGE-BREAK AND BOX INTEGRITY
+           ---------------------------------------------------- */
+        .items-grid-table {
+            page-break-inside: auto;
+        }
+
+        .items-grid-table thead {
+            display: table-header-group;
+        }
+
+        .items-grid-table tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+
+        .items-grid-table th,
+        .items-grid-table td {
+            box-sizing: border-box;
+        }
+
+        .invoice-details-box,
+        .pos-bar-box,
+        .total-words-box,
+        .bottom-details-box,
+        .summary-totals-td,
+        .summary-notes-td,
+        .totals-inner-table tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
         @media print {
             .no-print { display: none !important; }
-            body { padding: 0; }
+            body { 
+                padding: 0; 
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .document-wrapper {
+                width: 100%;
+                max-width: 100%;
+            }
+            .items-grid-table {
+                border-collapse: collapse !important;
+            }
+            .items-grid-table thead {
+                display: table-header-group !important;
+            }
+            .items-grid-table tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            .invoice-details-box,
+            .pos-bar-box,
+            .total-words-box,
+            .bottom-details-box {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
         }
 
         .no-print-toolbar {

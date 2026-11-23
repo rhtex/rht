@@ -992,12 +992,6 @@ if ($itemCount > 0 && $itemCount < 14) {
             </tr>
         </table>
 
-        <!-- 7. PAGE FOOTER -->
-        <div class="footer-line">
-            <div class="powered">POWERED BY <?= esc($companyName) ?></div>
-            <div>1</div>
-        </div>
-
     </div><!-- END .document-wrapper -->
 
 </body>

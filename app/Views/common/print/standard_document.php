@@ -123,7 +123,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             margin: 0;
             padding: 0;
             line-height: 1.35;
-            font-weight: 500;
+            font-weight: 700;
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
         }
@@ -216,7 +216,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             font-size: 11px;
             line-height: 1.35;
             color: #000;
-            font-weight: 550;
+            font-weight: 700;
         }
 
         .header-title-cell {
@@ -257,6 +257,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             vertical-align: top;
             padding: 4px 6px;
             font-size: 10.5px;
+            font-weight: 600;
             border-right: 1px solid #000;
             border-top: none;
             border-bottom: none;
@@ -331,7 +332,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             font-size: 11px;
             line-height: 1.4;
             color: #000;
-            font-weight: 550;
+            font-weight: 700;
         }
 
         /* ----------------------------------------------------
@@ -393,7 +394,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-right: 1px solid #000;
             padding: 2.5px 5px;
             font-size: 10px;
-            font-weight: 550;
+            font-weight: 700;
             color: #000;
             vertical-align: top;
             height: 18px;
@@ -549,7 +550,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             padding: 0 6px 0 0;
             font-size: 9.5px;
             line-height: 1.35;
-            font-weight: 550;
+            font-weight: 700;
             color: #000;
         }
 
@@ -568,7 +569,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             margin-top: 3px;
             font-size: 9.5px;
             line-height: 1.35;
-            font-weight: 600;
+            font-weight: 700;
             color: #000;
         }
 

@@ -130,7 +130,7 @@ if ($itemCount > 0 && $itemCount < 14) {
         }
 
         /* ----------------------------------------------------
-           1. TOP HEADER (BORDERLESS)
+           1. TOP HEADER (BORDERLESS WITH MONOGRAM / LOGO)
            ---------------------------------------------------- */
         .header-table {
             width: 100%;
@@ -143,6 +143,7 @@ if ($itemCount > 0 && $itemCount < 14) {
         .header-table td {
             vertical-align: top;
             padding: 6px 8px;
+            border: none;
         }
 
         .header-logo-cell {
@@ -249,6 +250,9 @@ if ($itemCount > 0 && $itemCount < 14) {
             padding: 5px 7px;
             font-size: 11px;
             border-right: 1.2px solid #000;
+            border-top: none;
+            border-bottom: none;
+            border-left: none;
             color: #000;
         }
 
@@ -324,6 +328,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             width: 100%;
             border-left: none;
             border-right: none;
+            border-top: none;
             border-bottom: 1.2px solid #000;
             padding: 5px 8px;
             font-size: 12px;
@@ -340,13 +345,16 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-collapse: collapse;
             border-left: none;
             border-right: none;
+            border-top: none;
             border-bottom: 1.2px solid #000;
             color: #000;
         }
 
         .items-grid-table th {
+            border-top: none;
             border-bottom: 1.2px solid #000;
-            border-right: 1px solid #000;
+            border-left: none;
+            border-right: 1.2px solid #000;
             padding: 6px 6px;
             font-size: 11.5px;
             font-weight: 800;
@@ -360,8 +368,10 @@ if ($itemCount > 0 && $itemCount < 14) {
         }
 
         .items-grid-table td {
-            border-bottom: 1px solid #000;
-            border-right: 1px solid #000;
+            border-top: none;
+            border-bottom: 1.2px solid #000;
+            border-left: none;
+            border-right: 1.2px solid #000;
             padding: 4px 6px;
             font-size: 11px;
             font-weight: 550;
@@ -373,7 +383,10 @@ if ($itemCount > 0 && $itemCount < 14) {
         .items-grid-table tr.blank-filler-row td {
             height: 22px;
             padding: 0 6px;
-            border-bottom: 1px solid #000;
+            border-top: none;
+            border-bottom: 1.2px solid #000;
+            border-left: none;
+            border-right: 1.2px solid #000;
             color: transparent;
         }
 
@@ -388,6 +401,7 @@ if ($itemCount > 0 && $itemCount < 14) {
         /* Summary row inside the table */
         .summary-notes-td {
             border-right: 1.2px solid #000 !important;
+            border-bottom: none !important;
             padding: 8px !important;
             vertical-align: top !important;
             font-weight: 600;
@@ -396,6 +410,8 @@ if ($itemCount > 0 && $itemCount < 14) {
 
         .summary-totals-td {
             padding: 0 !important;
+            border-right: none !important;
+            border-bottom: none !important;
             vertical-align: top !important;
             min-width: 260px;
             width: 35%;
@@ -441,6 +457,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             width: 100%;
             border-left: none;
             border-right: none;
+            border-top: none;
             border-bottom: 1.2px solid #000;
             padding: 6px 8px;
             font-size: 12px;
@@ -456,6 +473,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-collapse: collapse;
             border-left: none;
             border-right: none;
+            border-top: none;
             border-bottom: none;
             color: #000;
         }
@@ -463,17 +481,22 @@ if ($itemCount > 0 && $itemCount < 14) {
         .bottom-details-box td {
             vertical-align: top;
             padding: 6px 8px;
+            border-top: none;
+            border-bottom: none;
         }
 
         .bank-terms-left {
             width: 63%;
-            border-right: 1.2px solid #000;
+            border-right: 1.2px solid #000 !important;
+            border-left: none !important;
             font-size: 11px;
             padding-right: 8px;
         }
 
         .signature-right {
             width: 37%;
+            border-right: none !important;
+            border-left: none !important;
             text-align: center;
             vertical-align: bottom !important;
             padding-bottom: 18px;
@@ -506,37 +529,18 @@ if ($itemCount > 0 && $itemCount < 14) {
         }
 
         .bank-entry:first-child {
-            border-right: 1.5px solid #000;
+            border-right: 1.2px solid #000;
             margin-right: 8px;
         }
 
         .terms-wrap {
-            border-top: 1.5px solid #000;
+            border-top: 1.2px solid #000;
             padding-top: 5px;
             margin-top: 4px;
             font-size: 10.5px;
-            line-height: 1.4;
+            line-line: 1.4;
             font-weight: 600;
             color: #000;
-        }
-
-        /* ----------------------------------------------------
-           7. PAGE FOOTER
-           ---------------------------------------------------- */
-        .footer-line {
-            margin-top: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 10px;
-            color: #444;
-            letter-spacing: 0.5px;
-            page-break-inside: avoid;
-        }
-
-        .footer-line .powered {
-            font-weight: bold;
-            color: #333;
         }
 
         /* ----------------------------------------------------
@@ -544,7 +548,6 @@ if ($itemCount > 0 && $itemCount < 14) {
            ---------------------------------------------------- */
         .items-grid-table {
             page-break-inside: auto;
-            border-bottom: 1.2px solid #000;
         }
 
         .items-grid-table thead {
@@ -552,7 +555,7 @@ if ($itemCount > 0 && $itemCount < 14) {
         }
 
         .items-grid-table thead th {
-            border-top: 1.2px solid #000;
+            border-top: none;
             border-bottom: 1.2px solid #000;
         }
 
@@ -598,7 +601,6 @@ if ($itemCount > 0 && $itemCount < 14) {
                 size: A4 portrait;
                 margin: 5mm 6mm 4mm 6mm;
             }
-            .no-print { display: none !important; }
             body { 
                 padding: 0;
                 margin: 0;
@@ -620,7 +622,7 @@ if ($itemCount > 0 && $itemCount < 14) {
                 display: table-header-group !important;
             }
             .items-grid-table thead th {
-                border-top: 1.2px solid #000 !important;
+                border-top: none !important;
                 border-bottom: 1.2px solid #000 !important;
             }
             .items-grid-table tfoot {
@@ -642,49 +644,10 @@ if ($itemCount > 0 && $itemCount < 14) {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }
-            .footer-line {
-                margin-top: 2px !important;
-            }
-        }
-
-        .no-print-toolbar {
-            background: #f1f3f5;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            border: 1px solid #ced4da;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .btn-print {
-            background: #0d6efd;
-            color: #fff;
-            border: none;
-            padding: 6px 14px;
-            font-size: 13px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-print:hover {
-            background: #0b5ed7;
         }
     </style>
 </head>
 <body onload="<?= !empty($auto_print) ? 'window.print()' : '' ?>">
-
-    <!-- Floating toolbar when viewing in browser -->
-    <div class="no-print no-print-toolbar">
-        <div>
-            <strong><?= esc($docTitle) ?> Preview:</strong> <?= esc($docNumber) ?>
-        </div>
-        <div>
-            <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Print Document</button>
-        </div>
-    </div>
 
     <div class="document-wrapper">
 

@@ -125,6 +125,8 @@ if ($itemCount > 0 && $itemCount < 15) {
             margin: 0 auto;
             background: #fff;
             color: #000;
+            border: 1.2px solid #000;
+            box-sizing: border-box;
         }
 
         /* ----------------------------------------------------
@@ -133,12 +135,14 @@ if ($itemCount > 0 && $itemCount < 15) {
         .header-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 12px;
+            border-bottom: 1.2px solid #000;
+            margin-bottom: 0px;
+            padding: 8px 10px;
         }
 
         .header-table td {
             vertical-align: top;
-            padding: 0;
+            padding: 8px 10px;
         }
 
         .header-logo-cell {
@@ -233,7 +237,10 @@ if ($itemCount > 0 && $itemCount < 15) {
         .invoice-details-box {
             width: 100%;
             border-collapse: collapse;
-            border: 1.2px solid #000;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            border-bottom: 1.2px solid #000;
             margin-bottom: 0px;
         }
 
@@ -315,8 +322,8 @@ if ($itemCount > 0 && $itemCount < 15) {
            ---------------------------------------------------- */
         .pos-bar-box {
             width: 100%;
-            border-left: 1.2px solid #000;
-            border-right: 1.2px solid #000;
+            border-left: none;
+            border-right: none;
             border-bottom: 1.2px solid #000;
             padding: 5px 8px;
             font-size: 12px;
@@ -331,8 +338,8 @@ if ($itemCount > 0 && $itemCount < 15) {
         .items-grid-table {
             width: 100%;
             border-collapse: collapse;
-            border-left: 1.2px solid #000;
-            border-right: 1.2px solid #000;
+            border-left: none;
+            border-right: none;
             border-bottom: 1.2px solid #000;
             color: #000;
         }
@@ -432,8 +439,8 @@ if ($itemCount > 0 && $itemCount < 15) {
            ---------------------------------------------------- */
         .total-words-box {
             width: 100%;
-            border-left: 1.2px solid #000;
-            border-right: 1.2px solid #000;
+            border-left: none;
+            border-right: none;
             border-bottom: 1.2px solid #000;
             padding: 6px 8px;
             font-size: 12px;
@@ -447,9 +454,9 @@ if ($itemCount > 0 && $itemCount < 15) {
         .bottom-details-box {
             width: 100%;
             border-collapse: collapse;
-            border-left: 1.2px solid #000;
-            border-right: 1.2px solid #000;
-            border-bottom: 1.2px solid #000;
+            border-left: none;
+            border-right: none;
+            border-bottom: none;
             color: #000;
         }
 

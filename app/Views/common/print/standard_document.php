@@ -80,6 +80,13 @@ $totalQty = 0;
 foreach (($items ?? []) as $it) {
     $totalQty += (float) ($it['quantity'] ?? 0);
 }
+
+// Calculate minimum rows to cleanly fill the page and prevent empty whitespace
+$itemCount = count($items ?? []);
+$minRowsNeeded = 0;
+if ($itemCount > 0 && $itemCount < 15) {
+    $minRowsNeeded = 15 - $itemCount;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -353,6 +360,14 @@ foreach (($items ?? []) as $it) {
             font-weight: 550;
             color: #000;
             vertical-align: top;
+            height: 24px;
+        }
+
+        .items-grid-table tr.blank-filler-row td {
+            height: 24px;
+            padding: 0 6px;
+            border-bottom: 1px solid #000;
+            color: transparent;
         }
 
         .items-grid-table td:last-child {
@@ -802,6 +817,17 @@ foreach (($items ?? []) as $it) {
                             <td class="text-right"><?= number_format((float) ($item['amount'] ?? 0), 2) ?></td>
                         </tr>
                     <?php endforeach; ?>
+                    <?php for ($bi = 0; $bi < $minRowsNeeded; $bi++): ?>
+                        <tr class="blank-filler-row">
+                            <td class="text-center">&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td class="text-center">&nbsp;</td>
+                            <td class="text-center">&nbsp;</td>
+                            <td class="text-center">&nbsp;</td>
+                            <td class="text-right">&nbsp;</td>
+                            <td class="text-right">&nbsp;</td>
+                        </tr>
+                    <?php endfor; ?>
                 <?php else: ?>
                     <tr>
                         <td colspan="7" class="text-center py-3">No line items found.</td>

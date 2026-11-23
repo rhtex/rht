@@ -17,9 +17,9 @@ $docTitle       = $document_title ?? 'TAX INVOICE';
 $docNumberLabel = $document_number_label ?? 'Invoice#';
 $docNumber      = $document_number ?? '';
 
-$companyName    = get_setting('company_print_name', get_setting('org_name', get_setting('app_name', 'RASI HANDLOOM TEXTILES')));
-$companyAddress = get_setting('company_print_address', '');
-if (empty($companyAddress)) {
+$companyName    = trim((string) get_setting('company_print_name', get_setting('org_name', get_setting('app_name', 'RASI HANDLOOM TEXTILES'))));
+$companyAddress = (string) get_setting('company_print_address', '');
+if (trim($companyAddress) === '') {
     $lines = array_filter([
         get_setting('company_address_1', ''),
         get_setting('company_address_2', ''),
@@ -27,10 +27,13 @@ if (empty($companyAddress)) {
     ]);
     $companyAddress = implode(",\n", $lines);
 }
-$companyPhone   = get_setting('company_print_phone', get_setting('company_phone', get_setting('company_mobile', '')));
-$companyEmail   = get_setting('company_print_email', get_setting('company_email', ''));
-$companyGstin   = get_setting('company_print_gstin', get_setting('company_gstin', ''));
-$companyLogoUrl = get_setting('company_logo_url', '');
+// Normalize literal '\n' if stored by forms into real newlines
+$companyAddress = str_replace(['\r\n', '\r', '\n'], "\n", $companyAddress);
+
+$companyPhone   = trim((string) get_setting('company_print_phone', get_setting('company_phone', get_setting('company_mobile', ''))));
+$companyEmail   = trim((string) get_setting('company_print_email', get_setting('company_email', '')));
+$companyGstin   = trim((string) get_setting('company_print_gstin', get_setting('company_gstin', '')));
+$companyLogoUrl = trim((string) get_setting('company_logo_url', ''));
 $headerFont     = get_setting('print_header_font', "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif");
 $printFontSize  = get_setting('print_font_size', '13px');
 

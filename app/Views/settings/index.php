@@ -164,7 +164,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Header Company Name on Print</label>
-                            <input type="text" class="form-control" name="settings[company_print_name]" value="<?= esc($settings['company_print_name'] ?? ($settings['app_name'] ?? 'RASI HANDLOOM TEXTILES')) ?>" placeholder="RASI HANDLOOM TEXTILES">
+                            <input type="text" class="form-control" name="settings[company_print_name]" value="<?= esc($settings['company_print_name'] ?? ($settings['org_name'] ?? ($settings['app_name'] ?? 'RASI HANDLOOM TEXTILES'))) ?>" placeholder="RASI HANDLOOM TEXTILES">
                             <small class="text-muted">Primary name displayed on top of printed bills and invoices.</small>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -175,18 +175,29 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Print Header Address</label>
-                            <textarea class="form-control" name="settings[company_print_address]" rows="3" placeholder="Street Address, Area, City - Pincode"><?= esc($settings['company_print_address'] ?? "C.P Kannaiah Street, Opp: Gopinath Engineering Works,\nRasipuram (TK), Namakkal (D.T) - 637408") ?></textarea>
-                            <small class="text-muted">Multi-line address shown below company title.</small>
+                            <label class="form-label">Print Header From-Address</label>
+                            <?php 
+                            $defaultPrintAddr = $settings['company_print_address'] ?? '';
+                            if (empty($defaultPrintAddr)) {
+                                $lines = array_filter([
+                                    $settings['company_address_1'] ?? '',
+                                    $settings['company_address_2'] ?? '',
+                                    trim(($settings['company_city'] ?? '') . ' ' . ($settings['company_pincode'] ?? ''))
+                                ]);
+                                $defaultPrintAddr = implode(",\n", $lines);
+                            }
+                            ?>
+                            <textarea class="form-control" name="settings[company_print_address]" rows="3" placeholder="Street Address, Area, City - Pincode"><?= esc($defaultPrintAddr) ?></textarea>
+                            <small class="text-muted">Multi-line address shown below company title in the header.</small>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="mb-2">
                                 <label class="form-label">Print Contact Phones</label>
-                                <input type="text" class="form-control" name="settings[company_print_phone]" value="<?= esc($settings['company_print_phone'] ?? '+91-9443323810, +91-9626077333') ?>" placeholder="+91-9443323810, +91-9626077333">
+                                <input type="text" class="form-control" name="settings[company_print_phone]" value="<?= esc($settings['company_print_phone'] ?? ($settings['company_phone'] ?? ($settings['company_mobile'] ?? '09626077333'))) ?>" placeholder="Mobile / Phone">
                             </div>
                             <div>
                                 <label class="form-label">Print Email</label>
-                                <input type="email" class="form-control" name="settings[company_print_email]" value="<?= esc($settings['company_print_email'] ?? 'rasihandloomtextiles@gmail.com') ?>" placeholder="rasihandloomtextiles@gmail.com">
+                                <input type="email" class="form-control" name="settings[company_print_email]" value="<?= esc($settings['company_print_email'] ?? ($settings['company_email'] ?? 'sgrgowthamraj63@gmail.com')) ?>" placeholder="Email address">
                             </div>
                         </div>
                     </div>

@@ -320,6 +320,15 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->get('sales_orders/print/(:num)', 'SalesOrderController::print/$1', ['filter' => 'permission:sales_order.view']);
     $routes->get('sales_orders/convert/(:num)', 'SalesOrderController::convertToInvoice/$1', ['filter' => 'permission:invoice.create']);
 
+    // Customer Orders
+    $routes->get('customer_orders', 'CustomerOrderController::index', ['filter' => 'permission:sales_order.view']);
+    $routes->get('customer_orders/create', 'CustomerOrderController::create', ['filter' => 'permission:sales_order.create']);
+    $routes->post('customer_orders/store', 'CustomerOrderController::store', ['filter' => 'permission:sales_order.create']);
+    $routes->get('customer_orders/edit/(:num)', 'CustomerOrderController::edit/$1', ['filter' => 'permission:sales_order.edit']);
+    $routes->post('customer_orders/update/(:num)', 'CustomerOrderController::update/$1', ['filter' => 'permission:sales_order.edit']);
+    $routes->get('customer_orders/delete/(:num)', 'CustomerOrderController::delete/$1', ['filter' => 'permission:sales_order.delete']);
+    $routes->get('customer_orders/by-customer/(:num)', 'CustomerOrderController::byCustomer/$1', ['filter' => 'permission:invoice.view']);
+
     // Invoices
     $routes->get('invoices', 'InvoiceController::index', ['filter' => 'permission:invoice.view']);
     $routes->get('invoices/create', 'InvoiceController::create', ['filter' => 'permission:invoice.create']);
@@ -642,6 +651,15 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->get('sales_orders/delete/(:num)', 'SalesOrderController::delete/$1', ['filter' => 'permission:sales_order.delete']);
     $routes->get('sales_orders/print/(:num)', 'SalesOrderController::print/$1', ['filter' => 'permission:sales_order.view']);
     $routes->get('sales_orders/convert/(:num)', 'SalesOrderController::convertToInvoice/$1', ['filter' => 'permission:invoice.create']);
+
+    // Customer Orders
+    $routes->get('customer_orders', 'CustomerOrderController::index', ['filter' => 'permission:sales_order.view']);
+    $routes->get('customer_orders/create', 'CustomerOrderController::create', ['filter' => 'permission:sales_order.create']);
+    $routes->post('customer_orders/store', 'CustomerOrderController::store', ['filter' => 'permission:sales_order.create']);
+    $routes->get('customer_orders/edit/(:num)', 'CustomerOrderController::edit/$1', ['filter' => 'permission:sales_order.edit']);
+    $routes->post('customer_orders/update/(:num)', 'CustomerOrderController::update/$1', ['filter' => 'permission:sales_order.edit']);
+    $routes->get('customer_orders/delete/(:num)', 'CustomerOrderController::delete/$1', ['filter' => 'permission:sales_order.delete']);
+    $routes->get('customer_orders/by-customer/(:num)', 'CustomerOrderController::byCustomer/$1', ['filter' => 'permission:invoice.view']);
 
     // Invoices
     $routes->get('invoices', 'InvoiceController::index', ['filter' => 'permission:invoice.view']);

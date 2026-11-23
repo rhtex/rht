@@ -207,8 +207,9 @@ class InvoiceController extends BaseController
         foreach ($rawItems as $item) {
             $hasProduct = !empty($item['product_id']);
             $hasDesc = !empty(trim($item['description'] ?? ''));
+            $hasDesign = !empty(trim($item['design_no'] ?? ''));
             $qty = floatval($item['quantity'] ?? 0);
-            if (($hasProduct || $hasDesc) && $qty > 0) {
+            if (($hasProduct || $hasDesc || $hasDesign) && $qty > 0) {
                 $items[] = $item;
             }
         }
@@ -226,10 +227,20 @@ class InvoiceController extends BaseController
         $invoiceId = $this->invoiceModel->getInsertID();
 
         foreach ($items as $item) {
+            $desc = trim((string) ($item['description'] ?? ''));
+            if ($desc === '' && !empty($item['product_id'])) {
+                $prod = (new \App\Models\ProductModel())->find((int) $item['product_id']);
+                $desc = $prod['product_name'] ?? '';
+            }
+            if ($desc === '' && !empty($item['design_no'])) {
+                $desc = trim((string) $item['design_no']);
+            }
             $this->itemModel->insert([
                 'invoice_id' => $invoiceId,
                 'product_id' => !empty($item['product_id']) ? $item['product_id'] : null,
-                'description' => $item['description'] ?? '',
+                'description' => $desc,
+                'design_no' => trim((string) ($item['design_no'] ?? '')) ?: null,
+                'customer_order_id' => !empty($item['customer_order_id']) ? (int) $item['customer_order_id'] : null,
                 'hsn_code' => $item['hsn_code'] ?? '',
                 'quantity' => floatval($item['quantity']),
                 'rate' => floatval($item['rate']),
@@ -425,8 +436,9 @@ class InvoiceController extends BaseController
         foreach ($rawItems as $item) {
             $hasProduct = !empty($item['product_id']);
             $hasDesc = !empty(trim($item['description'] ?? ''));
+            $hasDesign = !empty(trim($item['design_no'] ?? ''));
             $qty = floatval($item['quantity'] ?? 0);
-            if (($hasProduct || $hasDesc) && $qty > 0) {
+            if (($hasProduct || $hasDesc || $hasDesign) && $qty > 0) {
                 $items[] = $item;
             }
         }
@@ -442,10 +454,20 @@ class InvoiceController extends BaseController
         $this->itemModel->where('invoice_id', $id)->delete();
 
         foreach ($items as $item) {
+            $desc = trim((string) ($item['description'] ?? ''));
+            if ($desc === '' && !empty($item['product_id'])) {
+                $prod = (new \App\Models\ProductModel())->find((int) $item['product_id']);
+                $desc = $prod['product_name'] ?? '';
+            }
+            if ($desc === '' && !empty($item['design_no'])) {
+                $desc = trim((string) $item['design_no']);
+            }
             $this->itemModel->insert([
                 'invoice_id' => $id,
                 'product_id' => !empty($item['product_id']) ? $item['product_id'] : null,
-                'description' => $item['description'] ?? '',
+                'description' => $desc,
+                'design_no' => trim((string) ($item['design_no'] ?? '')) ?: null,
+                'customer_order_id' => !empty($item['customer_order_id']) ? (int) $item['customer_order_id'] : null,
                 'hsn_code' => $item['hsn_code'] ?? '',
                 'quantity' => floatval($item['quantity']),
                 'rate' => floatval($item['rate']),

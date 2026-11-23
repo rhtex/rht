@@ -352,8 +352,13 @@
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <input type="text" name="items[<?= $index ?>][description]" class="form-control form-control-sm mt-1 desc-input"
-                                            placeholder="Item specifications / notes..." value="<?= esc($item['description'] ?? '') ?>">
+                                        <div class="d-flex gap-1 mt-1 design-wrap">
+                                            <select name="items[<?= $index ?>][customer_order_id]" class="form-select form-select-sm design-order-select d-none" data-selected="<?= esc($item['customer_order_id'] ?? '') ?>">
+                                                <option value="">-- Select Order Design No --</option>
+                                            </select>
+                                            <input type="text" name="items[<?= $index ?>][design_no]" class="form-control form-control-sm design-no-input"
+                                                placeholder="Design No..." value="<?= esc($item['design_no'] ?? '') ?>">
+                                        </div>
                                     </td>
                                     <td><input type="text" name="items[<?= $index ?>][hsn_code]" class="form-control text-center hsn" value="<?= esc($item['hsn_code'] ?? '') ?>"></td>
                                     <td><input type="number" name="items[<?= $index ?>][quantity]" class="form-control text-end qty" value="<?= esc($item['quantity']) ?>" step="0.01" min="0.01" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
@@ -388,7 +393,12 @@
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
-                                    <input type="text" name="items[0][description]" class="form-control form-control-sm mt-1 desc-input" placeholder="Item specifications / notes...">
+                                    <div class="d-flex gap-1 mt-1 design-wrap">
+                                        <select name="items[0][customer_order_id]" class="form-select form-select-sm design-order-select d-none">
+                                            <option value="">-- Select Order Design No --</option>
+                                        </select>
+                                        <input type="text" name="items[0][design_no]" class="form-control form-control-sm design-no-input" placeholder="Design No...">
+                                    </div>
                                 </td>
                                 <td><input type="text" name="items[0][hsn_code]" class="form-control text-center hsn"></td>
                                 <td><input type="number" name="items[0][quantity]" class="form-control text-end qty" value="1" step="0.01" min="0.01" oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
@@ -514,6 +524,50 @@
     // Global caches for clean HTML templates
     let _productOptionsHtml = '';
     let _taxOptionsHtml = '';
+    let _customerOrders = [];
+
+    function escHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+
+    function buildDesignOrderOptionsHtml(selectedId = '') {
+        let html = '<option value="">-- Select Order Design No --</option>';
+        _customerOrders.forEach(o => {
+            const sel = (selectedId && String(selectedId) === String(o.id)) ? 'selected' : '';
+            const label = `${escHtml(o.design_no)} - ${escHtml(o.product_name)} (₹${parseFloat(o.rate || 0).toFixed(2)})`;
+            html += `<option value="${o.id}" data-design="${escHtml(o.design_no)}" data-product-id="${o.product_id || ''}" data-rate="${o.rate || 0}" ${sel}>${label}</option>`;
+        });
+        return html;
+    }
+
+    function syncDesignOrderSelects() {
+        document.querySelectorAll('.design-order-select').forEach(sel => {
+            const currentVal = sel.value || sel.getAttribute('data-selected') || '';
+            sel.innerHTML = buildDesignOrderOptionsHtml(currentVal);
+            sel.removeAttribute('data-selected');
+            if (_customerOrders.length > 0) {
+                sel.classList.remove('d-none');
+            } else {
+                sel.classList.add('d-none');
+                sel.value = '';
+            }
+        });
+    }
+
+    function loadCustomerOrders(customerId) {
+        if (!customerId) {
+            _customerOrders = [];
+            syncDesignOrderSelects();
+            return;
+        }
+        $.get('<?= site_url('customer_orders/by-customer') ?>/' + customerId, function(res) {
+            _customerOrders = (res && res.success && Array.isArray(res.orders)) ? res.orders : [];
+            syncDesignOrderSelects();
+        }).fail(function() {
+            _customerOrders = [];
+            syncDesignOrderSelects();
+        });
+    }
 
     function calculateDueDate(force = false) {
         // If editing an existing invoice and not forced by user changing invoice date, preserve saved due date
@@ -559,7 +613,12 @@
                 <select name="items[${rowIndex}][product_id]" class="form-select product-select select2">
                     ${productOptions}
                 </select>
-                <input type="text" name="items[${rowIndex}][description]" class="form-control form-control-sm mt-1 desc-input" placeholder="Item specifications / notes...">
+                <div class="d-flex gap-1 mt-1 design-wrap">
+                    <select name="items[${rowIndex}][customer_order_id]" class="form-select form-select-sm design-order-select ${_customerOrders.length ? '' : 'd-none'}">
+                        ${buildDesignOrderOptionsHtml()}
+                    </select>
+                    <input type="text" name="items[${rowIndex}][design_no]" class="form-control form-control-sm design-no-input" placeholder="Design No...">
+                </div>
             </td>
             <td><input type="text" name="items[${rowIndex}][hsn_code]" class="form-control text-center hsn"></td>
             <td><input type="number" name="items[${rowIndex}][quantity]" class="form-control text-end qty" value="1" step="0.01" min="0.01" oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
@@ -1000,16 +1059,39 @@
             updateProductDetails(this);
         });
 
+        // Customer Order Design No selection handler
+        $('#itemsBody').on('change', '.design-order-select', function () {
+            const opt = $(this).find('option:selected');
+            const row = $(this).closest('.item-row');
+            if (opt.val()) {
+                row.find('.design-no-input').val(opt.data('design') || '');
+                const prodId = opt.data('product-id');
+                if (prodId) {
+                    const $prodSelect = row.find('.product-select');
+                    if ($prodSelect.val() != prodId) {
+                        $prodSelect.val(prodId).trigger('change');
+                    }
+                }
+                const orderRate = parseFloat(opt.data('rate'));
+                if (!isNaN(orderRate) && orderRate > 0) {
+                    row.find('.rate').val(orderRate.toFixed(2));
+                    calculateRow(row.find('.rate')[0]);
+                }
+            }
+        });
+
         // 5. Unified customer change handler
         $('#customerSelect').on('change select2:select', function () {
             const customerId = $(this).val();
             fetchCustomerDetails(customerId, false);
+            loadCustomerOrders(customerId);
         });
 
         // 6. Initial customer load if editing existing invoice
         const initialCustomerId = $('#customerSelect').val();
         if (initialCustomerId) {
             fetchCustomerDetails(initialCustomerId, true);
+            loadCustomerOrders(initialCustomerId);
         } else {
             calculateTotals();
         }

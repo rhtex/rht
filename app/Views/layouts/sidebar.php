@@ -17,7 +17,7 @@
                 $segment3 = $uri->getTotalSegments() >= 3 ? $uri->getSegment(3) : '';
                 $segment4 = $uri->getTotalSegments() >= 4 ? $uri->getSegment(4) : '';
                 
-                $isSales = in_array($segment1, ['customers', 'quotations', 'sales_orders', 'invoices', 'eway_bills', 'sales_returns', 'invoice_payments', 'agents', 'agent-payments']);
+                $isSales = in_array($segment1, ['customers', 'quotations', 'sales_orders', 'customer_orders', 'invoices', 'eway_bills', 'sales_returns', 'invoice_payments', 'agents', 'agent-payments']);
                 $isPurchases = in_array($segment1, ['vendors', 'bills', 'vendor_credits', 'payments', 'expenses', 'expense_categories']);
                 $isInventory = in_array($segment1, ['products', 'product_categories']);
                 $isProduction = in_array($segment1, ['production', 'weavers']) || ($segment1 === 'production' && $segment2 === 'colors');
@@ -82,6 +82,14 @@
                             <a href="<?= site_url('sales_orders') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-shopping-cart text-warning"></i>
                                 <p><?= lang("App.sales_orders") ?></p>
+                            </a>
+                        </li>
+                        <?php endif; ?>
+                        <?php if(can('sales_order.view') || can('invoice.view')): ?>
+                        <li class="nav-item">
+                            <a href="<?= site_url('customer_orders') ?>" class="nav-link <?= $segment1 === 'customer_orders' ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-swatchbook text-primary"></i>
+                                <p>Customer Orders</p>
                             </a>
                         </li>
                         <?php endif; ?>

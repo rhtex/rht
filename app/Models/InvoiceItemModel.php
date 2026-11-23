@@ -13,7 +13,7 @@ class InvoiceItemModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'invoice_id', 'product_id', 'description', 'hsn_code', 'quantity', 'rate',
+        'invoice_id', 'product_id', 'description', 'design_no', 'customer_order_id', 'hsn_code', 'quantity', 'rate',
         'tax_percentage', 'cgst_rate', 'sgst_rate', 'igst_rate', 'amount'
     ];
 

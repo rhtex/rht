@@ -375,6 +375,8 @@ foreach (($items ?? []) as $it) {
         .summary-totals-td {
             padding: 0 !important;
             vertical-align: top !important;
+            min-width: 260px;
+            width: 35%;
         }
 
         .totals-inner-table {
@@ -388,6 +390,18 @@ foreach (($items ?? []) as $it) {
             font-size: 12px;
             font-weight: 600;
             color: #000;
+            white-space: nowrap;
+        }
+
+        .totals-inner-table td.total-label {
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .totals-inner-table td.total-value {
+            text-align: right;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
         }
 
         .totals-inner-table tr.total-row td {
@@ -395,6 +409,7 @@ foreach (($items ?? []) as $it) {
             font-size: 14px;
             font-weight: 900;
             padding: 6px 8px;
+            white-space: nowrap;
         }
 
         /* ----------------------------------------------------
@@ -738,57 +753,57 @@ foreach (($items ?? []) as $it) {
 
                 <!-- Table Summary Row (Items in Total & Notes on left | Financial Totals on right) -->
                 <tr>
-                    <td colspan="5" class="summary-notes-td">
+                    <td colspan="4" class="summary-notes-td">
                         <div class="fw-bold mb-2">Items in Total <?= (int) $totalQty ?></div>
                         <?php if (!empty($notes)): ?>
                             <div><strong>Notes :</strong> <?= nl2br(esc($notes)) ?></div>
                         <?php endif; ?>
                     </td>
-                    <td colspan="2" class="summary-totals-td">
+                    <td colspan="3" class="summary-totals-td">
                         <table class="totals-inner-table">
                             <tr>
-                                <td>Sub Total</td>
-                                <td class="text-right"><?= number_format((float) ($subtotal ?? 0), 2) ?></td>
+                                <td class="total-label">Sub Total</td>
+                                <td class="total-value"><?= number_format((float) ($subtotal ?? 0), 2) ?></td>
                             </tr>
                             <?php if (!empty($discount_amount) && (float) $discount_amount > 0): ?>
                                 <tr>
-                                    <td>Discount</td>
-                                    <td class="text-right">-<?= number_format((float) $discount_amount, 2) ?></td>
+                                    <td class="total-label">Discount</td>
+                                    <td class="total-value">-<?= number_format((float) $discount_amount, 2) ?></td>
                                 </tr>
                             <?php endif; ?>
                             <?php if (!empty($cgst_amount) && (float) $cgst_amount > 0): ?>
                                 <tr>
-                                    <td>CGST (<?= !empty($cgst_rate) ? esc($cgst_rate) : '2.5' ?>%)</td>
-                                    <td class="text-right"><?= number_format((float) $cgst_amount, 2) ?></td>
+                                    <td class="total-label">CGST (<?= !empty($cgst_rate) ? esc($cgst_rate) : '2.5' ?>%)</td>
+                                    <td class="total-value"><?= number_format((float) $cgst_amount, 2) ?></td>
                                 </tr>
                             <?php endif; ?>
                             <?php if (!empty($sgst_amount) && (float) $sgst_amount > 0): ?>
                                 <tr>
-                                    <td>SGST (<?= !empty($sgst_rate) ? esc($sgst_rate) : '2.5' ?>%)</td>
-                                    <td class="text-right"><?= number_format((float) $sgst_amount, 2) ?></td>
+                                    <td class="total-label">SGST (<?= !empty($sgst_rate) ? esc($sgst_rate) : '2.5' ?>%)</td>
+                                    <td class="total-value"><?= number_format((float) $sgst_amount, 2) ?></td>
                                 </tr>
                             <?php endif; ?>
                             <?php if (!empty($igst_amount) && (float) $igst_amount > 0): ?>
                                 <tr>
-                                    <td>IGST (<?= !empty($igst_rate) ? esc($igst_rate) : '5.0' ?>%)</td>
-                                    <td class="text-right"><?= number_format((float) $igst_amount, 2) ?></td>
+                                    <td class="total-label">IGST (<?= !empty($igst_rate) ? esc($igst_rate) : '5.0' ?>%)</td>
+                                    <td class="total-value"><?= number_format((float) $igst_amount, 2) ?></td>
                                 </tr>
                             <?php endif; ?>
                             <?php if (!empty($shipping_charge) && (float) $shipping_charge > 0): ?>
                                 <tr>
-                                    <td>Shipping Charge</td>
-                                    <td class="text-right"><?= number_format((float) $shipping_charge, 2) ?></td>
+                                    <td class="total-label">Shipping Charge</td>
+                                    <td class="total-value"><?= number_format((float) $shipping_charge, 2) ?></td>
                                 </tr>
                             <?php endif; ?>
                             <?php if (!empty($roundoff_amount) && abs((float) $roundoff_amount) > 0): ?>
                                 <tr>
-                                    <td>Round Off</td>
-                                    <td class="text-right"><?= number_format((float) $roundoff_amount, 2) ?></td>
+                                    <td class="total-label">Round Off</td>
+                                    <td class="total-value"><?= number_format((float) $roundoff_amount, 2) ?></td>
                                 </tr>
                             <?php endif; ?>
                             <tr class="total-row">
-                                <td>Total</td>
-                                <td class="text-right"><?= number_format($totalAmountFloat, 2) ?></td>
+                                <td class="total-label">Total</td>
+                                <td class="total-value"><?= number_format($totalAmountFloat, 2) ?></td>
                             </tr>
                         </table>
                     </td>

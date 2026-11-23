@@ -47,12 +47,11 @@ class QrCodeGenerator
         10 => [216, 26, 4, 43, 1, 44, [6, 28, 50]],
     ];
 
-    public static function buildUpiUri(string $upiId, string $payeeName, float $amount, string $description): string
+    public static function buildUpiUri(string $upiId, string $payeeName, string $description): string
     {
         $params = [
             'pa' => trim($upiId),
             'pn' => mb_substr(trim($payeeName), 0, 50),
-            'am' => number_format($amount, 2, '.', ''),
             'cu' => 'INR',
             'tn' => mb_substr(trim(preg_replace('/\s+/', ' ', $description)), 0, 80),
         ];

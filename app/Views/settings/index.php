@@ -177,7 +177,7 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label"><i class="fas fa-qrcode text-primary me-1"></i> UPI ID (for Invoice / Estimate Payment QR Code)</label>
                             <input type="text" class="form-control" name="settings[company_upi_id]" value="<?= esc($settings['company_upi_id'] ?? '') ?>" placeholder="e.g. rht@okicici or 9626077333@ybl">
-                            <small class="text-muted">Used to auto-generate a scannable UPI QR code with invoice/estimate number, customer name, and payable amount.</small>
+                            <small class="text-muted">Used to auto-generate a scannable UPI QR code with invoice/estimate number and customer name.</small>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">UPI Payee Name (Optional)</label>

@@ -202,12 +202,12 @@ foreach ($cfgFields as $k => $def) {
 
 $showBank        = $isVis('bank_details') && !empty($bankAccounts);
 $showUpi         = $isVis('upi_details') && !empty($companyUpi);
-$showUpiQr       = in_array($docType, ['invoice', 'quotation'], true) && $isVis('upi_qr_code') && $companyUpi !== '' && $totalAmountFloat > 0;
+$showUpiQr       = in_array($docType, ['invoice', 'quotation'], true) && $isVis('upi_qr_code') && $companyUpi !== '';
 $upiQrDataUri    = '';
 if ($showUpiQr) {
     try {
         $qrDesc       = trim($docNumber . ' - ' . ($billing_name ?? ''));
-        $upiUri       = \App\Libraries\QrCodeGenerator::buildUpiUri($companyUpi, $companyUpiName ?: $companyName, $totalAmountFloat, $qrDesc);
+        $upiUri       = \App\Libraries\QrCodeGenerator::buildUpiUri($companyUpi, $companyUpiName ?: $companyName, $qrDesc);
         $upiQrDataUri = \App\Libraries\QrCodeGenerator::toDataUri($upiUri, 3, 2);
     } catch (\Throwable $e) {
         $showUpiQr = false;

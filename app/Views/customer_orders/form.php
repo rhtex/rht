@@ -112,7 +112,7 @@
                                         </select>
                                     </div>
                                     <div class="input-group input-group-sm co-product-display-wrap <?= $hasSelected ? '' : 'd-none' ?>">
-                                        <input type="text" name="designs[<?= $idx ?>][product_name]" class="form-control fw-bold co-product-name" value="<?= esc($d['product_name'] ?? '') ?>" placeholder="Product name...">
+                                        <input type="text" name="designs[<?= $idx ?>][product_name]" class="form-control fw-bold bg-light co-product-name" value="<?= esc($d['product_name'] ?? '') ?>" placeholder="Product name..." readonly>
                                         <button type="button" class="btn btn-danger btn-clear-product" title="Remove Product &amp; Reselect"><i class="fas fa-times"></i></button>
                                     </div>
                                 </td>
@@ -197,7 +197,7 @@ $(function() {
                         </select>
                     </div>
                     <div class="input-group input-group-sm co-product-display-wrap ${hasSelected ? '' : 'd-none'}">
-                        <input type="text" name="designs[${idx}][product_name]" class="form-control fw-bold co-product-name" value="${$('<div>').text(preset.product_name || '').html()}" placeholder="Product name...">
+                        <input type="text" name="designs[${idx}][product_name]" class="form-control fw-bold bg-light co-product-name" value="${$('<div>').text(preset.product_name || '').html()}" placeholder="Product name..." readonly>
                         <button type="button" class="btn btn-danger btn-clear-product" title="Remove Product &amp; Reselect"><i class="fas fa-times"></i></button>
                     </div>
                 </td>

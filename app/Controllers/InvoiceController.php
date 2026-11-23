@@ -726,6 +726,27 @@ class InvoiceController extends BaseController
         $data['company_gstin'] = get_setting('company_gstin', '');
         $data['title'] = 'Invoice ' . $data['invoice']['invoice_number'];
 
+        // If requested format is pdf, or ?pdf=1 is passed, stream server-generated PDF
+        if ($this->request->getGet('pdf') || $this->request->getGet('format') === 'pdf') {
+            try {
+                $options = new \Dompdf\Options();
+                $options->set('isRemoteEnabled', true);
+                $options->set('isHtml5ParserEnabled', true);
+                $dompdf = new \Dompdf\Dompdf($options);
+                $html = view('invoices/print', array_merge($data, ['auto_print' => false]));
+                $dompdf->loadHtml($html);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+                $filename = 'Invoice_' . preg_replace('/[^A-Za-z0-9_-]/', '_', $data['invoice']['invoice_number']) . '.pdf';
+                return $this->response
+                    ->setHeader('Content-Type', 'application/pdf')
+                    ->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"')
+                    ->setBody($dompdf->output());
+            } catch (\Throwable $e) {
+                log_message('error', 'Invoice PDF generation error: ' . $e->getMessage());
+            }
+        }
+
         return view('invoices/print', $data);
     }
 

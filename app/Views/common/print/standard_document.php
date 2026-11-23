@@ -107,6 +107,9 @@ foreach (($items ?? []) as $it) {
             margin: 0;
             padding: 10px;
             line-height: 1.35;
+            font-weight: 500;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
         .document-wrapper {
@@ -114,6 +117,7 @@ foreach (($items ?? []) as $it) {
             max-width: 820px;
             margin: 0 auto;
             background: #fff;
+            color: #000;
         }
 
         /* ----------------------------------------------------
@@ -166,9 +170,9 @@ foreach (($items ?? []) as $it) {
         }
 
         .logo-subtext {
-            font-size: 9px;
-            font-weight: bold;
-            color: #222;
+            font-size: 10px;
+            font-weight: 800;
+            color: #000;
             text-align: center;
             margin-top: 2px;
             width: 78px;
@@ -180,8 +184,8 @@ foreach (($items ?? []) as $it) {
         }
 
         .company-name {
-            font-size: 19px;
-            font-weight: 800;
+            font-size: 20px;
+            font-weight: 900;
             letter-spacing: 0.5px;
             color: #002244;
             margin: 0 0 3px 0;
@@ -189,9 +193,10 @@ foreach (($items ?? []) as $it) {
         }
 
         .company-text-line {
-            font-size: 11px;
-            line-height: 1.35;
-            color: #111;
+            font-size: 11.5px;
+            line-height: 1.4;
+            color: #000;
+            font-weight: 550;
         }
 
         .header-title-cell {
@@ -201,8 +206,8 @@ foreach (($items ?? []) as $it) {
         }
 
         .doc-title-main {
-            font-size: 19px;
-            font-weight: 800;
+            font-size: 20px;
+            font-weight: 900;
             letter-spacing: 1px;
             color: #117a38;
             margin: 0 0 4px 0;
@@ -210,8 +215,8 @@ foreach (($items ?? []) as $it) {
         }
 
         .doc-number-main {
-            font-size: 13.5px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 800;
             color: #000;
         }
 
@@ -221,15 +226,16 @@ foreach (($items ?? []) as $it) {
         .invoice-details-box {
             width: 100%;
             border-collapse: collapse;
-            border: 1px solid #000;
+            border: 1.5px solid #000;
             margin-bottom: 0px;
         }
 
         .invoice-details-box td {
             vertical-align: top;
             padding: 6px 8px;
-            font-size: 11px;
-            border-right: 1px solid #000;
+            font-size: 11.5px;
+            border-right: 1.5px solid #000;
+            color: #000;
         }
 
         .invoice-details-box td:last-child {
@@ -246,53 +252,55 @@ foreach (($items ?? []) as $it) {
 
         .meta-line {
             display: flex;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
             line-height: 1.35;
         }
 
         .meta-line .lbl {
-            width: 85px;
-            font-weight: 600;
-            color: #111;
+            width: 90px;
+            font-weight: 700;
+            color: #000;
         }
 
         .meta-line .sep {
             width: 12px;
             text-align: center;
+            font-weight: 700;
         }
 
         .meta-line .val {
             flex: 1;
-            font-weight: bold;
+            font-weight: 700;
             color: #000;
         }
 
         .party-lbl {
-            font-size: 11px;
-            font-weight: bold;
+            font-size: 11.5px;
+            font-weight: 800;
             color: #000;
             margin-bottom: 3px;
         }
 
         .party-name-bold {
-            font-size: 12.5px;
-            font-weight: 800;
+            font-size: 13px;
+            font-weight: 900;
             color: #002266;
             margin-bottom: 2px;
             text-transform: uppercase;
         }
 
         .party-gst-bold {
-            font-size: 12.5px;
-            font-weight: 800;
+            font-size: 13px;
+            font-weight: 900;
             color: #002266;
             margin-bottom: 3px;
         }
 
         .party-addr-text {
-            font-size: 10.5px;
-            line-height: 1.35;
-            color: #222;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #000;
+            font-weight: 550;
         }
 
         /* ----------------------------------------------------
@@ -300,13 +308,14 @@ foreach (($items ?? []) as $it) {
            ---------------------------------------------------- */
         .pos-bar-box {
             width: 100%;
-            border-left: 1px solid #000;
-            border-right: 1px solid #000;
-            border-bottom: 1px solid #000;
-            padding: 4px 8px;
-            font-size: 11.5px;
-            font-weight: bold;
+            border-left: 1.5px solid #000;
+            border-right: 1.5px solid #000;
+            border-bottom: 1.5px solid #000;
+            padding: 5px 8px;
+            font-size: 12px;
+            font-weight: 800;
             background: #fff;
+            color: #000;
         }
 
         /* ----------------------------------------------------
@@ -315,18 +324,20 @@ foreach (($items ?? []) as $it) {
         .items-grid-table {
             width: 100%;
             border-collapse: collapse;
-            border-left: 1px solid #000;
-            border-right: 1px solid #000;
-            border-bottom: 1px solid #000;
+            border-left: 1.5px solid #000;
+            border-right: 1.5px solid #000;
+            border-bottom: 1.5px solid #000;
+            color: #000;
         }
 
         .items-grid-table th {
-            border-bottom: 1px solid #000;
+            border-bottom: 1.5px solid #000;
             border-right: 1px solid #000;
-            padding: 5px 6px;
-            font-size: 11px;
-            font-weight: bold;
+            padding: 6px 6px;
+            font-size: 11.5px;
+            font-weight: 800;
             background: #fff;
+            color: #000;
             text-align: left;
         }
 
@@ -337,8 +348,10 @@ foreach (($items ?? []) as $it) {
         .items-grid-table td {
             border-bottom: 1px solid #000;
             border-right: 1px solid #000;
-            padding: 4px 6px;
-            font-size: 11px;
+            padding: 5px 6px;
+            font-size: 11.5px;
+            font-weight: 550;
+            color: #000;
             vertical-align: top;
         }
 
@@ -348,13 +361,15 @@ foreach (($items ?? []) as $it) {
 
         .text-center { text-align: center; }
         .text-right { text-align: right; }
-        .fw-bold { font-weight: bold; }
+        .fw-bold { font-weight: 800; }
 
         /* Summary row inside the table */
         .summary-notes-td {
-            border-right: 1px solid #000 !important;
+            border-right: 1.5px solid #000 !important;
             padding: 8px !important;
             vertical-align: top !important;
+            font-weight: 600;
+            font-size: 12px;
         }
 
         .summary-totals-td {
@@ -369,15 +384,17 @@ foreach (($items ?? []) as $it) {
 
         .totals-inner-table td {
             border: none !important;
-            padding: 3px 8px;
-            font-size: 11.5px;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #000;
         }
 
         .totals-inner-table tr.total-row td {
-            border-top: 1px solid #000 !important;
-            font-size: 13.5px;
-            font-weight: 800;
-            padding: 5px 8px;
+            border-top: 1.5px solid #000 !important;
+            font-size: 14px;
+            font-weight: 900;
+            padding: 6px 8px;
         }
 
         /* ----------------------------------------------------
@@ -385,12 +402,13 @@ foreach (($items ?? []) as $it) {
            ---------------------------------------------------- */
         .total-words-box {
             width: 100%;
-            border-left: 1px solid #000;
-            border-right: 1px solid #000;
-            border-bottom: 1px solid #000;
-            padding: 5px 8px;
-            font-size: 11.5px;
-            font-weight: bold;
+            border-left: 1.5px solid #000;
+            border-right: 1.5px solid #000;
+            border-bottom: 1.5px solid #000;
+            padding: 6px 8px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #000;
         }
 
         /* ----------------------------------------------------
@@ -399,9 +417,10 @@ foreach (($items ?? []) as $it) {
         .bottom-details-box {
             width: 100%;
             border-collapse: collapse;
-            border-left: 1px solid #000;
-            border-right: 1px solid #000;
-            border-bottom: 1px solid #000;
+            border-left: 1.5px solid #000;
+            border-right: 1.5px solid #000;
+            border-bottom: 1.5px solid #000;
+            color: #000;
         }
 
         .bottom-details-box td {
@@ -411,8 +430,8 @@ foreach (($items ?? []) as $it) {
 
         .bank-terms-left {
             width: 63%;
-            border-right: 1px solid #000;
-            font-size: 10.5px;
+            border-right: 1.5px solid #000;
+            font-size: 11px;
             padding-right: 8px;
         }
 
@@ -420,16 +439,18 @@ foreach (($items ?? []) as $it) {
             width: 37%;
             text-align: center;
             vertical-align: bottom !important;
-            padding-bottom: 16px;
-            font-size: 12px;
-            font-weight: bold;
+            padding-bottom: 18px;
+            font-size: 13px;
+            font-weight: 800;
+            color: #000;
         }
 
         .bank-sec-title {
-            font-size: 11px;
-            font-weight: bold;
+            font-size: 11.5px;
+            font-weight: 800;
             text-decoration: underline;
             margin-bottom: 4px;
+            color: #000;
         }
 
         .bank-accounts-wrap {
@@ -441,8 +462,10 @@ foreach (($items ?? []) as $it) {
         .bank-entry {
             flex: 1;
             padding-right: 8px;
-            font-size: 10px;
-            line-height: 1.35;
+            font-size: 10.5px;
+            line-height: 1.38;
+            font-weight: 550;
+            color: #000;
         }
 
         .bank-entry:first-child {
@@ -454,8 +477,10 @@ foreach (($items ?? []) as $it) {
             border-top: 1px solid #000;
             padding-top: 5px;
             margin-top: 4px;
-            font-size: 10px;
-            line-height: 1.35;
+            font-size: 10.5px;
+            line-height: 1.4;
+            font-weight: 600;
+            color: #000;
         }
 
         /* ----------------------------------------------------

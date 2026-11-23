@@ -196,6 +196,15 @@ class SalesReturnController extends BaseController
         $data['items'] = $data['return']['items'] ?? [];
         $data['title'] = 'Credit Note ' . $data['return']['return_number'];
 
+        if ($this->request->getGet('format') !== 'html') {
+            try {
+                $html = view('sales_returns/print', array_merge($data, ['auto_print' => false]));
+                return \App\Libraries\PdfRenderer::stream($html, 'CreditNote_' . $data['return']['return_number']);
+            } catch (\Throwable $e) {
+                log_message('error', 'Credit Note PDF generation error: ' . $e->getMessage());
+            }
+        }
+
         return view('sales_returns/print', $data);
     }
 }

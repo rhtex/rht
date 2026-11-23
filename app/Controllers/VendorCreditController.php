@@ -134,7 +134,18 @@ class VendorCreditController extends BaseController
             return redirect()->to(site_url('vendor_credits'))->with('error', 'Debit note not found.');
         }
 
-        return view('vendor_credits/print', ['credit' => $credit, 'title' => 'Debit Note ' . $credit['reference_no']]);
+        $printData = ['credit' => $credit, 'title' => 'Debit Note ' . $credit['reference_no']];
+
+        if ($this->request->getGet('format') !== 'html') {
+            try {
+                $html = view('vendor_credits/print', array_merge($printData, ['auto_print' => false]));
+                return \App\Libraries\PdfRenderer::stream($html, 'DebitNote_' . ($credit['reference_no'] ?: $credit['id']));
+            } catch (\Throwable $e) {
+                log_message('error', 'Debit Note PDF generation error: ' . $e->getMessage());
+            }
+        }
+
+        return view('vendor_credits/print', $printData);
     }
 
     public function syncZoho()

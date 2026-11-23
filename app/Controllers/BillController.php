@@ -602,6 +602,15 @@ class BillController extends BaseController
             'title'           => 'Purchase Bill - ' . $bill['bill_number']
         ];
 
+        if ($this->request->getGet('format') !== 'html') {
+            try {
+                $html = view('bills/print', array_merge($data, ['auto_print' => false]));
+                return \App\Libraries\PdfRenderer::stream($html, 'Bill_' . $bill['bill_number']);
+            } catch (\Throwable $e) {
+                log_message('error', 'Bill PDF generation error: ' . $e->getMessage());
+            }
+        }
+
         return view('bills/print', $data);
     }
 

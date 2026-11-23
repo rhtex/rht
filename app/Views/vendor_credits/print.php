@@ -61,7 +61,7 @@ $printData = [
     'total_amount'          => $credit['amount'] ?? 0,
 
     'notes'                 => $credit['notes'] ?? 'Debit note recorded in books.',
-    'auto_print'            => true,
+    'auto_print'            => $auto_print ?? true,
 ];
 
 echo view('common/print/standard_document', $printData);

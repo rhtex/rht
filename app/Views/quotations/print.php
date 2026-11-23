@@ -58,7 +58,7 @@ $printData = [
 
     'notes'                 => $q['notes'] ?? '',
     'terms'                 => $q['terms'] ?? '',
-    'auto_print'            => true,
+    'auto_print'            => $auto_print ?? true,
 ];
 
 echo view('common/print/standard_document', $printData);

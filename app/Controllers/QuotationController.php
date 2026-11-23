@@ -464,6 +464,15 @@ class QuotationController extends BaseController
         $data['company_contact'] = get_setting('company_phone', '');
         $data['title']           = 'Quotation / Estimate #' . $data['quotation']['quotation_number'];
 
+        if ($this->request->getGet('format') !== 'html') {
+            try {
+                $html = view('quotations/print', array_merge($data, ['auto_print' => false]));
+                return \App\Libraries\PdfRenderer::stream($html, 'Quotation_' . $data['quotation']['quotation_number']);
+            } catch (\Throwable $e) {
+                log_message('error', 'Quotation PDF generation error: ' . $e->getMessage());
+            }
+        }
+
         return view('quotations/print', $data);
     }
 }

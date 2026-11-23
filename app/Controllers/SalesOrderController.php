@@ -429,6 +429,15 @@ class SalesOrderController extends BaseController
         $data['company_gstin'] = get_setting('company_gstin', '');
         $data['title'] = 'Sales Order ' . $data['order']['sales_order_number'];
 
+        if ($this->request->getGet('format') !== 'html') {
+            try {
+                $html = view('sales_orders/print', array_merge($data, ['auto_print' => false]));
+                return \App\Libraries\PdfRenderer::stream($html, 'SalesOrder_' . $data['order']['sales_order_number']);
+            } catch (\Throwable $e) {
+                log_message('error', 'Sales Order PDF generation error: ' . $e->getMessage());
+            }
+        }
+
         return view('sales_orders/print', $data);
     }
 }

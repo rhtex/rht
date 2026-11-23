@@ -60,7 +60,7 @@ $printData = [
 
     'notes'                 => $so['notes'] ?? '',
     'terms'                 => $so['terms'] ?? '',
-    'auto_print'            => true,
+    'auto_print'            => $auto_print ?? true,
 ];
 
 echo view('common/print/standard_document', $printData);

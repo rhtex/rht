@@ -461,12 +461,19 @@ class PrintConfig
      */
     public static function getDefaultConfig(string $docType): array
     {
+        $defaultTerms = trim((string) get_setting('print_default_terms', ''));
+        if ($defaultTerms === '') {
+            $defaultTerms = "1. All disputes will be resolved under Rasipuram jurisdiction.\n2. Please ensure payment is made before the due date to avoid an interest charge of 24% on the outstanding amount.\n3. We are not liable for any loss or damage occurring during transit.\n4. Goods once sold are non-returnable under any circumstances.";
+        }
+
         return [
             'document_type'  => $docType,
             'paper_size'     => 'A4',
             'orientation'    => 'portrait',
             'font_family'    => 'Helvetica, Arial, sans-serif',
             'base_font_size' => '10.5px',
+            'default_terms'  => $defaultTerms,
+            'default_notes'  => '',
             'fields'         => self::getFieldCatalog($docType),
         ];
     }
@@ -494,6 +501,8 @@ class PrintConfig
                         'orientation'    => $row['orientation'] ?? 'portrait',
                         'font_family'    => $row['font_family'] ?? 'Helvetica, Arial, sans-serif',
                         'base_font_size' => $row['base_font_size'] ?? '10.5px',
+                        'default_terms'  => $decoded['default_terms'] ?? null,
+                        'default_notes'  => $decoded['default_notes'] ?? null,
                         'fields'         => $decoded['fields'] ?? $decoded,
                     ];
                     return self::mergeConfig($default, $saved);
@@ -516,6 +525,12 @@ class PrintConfig
             if (!empty($saved[$prop])) {
                 $result[$prop] = $saved[$prop];
             }
+        }
+        if (isset($saved['default_terms']) && $saved['default_terms'] !== null) {
+            $result['default_terms'] = (string) $saved['default_terms'];
+        }
+        if (isset($saved['default_notes']) && $saved['default_notes'] !== null) {
+            $result['default_notes'] = (string) $saved['default_notes'];
         }
 
         $savedFields = $saved['fields'] ?? [];

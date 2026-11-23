@@ -43,8 +43,19 @@ class PrintSettingsController extends BaseController
             'orientation'    => $merged['orientation'],
             'font_family'    => $merged['font_family'],
             'base_font_size' => $merged['base_font_size'],
-            'config_json'    => json_encode(['fields' => $merged['fields']]),
+            'config_json'    => json_encode([
+                'default_terms' => $merged['default_terms'] ?? '',
+                'default_notes' => $merged['default_notes'] ?? '',
+                'fields'        => $merged['fields'],
+            ]),
         ]);
+
+        if ($saved && $docType === 'invoice') {
+            try {
+                (new \App\Models\SettingModel())->updateSetting('print_default_terms', $merged['default_terms'] ?? '');
+            } catch (\Throwable $e) {
+            }
+        }
 
         return $this->response->setJSON([
             'success'   => $saved,
@@ -99,7 +110,11 @@ class PrintSettingsController extends BaseController
             'orientation'    => $merged['orientation'],
             'font_family'    => $merged['font_family'],
             'base_font_size' => $merged['base_font_size'],
-            'config_json'    => json_encode(['fields' => $merged['fields']]),
+            'config_json'    => json_encode([
+                'default_terms' => $merged['default_terms'] ?? '',
+                'default_notes' => $merged['default_notes'] ?? '',
+                'fields'        => $merged['fields'],
+            ]),
         ]);
 
         return $this->response->setJSON([
@@ -120,6 +135,9 @@ class PrintSettingsController extends BaseController
         $override = $this->request->getMethod() === 'POST' ? $this->extractOverrideFromPost() : null;
         $sample   = PrintConfig::getSampleData($docType);
         $sample['print_config_override'] = $override;
+        if ($override !== null) {
+            $sample['notes'] = $override['default_notes'] ?? '';
+        }
 
         return view('common/print/standard_document', $sample);
     }
@@ -157,6 +175,8 @@ class PrintSettingsController extends BaseController
             'orientation'    => (string) ($this->request->getPost('orientation') ?? 'portrait'),
             'font_family'    => (string) ($this->request->getPost('font_family') ?? 'Helvetica, Arial, sans-serif'),
             'base_font_size' => (string) ($this->request->getPost('base_font_size') ?? '10.5px'),
+            'default_terms'  => $this->request->getPost('default_terms'),
+            'default_notes'  => $this->request->getPost('default_notes'),
             'fields'         => is_array($fields) ? $fields : [],
         ];
     }

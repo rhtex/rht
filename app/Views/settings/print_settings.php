@@ -129,6 +129,23 @@
             </div>
         </div>
 
+        <!-- Default Notes & Terms Card -->
+        <div class="card mb-3">
+            <div class="card-header bg-light py-2">
+                <strong><i class="fas fa-align-left me-1"></i> Default Terms & Conditions and Notes — <?= esc($docTypes[$activeDoc]['label']) ?></strong>
+            </div>
+            <div class="card-body py-2">
+                <div class="mb-2">
+                    <label class="form-label form-label-sm mb-1">Terms and Conditions</label>
+                    <textarea class="form-control form-control-sm cfg-global" id="cfgDefaultTerms" rows="3" placeholder="Enter default terms and conditions..."><?= esc($config['default_terms'] ?? '') ?></textarea>
+                </div>
+                <div>
+                    <label class="form-label form-label-sm mb-1">Default Notes <small class="text-muted">(Used when document notes are not modified)</small></label>
+                    <textarea class="form-control form-control-sm cfg-global" id="cfgDefaultNotes" rows="2" placeholder="Enter default notes (optional)..."><?= esc($config['default_notes'] ?? '') ?></textarea>
+                </div>
+            </div>
+        </div>
+
         <!-- Sections Accordion -->
         <div class="accordion" id="printSectionsAccordion">
             <?php $secIdx = 0; foreach ($sections as $secKey => $secTitle): $secIdx++; ?>
@@ -275,6 +292,8 @@
     <input type="hidden" name="orientation" id="pfOrientation">
     <input type="hidden" name="font_family" id="pfFontFamily">
     <input type="hidden" name="base_font_size" id="pfBaseFontSize">
+    <input type="hidden" name="default_terms" id="pfDefaultTerms">
+    <input type="hidden" name="default_notes" id="pfDefaultNotes">
     <input type="hidden" name="fields_json" id="pfFieldsJson">
 </form>
 <?= $this->endSection() ?>
@@ -342,6 +361,8 @@
         $('#pfOrientation').val($('#cfgOrientation').val());
         $('#pfFontFamily').val($('#cfgFontFamily').val());
         $('#pfBaseFontSize').val($('#cfgBaseFontSize').val());
+        $('#pfDefaultTerms').val($('#cfgDefaultTerms').val());
+        $('#pfDefaultNotes').val($('#cfgDefaultNotes').val());
         $('#pfFieldsJson').val(JSON.stringify(collectFields()));
         const form = $('#previewPostForm');
         form.attr('action', '<?= site_url('settings/print/preview') ?>').attr('target', 'livePreviewFrame');
@@ -381,6 +402,8 @@
         $('#pfOrientation').val($('#cfgOrientation').val());
         $('#pfFontFamily').val($('#cfgFontFamily').val());
         $('#pfBaseFontSize').val($('#cfgBaseFontSize').val());
+        $('#pfDefaultTerms').val($('#cfgDefaultTerms').val());
+        $('#pfDefaultNotes').val($('#cfgDefaultNotes').val());
         $('#pfFieldsJson').val(JSON.stringify(collectFields()));
         const form = $('#previewPostForm');
         form.attr('action', '<?= site_url('settings/print/pdf-preview') ?>').attr('target', '_blank');
@@ -430,6 +453,8 @@
             orientation:    $('#cfgOrientation').val(),
             font_family:    $('#cfgFontFamily').val(),
             base_font_size: $('#cfgBaseFontSize').val(),
+            default_terms:  $('#cfgDefaultTerms').val(),
+            default_notes:  $('#cfgDefaultNotes').val(),
             fields_json:    JSON.stringify(collectFields())
         }).done(function(res) {
             if (res.csrf_hash) csrfHash = res.csrf_hash;

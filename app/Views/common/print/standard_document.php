@@ -79,15 +79,21 @@ if (empty($bankAccounts) && $isVis('bank_details')) {
     }
 }
 
-// Terms & Conditions
-$termsSetting = trim((string) get_setting('print_default_terms', ''));
-if (empty($termsSetting)) {
+// Terms & Conditions (configured in Print Settings per document type, fallback to global setting / document terms)
+$termsSetting = trim((string) ($printConfig['default_terms'] ?? get_setting('print_default_terms', '')));
+if ($termsSetting === '') {
     $termsSetting = !empty($terms)
         ? (is_array($terms) ? implode("\n", $terms) : $terms)
         : "1. All disputes will be resolved under Rasipuram jurisdiction.\n2. Please ensure payment is made before the due date to avoid an interest charge of 24% on the outstanding amount.\n3. We are not liable for any loss or damage occurring during transit.\n4. Goods once sold are non-returnable under any circumstances.";
 }
 $termsSetting = str_replace(['\r\n', '\r', '\n'], "\n", $termsSetting);
 $termsList    = array_filter(array_map('trim', explode("\n", $termsSetting)));
+
+// Notes: use document's own modified notes if non-empty, otherwise fall back to Print Settings default_notes
+$notes = trim((string) ($notes ?? ''));
+if ($notes === '') {
+    $notes = trim((string) ($printConfig['default_notes'] ?? ''));
+}
 
 // Totals & Tax Type (Intra-state vs Inter-state)
 $totalAmountFloat = (float) ($total_amount ?? 0);

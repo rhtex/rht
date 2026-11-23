@@ -431,13 +431,19 @@
                 </div>
                 <?php endif; ?>
 
+                <?php
+                $invPrintCfg = \App\Libraries\PrintConfig::getForDocument('invoice');
+                $defaultPrintNotes = $invPrintCfg['default_notes'] ?? '';
+                $defaultPrintTerms = $invPrintCfg['default_terms'] ?? "1. Goods once sold cannot be taken back or exchanged.\n2. Please verify the items at the time of delivery.";
+                ?>
                 <div class="mb-3">
                     <label class="form-label">Notes</label>
-                    <textarea name="notes" class="form-control bg-light" rows="3" placeholder="Add notes for the customer..."><?= esc($invoice['notes'] ?? '') ?></textarea>
+                    <textarea name="notes" class="form-control bg-light" rows="3" placeholder="Leave blank to use default Print Settings notes, or enter custom notes..."><?= esc(isset($invoice['notes']) && trim((string) $invoice['notes']) !== '' ? $invoice['notes'] : $defaultPrintNotes) ?></textarea>
+                    <small class="text-muted">Default notes are configured in Print Settings; edit here to override for this invoice.</small>
                 </div>
                 <div class="mt-auto">
                     <label class="form-label">Terms & Conditions</label>
-                    <textarea name="terms" class="form-control bg-light" rows="3" placeholder="Terms..."><?= esc($invoice['terms'] ?? "1. Goods once sold cannot be taken back or exchanged.\n2. Please verify the items at the time of delivery.") ?></textarea>
+                    <textarea name="terms" class="form-control bg-light" rows="3" placeholder="Terms..."><?= esc($invoice['terms'] ?? $defaultPrintTerms) ?></textarea>
                 </div>
             </div>
             

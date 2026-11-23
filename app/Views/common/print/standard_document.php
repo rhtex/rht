@@ -97,7 +97,7 @@ if ($itemCount > 0 && $itemCount < 14) {
     <style>
         @page {
             size: A4 portrait;
-            margin: 8mm 8mm 6mm 8mm;
+            margin: 8mm 8mm 8mm 8mm;
         }
 
         * {
@@ -112,7 +112,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             color: #000;
             background: #fff;
             margin: 0;
-            padding: 8px;
+            padding: 0;
             line-height: 1.35;
             font-weight: 500;
             -webkit-font-smoothing: antialiased;
@@ -121,8 +121,7 @@ if ($itemCount > 0 && $itemCount < 14) {
 
         .document-wrapper {
             width: 100%;
-            max-width: 820px;
-            margin: 0 auto;
+            margin: 0;
             background: #fff;
             color: #000;
             border: 1.2px solid #000;
@@ -268,28 +267,33 @@ if ($itemCount > 0 && $itemCount < 14) {
             width: 34%;
         }
 
-        .meta-line {
-            display: flex;
-            margin-bottom: 3px;
-            line-height: 1.35;
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .meta-line .lbl {
-            width: 90px;
-            font-weight: 700;
+        .meta-table td {
+            padding: 1px 0 !important;
+            border: none !important;
+            font-size: 11px;
             color: #000;
+            vertical-align: top !important;
         }
 
-        .meta-line .sep {
-            width: 12px;
+        .meta-table td.lbl {
+            width: 82px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .meta-table td.sep {
+            width: 10px;
             text-align: center;
             font-weight: 700;
         }
 
-        .meta-line .val {
-            flex: 1;
+        .meta-table td.val {
             font-weight: 700;
-            color: #000;
         }
 
         .party-lbl {
@@ -474,7 +478,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-left: none;
             border-right: none;
             border-top: none;
-            border-bottom: none;
+            border-bottom: 1.2px solid #000;
             color: #000;
         }
 
@@ -513,24 +517,29 @@ if ($itemCount > 0 && $itemCount < 14) {
             color: #000;
         }
 
-        .bank-accounts-wrap {
-            display: flex;
+        .bank-accounts-table {
             width: 100%;
+            border-collapse: collapse;
             margin-bottom: 6px;
         }
 
-        .bank-entry {
-            flex: 1;
-            padding-right: 8px;
+        .bank-entry-cell {
+            vertical-align: top;
+            width: 50%;
+            padding: 0 8px 0 0;
             font-size: 10.5px;
             line-height: 1.38;
             font-weight: 550;
             color: #000;
         }
 
-        .bank-entry:first-child {
+        .bank-entry-cell:first-child {
             border-right: 1.2px solid #000;
-            margin-right: 8px;
+            padding-right: 8px;
+        }
+
+        .bank-entry-cell:last-child {
+            padding-left: 8px;
         }
 
         .terms-wrap {
@@ -538,7 +547,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             padding-top: 5px;
             margin-top: 4px;
             font-size: 10.5px;
-            line-line: 1.4;
+            line-height: 1.4;
             font-weight: 600;
             color: #000;
         }
@@ -691,60 +700,62 @@ if ($itemCount > 0 && $itemCount < 14) {
             <tr>
                 <!-- Col 1: Metadata -->
                 <td class="meta-col">
-                    <div class="meta-line">
-                        <span class="lbl"><?= esc($date_label ?? 'Invoice Date') ?></span>
-                        <span class="sep">:</span>
-                        <span class="val"><?= !empty($document_date) ? date('d-m-Y', strtotime($document_date)) : '-' ?></span>
-                    </div>
-                    <?php if (!empty($payment_terms)): ?>
-                        <div class="meta-line">
-                            <span class="lbl">Terms</span>
-                            <span class="sep">:</span>
-                            <span class="val"><?= esc($payment_terms) ?></span>
-                        </div>
-                    <?php endif; ?>
-                    <?php if (!empty($due_date)): ?>
-                        <div class="meta-line">
-                            <span class="lbl">Due Date</span>
-                            <span class="sep">:</span>
-                            <span class="val"><?= date('d-m-Y', strtotime($due_date)) ?></span>
-                        </div>
-                    <?php endif; ?>
-                    <?php if (!empty($ewaybill_number)): ?>
-                        <div class="meta-line">
-                            <span class="lbl">E-Way Bill#</span>
-                            <span class="sep">:</span>
-                            <span class="val"><?= esc($ewaybill_number) ?></span>
-                        </div>
-                    <?php endif; ?>
-                    <?php if (!empty($transport_name)): ?>
-                        <div class="meta-line">
-                            <span class="lbl">Transport</span>
-                            <span class="sep">:</span>
-                            <span class="val"><?= esc($transport_name) ?></span>
-                        </div>
-                    <?php endif; ?>
-                    <?php if (!empty($waybill_number)): ?>
-                        <div class="meta-line">
-                            <span class="lbl">Waybill/LR#</span>
-                            <span class="sep">:</span>
-                            <span class="val"><?= esc($waybill_number) ?></span>
-                        </div>
-                    <?php endif; ?>
-                    <?php if (!empty($bales_count)): ?>
-                        <div class="meta-line">
-                            <span class="lbl">No of Bales</span>
-                            <span class="sep">:</span>
-                            <span class="val"><?= esc($bales_count) ?></span>
-                        </div>
-                    <?php endif; ?>
-                    <?php if (!empty($reference_number)): ?>
-                        <div class="meta-line">
-                            <span class="lbl">Ref / PO#</span>
-                            <span class="sep">:</span>
-                            <span class="val"><?= esc($reference_number) ?></span>
-                        </div>
-                    <?php endif; ?>
+                    <table class="meta-table">
+                        <tr>
+                            <td class="lbl"><?= esc($date_label ?? 'Invoice Date') ?></td>
+                            <td class="sep">:</td>
+                            <td class="val"><?= !empty($document_date) ? date('d-m-Y', strtotime($document_date)) : '-' ?></td>
+                        </tr>
+                        <?php if (!empty($payment_terms)): ?>
+                            <tr>
+                                <td class="lbl">Terms</td>
+                                <td class="sep">:</td>
+                                <td class="val"><?= esc($payment_terms) ?></td>
+                            </tr>
+                        <?php endif; ?>
+                        <?php if (!empty($due_date)): ?>
+                            <tr>
+                                <td class="lbl">Due Date</td>
+                                <td class="sep">:</td>
+                                <td class="val"><?= date('d-m-Y', strtotime($due_date)) ?></td>
+                            </tr>
+                        <?php endif; ?>
+                        <?php if (!empty($ewaybill_number)): ?>
+                            <tr>
+                                <td class="lbl">E-Way Bill#</td>
+                                <td class="sep">:</td>
+                                <td class="val"><?= esc($ewaybill_number) ?></td>
+                            </tr>
+                        <?php endif; ?>
+                        <?php if (!empty($transport_name)): ?>
+                            <tr>
+                                <td class="lbl">Transport</td>
+                                <td class="sep">:</td>
+                                <td class="val"><?= esc($transport_name) ?></td>
+                            </tr>
+                        <?php endif; ?>
+                        <?php if (!empty($waybill_number)): ?>
+                            <tr>
+                                <td class="lbl">Waybill/LR#</td>
+                                <td class="sep">:</td>
+                                <td class="val"><?= esc($waybill_number) ?></td>
+                            </tr>
+                        <?php endif; ?>
+                        <?php if (!empty($bales_count)): ?>
+                            <tr>
+                                <td class="lbl">No of Bales</td>
+                                <td class="sep">:</td>
+                                <td class="val"><?= esc($bales_count) ?></td>
+                            </tr>
+                        <?php endif; ?>
+                        <?php if (!empty($reference_number)): ?>
+                            <tr>
+                                <td class="lbl">Ref / PO#</td>
+                                <td class="sep">:</td>
+                                <td class="val"><?= esc($reference_number) ?></td>
+                            </tr>
+                        <?php endif; ?>
+                    </table>
                 </td>
 
                 <!-- Col 2: Bill To -->
@@ -927,17 +938,19 @@ if ($itemCount > 0 && $itemCount < 14) {
                 <td class="bank-terms-left">
                     <?php if (!empty($bankAccounts)): ?>
                         <div class="bank-sec-title">Bank Account Details</div>
-                        <div class="bank-accounts-wrap">
-                            <?php foreach ($bankAccounts as $bk): ?>
-                                <div class="bank-entry">
-                                    <div><strong>Bank Name:</strong> <?= esc($bk['bank_name']) ?></div>
-                                    <div><strong>Account Number:</strong> <?= esc($bk['account_number']) ?></div>
-                                    <div><strong>Account Name:</strong><br><?= esc($companyName) ?></div>
-                                    <div><strong>Branch:</strong> <?= esc($bk['branch_name'] ?? 'Rasipuram') ?></div>
-                                    <div><strong>IFSC Code:</strong> <?= esc($bk['ifsc_code']) ?></div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
+                        <table class="bank-accounts-table">
+                            <tr>
+                                <?php foreach ($bankAccounts as $bk): ?>
+                                    <td class="bank-entry-cell">
+                                        <div><strong>Bank Name:</strong> <?= esc($bk['bank_name']) ?></div>
+                                        <div><strong>Account Number:</strong> <?= esc($bk['account_number']) ?></div>
+                                        <div><strong>Account Name:</strong><br><?= esc($companyName) ?></div>
+                                        <div><strong>Branch:</strong> <?= esc($bk['branch_name'] ?? 'Rasipuram') ?></div>
+                                        <div><strong>IFSC Code:</strong> <?= esc($bk['ifsc_code']) ?></div>
+                                    </td>
+                                <?php endforeach; ?>
+                            </tr>
+                        </table>
                     <?php endif; ?>
 
                     <?php if (!empty($termsList)): ?>

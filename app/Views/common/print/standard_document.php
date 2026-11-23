@@ -106,7 +106,7 @@ if ($itemCount > 0 && $itemCount < 14) {
     <style>
         @page {
             size: A4 portrait;
-            margin: 8mm 8mm 8mm 8mm;
+            margin: 5mm 6mm 5mm 6mm;
         }
 
         * {
@@ -150,7 +150,7 @@ if ($itemCount > 0 && $itemCount < 14) {
 
         .header-table td {
             vertical-align: top;
-            padding: 6px 8px;
+            padding: 4px 6px;
             border: none;
         }
 
@@ -255,8 +255,8 @@ if ($itemCount > 0 && $itemCount < 14) {
 
         .invoice-details-box td {
             vertical-align: top;
-            padding: 5px 7px;
-            font-size: 11px;
+            padding: 4px 6px;
+            font-size: 10.5px;
             border-right: 1px solid #000;
             border-top: none;
             border-bottom: none;
@@ -374,8 +374,8 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-bottom: 1px solid #000;
             border-left: none;
             border-right: 1px solid #000;
-            padding: 6px 6px;
-            font-size: 11.5px;
+            padding: 4px 5px;
+            font-size: 11px;
             font-weight: 800;
             background: #fff;
             color: #000;
@@ -391,17 +391,17 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-bottom: 1px solid #000;
             border-left: none;
             border-right: 1px solid #000;
-            padding: 4px 6px;
-            font-size: 11px;
+            padding: 2.5px 5px;
+            font-size: 10px;
             font-weight: 550;
             color: #000;
             vertical-align: top;
-            height: 22px;
+            height: 18px;
         }
 
         .items-grid-table tr.blank-filler-row td {
-            height: 22px;
-            padding: 0 6px;
+            height: 18px;
+            padding: 0 5px;
             border-top: none;
             border-bottom: 1px solid #000;
             border-left: none;
@@ -504,7 +504,7 @@ if ($itemCount > 0 && $itemCount < 14) {
 
         .bottom-details-box td {
             vertical-align: top;
-            padding: 6px 8px;
+            padding: 4px 6px;
             border-top: none;
             border-bottom: none;
         }
@@ -513,8 +513,8 @@ if ($itemCount > 0 && $itemCount < 14) {
             width: 63%;
             border-right: 1px solid #000 !important;
             border-left: none !important;
-            font-size: 11px;
-            padding-right: 8px;
+            font-size: 10px;
+            padding-right: 6px;
         }
 
         .signature-right {
@@ -523,51 +523,51 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-left: none !important;
             text-align: center;
             vertical-align: bottom !important;
-            padding-bottom: 18px;
-            font-size: 13px;
+            padding-bottom: 12px;
+            font-size: 12px;
             font-weight: 800;
             color: #000;
         }
 
         .bank-sec-title {
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 800;
             text-decoration: underline;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             color: #000;
         }
 
         .bank-accounts-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .bank-entry-cell {
             vertical-align: top;
             width: 50%;
-            padding: 0 8px 0 0;
-            font-size: 10.5px;
-            line-height: 1.38;
+            padding: 0 6px 0 0;
+            font-size: 9.5px;
+            line-height: 1.35;
             font-weight: 550;
             color: #000;
         }
 
         .bank-entry-cell:first-child {
             border-right: 1px solid #000;
-            padding-right: 8px;
+            padding-right: 6px;
         }
 
         .bank-entry-cell:last-child {
-            padding-left: 8px;
+            padding-left: 6px;
         }
 
         .terms-wrap {
             border-top: 1px solid #000;
-            padding-top: 5px;
-            margin-top: 4px;
-            font-size: 10.5px;
-            line-height: 1.4;
+            padding-top: 3px;
+            margin-top: 3px;
+            font-size: 9.5px;
+            line-height: 1.35;
             font-weight: 600;
             color: #000;
         }

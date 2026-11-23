@@ -20,7 +20,7 @@
                     <i class="fas fa-truck me-1"></i> e-Way Bill
                 </a>
             <?php endif; ?>
-            <a href="<?= site_url('sales_returns/print/' . $return['id']) ?>?pdf=1" target="_blank" class="btn btn-sm btn-info text-white">
+            <a href="<?= site_url('sales_returns/print/' . $return['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white">
                 <i class="fas fa-print me-1"></i> Print
             </a>
         </div>

@@ -37,7 +37,7 @@
                     <a href="<?= site_url('sales_orders/edit/' . $order['id']) ?>" class="btn btn-sm btn-warning"><i class="fas fa-edit me-1"></i> Edit</a>
                     <?php endif; ?>
                 <?php endif; ?>
-                <a href="<?= site_url('sales_orders/print/' . $order['id']) ?>?pdf=1" target="_blank" class="btn btn-sm btn-info text-white"><i class="fas fa-print me-1"></i> Print</a>
+                <a href="<?= site_url('sales_orders/print/' . $order['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white"><i class="fas fa-print me-1"></i> Print</a>
             </div>
         </div>
         <div class="card-body">

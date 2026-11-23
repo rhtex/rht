@@ -5,7 +5,7 @@
             <h4 class="d-inline mb-0 fw-bold"><?= esc($credit['reference_no']) ?></h4>
         </div>
         <div class="d-flex gap-2 align-items-center">
-            <a href="<?= site_url('vendor_credits/print/' . $credit['id']) ?>?pdf=1" target="_blank" class="btn btn-sm btn-info text-white" title="Print Debit Note">
+            <a href="<?= site_url('vendor_credits/print/' . $credit['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white" title="Print Debit Note">
                 <i class="fas fa-print me-1"></i> Print
             </a>
             <span class="badge bg-<?= in_array($credit['status'], ['Closed', 'Used']) ? 'success' : ($credit['status'] === 'Partial' ? 'warning' : 'primary') ?> fs-6">

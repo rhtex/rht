@@ -602,26 +602,6 @@ class BillController extends BaseController
             'title'           => 'Purchase Bill - ' . $bill['bill_number']
         ];
 
-        if ($this->request->getGet('pdf') || $this->request->getGet('format') === 'pdf') {
-            try {
-                $options = new \Dompdf\Options();
-                $options->set('isRemoteEnabled', true);
-                $options->set('isHtml5ParserEnabled', true);
-                $dompdf = new \Dompdf\Dompdf($options);
-                $html = view('bills/print', array_merge($data, ['auto_print' => false]));
-                $dompdf->loadHtml($html);
-                $dompdf->setPaper('A4', 'portrait');
-                $dompdf->render();
-                $filename = 'Bill_' . preg_replace('/[^A-Za-z0-9_-]/', '_', $bill['bill_number']) . '.pdf';
-                return $this->response
-                    ->setHeader('Content-Type', 'application/pdf')
-                    ->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"')
-                    ->setBody($dompdf->output());
-            } catch (\Throwable $e) {
-                log_message('error', 'Bill PDF generation error: ' . $e->getMessage());
-            }
-        }
-
         return view('bills/print', $data);
     }
 

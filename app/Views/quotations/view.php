@@ -55,7 +55,7 @@
                     </a>
                     <?php endif; ?>
                 <?php endif; ?>
-                <a href="<?= site_url('quotations/print/' . $quotation['id']) ?>?pdf=1" target="_blank" class="btn btn-sm btn-info text-white">
+                <a href="<?= site_url('quotations/print/' . $quotation['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white">
                     <i class="fas fa-print me-1"></i> Print
                 </a>
             </div>

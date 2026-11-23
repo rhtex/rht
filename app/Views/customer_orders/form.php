@@ -132,7 +132,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <input type="number" name="designs[<?= $idx ?>][rate]" class="form-control form-control-sm text-end co-rate" step="0.01" min="0" value="<?= esc(number_format((float) ($d['rate'] ?? 0), 2, '.', '')) ?>">
+                                    <input type="number" name="designs[<?= $idx ?>][rate]" class="form-control form-control-sm text-end co-rate" step="10" min="0" value="<?= esc(number_format((float) ($d['rate'] ?? 0), 2, '.', '')) ?>">
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm">
@@ -215,7 +215,7 @@ $(function() {
                     </div>
                 </td>
                 <td>
-                    <input type="number" name="designs[${idx}][rate]" class="form-control form-control-sm text-end co-rate" step="0.01" min="0" value="${parseFloat(preset.rate || 0).toFixed(2)}">
+                    <input type="number" name="designs[${idx}][rate]" class="form-control form-control-sm text-end co-rate" step="10" min="0" value="${parseFloat(preset.rate || 0).toFixed(2)}">
                 </td>
                 <td class="text-center">
                     <div class="btn-group btn-group-sm">
@@ -334,17 +334,32 @@ $(function() {
         resequenceDesigns();
     });
 
-    // Validate at least one design is filled before submit
+    // Validate at least one design is filled and every selected product has an image
     $('#customerOrderForm').on('submit', function(e) {
         let filled = 0;
+        let missingImgDesignNo = null;
         $('#designsBody .design-row').each(function() {
-            if ($(this).find('.co-product-select').val() || $(this).find('.co-product-name').val().trim() !== '') {
+            const row = $(this);
+            const hasProd = !!(row.find('.co-product-select').val() || row.find('.co-product-name').val().trim() !== '');
+            if (hasProd) {
                 filled++;
+                const hasExistingImg = row.find('.co-existing-image').val().trim() !== '';
+                const fileInput = row.find('.co-image-input')[0];
+                const hasNewFile = !!(fileInput && fileInput.files && fileInput.files.length > 0);
+                if (!hasExistingImg && !hasNewFile && missingImgDesignNo === null) {
+                    missingImgDesignNo = row.find('.design-no-val').val();
+                    row.find('.co-image-input').focus();
+                }
             }
         });
         if (filled === 0) {
             e.preventDefault();
             alert('Please add at least one design product.');
+            return;
+        }
+        if (missingImgDesignNo !== null) {
+            e.preventDefault();
+            alert('Image is mandatory for selected product (Design No. ' + missingImgDesignNo + ').');
         }
     });
 });

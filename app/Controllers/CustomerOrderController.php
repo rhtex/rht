@@ -71,6 +71,11 @@ class CustomerOrderController extends BaseController
         if ($customerId <= 0 || empty($designs)) {
             return redirect()->back()->withInput()->with('error', 'Customer and at least one design line item are required.');
         }
+        foreach ($designs as $d) {
+            if (empty($d['image'])) {
+                return redirect()->back()->withInput()->with('error', 'Design image is mandatory for Design No. ' . $d['design_no'] . '.');
+            }
+        }
 
         $db = \Config\Database::connect();
         $db->transStart();
@@ -137,6 +142,11 @@ class CustomerOrderController extends BaseController
         $designs = $this->collectDesignsFromPost();
         if ($customerId <= 0 || empty($designs)) {
             return redirect()->back()->withInput()->with('error', 'Customer and at least one design line item are required.');
+        }
+        foreach ($designs as $d) {
+            if (empty($d['image'])) {
+                return redirect()->back()->withInput()->with('error', 'Design image is mandatory for Design No. ' . $d['design_no'] . '.');
+            }
         }
 
         $db = \Config\Database::connect();

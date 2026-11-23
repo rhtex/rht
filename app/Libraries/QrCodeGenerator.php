@@ -49,11 +49,16 @@ class QrCodeGenerator
 
     public static function buildUpiUri(string $upiId, string $payeeName, string $description): string
     {
+        $cleanPn = trim(preg_replace('/[^A-Za-z0-9 ]+/', ' ', $payeeName));
+        $cleanPn = preg_replace('/\s+/', ' ', $cleanPn);
+        $cleanTn = trim(preg_replace('/[^A-Za-z0-9 ]+/', ' ', $description));
+        $cleanTn = preg_replace('/\s+/', ' ', $cleanTn);
+
         $params = [
             'pa' => trim($upiId),
-            'pn' => mb_substr(trim($payeeName), 0, 50),
+            'pn' => mb_substr($cleanPn, 0, 50),
+            'tn' => mb_substr($cleanTn, 0, 50),
             'cu' => 'INR',
-            'tn' => mb_substr(trim(preg_replace('/\s+/', ' ', $description)), 0, 80),
         ];
 
         return 'upi://pay?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);

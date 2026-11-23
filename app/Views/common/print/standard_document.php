@@ -543,10 +543,32 @@ if ($itemCount > 0 && $itemCount < 15) {
            ---------------------------------------------------- */
         .items-grid-table {
             page-break-inside: auto;
+            border-bottom: 1.2px solid #000;
         }
 
         .items-grid-table thead {
             display: table-header-group;
+        }
+
+        .items-grid-table thead th {
+            border-top: 1.2px solid #000;
+            border-bottom: 1.2px solid #000;
+        }
+
+        .items-grid-table tfoot {
+            display: table-footer-group;
+        }
+
+        .items-grid-table tfoot td {
+            height: 0px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border-top: 1.2px solid #000 !important;
+            border-bottom: none !important;
+            border-left: none !important;
+            border-right: none !important;
+            line-height: 0 !important;
+            font-size: 0 !important;
         }
 
         .items-grid-table tr {
@@ -571,21 +593,41 @@ if ($itemCount > 0 && $itemCount < 15) {
         }
 
         @media print {
+            @page {
+                size: A4 portrait;
+                margin: 6mm 8mm 6mm 8mm;
+            }
             .no-print { display: none !important; }
             body { 
-                padding: 0; 
+                padding: 0;
+                margin: 0;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
             .document-wrapper {
                 width: 100%;
                 max-width: 100%;
+                margin: 0;
+                border: 1.2px solid #000 !important;
+                box-sizing: border-box;
             }
             .items-grid-table {
                 border-collapse: collapse !important;
             }
             .items-grid-table thead {
                 display: table-header-group !important;
+            }
+            .items-grid-table thead th {
+                border-top: 1.2px solid #000 !important;
+                border-bottom: 1.2px solid #000 !important;
+            }
+            .items-grid-table tfoot {
+                display: table-footer-group !important;
+            }
+            .items-grid-table tfoot td {
+                border-top: 1.2px solid #000 !important;
+                height: 0px !important;
+                padding: 0 !important;
             }
             .items-grid-table tr {
                 page-break-inside: avoid !important;
@@ -806,6 +848,11 @@ if ($itemCount > 0 && $itemCount < 15) {
                     <th class="text-right" style="width: 10%;">Amount</th>
                 </tr>
             </thead>
+            <tfoot>
+                <tr>
+                    <td colspan="7"></td>
+                </tr>
+            </tfoot>
             <tbody>
                 <?php if (!empty($items)): ?>
                     <?php $idx = 1; foreach ($items as $item): ?>

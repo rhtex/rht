@@ -324,18 +324,18 @@ foreach (($items ?? []) as $it) {
         .items-grid-table {
             width: 100%;
             border-collapse: collapse;
-            border-left: 2px solid #000;
-            border-right: 2px solid #000;
-            border-bottom: 2px solid #000;
+            border-left: 2.5px solid #000;
+            border-right: 2.5px solid #000;
+            border-bottom: 2.5px solid #000;
             color: #000;
         }
 
         .items-grid-table th {
-            border-bottom: 2px solid #000;
-            border-right: 1.5px solid #000;
-            padding: 6px 6px;
+            border-bottom: 2.5px solid #000;
+            border-right: 2px solid #000;
+            padding: 7px 6px;
             font-size: 11.5px;
-            font-weight: 800;
+            font-weight: 850;
             background: #fff;
             color: #000;
             text-align: left;
@@ -346,11 +346,11 @@ foreach (($items ?? []) as $it) {
         }
 
         .items-grid-table td {
-            border-bottom: 1.5px solid #000;
-            border-right: 1.5px solid #000;
-            padding: 5px 6px;
+            border-bottom: 2px solid #000;
+            border-right: 2px solid #000;
+            padding: 6px 6px;
             font-size: 11.5px;
-            font-weight: 550;
+            font-weight: 600;
             color: #000;
             vertical-align: top;
         }
@@ -365,7 +365,7 @@ foreach (($items ?? []) as $it) {
 
         /* Summary row inside the table */
         .summary-notes-td {
-            border-right: 2px solid #000 !important;
+            border-right: 2.5px solid #000 !important;
             padding: 8px !important;
             vertical-align: top !important;
             font-weight: 600;

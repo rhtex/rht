@@ -226,7 +226,7 @@ foreach (($items ?? []) as $it) {
         .invoice-details-box {
             width: 100%;
             border-collapse: collapse;
-            border: 2px solid #000;
+            border: 1.2px solid #000;
             margin-bottom: 0px;
         }
 
@@ -234,7 +234,7 @@ foreach (($items ?? []) as $it) {
             vertical-align: top;
             padding: 6px 8px;
             font-size: 11.5px;
-            border-right: 2px solid #000;
+            border-right: 1.2px solid #000;
             color: #000;
         }
 
@@ -308,9 +308,9 @@ foreach (($items ?? []) as $it) {
            ---------------------------------------------------- */
         .pos-bar-box {
             width: 100%;
-            border-left: 2px solid #000;
-            border-right: 2px solid #000;
-            border-bottom: 2px solid #000;
+            border-left: 1.2px solid #000;
+            border-right: 1.2px solid #000;
+            border-bottom: 1.2px solid #000;
             padding: 5px 8px;
             font-size: 12px;
             font-weight: 800;
@@ -324,18 +324,18 @@ foreach (($items ?? []) as $it) {
         .items-grid-table {
             width: 100%;
             border-collapse: collapse;
-            border-left: 2.5px solid #000;
-            border-right: 2.5px solid #000;
-            border-bottom: 2.5px solid #000;
+            border-left: 1.2px solid #000;
+            border-right: 1.2px solid #000;
+            border-bottom: 1.2px solid #000;
             color: #000;
         }
 
         .items-grid-table th {
-            border-bottom: 2.5px solid #000;
-            border-right: 2px solid #000;
-            padding: 7px 6px;
+            border-bottom: 1.2px solid #000;
+            border-right: 1px solid #000;
+            padding: 6px 6px;
             font-size: 11.5px;
-            font-weight: 850;
+            font-weight: 800;
             background: #fff;
             color: #000;
             text-align: left;
@@ -346,11 +346,11 @@ foreach (($items ?? []) as $it) {
         }
 
         .items-grid-table td {
-            border-bottom: 2px solid #000;
-            border-right: 2px solid #000;
-            padding: 6px 6px;
+            border-bottom: 1px solid #000;
+            border-right: 1px solid #000;
+            padding: 5px 6px;
             font-size: 11.5px;
-            font-weight: 600;
+            font-weight: 550;
             color: #000;
             vertical-align: top;
         }
@@ -365,7 +365,7 @@ foreach (($items ?? []) as $it) {
 
         /* Summary row inside the table */
         .summary-notes-td {
-            border-right: 2.5px solid #000 !important;
+            border-right: 1.2px solid #000 !important;
             padding: 8px !important;
             vertical-align: top !important;
             font-weight: 600;
@@ -405,7 +405,7 @@ foreach (($items ?? []) as $it) {
         }
 
         .totals-inner-table tr.total-row td {
-            border-top: 2px solid #000 !important;
+            border-top: 1.2px solid #000 !important;
             font-size: 14px;
             font-weight: 900;
             padding: 6px 8px;
@@ -417,9 +417,9 @@ foreach (($items ?? []) as $it) {
            ---------------------------------------------------- */
         .total-words-box {
             width: 100%;
-            border-left: 2px solid #000;
-            border-right: 2px solid #000;
-            border-bottom: 2px solid #000;
+            border-left: 1.2px solid #000;
+            border-right: 1.2px solid #000;
+            border-bottom: 1.2px solid #000;
             padding: 6px 8px;
             font-size: 12px;
             font-weight: 800;
@@ -432,9 +432,9 @@ foreach (($items ?? []) as $it) {
         .bottom-details-box {
             width: 100%;
             border-collapse: collapse;
-            border-left: 2px solid #000;
-            border-right: 2px solid #000;
-            border-bottom: 2px solid #000;
+            border-left: 1.2px solid #000;
+            border-right: 1.2px solid #000;
+            border-bottom: 1.2px solid #000;
             color: #000;
         }
 
@@ -445,7 +445,7 @@ foreach (($items ?? []) as $it) {
 
         .bank-terms-left {
             width: 63%;
-            border-right: 2px solid #000;
+            border-right: 1.2px solid #000;
             font-size: 11px;
             padding-right: 8px;
         }

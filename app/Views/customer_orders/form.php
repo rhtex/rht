@@ -137,9 +137,14 @@
                 </table>
             </div>
         </div>
-        <div class="card-footer text-end">
-            <a href="<?= site_url('customer_orders') ?>" class="btn btn-secondary me-2">Cancel</a>
-            <button type="submit" class="btn btn-primary fw-bold"><i class="fas fa-save me-1"></i> <?= $order ? 'Update Customer Order' : 'Save Customer Order' ?></button>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <button type="button" class="btn btn-sm btn-outline-success fw-bold" id="btnAddDesignBottom">
+                <i class="fas fa-plus me-1"></i> Add Another Product / Design
+            </button>
+            <div>
+                <a href="<?= site_url('customer_orders') ?>" class="btn btn-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary fw-bold"><i class="fas fa-save me-1"></i> <?= $order ? 'Update Customer Order' : 'Save Customer Order' ?></button>
+            </div>
         </div>
     </div>
 </form>
@@ -216,7 +221,7 @@ $(function() {
         resequenceDesigns();
     }
 
-    $('#btnAddDesign').on('click', function() {
+    $('#btnAddDesign, #btnAddDesignBottom').on('click', function() {
         appendDesignRow();
     });
 
@@ -225,9 +230,7 @@ $(function() {
         const row = $(this).closest('.design-row');
         if (opt.val()) {
             row.find('.co-product-name').val(opt.data('name'));
-            if (parseFloat(row.find('.co-rate').val()) === 0) {
-                row.find('.co-rate').val(parseFloat(opt.data('rate') || 0).toFixed(2));
-            }
+            row.find('.co-rate').val(parseFloat(opt.data('rate') || 0).toFixed(2));
         }
     });
 

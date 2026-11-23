@@ -139,7 +139,7 @@ class VendorCreditController extends BaseController
         if ($this->request->getGet('format') !== 'html') {
             try {
                 $html = view('vendor_credits/print', array_merge($printData, ['auto_print' => false]));
-                return \App\Libraries\PdfRenderer::stream($html, 'DebitNote_' . ($credit['reference_no'] ?: $credit['id']));
+                return \App\Libraries\PdfRenderer::streamDocument('debit_note', $html, 'DebitNote_' . ($credit['reference_no'] ?: $credit['id']));
             } catch (\Throwable $e) {
                 log_message('error', 'Debit Note PDF generation error: ' . $e->getMessage());
             }

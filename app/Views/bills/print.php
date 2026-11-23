@@ -24,6 +24,7 @@ foreach (($b['items'] ?? []) as $it) {
 }
 
 $printData = [
+    'document_type'         => 'bill',
     'document_title'        => 'PURCHASE BILL',
     'document_number_label' => 'Bill#',
     'document_number'       => $b['bill_number'] ?? '',

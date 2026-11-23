@@ -29,6 +29,7 @@ foreach (($inv['items'] ?? []) as $it) {
 }
 
 $printData = [
+    'document_type'         => 'invoice',
     'document_title'        => 'TAX INVOICE',
     'document_number_label' => 'Invoice#',
     'document_number'       => $inv['invoice_number'] ?? '',
@@ -40,6 +41,10 @@ $printData = [
     'waybill_number'        => $inv['waybill_number'] ?? null,
     'bales_count'           => !empty($inv['bales_count']) ? $inv['bales_count'] : (!empty($inv['packages_count']) ? $inv['packages_count'] : null),
     'reference_number'      => $inv['reference_number'] ?? null,
+    'order_number'          => $inv['so_number'] ?? null,
+    'is_inter_state'        => $inv['is_inter_state'] ?? null,
+    'billing_email'         => $inv['customer_email'] ?? null,
+    'billing_state_code'    => $inv['customer_state_gst_code'] ?? null,
     
     // Customer Billing & Shipping
     'bill_to_heading'       => 'Bill To :',

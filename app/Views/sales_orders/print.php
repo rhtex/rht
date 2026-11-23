@@ -16,6 +16,7 @@ foreach (($so['items'] ?? []) as $it) {
 }
 
 $printData = [
+    'document_type'         => 'sales_order',
     'document_title'        => 'SALES ORDER',
     'document_number_label' => 'Order#',
     'document_number'       => $so['sales_order_number'] ?? '',

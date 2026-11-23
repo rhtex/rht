@@ -6,25 +6,32 @@
  * BORDER SPECIFICATION
  * --------------------
  *  - One line weight: 1px solid #000. Nothing else.
- *  - Outer edges of every page are drawn ONLY by .page-frame (position: fixed),
- *    which the engine repeats on every page at identical coordinates.
+ *  - Outer edges of every page are drawn ONLY by the page frame:
+ *      PDF  -> PdfRenderer draws a rectangle on each page canvas, 8mm from every edge
+ *      HTML -> .page-frame (position: fixed), repeated by Chrome/Edge on every page
  *  - Single-owner rule for shared edges:
  *      * between stacked sections  -> the upper section's border-bottom
  *      * between side-by-side cols -> the left column's border-right (last col: none)
  *      * no content element draws an outer left / right / top border
- *  - Frame bottom sits 3mm below the content area so a row line at a page break
- *    never lands on (and thickens) the frame line.
+ *  - Content bottom margin is 10mm vs. frame at 8mm, so a row line at a page break
+ *    never lands on (and thickens) the frame's bottom line.
+ *  - No page numbers.
  *
  * TYPOGRAPHY
  * ----------
  *  - Helvetica / Arial, weights normal + bold only (Dompdf has no in-between weights).
  */
 $printFontSize = $printFontSize ?? '10.5px';
+$paperSize     = $paperSize ?? 'A4';
+$orientation   = ($orientation ?? 'portrait') === 'landscape' ? 'landscape' : 'portrait';
+$fontFamily    = $fontFamily ?? 'Helvetica, Arial, sans-serif';
+$screenWidth   = $orientation === 'landscape' ? '297mm' : '210mm';
+$screenHeight  = $orientation === 'landscape' ? '210mm' : '297mm';
 ?>
 <style>
     @page {
-        size: A4 portrait;
-        margin: 8mm 8mm 12mm 8mm;
+        size: <?= esc($paperSize) ?> <?= esc($orientation) ?>;
+        margin: 8mm 8mm 10mm 8mm;
     }
 
     * {
@@ -33,14 +40,17 @@ $printFontSize = $printFontSize ?? '10.5px';
         print-color-adjust: exact !important;
     }
 
-    html, body {
+    /* NOTE: never set margin on <html> – Dompdf maps the @page margins onto the
+       html element, so an html margin reset silently removes the page margins
+       (content then runs to the paper edge and over the bottom frame line). */
+    body {
         margin: 0;
         padding: 0;
     }
 
     body {
-        font-family: Helvetica, Arial, sans-serif;
-        font-size: 10.5px;
+        font-family: <?= $fontFamily ?>;
+        font-size: <?= esc($printFontSize) ?>;
         font-weight: bold;
         line-height: 1.35;
         color: #000;
@@ -53,7 +63,7 @@ $printFontSize = $printFontSize ?? '10.5px';
     }
 
     td, th {
-        font-family: Helvetica, Arial, sans-serif;
+        font-family: <?= $fontFamily ?>;
         font-weight: bold;
     }
 
@@ -61,13 +71,18 @@ $printFontSize = $printFontSize ?? '10.5px';
     .text-right  { text-align: right; }
     .fw-bold     { font-weight: bold; }
 
-    /* ---------- OUTER PAGE FRAME (repeated on every page) ---------- */
+    /* ---------- OUTER PAGE FRAME ----------
+       PDF (default): drawn per page by App\Libraries\PdfRenderer on the canvas,
+                      8mm from every page edge; this element is not output.
+       Browser print (?format=html): fixed element, which Chrome/Edge repeat on
+                      every printed page. Kept inside the page area (bottom: 0)
+                      because anything outside the page area is clipped. */
     .page-frame {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
-        bottom: -3mm;
+        bottom: 0;
         border: 1px solid #000;
         z-index: -1;
     }
@@ -422,16 +437,16 @@ $printFontSize = $printFontSize ?? '10.5px';
     @media screen {
         html { background: #e9ecef; }
         body {
-            width: 210mm;
-            min-height: 297mm;
+            width: <?= $screenWidth ?>;
+            min-height: <?= $screenHeight ?>;
             margin: 10px auto;
-            padding: 8mm 8mm 12mm 8mm;
+            padding: 8mm 8mm 10mm 8mm;
             background: #fff;
             position: relative;
         }
         .page-frame {
             position: absolute;
-            top: 8mm; left: 8mm; right: 8mm; bottom: 9mm;
+            top: 8mm; left: 8mm; right: 8mm; bottom: 8mm;
         }
     }
 

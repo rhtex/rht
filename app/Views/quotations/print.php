@@ -16,6 +16,7 @@ foreach (($q['items'] ?? []) as $it) {
 }
 
 $printData = [
+    'document_type'         => 'quotation',
     'document_title'        => 'ESTIMATE / QUOTATION',
     'document_number_label' => 'Quotation#',
     'document_number'       => $q['quotation_number'] ?? '',

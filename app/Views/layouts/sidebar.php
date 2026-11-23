@@ -596,6 +596,12 @@
                                         <p><?= lang("App.app_settings") ?></p>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="<?= site_url('settings/print') ?>" class="nav-link <?= ($segment1 === 'settings' && $segment2 === 'print') ? 'active' : '' ?>">
+                                        <i class="fas fa-print nav-icon text-primary"></i>
+                                        <p>Print Settings</p>
+                                    </a>
+                                </li>
                                 <?php endif; ?>
                                 <?php if(can('country.view')): ?>
                                 <li class="nav-item">

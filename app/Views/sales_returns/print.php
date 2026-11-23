@@ -16,6 +16,7 @@ foreach (($items ?? ($return['items'] ?? [])) as $it) {
 }
 
 $printData = [
+    'document_type'         => 'credit_note',
     'document_title'        => 'CREDIT NOTE',
     'document_number_label' => 'Credit Note#',
     'document_number'       => $return['return_number'] ?? '',

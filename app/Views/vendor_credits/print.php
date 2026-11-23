@@ -27,6 +27,7 @@ if (!empty($credit['items'])) {
 }
 
 $printData = [
+    'document_type'         => 'debit_note',
     'document_title'        => 'DEBIT NOTE',
     'document_number_label' => 'Debit Note#',
     'document_number'       => $credit['reference_no'] ?? '',

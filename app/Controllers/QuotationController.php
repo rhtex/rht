@@ -467,7 +467,7 @@ class QuotationController extends BaseController
         if ($this->request->getGet('format') !== 'html') {
             try {
                 $html = view('quotations/print', array_merge($data, ['auto_print' => false]));
-                return \App\Libraries\PdfRenderer::stream($html, 'Quotation_' . $data['quotation']['quotation_number']);
+                return \App\Libraries\PdfRenderer::streamDocument('quotation', $html, 'Quotation_' . $data['quotation']['quotation_number']);
             } catch (\Throwable $e) {
                 log_message('error', 'Quotation PDF generation error: ' . $e->getMessage());
             }

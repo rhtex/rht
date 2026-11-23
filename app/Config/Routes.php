@@ -131,6 +131,16 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->get('settings', 'SettingController::index', ['filter' => 'permission:setting.view']);
     $routes->post('settings/update', 'SettingController::update', ['filter' => 'permission:setting.edit']);
 
+    // Print Settings / Document Print Configuration
+    $routes->group('settings/print', ['filter' => 'permission:setting.view'], function ($routes) {
+        $routes->get('', 'PrintSettingsController::index');
+        $routes->post('save', 'PrintSettingsController::save', ['filter' => 'permission:setting.edit']);
+        $routes->post('reset', 'PrintSettingsController::reset', ['filter' => 'permission:setting.edit']);
+        $routes->post('copy', 'PrintSettingsController::copy', ['filter' => 'permission:setting.edit']);
+        $routes->match(['get', 'post'], 'preview', 'PrintSettingsController::preview');
+        $routes->match(['get', 'post'], 'pdf-preview', 'PrintSettingsController::pdfPreview');
+    });
+
     // Salary Management
     $routes->get('salaries', 'SalaryController::index', ['filter' => 'permission:salary.view']);
     $routes->get('salaries/calculate', 'SalaryController::calculate', ['filter' => 'permission:salary.create']);

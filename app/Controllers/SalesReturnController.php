@@ -199,7 +199,7 @@ class SalesReturnController extends BaseController
         if ($this->request->getGet('format') !== 'html') {
             try {
                 $html = view('sales_returns/print', array_merge($data, ['auto_print' => false]));
-                return \App\Libraries\PdfRenderer::stream($html, 'CreditNote_' . $data['return']['return_number']);
+                return \App\Libraries\PdfRenderer::streamDocument('credit_note', $html, 'CreditNote_' . $data['return']['return_number']);
             } catch (\Throwable $e) {
                 log_message('error', 'Credit Note PDF generation error: ' . $e->getMessage());
             }

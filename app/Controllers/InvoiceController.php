@@ -730,7 +730,7 @@ class InvoiceController extends BaseController
         if ($this->request->getGet('format') !== 'html') {
             try {
                 $html = view('invoices/print', array_merge($data, ['auto_print' => false]));
-                return \App\Libraries\PdfRenderer::stream($html, 'Invoice_' . $data['invoice']['invoice_number']);
+                return \App\Libraries\PdfRenderer::streamDocument('invoice', $html, 'Invoice_' . $data['invoice']['invoice_number']);
             } catch (\Throwable $e) {
                 log_message('error', 'Invoice PDF generation error: ' . $e->getMessage());
             }

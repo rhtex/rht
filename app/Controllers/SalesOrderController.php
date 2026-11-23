@@ -432,7 +432,7 @@ class SalesOrderController extends BaseController
         if ($this->request->getGet('format') !== 'html') {
             try {
                 $html = view('sales_orders/print', array_merge($data, ['auto_print' => false]));
-                return \App\Libraries\PdfRenderer::stream($html, 'SalesOrder_' . $data['order']['sales_order_number']);
+                return \App\Libraries\PdfRenderer::streamDocument('sales_order', $html, 'SalesOrder_' . $data['order']['sales_order_number']);
             } catch (\Throwable $e) {
                 log_message('error', 'Sales Order PDF generation error: ' . $e->getMessage());
             }

@@ -84,8 +84,8 @@ foreach (($items ?? []) as $it) {
 // Calculate minimum rows to cleanly fill the page and prevent empty whitespace
 $itemCount = count($items ?? []);
 $minRowsNeeded = 0;
-if ($itemCount > 0 && $itemCount < 15) {
-    $minRowsNeeded = 15 - $itemCount;
+if ($itemCount > 0 && $itemCount < 14) {
+    $minRowsNeeded = 14 - $itemCount;
 }
 ?>
 <!DOCTYPE html>
@@ -97,7 +97,7 @@ if ($itemCount > 0 && $itemCount < 15) {
     <style>
         @page {
             size: A4 portrait;
-            margin: 8mm 10mm 10mm 10mm;
+            margin: 8mm 8mm 6mm 8mm;
         }
 
         * {
@@ -112,7 +112,7 @@ if ($itemCount > 0 && $itemCount < 15) {
             color: #000;
             background: #fff;
             margin: 0;
-            padding: 10px;
+            padding: 8px;
             line-height: 1.35;
             font-weight: 500;
             -webkit-font-smoothing: antialiased;
@@ -137,23 +137,23 @@ if ($itemCount > 0 && $itemCount < 15) {
             border-collapse: collapse;
             border-bottom: 1.2px solid #000;
             margin-bottom: 0px;
-            padding: 8px 10px;
+            padding: 0;
         }
 
         .header-table td {
             vertical-align: top;
-            padding: 8px 10px;
+            padding: 6px 8px;
         }
 
         .header-logo-cell {
-            width: 90px;
+            width: 80px;
             text-align: left;
             vertical-align: middle !important;
         }
 
         .logo-circle {
-            width: 78px;
-            height: 78px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             border: 2px solid #003366;
             display: inline-flex;
@@ -165,7 +165,7 @@ if ($itemCount > 0 && $itemCount < 15) {
 
         .logo-circle .monogram-r {
             font-family: 'Times New Roman', serif;
-            font-size: 54px;
+            font-size: 50px;
             font-weight: bold;
             font-style: italic;
             color: #e6b800;
@@ -181,31 +181,31 @@ if ($itemCount > 0 && $itemCount < 15) {
         }
 
         .logo-subtext {
-            font-size: 10px;
+            font-size: 9.5px;
             font-weight: 800;
             color: #000;
             text-align: center;
             margin-top: 2px;
-            width: 78px;
+            width: 70px;
             letter-spacing: 0.5px;
         }
 
         .header-company-cell {
-            padding-left: 12px !important;
+            padding-left: 10px !important;
         }
 
         .company-name {
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 900;
             letter-spacing: 0.5px;
             color: #002244;
-            margin: 0 0 3px 0;
+            margin: 0 0 2px 0;
             text-transform: uppercase;
         }
 
         .company-text-line {
-            font-size: 11.5px;
-            line-height: 1.4;
+            font-size: 11px;
+            line-height: 1.35;
             color: #000;
             font-weight: 550;
         }
@@ -213,20 +213,20 @@ if ($itemCount > 0 && $itemCount < 15) {
         .header-title-cell {
             text-align: right;
             vertical-align: middle !important;
-            width: 250px;
+            width: 240px;
         }
 
         .doc-title-main {
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 900;
             letter-spacing: 1px;
             color: #117a38;
-            margin: 0 0 4px 0;
+            margin: 0 0 3px 0;
             text-transform: uppercase;
         }
 
         .doc-number-main {
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 800;
             color: #000;
         }
@@ -246,8 +246,8 @@ if ($itemCount > 0 && $itemCount < 15) {
 
         .invoice-details-box td {
             vertical-align: top;
-            padding: 6px 8px;
-            font-size: 11.5px;
+            padding: 5px 7px;
+            font-size: 11px;
             border-right: 1.2px solid #000;
             color: #000;
         }
@@ -362,16 +362,16 @@ if ($itemCount > 0 && $itemCount < 15) {
         .items-grid-table td {
             border-bottom: 1px solid #000;
             border-right: 1px solid #000;
-            padding: 5px 6px;
-            font-size: 11.5px;
+            padding: 4px 6px;
+            font-size: 11px;
             font-weight: 550;
             color: #000;
             vertical-align: top;
-            height: 24px;
+            height: 22px;
         }
 
         .items-grid-table tr.blank-filler-row td {
-            height: 24px;
+            height: 22px;
             padding: 0 6px;
             border-bottom: 1px solid #000;
             color: transparent;
@@ -524,13 +524,14 @@ if ($itemCount > 0 && $itemCount < 15) {
            7. PAGE FOOTER
            ---------------------------------------------------- */
         .footer-line {
-            margin-top: 8px;
+            margin-top: 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 10px;
             color: #444;
             letter-spacing: 0.5px;
+            page-break-inside: avoid;
         }
 
         .footer-line .powered {
@@ -595,7 +596,7 @@ if ($itemCount > 0 && $itemCount < 15) {
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 6mm 8mm 6mm 8mm;
+                margin: 5mm 6mm 4mm 6mm;
             }
             .no-print { display: none !important; }
             body { 
@@ -610,6 +611,7 @@ if ($itemCount > 0 && $itemCount < 15) {
                 margin: 0;
                 border: 1.2px solid #000 !important;
                 box-sizing: border-box;
+                page-break-after: avoid;
             }
             .items-grid-table {
                 border-collapse: collapse !important;
@@ -639,6 +641,9 @@ if ($itemCount > 0 && $itemCount < 15) {
             .bottom-details-box {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+            }
+            .footer-line {
+                margin-top: 2px !important;
             }
         }
 

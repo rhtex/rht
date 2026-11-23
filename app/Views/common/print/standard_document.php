@@ -41,6 +41,15 @@ $companyPhone   = trim((string) get_setting('company_print_phone', get_setting('
 $companyEmail   = trim((string) get_setting('company_print_email', get_setting('company_email', '')));
 $companyGstin   = trim((string) get_setting('company_print_gstin', get_setting('company_gstin', '')));
 $companyLogoUrl = trim((string) get_setting('company_logo_url', ''));
+$defaultMonogramPath = FCPATH . 'assets/images/default_monogram_r.png';
+if (empty($companyLogoUrl) && file_exists($defaultMonogramPath)) {
+    $companyLogoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($defaultMonogramPath));
+} elseif (!empty($companyLogoUrl) && file_exists(str_replace(base_url(), FCPATH, $companyLogoUrl))) {
+    $localPath = str_replace(base_url(), FCPATH, $companyLogoUrl);
+    $companyLogoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($localPath));
+} else {
+    $companyLogoBase64 = !empty($companyLogoUrl) ? $companyLogoUrl : '';
+}
 $headerFont     = get_setting('print_header_font', "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif");
 $printFontSize  = get_setting('print_font_size', '12px');
 
@@ -328,17 +337,22 @@ if ($itemCount > 0 && $itemCount < 14) {
         /* ----------------------------------------------------
            3. PLACE OF SUPPLY BAR (ENCLOSED BOX)
            ---------------------------------------------------- */
-        .pos-bar-box {
+        .pos-bar-table {
             width: 100%;
+            border-collapse: collapse;
             border-left: none;
             border-right: none;
             border-top: none;
             border-bottom: 1.2px solid #000;
+        }
+
+        .pos-bar-table td {
             padding: 5px 8px;
             font-size: 12px;
             font-weight: 800;
             background: #fff;
             color: #000;
+            border: none;
         }
 
         /* ----------------------------------------------------
@@ -352,6 +366,7 @@ if ($itemCount > 0 && $itemCount < 14) {
             border-top: none;
             border-bottom: 1.2px solid #000;
             color: #000;
+            table-layout: fixed;
         }
 
         .items-grid-table th {
@@ -457,16 +472,21 @@ if ($itemCount > 0 && $itemCount < 14) {
         /* ----------------------------------------------------
            5. TOTAL IN WORDS BAR (BOXED)
            ---------------------------------------------------- */
-        .total-words-box {
+        .total-words-table {
             width: 100%;
+            border-collapse: collapse;
             border-left: none;
             border-right: none;
             border-top: none;
             border-bottom: 1.2px solid #000;
+        }
+
+        .total-words-table td {
             padding: 6px 8px;
             font-size: 12px;
             font-weight: 800;
             color: #000;
+            border: none;
         }
 
         /* ----------------------------------------------------
@@ -595,8 +615,8 @@ if ($itemCount > 0 && $itemCount < 14) {
         }
 
         .invoice-details-box,
-        .pos-bar-box,
-        .total-words-box,
+        .pos-bar-table,
+        .total-words-table,
         .bottom-details-box,
         .summary-totals-td,
         .summary-notes-td,
@@ -664,10 +684,13 @@ if ($itemCount > 0 && $itemCount < 14) {
         <table class="header-table">
             <tr>
                 <td class="header-logo-cell">
-                    <?php if (!empty($companyLogoUrl)): ?>
+                    <?php if (!empty($companyLogoBase64)): ?>
                         <div class="logo-circle">
-                            <img src="<?= esc($companyLogoUrl) ?>" alt="Logo">
+                            <img src="<?= $companyLogoBase64 ?>" alt="Logo">
                         </div>
+                        <?php if (empty($companyLogoUrl)): ?>
+                            <div class="logo-subtext">Since 1969</div>
+                        <?php endif; ?>
                     <?php else: ?>
                         <div class="logo-circle">
                             <span class="monogram-r">R</span>
@@ -809,9 +832,11 @@ if ($itemCount > 0 && $itemCount < 14) {
 
         <!-- 3. PLACE OF SUPPLY BAR (BOXED) -->
         <?php if (!empty($place_of_supply)): ?>
-            <div class="pos-bar-box">
-                Place Of Supply : <?= esc($place_of_supply) ?>
-            </div>
+            <table class="pos-bar-table">
+                <tr>
+                    <td>Place Of Supply : <?= esc($place_of_supply) ?></td>
+                </tr>
+            </table>
         <?php endif; ?>
 
         <!-- 4. FULLY BOXED LINE ITEMS TABLE -->
@@ -928,9 +953,11 @@ if ($itemCount > 0 && $itemCount < 14) {
         </table>
 
         <!-- 5. TOTAL IN WORDS BAR (BOXED) -->
-        <div class="total-words-box">
-            Total In Words : <?= esc($totalInWords) ?>
-        </div>
+        <table class="total-words-table">
+            <tr>
+                <td>Total In Words : <?= esc($totalInWords) ?></td>
+            </tr>
+        </table>
 
         <!-- 6. BOTTOM BANK ACCOUNTS & TERMS BOX -->
         <table class="bottom-details-box">

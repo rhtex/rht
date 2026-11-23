@@ -84,3 +84,77 @@ if (!function_exists('zoho_sync_badge')) {
         return $badgeHtml;
     }
 }
+
+if (!function_exists('number_to_indian_currency_words')) {
+    /**
+     * Convert a numeric amount to Indian currency words format
+     * E.g. 106722 => "Rupees One Lakh Six Thousand Seven Hundred Twenty-Two Only"
+     */
+    function number_to_indian_currency_words($number): string
+    {
+        $amount = (float) $number;
+        if ($amount < 0.001) {
+            return 'Rupees Zero Only';
+        }
+
+        $no = floor($amount);
+        $decimal = round(($amount - $no) * 100);
+        $digits_length = strlen((string)$no);
+        $i = 0;
+        $str = [];
+        $words = [
+            0 => '', 1 => 'One', 2 => 'Two',
+            3 => 'Three', 4 => 'Four', 5 => 'Five', 6 => 'Six',
+            7 => 'Seven', 8 => 'Eight', 9 => 'Nine',
+            10 => 'Ten', 11 => 'Eleven', 12 => 'Twelve',
+            13 => 'Thirteen', 14 => 'Fourteen', 15 => 'Fifteen',
+            16 => 'Sixteen', 17 => 'Seventeen', 18 => 'Eighteen',
+            19 => 'Nineteen', 20 => 'Twenty', 30 => 'Thirty',
+            40 => 'Forty', 50 => 'Fifty', 60 => 'Sixty',
+            70 => 'Seventy', 80 => 'Eighty', 90 => 'Ninety'
+        ];
+        $digits = ['', 'Hundred', 'Thousand', 'Lakh', 'Crore'];
+
+        while ($i < $digits_length) {
+            $divider = ($i == 2) ? 10 : 100;
+            $number_part = $no % $divider;
+            $no = floor($no / $divider);
+            $i += ($divider == 10) ? 1 : 2;
+
+            if ($number_part) {
+                $plural = (($counter = count($str)) && $number_part > 9) ? 's' : '';
+                $hundred = ($counter == 1 && $str[0]) ? ' and ' : '';
+                $part_str = '';
+                if ($number_part < 21) {
+                    $part_str = $words[$number_part];
+                } else {
+                    $ten = floor($number_part / 10) * 10;
+                    $unit = $number_part % 10;
+                    $part_str = $words[$ten] . ($unit ? '-' . $words[$unit] : '');
+                }
+                $unit_label = $digits[$counter] ?? '';
+                $str[] = trim($part_str . ' ' . $unit_label);
+            } else {
+                $str[] = '';
+            }
+        }
+
+        $str = array_filter($str);
+        $str = array_reverse($str);
+        $rupees = implode(' ', $str);
+
+        $paise = '';
+        if ($decimal > 0) {
+            if ($decimal < 21) {
+                $paise_words = $words[$decimal];
+            } else {
+                $ten = floor($decimal / 10) * 10;
+                $unit = $decimal % 10;
+                $paise_words = $words[$ten] . ($unit ? '-' . $words[$unit] : '');
+            }
+            $paise = ' and Paise ' . $paise_words;
+        }
+
+        return 'Rupees ' . trim($rupees) . $paise . ' Only';
+    }
+}

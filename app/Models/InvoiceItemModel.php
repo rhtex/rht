@@ -27,7 +27,7 @@ class InvoiceItemModel extends Model
      */
     public function getItemsByInvoice($invoiceId)
     {
-        return $this->select('invoice_items.*, products.product_name, products.barcode, products.hsn_code as product_hsn')
+        return $this->select('invoice_items.*, products.product_name, products.unit, products.barcode, products.hsn_code as product_hsn')
             ->join('products', 'products.id = invoice_items.product_id', 'left')
             ->where('invoice_items.invoice_id', $invoiceId)
             ->findAll();

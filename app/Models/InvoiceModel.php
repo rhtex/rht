@@ -155,10 +155,29 @@ class InvoiceModel extends Model
      */
     public function getInvoiceById($id)
     {
-        $invoice = $this->select('invoices.*, customers.name as customer_name, states.id as customer_state_id, states.name as customer_state')
+        $invoice = $this->select('invoices.*, 
+            customers.name as customer_name, 
+            customers.gstin as customer_gstin,
+            customers.phone as customer_phone,
+            customers.whatsapp_number as customer_whatsapp,
+            customers.credit_period_days as customer_credit_period_days,
+            states.id as customer_state_id, 
+            states.name as customer_state,
+            states.gst_state_code as customer_state_gst_code,
+            addresses.address_line1 as customer_address_1,
+            addresses.address_line2 as customer_address_2,
+            addresses.city as customer_city,
+            addresses.pincode as customer_pincode,
+            ship_addr.address_line1 as shipping_address_1,
+            ship_addr.address_line2 as shipping_address_2,
+            ship_addr.city as shipping_city,
+            ship_addr.pincode as shipping_pincode,
+            ship_states.name as shipping_state')
             ->join('customers', 'customers.id = invoices.customer_id', 'left')
             ->join('addresses', 'addresses.owner_id = customers.id AND addresses.owner_type = "customer" AND addresses.address_type = "billing" AND addresses.is_active = 1', 'left')
             ->join('states', 'states.id = addresses.state_id', 'left')
+            ->join('addresses as ship_addr', 'ship_addr.owner_id = customers.id AND ship_addr.owner_type = "customer" AND ship_addr.address_type = "shipping" AND ship_addr.is_active = 1', 'left')
+            ->join('states as ship_states', 'ship_states.id = ship_addr.state_id', 'left')
             ->find($id);
 
         if ($invoice) {

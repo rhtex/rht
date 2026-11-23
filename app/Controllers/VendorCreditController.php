@@ -121,6 +121,22 @@ class VendorCreditController extends BaseController
         return view('vendor_credits/view', ['credit' => $credit, 'title' => 'Vendor Credit ' . $credit['reference_no']]);
     }
 
+    public function print($id)
+    {
+        $credit = $this->creditModel->select('vendor_credits.*, vendors.name as vendor_name, vendors.phone as vendor_phone, vendors.whatsapp_number as vendor_whatsapp, vendors.gstin as vendor_gstin, bills.bill_number, addresses.address_line1 as vendor_address1, addresses.address_line2 as vendor_address2, addresses.city as vendor_city, addresses.pincode as vendor_pincode, states.name as vendor_state')
+            ->join('vendors', 'vendors.id = vendor_credits.vendor_id', 'left')
+            ->join('bills', 'bills.id = vendor_credits.bill_id', 'left')
+            ->join('addresses', 'addresses.owner_id = vendors.id AND addresses.owner_type = "vendor" AND addresses.address_type = "billing" AND addresses.is_active = 1', 'left')
+            ->join('states', 'states.id = addresses.state_id', 'left')
+            ->find($id);
+
+        if (!$credit) {
+            return redirect()->to(site_url('vendor_credits'))->with('error', 'Debit note not found.');
+        }
+
+        return view('vendor_credits/print', ['credit' => $credit, 'title' => 'Debit Note ' . $credit['reference_no']]);
+    }
+
     public function syncZoho()
     {
         try {

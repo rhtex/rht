@@ -156,6 +156,79 @@
                             <small class="text-muted">This preview dynamically reflects your settings.</small>
                         </div>
                     </div>
+
+                    <hr class="my-4">
+                    <h5 class="text-primary mb-3"><i class="fas fa-print"></i> Document Print & Layout Configuration</h5>
+                    <p class="text-muted small">Configure the header, footer, fonts, logo, and terms for all printed documents (Invoices, Purchase Bills, Sales Orders, Credit Notes, Debit Notes, Quotations).</p>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Header Company Name on Print</label>
+                            <input type="text" class="form-control" name="settings[company_print_name]" value="<?= esc($settings['company_print_name'] ?? ($settings['app_name'] ?? 'RASI HANDLOOM TEXTILES')) ?>" placeholder="RASI HANDLOOM TEXTILES">
+                            <small class="text-muted">Primary name displayed on top of printed bills and invoices.</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Company GSTIN on Print</label>
+                            <input type="text" class="form-control" name="settings[company_print_gstin]" value="<?= esc($settings['company_print_gstin'] ?? ($settings['company_gstin'] ?? '33FOPPS7926B1ZK')) ?>" placeholder="33FOPPS7926B1ZK">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Print Header Address</label>
+                            <textarea class="form-control" name="settings[company_print_address]" rows="3" placeholder="Street Address, Area, City - Pincode"><?= esc($settings['company_print_address'] ?? "C.P Kannaiah Street, Opp: Gopinath Engineering Works,\nRasipuram (TK), Namakkal (D.T) - 637408") ?></textarea>
+                            <small class="text-muted">Multi-line address shown below company title.</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="mb-2">
+                                <label class="form-label">Print Contact Phones</label>
+                                <input type="text" class="form-control" name="settings[company_print_phone]" value="<?= esc($settings['company_print_phone'] ?? '+91-9443323810, +91-9626077333') ?>" placeholder="+91-9443323810, +91-9626077333">
+                            </div>
+                            <div>
+                                <label class="form-label">Print Email</label>
+                                <input type="email" class="form-control" name="settings[company_print_email]" value="<?= esc($settings['company_print_email'] ?? 'rasihandloomtextiles@gmail.com') ?>" placeholder="rasihandloomtextiles@gmail.com">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Custom Logo Image URL</label>
+                            <input type="text" class="form-control" name="settings[company_logo_url]" value="<?= esc($settings['company_logo_url'] ?? '') ?>" placeholder="e.g. /uploads/company/logo.png or leave empty for monogram 'R'">
+                            <small class="text-muted">If blank, standard blue/gold monogram circle is rendered.</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Print Font Family</label>
+                            <select class="form-select" name="settings[print_header_font]">
+                                <?php $currFont = $settings['print_header_font'] ?? "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"; ?>
+                                <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" <?= $currFont === "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" ? 'selected' : '' ?>>Segoe UI (Standard Clean Sans)</option>
+                                <option value="'Helvetica Neue', Helvetica, Arial, sans-serif" <?= $currFont === "'Helvetica Neue', Helvetica, Arial, sans-serif" ? 'selected' : '' ?>>Helvetica / Arial</option>
+                                <option value="'Calibri', Candara, Segoe, 'Segoe UI', Optima, Arial, sans-serif" <?= $currFont === "'Calibri', Candara, Segoe, 'Segoe UI', Optima, Arial, sans-serif" ? 'selected' : '' ?>>Calibri</option>
+                                <option value="'Times New Roman', Times, serif" <?= $currFont === "'Times New Roman', Times, serif" ? 'selected' : '' ?>>Times New Roman (Serif)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Base Font Size</label>
+                            <select class="form-select" name="settings[print_font_size]">
+                                <?php $currSize = $settings['print_font_size'] ?? "13px"; ?>
+                                <option value="12px" <?= $currSize === '12px' ? 'selected' : '' ?>>Compact (12px)</option>
+                                <option value="13px" <?= $currSize === '13px' ? 'selected' : '' ?>>Standard (13px)</option>
+                                <option value="14px" <?= $currSize === '14px' ? 'selected' : '' ?>>Large (14px)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Default Document Notes (Footer Message)</label>
+                            <textarea class="form-control" name="settings[print_default_notes]" rows="2"><?= esc($settings['print_default_notes'] ?? 'Thank you for choosing us. We look forward to serving you again!') ?></textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Default Terms & Conditions</label>
+                            <textarea class="form-control" name="settings[print_default_terms]" rows="4"><?= esc($settings['print_default_terms'] ?? "1. All disputes will be resolved under Rasipuram jurisdiction.\n2. Please ensure payment is made before the due date to avoid an interest charge of 24% on the outstanding amount.\n3. We are not liable for any loss or damage occurring during transit.\n4. Goods once sold are non-returnable under any circumstances.") ?></textarea>
+                            <small class="text-muted">Terms shown in bottom box if document doesn't override them.</small>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-footer">
                     <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Changes</button>

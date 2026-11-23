@@ -1,340 +1,83 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+$inv = $invoice ?? [];
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?></title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 14px;
-            color: #333;
-            line-height: 1.6;
-            margin: 0;
-            padding: 40px;
-        }
+// Calculate terms from customer credit period or difference
+$paymentTerms = '';
+if (!empty($inv['invoice_date']) && !empty($inv['due_date'])) {
+    $diffDays = (int) round((strtotime($inv['due_date']) - strtotime($inv['invoice_date'])) / (60 * 60 * 24));
+    if ($diffDays > 0) {
+        $paymentTerms = 'Net ' . $diffDays;
+    }
+}
+if (empty($paymentTerms) && !empty($inv['customer_credit_period_days'])) {
+    $paymentTerms = 'Net ' . (int) $inv['customer_credit_period_days'];
+}
 
-        .invoice-box {
-            max-width: 800px;
-            margin: auto;
-        }
+// Format items for print template
+$printItems = [];
+foreach (($inv['items'] ?? []) as $it) {
+    $printItems[] = [
+        'name'        => $it['product_name'] ?? ($it['description'] ?? ''),
+        'description' => $it['description'] ?? ($it['product_name'] ?? ''),
+        'meters'      => !empty($it['unit']) ? $it['unit'] : '6.20',
+        'unit'        => !empty($it['unit']) ? $it['unit'] : '6.20',
+        'hsn_code'    => $it['hsn_code'] ?? ($it['prod_hsn'] ?? '5208'),
+        'quantity'    => $it['quantity'] ?? 0,
+        'rate'        => $it['rate'] ?? 0,
+        'amount'      => $it['amount'] ?? 0,
+    ];
+}
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 2px solid #333;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-        }
+$printData = [
+    'document_title'        => 'TAX INVOICE',
+    'document_number_label' => 'Invoice#',
+    'document_number'       => $inv['invoice_number'] ?? '',
+    'document_date'         => $inv['invoice_date'] ?? date('Y-m-d'),
+    'due_date'              => $inv['due_date'] ?? null,
+    'payment_terms'         => $paymentTerms,
+    'ewaybill_number'       => $inv['ewaybill_number'] ?? null,
+    'transport_name'        => $inv['transport_name'] ?? null,
+    'waybill_number'        => $inv['waybill_number'] ?? null,
+    'bales_count'           => !empty($inv['bales_count']) ? $inv['bales_count'] : (!empty($inv['packages_count']) ? $inv['packages_count'] : null),
+    'reference_number'      => $inv['reference_number'] ?? null,
+    
+    // Customer Billing & Shipping
+    'bill_to_heading'       => 'Bill To :',
+    'billing_name'          => $inv['customer_name'] ?? '',
+    'billing_gstin'         => $inv['customer_gstin'] ?? '',
+    'billing_address'       => implode(",\n", array_filter([$inv['customer_address_1'] ?? '', $inv['customer_address_2'] ?? ''])),
+    'billing_city'          => $inv['customer_city'] ?? '',
+    'billing_pincode'       => $inv['customer_pincode'] ?? '',
+    'billing_state'         => $inv['customer_state'] ?? '',
+    'billing_phone'         => implode(', ', array_filter([$inv['customer_phone'] ?? '', $inv['customer_whatsapp'] ?? ''])),
 
-        .company-info h1 {
-            margin: 0;
-            color: #007bff;
-            font-size: 28px;
-        }
+    'ship_to_heading'       => 'Ship To :',
+    'shipping_name'         => $inv['customer_name'] ?? '',
+    'shipping_gstin'        => $inv['customer_gstin'] ?? '',
+    'shipping_address'      => implode(",\n", array_filter([$inv['shipping_address_1'] ?? ($inv['customer_address_1'] ?? ''), $inv['shipping_address_2'] ?? ($inv['customer_address_2'] ?? '')])),
+    'shipping_city'         => $inv['shipping_city'] ?? ($inv['customer_city'] ?? ''),
+    'shipping_pincode'      => $inv['shipping_pincode'] ?? ($inv['customer_pincode'] ?? ''),
+    'shipping_state'        => $inv['shipping_state'] ?? ($inv['customer_state'] ?? ''),
+    'shipping_phone'        => implode(', ', array_filter([$inv['customer_phone'] ?? '', $inv['customer_whatsapp'] ?? ''])),
 
-        .invoice-details {
-            text-align: right;
-        }
+    'place_of_supply'       => !empty($inv['customer_state']) ? $inv['customer_state'] . (!empty($inv['customer_state_gst_code']) ? ' (' . $inv['customer_state_gst_code'] . ')' : '') : '',
+    
+    // Line items
+    'items'                 => $printItems,
+    
+    // Financials
+    'subtotal'              => $inv['subtotal'] ?? 0,
+    'discount_amount'       => $inv['discount_amount'] ?? 0,
+    'cgst_amount'           => $inv['cgst_amount'] ?? 0,
+    'sgst_amount'           => $inv['sgst_amount'] ?? 0,
+    'igst_amount'           => $inv['igst_amount'] ?? 0,
+    'shipping_charge'       => $inv['shipping_charge'] ?? 0,
+    'roundoff_amount'       => $inv['roundoff_amount'] ?? 0,
+    'total_amount'          => $inv['total_amount'] ?? 0,
 
-        .invoice-details h2 {
-            margin: 0;
-            color: #333;
-        }
+    'notes'                 => $inv['notes'] ?? '',
+    'terms'                 => $inv['terms'] ?? '',
+    'auto_print'            => true,
+];
 
-        .billing-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-        }
-
-        .billing-info div {
-            width: 45%;
-        }
-
-        .billing-info h3 {
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        th {
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-
-        td {
-            border: 1px solid #ddd;
-            padding: 10px;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .totals {
-            float: right;
-            width: 300px;
-        }
-
-        .totals table tr td {
-            border: none;
-            padding: 5px 0;
-        }
-
-        .totals table tr td:last-child {
-            text-align: right;
-            font-weight: bold;
-        }
-
-        .footer {
-            margin-top: 50px;
-            border-top: 1px solid #ddd;
-            padding-top: 20px;
-            font-size: 12px;
-            color: #777;
-        }
-
-        @media print {
-            body {
-                padding: 0;
-            }
-
-            .no-print {
-                display: none;
-            }
-        }
-    </style>
-</head>
-
-<body onload="window.print()">
-    <div class="invoice-box">
-        <div class="header">
-            <div class="company-info">
-                <h1><?= esc($company_name) ?></h1>
-                <p><?= nl2br(esc($company_address)) ?></p>
-                <?php if (!empty($company_gstin)): ?>
-                    <p>GSTIN: <?= esc($company_gstin) ?></p>
-                <?php endif; ?>
-            </div>
-            <div class="invoice-details">
-                <h2>INVOICE</h2>
-                <p><strong>Invoice #:</strong> <?= esc($invoice['invoice_number']) ?></p>
-                <p><strong>Date:</strong> <?= date('d/m/Y', strtotime($invoice['invoice_date'])) ?></p>
-                <p><strong>Due Date:</strong> <?= date('d/m/Y', strtotime($invoice['due_date'])) ?></p>
-                <?php if ($invoice['reference_number']): ?>
-                    <p><strong>P.O number:</strong> <?= esc($invoice['reference_number']) ?></p>
-                <?php endif; ?>
-                <?php if ($invoice['po_date']): ?>
-                    <p><strong>P.O Date:</strong> <?= date('d/m/Y', strtotime($invoice['po_date'])) ?></p>
-                <?php endif; ?>
-                <?php if (!empty($invoice['so_number'])): ?>
-                    <p><strong>SO Number:</strong> <?= esc($invoice['so_number']) ?></p>
-                <?php endif; ?>
-                <?php if (!empty($invoice['so_date'])): ?>
-                    <p><strong>SO Date:</strong> <?= date('d/m/Y', strtotime($invoice['so_date'])) ?></p>
-                <?php endif; ?>
-                <?php if (!empty($invoice['selection_type'])): ?>
-                    <p><strong>Selection:</strong> <?= esc($invoice['selection_type']) ?></p>
-                <?php endif; ?>
-                <?php if ($invoice['transport_name']): ?>
-                    <p><strong>Transport:</strong> <?= esc($invoice['transport_name']) ?></p>
-                <?php endif; ?>
-                <?php if ($invoice['waybill_number']): ?>
-                    <p><strong>Waybill / LR:</strong> <?= esc($invoice['waybill_number']) ?></p>
-                <?php endif; ?>
-                <?php if (!empty($invoice['ewaybill_number'])): ?>
-                    <p><strong>e-Way Bill No:</strong> <?= esc($invoice['ewaybill_number']) ?></p>
-                <?php endif; ?>
-                <?php $bales = !empty($invoice['bales_count']) ? $invoice['bales_count'] : (!empty($invoice['packages_count']) ? $invoice['packages_count'] : ''); ?>
-                <?php if (!empty($bales)): ?>
-                    <p><strong>No. of Bales:</strong> <?= esc($bales) ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <div class="billing-info">
-            <div>
-                <h3>Bill To</h3>
-                <p><strong><?= esc($invoice['customer_name']) ?></strong></p>
-                <?php if (!empty($invoice['customer_gstin'])): ?>
-                    <p>GSTIN: <?= esc($invoice['customer_gstin']) ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th width="5%">#</th>
-                    <th width="45%">Item & Description</th>
-                    <th width="10%">HSN</th>
-                    <th width="10%">Qty</th>
-                    <th width="15%">Rate</th>
-                    <th width="15%">Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($invoice['items'] as $index => $item): ?>
-                    <tr>
-                        <td><?= $index + 1 ?></td>
-                        <td>
-                            <strong><?= esc(!empty($item['product_name']) ? $item['product_name'] : ($item['description'] ?? '-')) ?></strong>
-                            <?php if (!empty($item['description']) && !empty($item['product_name']) && $item['description'] !== $item['product_name']): ?>
-                                <br><small style="color: #6c757d; font-size: 8pt;"><?= esc($item['description']) ?></small>
-                            <?php endif; ?>
-                        </td>
-                        <td><?= esc(!empty($item['hsn_code']) ? $item['hsn_code'] : ($item['product_hsn'] ?? '')) ?></td>
-                        <td><?= $item['quantity'] + 0 ?></td>
-                        <td><?= number_format($item['rate'], 2) ?></td>
-                        <td class="text-right"><?= number_format($item['quantity'] * $item['rate'], 2) ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-
-        <div class="totals">
-            <table>
-                <tr>
-                    <td>Subtotal:</td>
-                    <td>₹<?= number_format($invoice['subtotal'], 2) ?></td>
-                </tr>
-                <?php if ($invoice['discount_amount'] > 0): ?>
-                    <?php
-                    $actualDiscount = ($invoice['discount_type'] == 'Percentage') ? ($invoice['subtotal'] * $invoice['discount_amount'] / 100) : $invoice['discount_amount'];
-                    ?>
-                    <tr>
-                        <td>Discount
-                            (<?= $invoice['discount_type'] == 'Percentage' ? ($invoice['discount_amount'] + 0) . '%' : 'Fixed' ?>):
-                        </td>
-                        <td style="color: red;">-₹<?= number_format($actualDiscount, 2) ?></td>
-                    </tr>
-                <?php endif; ?>
-
-                <?php
-                // Tax breakdown calculation (using stored rates)
-                $cgstGroups = [];
-                $sgstGroups = [];
-                $igstGroups = [];
-
-                $subtotal = $invoice['subtotal'];
-                $totalDiscount = ($invoice['discount_type'] == 'Percentage') ? ($subtotal * $invoice['discount_amount'] / 100) : $invoice['discount_amount'];
-
-                foreach ($invoice['items'] as $item) {
-                    $itemAmount = $item['quantity'] * $item['rate'];
-                    $itemDiscount = ($subtotal > 0) ? ($itemAmount / $subtotal * $totalDiscount) : 0;
-                    $taxableValue = $itemAmount - $itemDiscount;
-
-                    // CGST
-                    $cr = (float) ($item['cgst_rate'] ?? 0);
-                    if ($cr > 0) {
-                        if (!isset($cgstGroups["$cr"]))
-                            $cgstGroups["$cr"] = 0;
-                        $cgstGroups["$cr"] += ($taxableValue * $cr) / 100;
-                    }
-
-                    // SGST
-                    $sr = (float) ($item['sgst_rate'] ?? 0);
-                    if ($sr > 0) {
-                        if (!isset($sgstGroups["$sr"]))
-                            $sgstGroups["$sr"] = 0;
-                        $sgstGroups["$sr"] += ($taxableValue * $sr) / 100;
-                    }
-
-                    // IGST
-                    $ir = (float) ($item['igst_rate'] ?? 0);
-                    if ($ir > 0) {
-                        if (!isset($igstGroups["$ir"]))
-                            $igstGroups["$ir"] = 0;
-                        $igstGroups["$ir"] += ($taxableValue * $ir) / 100;
-                    }
-                }
-
-                ksort($cgstGroups);
-                ksort($sgstGroups);
-                ksort($igstGroups);
-                ?>
-
-                <?php if ($invoice['is_inter_state']): ?>
-                    <?php foreach ($igstGroups as $rate => $amt): ?>
-                        <tr>
-                            <td>IGST (<?= $rate + 0 ?>%):</td>
-                            <td>₹<?= number_format($amt, 2) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <?php foreach ($cgstGroups as $rate => $amt): ?>
-                        <tr>
-                            <td>CGST (<?= $rate + 0 ?>%):</td>
-                            <td>₹<?= number_format($amt, 2) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-
-                    <?php foreach ($sgstGroups as $rate => $amt): ?>
-                        <tr>
-                            <td>SGST (<?= $rate + 0 ?>%):</td>
-                            <td>₹<?= number_format($amt, 2) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-
-                <?php if ($invoice['shipping_charge'] > 0): ?>
-                    <tr>
-                        <td>Shipping:</td>
-                        <td>₹<?= number_format($invoice['shipping_charge'], 2) ?></td>
-                    </tr>
-                <?php endif; ?>
-                <?php if ($invoice['roundoff_amount'] != 0): ?>
-                    <tr>
-                        <td>Roundoff:</td>
-                        <td>₹<?= number_format($invoice['roundoff_amount'], 2) ?></td>
-                    </tr>
-                <?php endif; ?>
-                <tr style="border-top: 2px solid #333; font-size: 18px;">
-                    <td style="padding-top: 10px;">Total:</td>
-                    <td style="padding-top: 10px;">₹<?= number_format($invoice['total_amount'], 2) ?></td>
-                </tr>
-            </table>
-        </div>
-
-        <div style="clear: both;"></div>
-
-        <?php if ($invoice['notes']): ?>
-            <div style="margin-top: 20px;">
-                <strong>Notes:</strong><br>
-                <?= nl2br(esc($invoice['notes'])) ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($invoice['terms']): ?>
-            <div style="margin-top: 20px;">
-                <strong>Terms & Conditions:</strong><br>
-                <?= nl2br(esc($invoice['terms'])) ?>
-            </div>
-        <?php endif; ?>
-
-        <div class="footer">
-            <p style="text-align: center;">Thank you for your business!</p>
-            <p style="text-align: center;">This is a computer-generated document. No signature is required.</p>
-        </div>
-    </div>
-
-    <div class="no-print" style="position: fixed; top: 20px; right: 20px;">
-        <button onclick="window.print()"
-            style="padding: 10px 20px; cursor: pointer; background: #007bff; color: #fff; border: none; border-radius: 4px;">Print</button>
-        <button onclick="window.close()"
-            style="padding: 10px 20px; cursor: pointer; background: #6c757d; color: #fff; border: none; border-radius: 4px; margin-left: 10px;">Close</button>
-    </div>
-</body>
-
-</html>
+echo view('common/print/standard_document', $printData);

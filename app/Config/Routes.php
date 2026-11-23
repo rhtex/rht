@@ -205,6 +205,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->get('sales_returns/create', 'SalesReturnController::create', ['filter' => 'permission:invoice.edit']);
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
     $routes->get('sales_returns/view/(:num)', 'SalesReturnController::view/$1', ['filter' => 'permission:invoice.view']);
+    $routes->get('sales_returns/print/(:num)', 'SalesReturnController::print/$1', ['filter' => 'permission:invoice.view']);
 
     // e-Way Bills (Zoho Books API Integration)
     $routes->get('eway_bills', 'EwayBillController::index', ['filter' => 'permission:eway_bill.view']);
@@ -283,6 +284,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     // Vendor Credits
     $routes->get('vendor_credits', 'VendorCreditController::index', ['filter' => 'permission:vendor_credit.view']);
     $routes->get('vendor_credits/view/(:num)', 'VendorCreditController::view/$1', ['filter' => 'permission:vendor_credit.view']);
+    $routes->get('vendor_credits/print/(:num)', 'VendorCreditController::print/$1', ['filter' => 'permission:vendor_credit.view']);
     $routes->get('vendor_credits/sync-zoho', 'VendorCreditController::syncZoho', ['filter' => 'permission:vendor_credit.view']);
 
     // Quotations
@@ -406,6 +408,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->get('sales_returns/create', 'SalesReturnController::create', ['filter' => 'permission:invoice.edit']);
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
     $routes->get('sales_returns/view/(:num)', 'SalesReturnController::view/$1', ['filter' => 'permission:invoice.view']);
+    $routes->get('sales_returns/print/(:num)', 'SalesReturnController::print/$1', ['filter' => 'permission:invoice.view']);
 
     // e-Way Bills (Zoho Books API Integration)
     $routes->get('eway_bills', 'EwayBillController::index', ['filter' => 'permission:eway_bill.view']);

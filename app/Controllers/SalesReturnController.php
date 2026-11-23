@@ -186,5 +186,16 @@ class SalesReturnController extends BaseController
         return view('sales_returns/view', $data);
     }
 
+    public function print($id)
+    {
+        $data['return'] = $this->returnModel->getReturnById($id);
+        if (!$data['return']) {
+            return redirect()->to('sales_returns')->with('error', 'Credit note not found.');
+        }
 
+        $data['items'] = $data['return']['items'] ?? [];
+        $data['title'] = 'Credit Note ' . $data['return']['return_number'];
+
+        return view('sales_returns/print', $data);
+    }
 }

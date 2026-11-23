@@ -10,6 +10,9 @@
             <?= function_exists('zoho_sync_badge') ? zoho_sync_badge('sales_returns', (int) $return['id']) : '' ?>
         </div>
         <div class="d-flex gap-2 align-items-center flex-wrap">
+            <a href="<?= site_url('sales_returns/print/' . $return['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white" title="Print Credit Note">
+                <i class="fas fa-print me-1"></i> Print
+            </a>
             <a href="<?= site_url('sales_returns/view/' . $return['id']) ?>?mode=single" class="btn btn-sm btn-outline-dark" title="Open Full Standalone Page">
                 <i class="fas fa-external-link-alt me-1"></i> Full Page View
             </a>

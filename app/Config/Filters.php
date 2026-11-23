@@ -80,7 +80,7 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             // 'honeypot',
-            'csrf',
+            'csrf' => ['except' => ['settings/print/preview', 'settings/print/pdf-preview']],
             // 'invalidchars',
             'auth' => ['except' => ['login', 'login/*', 'logout', 'register', 'attemptLogin']],
         ],

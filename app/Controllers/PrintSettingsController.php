@@ -47,8 +47,9 @@ class PrintSettingsController extends BaseController
         ]);
 
         return $this->response->setJSON([
-            'success' => $saved,
-            'message' => $saved ? 'Print configuration saved for ' . $docTypes[$docType]['label'] . '.' : 'Failed to save configuration.',
+            'success'   => $saved,
+            'message'   => $saved ? 'Print configuration saved for ' . $docTypes[$docType]['label'] . '.' : 'Failed to save configuration.',
+            'csrf_hash' => csrf_hash(),
         ]);
     }
 
@@ -64,8 +65,9 @@ class PrintSettingsController extends BaseController
         $model->where('document_type', $docType)->delete();
 
         return $this->response->setJSON([
-            'success' => true,
-            'message' => $docTypes[$docType]['label'] . ' configuration reset to default.',
+            'success'   => true,
+            'message'   => $docTypes[$docType]['label'] . ' configuration reset to default.',
+            'csrf_hash' => csrf_hash(),
         ]);
     }
 
@@ -101,8 +103,9 @@ class PrintSettingsController extends BaseController
         ]);
 
         return $this->response->setJSON([
-            'success' => true,
-            'message' => 'Copied configuration from ' . $docTypes[$sourceDoc]['label'] . ' to ' . $docTypes[$targetDoc]['label'] . '.',
+            'success'   => true,
+            'message'   => 'Copied configuration from ' . $docTypes[$sourceDoc]['label'] . ' to ' . $docTypes[$targetDoc]['label'] . '.',
+            'csrf_hash' => csrf_hash(),
         ]);
     }
 

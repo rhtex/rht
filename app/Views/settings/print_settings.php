@@ -432,8 +432,10 @@
             base_font_size: $('#cfgBaseFontSize').val(),
             fields_json:    JSON.stringify(collectFields())
         }).done(function(res) {
+            if (res.csrf_hash) csrfHash = res.csrf_hash;
             showAlert(res.success ? 'success' : 'danger', res.message || 'Saved.');
         }).fail(function(xhr) {
+            if (xhr.responseJSON?.csrf_hash) csrfHash = xhr.responseJSON.csrf_hash;
             showAlert('danger', xhr.responseJSON?.message || 'Error saving configuration.');
         }).always(() => btn.prop('disabled', false));
     });

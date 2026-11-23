@@ -161,21 +161,21 @@ $screenHeight  = $orientation === 'landscape' ? '210mm' : '297mm';
     }
 
     .header-title-cell {
-        width: 200px;
+        width: 185px;
         text-align: right;
         vertical-align: middle !important;
     }
 
     .header-qr-cell {
-        width: 82px;
+        width: 102px;
         text-align: center;
         vertical-align: middle !important;
-        padding: 3px 4px !important;
+        padding: 3px 5px !important;
     }
 
     .header-qr-cell img {
-        width: 60px;
-        height: 60px;
+        width: 86px;
+        height: 86px;
         display: block;
         margin: 0 auto;
     }

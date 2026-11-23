@@ -209,7 +209,7 @@ if ($showUpiQr) {
         $shortDocNo   = preg_match('/(\d+)$/', (string) $docNumber, $m) ? (ltrim($m[1], '0') ?: '0') : (string) $docNumber;
         $qrDesc       = trim($shortDocNo . ' ' . ($billing_name ?? ''));
         $upiUri       = \App\Libraries\QrCodeGenerator::buildUpiUri($companyUpi, $companyUpiName ?: $companyName, $qrDesc);
-        $upiQrDataUri = \App\Libraries\QrCodeGenerator::toDataUri($upiUri, 3, 2);
+        $upiQrDataUri = \App\Libraries\QrCodeGenerator::toDataUri($upiUri, 5, 2);
     } catch (\Throwable $e) {
         $showUpiQr = false;
     }

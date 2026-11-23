@@ -60,15 +60,16 @@ if (empty($bankAccounts)) {
     } catch (\Throwable $e) {}
 }
 
-// Terms & Conditions (Sole footer message)
-$termsList = $terms ?? [];
-if (is_string($termsList)) {
-    $termsList = array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $termsList)));
+// Terms & Conditions (Always fetched directly from Settings as requested by user)
+$termsSetting = trim((string) get_setting('print_default_terms', ''));
+if (empty($termsSetting)) {
+    // If not set in settings, fallback to document terms or default 4 terms
+    $termsSetting = !empty($terms) ? (is_array($terms) ? implode("\n", $terms) : $terms) : "1. All disputes will be resolved under Rasipuram jurisdiction.\n2. Please ensure payment is made before the due date to avoid an interest charge of 24% on the outstanding amount.\n3. We are not liable for any loss or damage occurring during transit.\n4. Goods once sold are non-returnable under any circumstances.";
 }
-if (empty($termsList)) {
-    $defaultTermsSetting = get_setting('print_default_terms', "1. All disputes will be resolved under Rasipuram jurisdiction.\n2. Please ensure payment is made before the due date to avoid an interest charge of 24% on the outstanding amount.\n3. We are not liable for any loss or damage occurring during transit.\n4. Goods once sold are non-returnable under any circumstances.");
-    $termsList = array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $defaultTermsSetting)));
-}
+
+// Convert literal \r\n, \n to real newlines and split into clean lines
+$termsSetting = str_replace(['\r\n', '\r', '\n'], "\n", $termsSetting);
+$termsList = array_filter(array_map('trim', explode("\n", $termsSetting)));
 
 // Number in words
 $totalAmountFloat = (float) ($total_amount ?? 0);

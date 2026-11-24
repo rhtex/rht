@@ -112,7 +112,7 @@
                                 <i class="fas fa-wallet"></i>
                             </div>
                         </div>
-                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($totalSales, 2) ?></h3>
+                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= format_inr($totalSales) ?></h3>
                     </div>
                     <div class="text-muted small fw-semibold" style="font-size: 0.72rem;">
                         <span class="text-success"><i class="fas fa-chart-line me-1"></i>All Time</span> Total Revenue
@@ -133,7 +133,7 @@
                                 <i class="fas fa-shopping-cart"></i>
                             </div>
                         </div>
-                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($totalPurchases, 2) ?></h3>
+                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= format_inr($totalPurchases) ?></h3>
                     </div>
                     <div class="text-muted small fw-semibold" style="font-size: 0.72rem;">
                         <span class="text-primary"><i class="fas fa-chart-line me-1"></i>All Time</span> Total Purchases
@@ -154,12 +154,12 @@
                                 <i class="fas fa-hand-holding-usd"></i>
                             </div>
                         </div>
-                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($accountsReceivable, 2) ?></h3>
+                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= format_inr($accountsReceivable) ?></h3>
                     </div>
                     <div class="text-muted small fw-semibold d-flex flex-wrap gap-2" style="font-size: 0.72rem;">
-                        <span>Current : <strong class="text-success">₹<?= number_format($receivableCurrent, 2) ?></strong></span>
+                        <span>Current : <strong class="text-success">₹<?= format_inr($receivableCurrent) ?></strong></span>
                         <span class="text-muted">|</span>
-                        <span>Overdue : <strong class="text-danger">₹<?= number_format($receivableOverdue, 2) ?></strong></span>
+                        <span>Overdue : <strong class="text-danger">₹<?= format_inr($receivableOverdue) ?></strong></span>
                     </div>
                 </div>
             </div>
@@ -177,12 +177,12 @@
                                 <i class="fas fa-file-invoice-dollar"></i>
                             </div>
                         </div>
-                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= number_format($accountsPayable, 2) ?></h3>
+                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= format_inr($accountsPayable) ?></h3>
                     </div>
                     <div class="text-muted small fw-semibold d-flex flex-wrap gap-2" style="font-size: 0.72rem;">
-                        <span>Current : <strong class="text-success">₹<?= number_format($payableCurrent, 2) ?></strong></span>
+                        <span>Current : <strong class="text-success">₹<?= format_inr($payableCurrent) ?></strong></span>
                         <span class="text-muted">|</span>
-                        <span>Overdue : <strong class="text-danger">₹<?= number_format($payableOverdue, 2) ?></strong></span>
+                        <span>Overdue : <strong class="text-danger">₹<?= format_inr($payableOverdue) ?></strong></span>
                     </div>
                 </div>
             </div>

@@ -158,3 +158,27 @@ if (!function_exists('number_to_indian_currency_words')) {
         return 'Rupees ' . trim($rupees) . $paise . ' Only';
     }
 }
+
+if (!function_exists('format_inr')) {
+    /**
+     * Format a number using the Indian numbering system (e.g. 2,90,41,810.04).
+     */
+    function format_inr($amount, int $decimals = 2): string
+    {
+        $val = (float) $amount;
+        $neg = $val < 0 ? '-' : '';
+        $val = abs($val);
+
+        $formatted = number_format($val, $decimals, '.', '');
+        [$intPart, $decPart] = array_pad(explode('.', $formatted, 2), 2, '');
+
+        if (strlen($intPart) > 3) {
+            $last3 = substr($intPart, -3);
+            $rest  = substr($intPart, 0, -3);
+            $rest  = preg_replace('/\B(?=(\d{2})+(?!\d))/', ',', $rest);
+            $intPart = $rest . ',' . $last3;
+        }
+
+        return $neg . $intPart . ($decimals > 0 ? '.' . $decPart : '');
+    }
+}

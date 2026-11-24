@@ -117,9 +117,10 @@
                 </thead>
                 <tbody>
                     <?php if (!empty($vehicles)): ?>
+                        <?php $startIdx = !empty($pager) ? (($pager->getCurrentPage() - 1) * $pager->getPerPage()) : 0; ?>
                         <?php foreach ($vehicles as $i => $v): ?>
                             <tr>
-                                <td class="text-muted small"><?= $i + 1 ?></td>
+                                <td class="text-muted small"><?= $startIdx + $i + 1 ?></td>
                                 <td>
                                     <span class="badge bg-dark fs-6 font-monospace px-2 py-1">
                                         <?= esc($v['vehicle_number']) ?>
@@ -178,9 +179,19 @@
             </table>
         </div>
     </div>
-    <?php if (!empty($pager)): ?>
-        <div class="card-footer bg-white border-0 py-3">
-            <?= $pager->links() ?>
+    <?php if (!empty($pager) && $pager->getPageCount() > 1): ?>
+        <?php
+        $curPage  = $pager->getCurrentPage();
+        $perPage  = $pager->getPerPage();
+        $totalCnt = $pager->getTotal();
+        $fromRow  = $totalCnt > 0 ? (($curPage - 1) * $perPage + 1) : 0;
+        $toRow    = min($totalCnt, $curPage * $perPage);
+        ?>
+        <div class="card-footer bg-white border-top py-2 px-3 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+            <div class="text-muted small">
+                Showing <?= $fromRow ?> to <?= $toRow ?> of <?= $totalCnt ?> vehicles
+            </div>
+            <?= $pager->links('default', 'bootstrap_5') ?>
         </div>
     <?php endif; ?>
 </div>

@@ -775,6 +775,26 @@ body.is-mobile-device .erp-mobile-card {
     margin-bottom: 0;
     font-weight: 500;
     color: #475569;
+    white-space: nowrap;
+}
+.dataTables_wrapper .dataTables_length select {
+    min-width: 70px !important;
+    width: auto !important;
+    padding: 0.28rem 2rem 0.28rem 0.65rem !important;
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+    color: #1e293b !important;
+    background-color: #fff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    flex: 0 0 auto;
+}
+.dataTables_wrapper .dataTables_filter input {
+    min-width: 180px;
+    padding: 0.28rem 0.65rem !important;
+    font-size: 0.82rem !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
 }
 .dataTables_wrapper .dataTables_paginate .pagination {
     margin-bottom: 0;

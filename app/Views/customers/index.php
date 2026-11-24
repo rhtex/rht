@@ -101,20 +101,54 @@
 <div class="card card-outline card-primary shadow-sm">
     <style>
         @media (max-width: 991.98px), (hover: none) and (pointer: coarse) {
-            .customers-list-table tbody tr td:nth-child(1),
             .customers-list-table tbody tr td:nth-child(3),
             .customers-list-table tbody tr td:nth-child(4),
+            .customers-list-table tbody tr td:nth-child(5),
+            .customers-list-table tbody tr td:nth-child(6),
             .customers-list-table tbody tr td:nth-child(7),
+            .customers-list-table .bt-avatar,
             .customers-list-table .cust-contact-person {
                 display: none !important;
             }
+            .customers-list-table tbody tr {
+                display: flex !important;
+                align-items: center;
+                padding: 4px 6px;
+            }
+            .customers-list-table tbody tr td:nth-child(1) {
+                width: auto !important;
+                border-bottom: 0 !important;
+                padding-right: 4px !important;
+                flex-shrink: 0;
+            }
+            .customers-list-table tbody tr td:nth-child(2) {
+                border-bottom: 0 !important;
+                flex: 1;
+            }
         }
-        body.is-mobile-device .customers-list-table tbody tr td:nth-child(1),
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(3),
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(4),
+        body.is-mobile-device .customers-list-table tbody tr td:nth-child(5),
+        body.is-mobile-device .customers-list-table tbody tr td:nth-child(6),
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(7),
+        body.is-mobile-device .customers-list-table .bt-avatar,
         body.is-mobile-device .customers-list-table .cust-contact-person {
             display: none !important;
+        }
+        body.is-mobile-device .customers-list-table tbody tr {
+            display: flex !important;
+            align-items: center;
+            padding: 4px 6px;
+        }
+        body.is-mobile-device .customers-list-table tbody tr td:nth-child(1) {
+            width: auto !important;
+            border-bottom: 0 !important;
+            padding-right: 4px !important;
+            flex-shrink: 0;
+        }
+        body.is-mobile-device .customers-list-table tbody tr td:nth-child(2) {
+            border-bottom: 0 !important;
+            flex: 1;
         }
     </style>
     <div class="card-header py-2">

@@ -111,8 +111,8 @@
         box-shadow: 0 8px 20px -5px rgba(0,0,0,0.08);
         transform: translateY(-2px);
     }
-    .metric-box-v2 .val { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; }
-    .metric-box-v2 .lbl { font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.5px; }
+    .metric-box-v2 .val { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; color: #0f172a !important; }
+    .metric-box-v2 .lbl { font-size: 0.65rem; font-weight: 700; color: #1e293b !important; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.5px; }
 
     .chart-card {
         background: white; border-radius: 16px; border: 1px solid #f1f5f9;

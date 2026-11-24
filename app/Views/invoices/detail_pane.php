@@ -47,8 +47,8 @@
     <div class="row g-3 mb-3">
         <div class="col-md-6">
             <div class="card card-outline card-primary h-100 shadow-none border">
-                <div class="card-header py-2 bg-light">
-                    <h6 class="card-title m-0 fw-bold"><i class="fas fa-user text-primary me-1"></i> Customer & Details</h6>
+                <div class="card-header py-2 text-white" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;">
+                    <h6 class="card-title m-0 fw-bold text-white"><i class="fas fa-user me-1"></i> Customer & Details</h6>
                 </div>
                 <div class="card-body p-2">
                     <table class="table table-sm table-borderless mb-0">
@@ -106,8 +106,8 @@
 
         <div class="col-md-6">
             <div class="card card-outline card-info h-100 shadow-none border">
-                <div class="card-header py-2 bg-light">
-                    <h6 class="card-title m-0 fw-bold"><i class="fas fa-calendar-alt text-info me-1"></i> Dates & References</h6>
+                <div class="card-header py-2 text-white" style="background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%) !important;">
+                    <h6 class="card-title m-0 fw-bold text-white"><i class="fas fa-calendar-alt me-1"></i> Dates & References</h6>
                 </div>
                 <div class="card-body p-2">
                     <table class="table table-sm table-borderless mb-0">
@@ -148,8 +148,8 @@
 
     <!-- Line Items Table -->
     <div class="card card-outline card-secondary mb-3 shadow-none border">
-        <div class="card-header py-2 bg-light">
-            <h6 class="card-title m-0 fw-bold"><i class="fas fa-boxes text-secondary me-1"></i> Line Items (<?= count($invoice['items'] ?? []) ?>)</h6>
+        <div class="card-header py-2 text-white" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;">
+            <h6 class="card-title m-0 fw-bold text-white"><i class="fas fa-boxes me-1"></i> Line Items (<?= count($invoice['items'] ?? []) ?>)</h6>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -280,9 +280,9 @@
     <!-- Receipts / Payments -->
     <?php if (!empty($invoice['payments'])): ?>
         <div class="card card-outline card-success mb-3 shadow-none border">
-            <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
-                <h6 class="card-title m-0 fw-bold"><i class="fas fa-receipt text-success me-1"></i> Receipts & Payments (<?= count($invoice['payments']) ?>)</h6>
-                <span class="badge bg-success-subtle text-success border border-success-subtle small">
+            <div class="card-header py-2 text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #065f46 0%, #059669 100%) !important;">
+                <h6 class="card-title m-0 fw-bold text-white"><i class="fas fa-receipt me-1"></i> Receipts & Payments (<?= count($invoice['payments']) ?>)</h6>
+                <span class="badge bg-light text-success fw-bold small">
                     ₹<?= number_format(array_sum(array_column($invoice['payments'], 'amount')), 2) ?>
                 </span>
             </div>
@@ -337,9 +337,9 @@
     <!-- Credit Notes / Returns -->
     <?php if (!empty($invoice['credit_notes'])): ?>
         <div class="card card-outline card-warning mb-3 shadow-none border">
-            <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
-                <h6 class="card-title m-0 fw-bold"><i class="fas fa-undo text-warning me-1"></i> Credit Notes / Returns (<?= count($invoice['credit_notes']) ?>)</h6>
-                <span class="badge bg-warning-subtle text-dark border border-warning-subtle small">
+            <div class="card-header py-2 text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #92400e 0%, #d97706 100%) !important;">
+                <h6 class="card-title m-0 fw-bold text-white"><i class="fas fa-undo me-1"></i> Credit Notes / Returns (<?= count($invoice['credit_notes']) ?>)</h6>
+                <span class="badge bg-light text-dark fw-bold small">
                     ₹<?= number_format(array_sum(array_column($invoice['credit_notes'], 'total_amount')), 2) ?>
                 </span>
             </div>

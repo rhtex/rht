@@ -111,7 +111,7 @@
         box-shadow: 0 8px 20px -5px rgba(0,0,0,0.08);
         transform: translateY(-2px);
     }
-    .metric-box-v2 .val { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; color: #0f172a !important; }
+    .metric-box-v2 .val { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; }
     .metric-box-v2 .lbl { font-size: 0.65rem; font-weight: 700; color: #1e293b !important; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.5px; }
 
     .chart-card {
@@ -211,25 +211,25 @@
     <div class="row compact-row mb-3">
         <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
-                <div class="val text-primary"><?= number_format($pendingQuotations) ?></div>
+                <div class="val" style="color: #1e3a8a !important;"><?= number_format($pendingQuotations) ?></div>
                 <div class="lbl"><?= lang("App.active_quotes") ?></div>
             </div>
         </div>
         <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
-                <div class="val text-info"><?= number_format($activeSalesOrders) ?></div>
+                <div class="val" style="color: #0e7490 !important;"><?= number_format($activeSalesOrders) ?></div>
                 <div class="lbl"><?= lang("App.pending_sales_orders") ?></div>
             </div>
         </div>
         <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
-                <div class="val text-warning"><?= number_format($pendingReturns) ?></div>
+                <div class="val" style="color: #9a3412 !important;"><?= number_format($pendingReturns) ?></div>
                 <div class="lbl"><?= lang("App.pending_returns") ?></div>
             </div>
         </div>
         <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
-                <div class="val text-success"><?= number_format($itemsInStock) ?></div>
+                <div class="val" style="color: #065f46 !important;"><?= number_format($itemsInStock) ?></div>
                 <div class="lbl"><?= lang("App.units_in_stock") ?></div>
             </div>
         </div>
@@ -239,25 +239,25 @@
     <div class="row compact-row mb-3">
         <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
-                <div class="val" style="color: #8b5cf6 !important;"><?= number_format($totalWeavers) ?></div>
+                <div class="val" style="color: #5b21b6 !important;"><?= number_format($totalWeavers) ?></div>
                 <div class="lbl"><?= lang("App.active_weavers") ?></div>
             </div>
         </div>
         <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
-                <div class="val" style="color: #3b82f6 !important;"><?= number_format($totalYarnStock) ?> <span style="font-size: 0.8rem; font-weight: 700;">kg</span></div>
+                <div class="val" style="color: #1d4ed8 !important;"><?= number_format($totalYarnStock) ?> <span style="font-size: 0.8rem; font-weight: 700;">kg</span></div>
                 <div class="lbl"><?= lang("App.total_yarn_stock") ?></div>
             </div>
         </div>
         <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
-                <div class="val" style="color: #ec4899 !important;"><?= number_format($yarnPurchasedYTD) ?> <span style="font-size: 0.8rem; font-weight: 700;">kg</span></div>
+                <div class="val" style="color: #9d174d !important;"><?= number_format($yarnPurchasedYTD) ?> <span style="font-size: 0.8rem; font-weight: 700;">kg</span></div>
                 <div class="lbl"><?= lang("App.yarn_purchased_ytd") ?></div>
             </div>
         </div>
         <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
-                <div class="val" style="color: #f59e0b !important;"><?= number_format($pendingWeavingJobs) ?></div>
+                <div class="val" style="color: #92400e !important;"><?= number_format($pendingWeavingJobs) ?></div>
                 <div class="lbl"><?= lang("App.pending_weaving_jobs") ?></div>
             </div>
         </div>

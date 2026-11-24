@@ -919,3 +919,217 @@ body.is-mobile-device .erp-mobile-card {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
 }
+
+/* ==========================================================================
+   Global Styled Dropdown Expansions (Select2 & Bootstrap Dropdowns)
+   ========================================================================== */
+.select2-container--bootstrap-5.select2-container--focus .select2-selection,
+.select2-container--bootstrap-5.select2-container--open .select2-selection {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.18) !important;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16) !important;
+    overflow: hidden !important;
+    background-color: #ffffff !important;
+    margin-top: 4px !important;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown .select2-search {
+    padding: 8px 10px !important;
+    background-color: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown .select2-search .select2-search__field {
+    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 6px 10px !important;
+    font-size: 0.84rem !important;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown .select2-search .select2-search__field:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 0.15rem rgba(37, 99, 235, 0.15) !important;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options {
+    padding: 4px 6px !important;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option {
+    border-radius: 8px !important;
+    padding: 7px 12px !important;
+    margin: 2px 0 !important;
+    font-size: 0.85rem !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--highlighted {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--selected,
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-selected="true"]:not(.select2-results__option--highlighted) {
+    background-color: #eff6ff !important;
+    color: #1e3a8a !important;
+    font-weight: 600 !important;
+}
+
+/* Bootstrap Dropdown Menu Expansions */
+.dropdown-menu {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15) !important;
+    padding: 6px !important;
+    background-color: #ffffff !important;
+}
+
+.dropdown-menu .dropdown-header {
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    color: #1e3a8a !important;
+    padding: 6px 12px !important;
+}
+
+.dropdown-menu .dropdown-item {
+    border-radius: 8px !important;
+    padding: 7px 12px !important;
+    font-size: 0.85rem !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+    color: #1e3a8a !important;
+    font-weight: 600 !important;
+}
+
+.dropdown-menu .dropdown-item.active,
+.dropdown-menu .dropdown-item:active {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+}
+
+/* ==========================================================================
+   Global Styled Calendar Popup (Flatpickr)
+   ========================================================================== */
+.flatpickr-calendar {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.18) !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    font-family: inherit !important;
+}
+
+.flatpickr-months {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    padding: 8px 6px !important;
+    align-items: center !important;
+}
+
+.flatpickr-months .flatpickr-month {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    height: 36px !important;
+}
+
+.flatpickr-current-month {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    padding-top: 4px !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    background: transparent !important;
+    border-radius: 6px !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months option {
+    color: #1e293b !important;
+    background-color: #ffffff !important;
+}
+
+.flatpickr-current-month input.cur-year {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    top: 8px !important;
+    border-radius: 8px !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+    background-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+.flatpickr-months .flatpickr-prev-month svg,
+.flatpickr-months .flatpickr-next-month svg {
+    fill: #ffffff !important;
+}
+
+.flatpickr-weekdays {
+    background-color: #f1f5f9 !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    height: 32px !important;
+}
+
+span.flatpickr-weekday {
+    background-color: transparent !important;
+    color: #1e3a8a !important;
+    font-weight: 700 !important;
+    font-size: 0.76rem !important;
+}
+
+.flatpickr-days {
+    padding: 4px 0 !important;
+}
+
+.flatpickr-day {
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    color: #1e293b !important;
+    transition: all 0.15s ease !important;
+}
+
+.flatpickr-day:hover,
+.flatpickr-day:focus {
+    background-color: #dbeafe !important;
+    border-color: #93c5fd !important;
+    color: #1e3a8a !important;
+}
+
+.flatpickr-day.today {
+    border-color: #2563eb !important;
+    color: #1e3a8a !important;
+    font-weight: 700 !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    border-color: #1e3a8a !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 8px rgba(30, 58, 138, 0.28) !important;
+}

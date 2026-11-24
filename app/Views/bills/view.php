@@ -251,7 +251,34 @@
                 <span class="badge bg-secondary"><?= count($bill['payments']) ?> Payment(s)</span>
             </div>
             <div class="card-body p-0">
-                <div class="table-responsive">
+                <div class="erp-mobile-list p-2 bg-light">
+                    <?php foreach ($bill['payments'] as $payment): ?>
+                        <?php
+                        $deductions = (float) ($payment['discount_amount'] ?? 0)
+                                    + (float) ($payment['mahimai_amount'] ?? 0)
+                                    + (float) ($payment['postal_charges'] ?? 0);
+                        $grossSettled = (float) ($payment['amount'] ?? 0) + $deductions;
+                        ?>
+                        <a href="<?= site_url('payments/view/' . $payment['id']) ?>" class="erp-mobile-card">
+                            <div class="fw-bold text-primary"><?= esc($payment['payment_number'] ?? '#'.$payment['id']) ?></div>
+                            <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                                <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                    <?= date('d/m/Y', strtotime($payment['payment_date'])) ?> &middot; <?= esc($payment['payment_mode'] ?? $payment['payment_method'] ?? 'Bank') ?>
+                                    <?php if (!empty($payment['reference_number'])): ?>
+                                        &middot; Ref: <?= esc($payment['reference_number']) ?>
+                                    <?php endif; ?>
+                                    <?php if ($deductions > 0): ?>
+                                        &middot; Ded: ₹<?= format_inr($deductions) ?>
+                                    <?php endif; ?>
+                                </span>
+                                <span class="fw-bold small text-success" style="flex: 0 0 auto; white-space: nowrap;">
+                                    ₹<?= format_inr($grossSettled) ?>
+                                </span>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+                <div class="table-responsive erp-desktop-wrap">
                     <table class="table table-striped table-hover mb-0 align-middle">
                         <thead class="table-light">
                             <tr>

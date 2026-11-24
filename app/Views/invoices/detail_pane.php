@@ -298,6 +298,7 @@
                                 <th class="text-end">Deductions</th>
                                 <th class="text-end">Total Settled</th>
                                 <th>Reference</th>
+                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -319,6 +320,11 @@
                                     </td>
                                     <td class="text-end fw-bold text-success">₹<?= number_format($payment['amount'] + $ded, 2) ?></td>
                                     <td><?= esc($payment['reference_number']) ?: '-' ?></td>
+                                    <td class="text-center">
+                                        <a href="<?= site_url('invoice_payments/view/' . $payment['id']) ?>" class="btn btn-xs btn-outline-primary py-0 px-1" title="View Receipt" target="_blank">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

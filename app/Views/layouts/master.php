@@ -137,6 +137,26 @@
                 allowInput: true
             });
         });
+
+        // Global Back button behavior: go back to previous screen when navigated within the app
+        document.addEventListener("click", function(e) {
+            const backBtn = e.target.closest("a.btn");
+            if (!backBtn) return;
+            if (backBtn.hasAttribute("data-no-history-back") || backBtn.target === "_blank") return;
+            const href = backBtn.getAttribute("href") || "";
+            if (!href || href === "#" || href.startsWith("javascript:")) return;
+
+            const hasBackIcon = !!backBtn.querySelector(".fa-arrow-left, .fa-chevron-left");
+            const txt = (backBtn.textContent || "").trim().toLowerCase();
+            const isBackText = txt === "back" || txt.startsWith("back to ");
+            if (!hasBackIcon && !isBackText) return;
+
+            const sameOriginRef = document.referrer && document.referrer.indexOf(window.location.origin) === 0;
+            if (window.history.length > 1 && sameOriginRef && document.referrer !== window.location.href) {
+                e.preventDefault();
+                window.history.back();
+            }
+        });
     </script>
     <?= $this->renderSection('scripts') ?>
     <!-- List UI Enhancements -->

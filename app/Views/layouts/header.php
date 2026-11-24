@@ -44,9 +44,13 @@
                         </p>
                     </li>
                     <!-- Menu Footer-->
-                    <li class="user-footer">
-                        <a href="<?= site_url('profile/change_password') ?>" class="btn btn-default btn-flat"><?= lang('App.profile') ?></a>
-                        <a href="<?= site_url('logout') ?>" class="btn btn-default btn-flat float-end"><?= lang('App.sign_out') ?></a>
+                    <li class="user-footer d-flex justify-content-between align-items-center gap-2 p-2">
+                        <a href="<?= site_url('profile/change_password') ?>" class="btn btn-sm btn-primary fw-semibold">
+                            <i class="fas fa-user-cog me-1"></i><?= lang('App.profile') ?>
+                        </a>
+                        <a href="<?= site_url('logout') ?>" class="btn btn-sm btn-danger fw-semibold">
+                            <i class="fas fa-sign-out-alt me-1"></i><?= lang('App.sign_out') ?>
+                        </a>
                     </li>
                 </ul>
             </li>

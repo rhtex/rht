@@ -23,7 +23,7 @@
     }
     .co-desktop-table { display: none !important; }
     .co-mobile-cards  { display: block !important; }
-    @media (min-width: 992px) {
+    @media (min-width: 992px) and (hover: hover) and (pointer: fine) {
         .co-desktop-table { display: block !important; }
         .co-mobile-cards  { display: none !important; }
     }
@@ -62,7 +62,8 @@
     </div>
 
     <div class="card-body p-0">
-        <!-- Desktop Table (only >= 992px) -->
+        <?php if (empty($isMobileDevice)): ?>
+        <!-- Desktop Table (only >= 992px & non-mobile device) -->
         <div class="table-responsive co-desktop-table">
             <table class="table table-hover table-striped align-middle mb-0">
                 <thead class="table-light">
@@ -110,8 +111,9 @@
                 </tbody>
             </table>
         </div>
+        <?php endif; ?>
 
-        <!-- Mobile Card List (only < 992px) -->
+        <!-- Mobile Card List (always shown on mobile devices or < 992px) -->
         <div class="co-mobile-cards p-2 bg-light">
             <?php if (!empty($orders)): ?>
                 <?php foreach ($orders as $o): ?>

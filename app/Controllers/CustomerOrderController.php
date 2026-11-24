@@ -28,12 +28,13 @@ class CustomerOrderController extends BaseController
         $orders    = $this->orderModel->getWithCustomer($search, $status, $customerId ?: null);
 
         return view('customer_orders/index', [
-            'orders'     => $orders,
-            'customers'  => $customers,
-            'statuses'   => CustomerOrderModel::STATUSES,
-            'search'     => $search,
-            'status'     => $status,
-            'customerId' => $customerId,
+            'orders'         => $orders,
+            'customers'      => $customers,
+            'statuses'       => CustomerOrderModel::STATUSES,
+            'search'         => $search,
+            'status'         => $status,
+            'customerId'     => $customerId,
+            'isMobileDevice' => $this->request->getUserAgent()->isMobile(),
         ]);
     }
 
@@ -44,7 +45,10 @@ class CustomerOrderController extends BaseController
             return redirect()->to('customer_orders')->with('error', 'Customer order not found.');
         }
 
-        return view('customer_orders/view', ['order' => $order]);
+        return view('customer_orders/view', [
+            'order'          => $order,
+            'isMobileDevice' => $this->request->getUserAgent()->isMobile(),
+        ]);
     }
 
     public function create()

@@ -36,6 +36,12 @@ $isClosed = ($order['status'] === 'Closed');
         cursor: pointer;
     }
     .mobile-design-card:active { background-color: #f1f6ff; }
+    .co-desktop-table { display: none !important; }
+    .co-mobile-cards  { display: block !important; }
+    @media (min-width: 992px) and (hover: hover) and (pointer: fine) {
+        .co-desktop-table { display: block !important; }
+        .co-mobile-cards  { display: none !important; }
+    }
 </style>
 
 <div class="card card-outline card-primary mb-3">
@@ -73,8 +79,9 @@ $isClosed = ($order['status'] === 'Closed');
         <small class="text-muted"><i class="fas fa-hand-pointer me-1"></i>Tap or click any row to view image</small>
     </div>
     <div class="card-body p-0">
+        <?php if (empty($isMobileDevice)): ?>
         <!-- Desktop / Tablet Table -->
-        <div class="table-responsive d-none d-md-block">
+        <div class="table-responsive co-desktop-table">
             <table class="table table-bordered table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
@@ -112,9 +119,10 @@ $isClosed = ($order['status'] === 'Closed');
                 </tbody>
             </table>
         </div>
+        <?php endif; ?>
 
         <!-- Mobile Card List -->
-        <div class="d-md-none p-2">
+        <div class="co-mobile-cards p-2">
             <?php if (!empty($order['designs'])): ?>
                 <?php foreach ($order['designs'] as $idx => $d): ?>
                     <?php $imgUrl = (!empty($d['image']) && file_exists(FCPATH . $d['image'])) ? base_url($d['image']) : ''; ?>
@@ -176,7 +184,7 @@ $isClosed = ($order['status'] === 'Closed');
 <script>
 $(function() {
     const items = [];
-    $('tr.design-clickable').each(function() {
+    $('.co-mobile-cards .design-clickable').each(function() {
         items.push({
             design:  $(this).data('design'),
             product: $(this).data('product'),

@@ -120,25 +120,38 @@
                 });
             }
 
-            // Initialize Select2 on explicit .select2 and standard .form-select dropdowns
-            $('select.select2, select.form-select:not(.select2):not(.no-select2):not(.flatpickr-monthDropdown-months):not([multiple])').each(function() {
-                const $el = $(this);
-                if ($el.hasClass('select2-hidden-accessible')) return;
-                if (!$el.hasClass('select2')) {
-                    if ($el.closest('.dataTables_length, .dt-length, .input-group, .card-header').length) return;
-                }
-                const $modal = $el.closest('.modal');
-                const opts = {
-                    theme: 'bootstrap-5',
-                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') || !$el.attr('style') || $el.attr('style').indexOf('width') === -1 ? '100%' : 'style'),
-                    placeholder: $el.data('placeholder'),
-                    minimumResultsForSearch: $el.hasClass('select2') ? 0 : 7
-                };
-                if ($modal.length) {
-                    opts.dropdownParent = $modal;
-                }
-                $el.select2(opts);
-            });
+            // Initialize Select2 on all .select2 and .form-select dropdowns globally
+            window.initStyledSelects = function(root) {
+                const $scope = root ? $(root) : $(document);
+                $scope.find('select.select2, select.form-select:not(.select2):not(.no-select2):not(.flatpickr-monthDropdown-months):not([multiple])').each(function() {
+                    const $el = $(this);
+                    if ($el.hasClass('select2-hidden-accessible')) return;
+                    if (!$el.hasClass('select2')) {
+                        if ($el.closest('.dataTables_length, .dt-length').length) return;
+                        const inlineStyle = ($el.attr('style') || '').replace(/\s+/g, '');
+                        if (inlineStyle.indexOf('width:50px') !== -1 || inlineStyle.indexOf('width:55px') !== -1) return;
+                    }
+                    const $modal = $el.closest('.modal');
+                    const inHeaderOrGroup = $el.closest('.card-header, .input-group').length > 0;
+                    const hasExplicitWidth = $el.data('width') || ($el.attr('style') && $el.attr('style').indexOf('width') !== -1);
+                    const opts = {
+                        theme: 'bootstrap-5',
+                        width: $el.data('width') ? $el.data('width') : (inHeaderOrGroup || hasExplicitWidth ? 'resolve' : '100%'),
+                        dropdownAutoWidth: inHeaderOrGroup,
+                        placeholder: $el.data('placeholder'),
+                        minimumResultsForSearch: $el.hasClass('select2') ? 0 : 7
+                    };
+                    if ($el.hasClass('form-select-sm')) {
+                        opts.selectionCssClass = 'select2--small';
+                        opts.dropdownCssClass = 'select2--small';
+                    }
+                    if ($modal.length) {
+                        opts.dropdownParent = $modal;
+                    }
+                    $el.select2(opts);
+                });
+            };
+            window.initStyledSelects();
 
             // Initialize Flatpickr for all date inputs
             flatpickr("input[type=date]", {

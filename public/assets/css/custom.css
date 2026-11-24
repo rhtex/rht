@@ -574,6 +574,32 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
     color: #ffffff !important;
 }
 
+/* Select2 inside colored Card Headers */
+.card-header .select2-container--bootstrap-5 .select2-selection {
+    background-color: rgba(255, 255, 255, 0.16) !important;
+    border: 1px solid rgba(255, 255, 255, 0.30) !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    min-height: 30px !important;
+    padding: 0.2rem 1.85rem 0.2rem 0.65rem !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.55rem center !important;
+    background-size: 12px 10px !important;
+}
+.card-header .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 0.78rem !important;
+    line-height: 1.4 !important;
+}
+.card-header .select2-container--bootstrap-5 .select2-selection--single .select2-selection__placeholder {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+.card-header .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+    display: none !important;
+}
+
 .badge {
     font-weight: 600 !important;
     padding: 6px 12px !important;

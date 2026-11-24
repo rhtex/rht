@@ -581,7 +581,9 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
     color: #ffffff !important;
 }
 
-/* Select2 inside colored Card Headers */
+/* Select2 inside colored Card Headers:
+   - Compact standalone selects (e.g. dashboard chart filters) use translucent white pill
+   - Filter forms inside card-header (e.g. customer_orders) match .form-control white inputs */
 .card-header .select2-container--bootstrap-5 .select2-selection {
     background-color: rgba(255, 255, 255, 0.16) !important;
     border: 1px solid rgba(255, 255, 255, 0.30) !important;
@@ -605,6 +607,24 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
 }
 .card-header .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
     display: none !important;
+}
+
+.card-header form .select2-container--bootstrap-5 .select2-selection,
+.card-header [class*="col-"] .select2-container--bootstrap-5 .select2-selection {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #1e293b !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23334155' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+}
+.card-header form .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered,
+.card-header [class*="col-"] .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    color: #1e293b !important;
+    font-weight: 500 !important;
+    font-size: 0.84rem !important;
+}
+.card-header form .select2-container--bootstrap-5 .select2-selection--single .select2-selection__placeholder,
+.card-header [class*="col-"] .select2-container--bootstrap-5 .select2-selection--single .select2-selection__placeholder {
+    color: #64748b !important;
 }
 
 .badge {

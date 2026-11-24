@@ -1039,6 +1039,35 @@ body.is-mobile-device .erp-mobile-card {
     color: #ffffff !important;
 }
 
+/* User Account Popup Dropdown */
+.app-header .user-menu .user-account-dropdown {
+    padding: 0 !important;
+    overflow: hidden !important;
+    min-width: 260px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.22) !important;
+}
+
+.app-header .user-menu .user-account-dropdown .user-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.app-header .user-menu .user-account-dropdown .user-popup-avatar {
+    width: 68px !important;
+    height: 68px !important;
+    border: 3px solid rgba(255, 255, 255, 0.85) !important;
+    object-fit: cover;
+}
+
+.app-header .user-menu .user-account-dropdown .user-footer {
+    background-color: #f8fafc !important;
+    border-top: 1px solid #e2e8f0 !important;
+}
+
 /* ==========================================================================
    Global Styled Dropdown Expansions (Select2 & Bootstrap Dropdowns)
    ========================================================================== */

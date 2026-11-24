@@ -34,21 +34,23 @@
                     <img src="https://ui-avatars.com/api/?name=<?= urlencode(session()->get('name')) ?>&background=random" class="user-image rounded-circle shadow" alt="User Image">
                     <span class="d-none d-md-inline"><?= session()->get('name') ?></span>
                 </a>
-                <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end" data-bs-theme="light">
+                <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end user-account-dropdown" data-bs-theme="light">
                     <!-- User image -->
-                    <li class="user-header text-bg-primary">
-                        <img src="https://ui-avatars.com/api/?name=<?= urlencode(session()->get('name')) ?>&background=random" class="rounded-circle shadow" alt="User Image">
-                        <p>
-                            <?= session()->get('name') ?>
-                            <small><?= session()->get('role') ?></small>
+                    <li class="user-header text-white text-center py-3 px-3">
+                        <img src="https://ui-avatars.com/api/?name=<?= urlencode(session()->get('name')) ?>&background=1e293b&color=ffffff&bold=true" class="rounded-circle shadow-sm mb-2 user-popup-avatar" alt="User Image">
+                        <p class="mb-0 fw-bold fs-6 text-white">
+                            <?= esc(session()->get('name')) ?>
                         </p>
+                        <span class="badge bg-light text-primary fw-semibold mt-1 px-3 py-1">
+                            <?= esc(ucfirst((string) session()->get('role'))) ?>
+                        </span>
                     </li>
                     <!-- Menu Footer-->
-                    <li class="user-footer d-flex justify-content-between align-items-center gap-2 p-2">
-                        <a href="<?= site_url('profile/change_password') ?>" class="btn btn-sm btn-primary fw-semibold">
+                    <li class="user-footer d-flex justify-content-between align-items-center gap-2 px-3 py-2">
+                        <a href="<?= site_url('profile/change_password') ?>" class="btn btn-sm btn-primary fw-semibold flex-fill text-center">
                             <i class="fas fa-user-cog me-1"></i><?= lang('App.profile') ?>
                         </a>
-                        <a href="<?= site_url('logout') ?>" class="btn btn-sm btn-danger fw-semibold">
+                        <a href="<?= site_url('logout') ?>" class="btn btn-sm btn-danger fw-semibold flex-fill text-center">
                             <i class="fas fa-sign-out-alt me-1"></i><?= lang('App.sign_out') ?>
                         </a>
                     </li>

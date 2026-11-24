@@ -968,16 +968,21 @@ body.is-mobile-device .erp-mobile-card {
     transition: background 0.15s ease, color 0.15s ease !important;
 }
 
-.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--highlighted {
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--selected:not(.select2-results__option--highlighted),
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-selected="true"]:not(.select2-results__option--highlighted) {
+    background-color: #dbeafe !important;
+    color: #1e3a8a !important;
+    font-weight: 600 !important;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--highlighted,
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--highlighted.select2-results__option--selected {
     background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
     color: #ffffff !important;
 }
 
-.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--selected,
-.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-selected="true"]:not(.select2-results__option--highlighted) {
-    background-color: #eff6ff !important;
-    color: #1e3a8a !important;
-    font-weight: 600 !important;
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--highlighted * {
+    color: #ffffff !important;
 }
 
 /* Bootstrap Dropdown Menu Expansions */
@@ -1015,6 +1020,10 @@ body.is-mobile-device .erp-mobile-card {
 .dropdown-menu .dropdown-item.active,
 .dropdown-menu .dropdown-item:active {
     background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+}
+.dropdown-menu .dropdown-item.active *,
+.dropdown-menu .dropdown-item:active * {
     color: #ffffff !important;
 }
 

@@ -21,6 +21,12 @@
         background: #fff;
         box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     }
+    .co-desktop-table { display: none !important; }
+    .co-mobile-cards  { display: block !important; }
+    @media (min-width: 992px) {
+        .co-desktop-table { display: block !important; }
+        .co-mobile-cards  { display: none !important; }
+    }
 </style>
 
 <div class="card card-outline card-primary">
@@ -56,8 +62,8 @@
     </div>
 
     <div class="card-body p-0">
-        <!-- Desktop / Tablet Table -->
-        <div class="table-responsive d-none d-md-block">
+        <!-- Desktop Table (only >= 992px) -->
+        <div class="table-responsive co-desktop-table">
             <table class="table table-hover table-striped align-middle mb-0">
                 <thead class="table-light">
                     <tr>
@@ -105,8 +111,8 @@
             </table>
         </div>
 
-        <!-- Mobile Card List -->
-        <div class="d-md-none p-2 bg-light">
+        <!-- Mobile Card List (only < 992px) -->
+        <div class="co-mobile-cards p-2 bg-light">
             <?php if (!empty($orders)): ?>
                 <?php foreach ($orders as $o): ?>
                     <?php

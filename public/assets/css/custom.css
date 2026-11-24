@@ -985,6 +985,26 @@ body.is-mobile-device .erp-mobile-card {
     color: #ffffff !important;
 }
 
+/* Native <select class="form-select"> fallback styling */
+select.form-select {
+    border-radius: 8px !important;
+    border-color: #cbd5e1 !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+select.form-select:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.18) !important;
+}
+select.form-select option {
+    color: #1e293b;
+    background-color: #ffffff;
+    padding: 6px 10px;
+}
+select.form-select option:checked {
+    background-color: #1e3a8a;
+    color: #ffffff;
+}
+
 /* Bootstrap Dropdown Menu Expansions */
 .dropdown-menu {
     border: 1px solid #e2e8f0 !important;

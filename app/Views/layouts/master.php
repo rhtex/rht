@@ -120,13 +120,24 @@
                 });
             }
 
-            // Initialize Select2
-            $('.select2').each(function() {
-                $(this).select2({
+            // Initialize Select2 on explicit .select2 and standard .form-select dropdowns
+            $('select.select2, select.form-select:not(.select2):not(.no-select2):not(.flatpickr-monthDropdown-months):not([multiple])').each(function() {
+                const $el = $(this);
+                if ($el.hasClass('select2-hidden-accessible')) return;
+                if (!$el.hasClass('select2')) {
+                    if ($el.closest('.dataTables_length, .dt-length, .input-group, .card-header').length) return;
+                }
+                const $modal = $el.closest('.modal');
+                const opts = {
                     theme: 'bootstrap-5',
-                    width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
-                    placeholder: $(this).data('placeholder'),
-                });
+                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') || !$el.attr('style') || $el.attr('style').indexOf('width') === -1 ? '100%' : 'style'),
+                    placeholder: $el.data('placeholder'),
+                    minimumResultsForSearch: $el.hasClass('select2') ? 0 : 7
+                };
+                if ($modal.length) {
+                    opts.dropdownParent = $modal;
+                }
+                $el.select2(opts);
             });
 
             // Initialize Flatpickr for all date inputs

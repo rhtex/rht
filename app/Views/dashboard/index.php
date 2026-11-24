@@ -148,7 +148,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <div>
                                 <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Receivables</div>
-                                <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Total Unpaid Invoices</div>
+                                <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Net Customer Balances</div>
                             </div>
                             <div class="kpi-icon-wrap bg-warning bg-opacity-10 text-warning" style="width: 32px; height: 32px; font-size: 0.9rem;">
                                 <i class="fas fa-hand-holding-usd"></i>
@@ -171,7 +171,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <div>
                                 <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Payables</div>
-                                <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Total Unpaid Bills</div>
+                                <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Net Vendor Balances</div>
                             </div>
                             <div class="kpi-icon-wrap bg-danger bg-opacity-10 text-danger" style="width: 32px; height: 32px; font-size: 0.9rem;">
                                 <i class="fas fa-file-invoice-dollar"></i>

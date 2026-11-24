@@ -138,17 +138,30 @@
                     <?php if (empty($invoices)): ?>
                         <div class="text-center py-4 text-muted">No invoices found matching criteria.</div>
                     <?php else: ?>
+                        <?php
+                        $mobileStatusColors = [
+                            'Draft'          => 'secondary',
+                            'Open'           => 'primary',
+                            'Paid'           => 'success',
+                            'Partially Paid' => 'info',
+                            'Overdue'        => 'danger',
+                            'Void'           => 'dark'
+                        ];
+                        ?>
                         <?php foreach ($invoices as $invoice): ?>
+                            <?php $mColor = $mobileStatusColors[$invoice['status']] ?? 'secondary'; ?>
                             <a href="<?= site_url('invoices/view/' . $invoice['id']) ?>" class="erp-mobile-card">
-                                <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
-                                    <?= esc($invoice['customer_name']) ?>
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                        <?= esc($invoice['customer_name']) ?>
+                                    </div>
+                                    <span class="badge text-bg-<?= $mColor ?>" style="font-size: 0.68rem; flex: 0 0 auto;">
+                                        <?= esc($invoice['status']) ?>
+                                    </span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
                                     <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
                                         <?= esc($invoice['invoice_number']) ?> &middot; <?= date('d/m/Y', strtotime($invoice['invoice_date'])) ?>
-                                        <?php if (!empty($invoice['customer_city'])): ?>
-                                            &middot; <?= esc($invoice['customer_city']) ?>
-                                        <?php endif; ?>
                                     </span>
                                     <span class="fw-bold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">
                                         &#8377;<?= format_inr((float)$invoice['total_amount']) ?>
@@ -556,11 +569,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         const id = tr.dataset.id;
                         const docNo = tr.querySelector('td:nth-child(1) .fw-bold')?.textContent.trim() || '';
                         const docDate = tr.querySelector('td:nth-child(1) small')?.textContent.trim() || '';
+                        const statusBadge = tr.querySelector('td:nth-child(1) .badge');
+                        const statusText = statusBadge ? statusBadge.textContent.trim() : '';
+                        const statusClass = statusBadge ? statusBadge.className : 'badge text-bg-secondary';
                         const party = tr.querySelector('td:nth-child(2) .fw-semibold')?.textContent.trim() || '';
                         const amt = tr.querySelector('td:nth-child(3) .fw-bold')?.textContent.trim() || '';
                         const cardHtml = `
                             <a href="<?= site_url('invoices/view/') ?>${id}" class="erp-mobile-card">
-                                <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">${escapeHtml(party)}</div>
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">${escapeHtml(party)}</div>
+                                    ${statusText ? `<span class="${escapeHtml(statusClass)}" style="font-size: 0.68rem; flex: 0 0 auto;">${escapeHtml(statusText)}</span>` : ''}
+                                </div>
                                 <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
                                     <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">${escapeHtml(docNo)} &middot; ${escapeHtml(docDate)}</span>
                                     <span class="fw-bold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">${escapeHtml(amt)}</span>

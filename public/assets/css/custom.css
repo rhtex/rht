@@ -1008,9 +1008,30 @@ body.is-mobile-device .erp-mobile-card {
     margin-bottom: 0 !important;
 }
 
-/* Top Navbar Header matching Dark Sidebar */
+/* Top Navbar Header matching Dark Sidebar (exact same height & alignment) */
+.sidebar-brand,
+.app-header {
+    height: 3.5rem !important;
+    min-height: 3.5rem !important;
+    box-sizing: border-box !important;
+}
+
+.app-header {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.app-header .navbar-nav {
+    align-items: center !important;
+}
+
 .app-header[data-bs-theme="dark"] .nav-link {
     color: rgba(255, 255, 255, 0.88) !important;
+    display: inline-flex;
+    align-items: center;
 }
 .app-header[data-bs-theme="dark"] .nav-link:hover,
 .app-header[data-bs-theme="dark"] .nav-link:focus {

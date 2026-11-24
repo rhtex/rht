@@ -1008,6 +1008,15 @@ body.is-mobile-device .erp-mobile-card {
     margin-bottom: 0 !important;
 }
 
+/* Top Navbar Header matching Dark Sidebar */
+.app-header[data-bs-theme="dark"] .nav-link {
+    color: rgba(255, 255, 255, 0.88) !important;
+}
+.app-header[data-bs-theme="dark"] .nav-link:hover,
+.app-header[data-bs-theme="dark"] .nav-link:focus {
+    color: #ffffff !important;
+}
+
 /* ==========================================================================
    Global Styled Dropdown Expansions (Select2 & Bootstrap Dropdowns)
    ========================================================================== */

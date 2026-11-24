@@ -1,4 +1,4 @@
-<nav class="app-header navbar navbar-expand bg-body">
+<nav class="app-header navbar navbar-expand bg-body-secondary shadow-sm" data-bs-theme="dark">
     <div class="container-fluid">
         <!-- Start Navbar Links -->
         <ul class="navbar-nav">
@@ -23,7 +23,7 @@
                         <i class="fas fa-globe"></i>
                         <span class="d-none d-md-inline"><?= session('lang') == 'ta' ? 'தமிழ்' : 'English' ?></span>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-end">
+                    <div class="dropdown-menu dropdown-menu-end" data-bs-theme="light">
                         <a href="<?= site_url('lang/en') ?>" class="dropdown-item <?= session('lang') == 'en' ? 'active' : '' ?>">English</a>
                         <a href="<?= site_url('lang/ta') ?>" class="dropdown-item <?= session('lang') == 'ta' ? 'active' : '' ?>">தமிழ் (Tamil)</a>
                     </div>
@@ -34,7 +34,7 @@
                     <img src="https://ui-avatars.com/api/?name=<?= urlencode(session()->get('name')) ?>&background=random" class="user-image rounded-circle shadow" alt="User Image">
                     <span class="d-none d-md-inline"><?= session()->get('name') ?></span>
                 </a>
-                <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end" data-bs-theme="light">
                     <!-- User image -->
                     <li class="user-header text-bg-primary">
                         <img src="https://ui-avatars.com/api/?name=<?= urlencode(session()->get('name')) ?>&background=random" class="rounded-circle shadow" alt="User Image">

@@ -76,8 +76,8 @@
 
 <!-- Filter Card -->
 <div class="card card-outline card-primary mb-3 shadow-sm">
-    <div class="card-header py-2">
-        <h3 class="card-title fw-bold"><i class="fas fa-filter me-1"></i> Filter Invoices</h3>
+    <div class="card-header py-2 text-white">
+        <h3 class="card-title fw-bold mb-0"><i class="fas fa-filter me-1"></i> Filter Invoices</h3>
     </div>
     <div class="card-body">
         <form method="get" class="row g-2 align-items-end" id="invoiceFilterForm">
@@ -129,9 +129,9 @@
     <!-- Center Invoices List Column -->
     <div class="col-12 col-lg-5 col-xl-5 transition-col" id="invoiceListCol">
         <div class="card card-outline card-secondary shadow-sm mb-3" id="invoiceListCard">
-            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="invoiceListCardHeader">
-                <h3 class="card-title fw-bold text-dark m-0"><i class="fas fa-list text-primary me-2"></i>Invoice List</h3>
-                <span class="text-muted small">Loaded <strong id="loadedInvoicesCount"><?= count($invoices) ?></strong> invoices</span>
+            <div class="card-header text-white py-2 d-flex justify-content-between align-items-center" id="invoiceListCardHeader" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;">
+                <h3 class="card-title fw-bold text-white m-0"><i class="fas fa-list me-2"></i>Invoice List</h3>
+                <span class="badge bg-light text-dark fw-semibold">Loaded <strong id="loadedInvoicesCount"><?= count($invoices) ?></strong> invoices</span>
             </div>
             <div class="card-body p-0 position-relative" id="invoiceListBody">
                 <div class="erp-mobile-list p-2 bg-light" id="invoiceMobileList">
@@ -264,9 +264,9 @@
     <!-- Right Side Invoice View Column (No scrollbar, full content flows naturally; hidden on mobile) -->
     <div class="col-lg-7 col-xl-7 transition-col d-none d-lg-block" id="invoiceDetailCol">
         <div class="card card-outline card-primary shadow-sm mb-3" id="invoiceDetailCard">
-            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="invoiceDetailCardHeader">
-                <h5 class="card-title fw-bold text-dark m-0" id="detailPaneTitle">
-                    <i class="fas fa-eye text-primary me-2"></i>Invoice Details
+            <div class="card-header text-white py-2 d-flex justify-content-between align-items-center" id="invoiceDetailCardHeader" style="background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;">
+                <h5 class="card-title fw-bold text-white m-0" id="detailPaneTitle">
+                    <i class="fas fa-eye me-2"></i>Invoice Details
                 </h5>
                 <div class="d-flex align-items-center gap-2">
                     <a href="#" id="btnOpenSinglePage" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark" target="_blank" title="Open this invoice in standalone full page">

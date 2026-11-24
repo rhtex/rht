@@ -15,26 +15,26 @@
             data-id="<?= $invoice['id'] ?>"
             id="inv-row-<?= $invoice['id'] ?>"
             style="cursor: pointer;">
-            <td class="text-truncate">
-                <div class="fw-bold text-primary text-truncate"><?= esc($invoice['invoice_number']) ?></div>
+            <td style="white-space: normal; word-break: break-word;">
+                <div class="fw-bold text-primary"><?= esc($invoice['invoice_number']) ?></div>
                 <small class="text-muted d-block"><?= date('d/m/Y', strtotime($invoice['invoice_date'])) ?></small>
                 <span class="badge text-bg-<?= $color ?>" style="font-size:0.68rem;"><?= esc($invoice['status']) ?></span>
             </td>
-            <td class="text-truncate">
-                <div class="fw-semibold text-dark text-truncate" title="<?= esc($invoice['customer_name']) ?>">
+            <td style="white-space: normal; word-break: break-word;">
+                <div class="fw-semibold text-dark">
                     <?= esc($invoice['customer_name']) ?>
                 </div>
                 <?php if (!empty($invoice['customer_city'])): ?>
-                    <small class="text-muted text-truncate d-block"><i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($invoice['customer_city']) ?></small>
+                    <small class="text-muted d-block"><i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($invoice['customer_city']) ?></small>
                 <?php endif; ?>
                 <?php if (!empty($invoice['so_number'])): ?>
                     <span class="badge bg-light text-secondary border small" style="font-size:0.65rem;">SO: <?= esc($invoice['so_number']) ?></span>
                 <?php endif; ?>
             </td>
-            <td class="text-end text-truncate">
-                <div class="fw-bold text-dark text-truncate">₹<?= number_format($invoice['total_amount'], 2) ?></div>
+            <td class="text-end text-nowrap">
+                <div class="fw-bold text-dark">₹<?= number_format($invoice['total_amount'], 2) ?></div>
                 <?php if ($invoice['balance'] > 0): ?>
-                    <small class="text-danger fw-semibold d-block text-truncate">Bal: ₹<?= number_format($invoice['balance'], 2) ?></small>
+                    <small class="text-danger fw-semibold d-block">Bal: ₹<?= number_format($invoice['balance'], 2) ?></small>
                 <?php else: ?>
                     <small class="text-success d-block"><i class="fas fa-check me-1"></i>Paid</small>
                 <?php endif; ?>

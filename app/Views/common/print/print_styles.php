@@ -453,13 +453,13 @@ $screenHeight  = $orientation === 'landscape' ? '210mm' : '297mm';
         break-inside: avoid;
     }
 
-    /* ---------- BROWSER SCREEN PREVIEW (?format=html) ---------- */
+    /* ---------- BROWSER SCREEN PREVIEW (?format=html or Settings Live Preview) ---------- */
     @media screen {
-        html { background: #e9ecef; }
+        html { background: <?= !empty($isPreview) ? '#fff' : '#e9ecef' ?>; <?= !empty($isPreview) ? 'overflow: hidden;' : '' ?> }
         body {
             width: <?= $screenWidth ?>;
             min-height: <?= $screenHeight ?>;
-            margin: 10px auto;
+            margin: <?= !empty($isPreview) ? '0' : '10px auto' ?>;
             padding: 8mm 8mm 10mm 8mm;
             background: #fff;
             position: relative;

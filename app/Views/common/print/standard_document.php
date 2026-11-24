@@ -233,6 +233,7 @@ $showBottomBox   = $showBottomLeft || $showBottomRight;
         'paperSize'     => $printConfig['paper_size'] ?? 'A4',
         'orientation'   => $printConfig['orientation'] ?? 'portrait',
         'fontFamily'    => $printConfig['font_family'] ?? 'Helvetica, Arial, sans-serif',
+        'isPreview'     => !empty($is_preview),
     ]) ?>
 </head>
 <body onload="<?= !empty($auto_print) ? 'window.print()' : '' ?>">

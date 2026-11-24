@@ -35,20 +35,26 @@
         background: #e9ecef;
         border: 1px solid #ced4da;
         border-radius: 6px;
-        height: 76vh;
-        overflow: auto;
+        overflow-x: hidden;
+        overflow-y: hidden;
         display: flex;
         justify-content: center;
         align-items: flex-start;
         padding: 10px;
     }
+    .preview-scaler {
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        background: #fff;
+    }
     #livePreviewFrame {
         border: none;
         background: #fff;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
         width: 210mm;
         height: 297mm;
-        transform-origin: top center;
+        transform-origin: top left;
+        display: block;
     }
 </style>
 
@@ -241,17 +247,20 @@
                 <strong><i class="fas fa-eye me-1"></i> Live Print Preview (Sample Data)</strong>
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-secondary" id="previewOrientationBadge"><?= strtoupper($config['orientation'] ?? 'portrait') ?></span>
-                    <select class="form-select form-select-sm" id="previewZoom" style="width: 90px;">
+                    <select class="form-select form-select-sm" id="previewZoom" style="width: 96px;">
+                        <option value="auto" selected>Fit Page</option>
                         <option value="0.55">55%</option>
-                        <option value="0.68" selected>68%</option>
+                        <option value="0.68">68%</option>
                         <option value="0.80">80%</option>
                         <option value="1">100%</option>
                     </select>
                 </div>
             </div>
             <div class="card-body p-2">
-                <div class="preview-frame-wrap">
-                    <iframe id="livePreviewFrame" name="livePreviewFrame"></iframe>
+                <div class="preview-frame-wrap" id="previewFrameWrap">
+                    <div id="previewScaler" class="preview-scaler">
+                        <iframe id="livePreviewFrame" name="livePreviewFrame" scrolling="no"></iframe>
+                    </div>
                 </div>
             </div>
         </div>
@@ -345,16 +354,39 @@
     }
 
     function applyPreviewScale() {
-        const ori = $('#cfgOrientation').val();
-        const zoom = parseFloat($('#previewZoom').val()) || 0.68;
-        const frame = $('#livePreviewFrame');
-        frame.css({
-            width: ori === 'landscape' ? '297mm' : '210mm',
-            height: ori === 'landscape' ? '210mm' : '297mm',
-            transform: 'scale(' + zoom + ')'
-        });
+        const ori      = $('#cfgOrientation').val();
+        const zoomSel  = $('#previewZoom').val();
+        const wrap     = document.getElementById('previewFrameWrap');
+        const scaler   = document.getElementById('previewScaler');
+        const frame    = document.getElementById('livePreviewFrame');
+
+        // 1mm = 96/25.4 px
+        const mmToPx   = 96 / 25.4;
+        const pageWpx  = (ori === 'landscape' ? 297 : 210) * mmToPx;
+        const pageHpx  = (ori === 'landscape' ? 210 : 297) * mmToPx;
+
+        let scale;
+        if (zoomSel === 'auto') {
+            const availW = Math.max(260, (wrap.clientWidth || 520) - 22);
+            scale = Math.min(availW / pageWpx, 0.82);
+            wrap.style.overflowX = 'hidden';
+            wrap.style.overflowY = 'hidden';
+        } else {
+            scale = parseFloat(zoomSel) || 0.68;
+            wrap.style.overflowX = 'auto';
+            wrap.style.overflowY = 'auto';
+        }
+
+        frame.style.width     = pageWpx + 'px';
+        frame.style.height    = pageHpx + 'px';
+        frame.style.transform = 'scale(' + scale + ')';
+        scaler.style.width    = Math.round(pageWpx * scale) + 'px';
+        scaler.style.height   = Math.round(pageHpx * scale) + 'px';
+
         $('#previewOrientationBadge').text(ori.toUpperCase());
     }
+
+    $(window).on('resize', applyPreviewScale);
 
     function refreshPreview() {
         applyPreviewScale();

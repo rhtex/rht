@@ -1,27 +1,27 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?>Executive Dashboard<?= $this->endSection() ?>
+<?= $this->section('title') ?><?= lang('App.executive_dashboard') ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row align-items-center mb-0">
     <div class="col-12 col-sm-6">
-        <h3 class="fw-bolder text-uppercase ls-1 mb-0" style="color: #1e293b; letter-spacing: -0.5px;">Analytics <span class="text-primary">Studio</span></h3>
-        <p class="text-muted small fw-bold mb-0">Comprehensive Business Overview</p>
+        <h3 class="fw-bolder text-uppercase ls-1 mb-0" style="color: #1e293b; letter-spacing: -0.5px;"><?= lang('App.analytics') ?> <span class="text-primary"><?= lang('App.studio') ?></span></h3>
+        <p class="text-muted small fw-bold mb-0"><?= lang('App.comprehensive_business_overview') ?></p>
     </div>
     <div class="col-12 col-sm-6 d-flex flex-wrap gap-2 justify-content-sm-end mt-2 mt-sm-0">
         <div class="btn-group shadow-sm rounded-3">
             <?php if (can('invoice.create')): ?>
-            <a href="<?= site_url('invoices/create') ?>" class="btn btn-outline-primary btn-sm fw-bold"><i class="fas fa-plus me-1"></i> Invoice</a>
+            <a href="<?= site_url('invoices/create') ?>" class="btn btn-outline-primary btn-sm fw-bold"><i class="fas fa-plus me-1"></i> <?= lang('App.invoice') ?></a>
             <?php endif; ?>
             <?php if (can('quotation.create')): ?>
-            <a href="<?= site_url('quotations/create') ?>" class="btn btn-outline-info btn-sm fw-bold"><i class="fas fa-plus me-1"></i> Quote</a>
+            <a href="<?= site_url('quotations/create') ?>" class="btn btn-outline-info btn-sm fw-bold"><i class="fas fa-plus me-1"></i> <?= lang('App.quote') ?></a>
             <?php endif; ?>
             <?php if (can('bill.create')): ?>
-            <a href="<?= site_url('bills/create') ?>" class="btn btn-outline-warning btn-sm fw-bold"><i class="fas fa-plus me-1"></i> Bill</a>
+            <a href="<?= site_url('bills/create') ?>" class="btn btn-outline-warning btn-sm fw-bold"><i class="fas fa-plus me-1"></i> <?= lang('App.bill') ?></a>
             <?php endif; ?>
         </div>
         <div class="btn-group shadow-sm rounded-3 d-none d-sm-inline-flex">
-            <button class="btn btn-white btn-sm fw-bold border-0 px-3"><i class="fas fa-sync-alt me-1 text-primary"></i> Live</button>
+            <button class="btn btn-white btn-sm fw-bold border-0 px-3"><i class="fas fa-sync-alt me-1 text-primary"></i> <?= lang('App.live') ?></button>
             <button class="btn btn-primary btn-sm fw-bold border-0 px-3"><?= date('M d, Y') ?></button>
         </div>
     </div>
@@ -157,11 +157,11 @@
             <div class="dash-kpi-card grad-blue flex-fill d-flex flex-column justify-content-between">
                 <i class="fas fa-wallet dash-kpi-icon"></i>
                 <div>
-                    <div class="dash-kpi-label">Total Sales &middot; Gross</div>
+                    <div class="dash-kpi-label"><?= lang('App.total_sales_gross') ?></div>
                     <div class="dash-kpi-num">₹<?= format_inr($totalSales) ?></div>
                 </div>
                 <div class="dash-kpi-sub mt-1">
-                    <i class="fas fa-chart-line me-1"></i>All Time Total Revenue
+                    <i class="fas fa-chart-line me-1"></i><?= lang('App.all_time_total_revenue') ?>
                 </div>
             </div>
         </div>
@@ -169,11 +169,11 @@
             <div class="dash-kpi-card grad-emerald flex-fill d-flex flex-column justify-content-between">
                 <i class="fas fa-shopping-cart dash-kpi-icon"></i>
                 <div>
-                    <div class="dash-kpi-label">Total Purchases</div>
+                    <div class="dash-kpi-label"><?= lang('App.total_purchases') ?></div>
                     <div class="dash-kpi-num">₹<?= format_inr($totalPurchases) ?></div>
                 </div>
                 <div class="dash-kpi-sub mt-1">
-                    <i class="fas fa-chart-line me-1"></i>All Time Total Purchases
+                    <i class="fas fa-chart-line me-1"></i><?= lang('App.all_time_total_purchases') ?>
                 </div>
             </div>
         </div>
@@ -181,13 +181,13 @@
             <div class="dash-kpi-card grad-amber flex-fill d-flex flex-column justify-content-between">
                 <i class="fas fa-hand-holding-usd dash-kpi-icon"></i>
                 <div>
-                    <div class="dash-kpi-label">Total Receivables &middot; Unpaid</div>
+                    <div class="dash-kpi-label"><?= lang('App.total_receivables_unpaid') ?></div>
                     <div class="dash-kpi-num">₹<?= format_inr($accountsReceivable) ?></div>
                 </div>
                 <div class="dash-kpi-sub d-flex flex-wrap gap-2 mt-1">
-                    <span>Cur: <strong>₹<?= format_inr($receivableCurrent) ?></strong></span>
+                    <span><?= lang('App.cur_short') ?>: <strong>₹<?= format_inr($receivableCurrent) ?></strong></span>
                     <span>|</span>
-                    <span>Overdue: <strong>₹<?= format_inr($receivableOverdue) ?></strong></span>
+                    <span><?= lang('App.overdue') ?>: <strong>₹<?= format_inr($receivableOverdue) ?></strong></span>
                 </div>
             </div>
         </div>
@@ -195,13 +195,13 @@
             <div class="dash-kpi-card grad-rose flex-fill d-flex flex-column justify-content-between">
                 <i class="fas fa-file-invoice-dollar dash-kpi-icon"></i>
                 <div>
-                    <div class="dash-kpi-label">Total Payables &middot; Unpaid</div>
+                    <div class="dash-kpi-label"><?= lang('App.total_payables_unpaid') ?></div>
                     <div class="dash-kpi-num">₹<?= format_inr($accountsPayable) ?></div>
                 </div>
                 <div class="dash-kpi-sub d-flex flex-wrap gap-2 mt-1">
-                    <span>Cur: <strong>₹<?= format_inr($payableCurrent) ?></strong></span>
+                    <span><?= lang('App.cur_short') ?>: <strong>₹<?= format_inr($payableCurrent) ?></strong></span>
                     <span>|</span>
-                    <span>Overdue: <strong>₹<?= format_inr($payableOverdue) ?></strong></span>
+                    <span><?= lang('App.overdue') ?>: <strong>₹<?= format_inr($payableOverdue) ?></strong></span>
                 </div>
             </div>
         </div>
@@ -282,10 +282,10 @@
                             <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #c2410c; font-size: 10px;"></i> <?= lang("App.expense") ?></span>
                         </div>
                         <div id="chartLegendCompare" class="d-none flex-wrap gap-2 text-white">
-                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #15803d; font-size: 10px;"></i> Rev (Cur FY)</span>
-                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #c2410c; font-size: 10px;"></i> Exp (Cur FY)</span>
-                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #86efac; font-size: 10px;"></i> Rev (Last FY)</span>
-                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #fdba74; font-size: 10px;"></i> Exp (Last FY)</span>
+                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #15803d; font-size: 10px;"></i> <?= lang('App.rev_cur_fy') ?></span>
+                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #c2410c; font-size: 10px;"></i> <?= lang('App.exp_cur_fy') ?></span>
+                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #86efac; font-size: 10px;"></i> <?= lang('App.rev_last_fy') ?></span>
+                            <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #fdba74; font-size: 10px;"></i> <?= lang('App.exp_last_fy') ?></span>
                         </div>
                     </div>
                 </div>
@@ -312,10 +312,10 @@
                 <div class="card-header fw-bold d-flex justify-content-between align-items-center">
                     <span style="font-size: 0.85rem;"><?= lang("App.top_performing_products") ?></span>
                     <select id="topProductsFilter" class="form-select form-select-sm border-0 fw-semibold text-white" style="background-color: rgba(255,255,255,0.15); width: auto; font-size: 0.72rem; padding: 2px 24px 2px 8px; cursor: pointer; border-radius: 6px;">
-                        <option value="current_fy" style="color:#000;" selected>This FY</option>
-                        <option value="last_fy" style="color:#000;">Last FY</option>
-                        <option value="12m" style="color:#000;">Last 12M</option>
-                        <option value="compare_both" style="color:#000;">Compare Both FY</option>
+                        <option value="current_fy" style="color:#000;" selected><?= lang('App.this_fy') ?></option>
+                        <option value="last_fy" style="color:#000;"><?= lang('App.last_fy') ?></option>
+                        <option value="12m" style="color:#000;"><?= lang('App.last_12m') ?></option>
+                        <option value="compare_both" style="color:#000;"><?= lang('App.compare_both_fy') ?></option>
                     </select>
                 </div>
                 <div class="card-body px-3 list-card-body-min">
@@ -327,7 +327,7 @@
                                 </div>
                                 <div style="min-width: 0; flex: 1 1 auto;">
                                     <div class="fw-bold text-dark small" style="white-space: normal; word-break: break-word;"><?= esc($prod['product_name']) ?></div>
-                                    <div class="text-muted small">Vol: <?= number_format($prod['total_qty']) ?> Units</div>
+                                    <div class="text-muted small"><?= lang('App.vol_short') ?>: <?= number_format($prod['total_qty']) ?> <?= lang('App.units') ?></div>
                                 </div>
                                 <div class="text-end fw-bolder text-success" style="font-size: 0.85rem; flex: 0 0 auto; white-space: nowrap;">
                                     ₹<?= number_format($prod['total_revenue'], 2) ?>
@@ -335,7 +335,7 @@
                             </a>
                         <?php endforeach; ?>
                         <?php if(empty($topProducts)): ?>
-                            <div class="text-center text-muted small py-4">No data available</div>
+                            <div class="text-center text-muted small py-4"><?= lang('App.no_data_available') ?></div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -348,10 +348,10 @@
                 <div class="card-header fw-bold d-flex justify-content-between align-items-center">
                     <span style="font-size: 0.85rem;"><?= lang("App.top_customers") ?></span>
                     <select id="topCustomersFilter" class="form-select form-select-sm border-0 fw-semibold text-white" style="background-color: rgba(255,255,255,0.15); width: auto; font-size: 0.72rem; padding: 2px 24px 2px 8px; cursor: pointer; border-radius: 6px;">
-                        <option value="current_fy" style="color:#000;" selected>This FY</option>
-                        <option value="last_fy" style="color:#000;">Last FY</option>
-                        <option value="12m" style="color:#000;">Last 12M</option>
-                        <option value="compare_both" style="color:#000;">Compare Both FY</option>
+                        <option value="current_fy" style="color:#000;" selected><?= lang('App.this_fy') ?></option>
+                        <option value="last_fy" style="color:#000;"><?= lang('App.last_fy') ?></option>
+                        <option value="12m" style="color:#000;"><?= lang('App.last_12m') ?></option>
+                        <option value="compare_both" style="color:#000;"><?= lang('App.compare_both_fy') ?></option>
                     </select>
                 </div>
                 <div class="card-body px-3 list-card-body-min">
@@ -363,7 +363,7 @@
                                 </div>
                                 <div style="min-width: 0; flex: 1 1 auto;">
                                     <div class="fw-bold text-dark small" style="white-space: normal; word-break: break-word;"><?= esc($cust['name']) ?></div>
-                                    <div class="text-muted small">Orders: <?= $cust['total_orders'] ?></div>
+                                    <div class="text-muted small"><?= lang('App.orders') ?>: <?= $cust['total_orders'] ?></div>
                                 </div>
                                 <div class="text-end fw-bolder text-primary" style="font-size: 0.85rem; flex: 0 0 auto; white-space: nowrap;">
                                     ₹<?= number_format($cust['total_spent'], 2) ?>
@@ -371,7 +371,7 @@
                             </a>
                         <?php endforeach; ?>
                         <?php if(empty($topCustomers)): ?>
-                            <div class="text-center text-muted small py-4">No data available</div>
+                            <div class="text-center text-muted small py-4"><?= lang('App.no_data_available') ?></div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -385,10 +385,10 @@
                     <span class="fw-bold text-white"><?= lang("App.recent_activity") ?></span>
                     <ul class="nav nav-pills nav-sm" id="recentTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active py-1 px-3" style="font-size: 0.8rem; background: rgba(255,255,255,0.2); color: #fff;" id="inv-tab" data-bs-toggle="tab" data-bs-target="#inv" type="button" role="tab">Invoices</button>
+                            <button class="nav-link active py-1 px-3" style="font-size: 0.8rem; background: rgba(255,255,255,0.2); color: #fff;" id="inv-tab" data-bs-toggle="tab" data-bs-target="#inv" type="button" role="tab"><?= lang('App.invoices') ?></button>
                         </li>
                         <li class="nav-item ms-1" role="presentation">
-                            <button class="nav-link py-1 px-3" style="font-size: 0.8rem; color: rgba(255,255,255,0.7);" id="bil-tab" data-bs-toggle="tab" data-bs-target="#bil" type="button" role="tab" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">Bills</button>
+                            <button class="nav-link py-1 px-3" style="font-size: 0.8rem; color: rgba(255,255,255,0.7);" id="bil-tab" data-bs-toggle="tab" data-bs-target="#bil" type="button" role="tab" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'"><?= lang('App.bills') ?></button>
                         </li>
                     </ul>
                 </div>
@@ -554,22 +554,22 @@
                     .then(data => {
                         let html = '';
                         if (data.is_comparison) {
-                            html += '<div class="fw-bold small text-muted text-uppercase mb-2" style="font-size: 0.68rem;">' + data.current_fy_label + ' (Current)</div>';
+                            html += '<div class="fw-bold small text-muted text-uppercase mb-2" style="font-size: 0.68rem;">' + data.current_fy_label + ' (<?= esc(lang('App.current'), 'js') ?>)</div>';
                             if (data.current_products && data.current_products.length > 0) {
                                 data.current_products.forEach((prod, i) => {
                                     html += renderProductRow(prod, i + 1, 'bg-primary text-primary');
                                 });
                             } else {
-                                html += '<div class="text-muted small py-1">No data</div>';
+                                html += '<div class="text-muted small py-1"><?= esc(lang('App.no_data'), 'js') ?></div>';
                             }
 
-                            html += '<div class="fw-bold small text-muted text-uppercase mt-3 mb-2" style="font-size: 0.68rem;">' + data.last_fy_label + ' (Previous)</div>';
+                            html += '<div class="fw-bold small text-muted text-uppercase mt-3 mb-2" style="font-size: 0.68rem;">' + data.last_fy_label + ' (<?= esc(lang('App.previous'), 'js') ?>)</div>';
                             if (data.last_products && data.last_products.length > 0) {
                                 data.last_products.forEach((prod, i) => {
                                     html += renderProductRow(prod, i + 1, 'bg-secondary text-secondary');
                                 });
                             } else {
-                                html += '<div class="text-muted small py-1">No data</div>';
+                                html += '<div class="text-muted small py-1"><?= esc(lang('App.no_data'), 'js') ?></div>';
                             }
                         } else {
                             if (data.products && data.products.length > 0) {
@@ -577,14 +577,14 @@
                                     html += renderProductRow(prod, i + 1, 'bg-primary text-primary');
                                 });
                             } else {
-                                html = '<div class="text-center text-muted small py-4">No data available</div>';
+                                html = '<div class="text-center text-muted small py-4"><?= esc(lang('App.no_data_available'), 'js') ?></div>';
                             }
                         }
                         container.innerHTML = html;
                     })
                     .catch(err => {
                         console.error('Error fetching top products:', err);
-                        container.innerHTML = '<div class="text-center text-danger small py-4">Failed to load data</div>';
+                        container.innerHTML = '<div class="text-center text-danger small py-4"><?= esc(lang('App.failed_to_load_data'), 'js') ?></div>';
                     });
             });
         }
@@ -602,22 +602,22 @@
                     .then(data => {
                         let html = '';
                         if (data.is_comparison) {
-                            html += '<div class="fw-bold small text-muted text-uppercase mb-2" style="font-size: 0.68rem;">' + data.current_fy_label + ' (Current)</div>';
+                            html += '<div class="fw-bold small text-muted text-uppercase mb-2" style="font-size: 0.68rem;">' + data.current_fy_label + ' (<?= esc(lang('App.current'), 'js') ?>)</div>';
                             if (data.current_customers && data.current_customers.length > 0) {
                                 data.current_customers.forEach((cust, i) => {
                                     html += renderCustomerRow(cust, 'bg-info text-info');
                                 });
                             } else {
-                                html += '<div class="text-muted small py-1">No data</div>';
+                                html += '<div class="text-muted small py-1"><?= esc(lang('App.no_data'), 'js') ?></div>';
                             }
 
-                            html += '<div class="fw-bold small text-muted text-uppercase mt-3 mb-2" style="font-size: 0.68rem;">' + data.last_fy_label + ' (Previous)</div>';
+                            html += '<div class="fw-bold small text-muted text-uppercase mt-3 mb-2" style="font-size: 0.68rem;">' + data.last_fy_label + ' (<?= esc(lang('App.previous'), 'js') ?>)</div>';
                             if (data.last_customers && data.last_customers.length > 0) {
                                 data.last_customers.forEach((cust, i) => {
                                     html += renderCustomerRow(cust, 'bg-secondary text-secondary');
                                 });
                             } else {
-                                html += '<div class="text-muted small py-1">No data</div>';
+                                html += '<div class="text-muted small py-1"><?= esc(lang('App.no_data'), 'js') ?></div>';
                             }
                         } else {
                             if (data.customers && data.customers.length > 0) {
@@ -625,14 +625,14 @@
                                     html += renderCustomerRow(cust, 'bg-info text-info');
                                 });
                             } else {
-                                html = '<div class="text-center text-muted small py-4">No data available</div>';
+                                html = '<div class="text-center text-muted small py-4"><?= esc(lang('App.no_data_available'), 'js') ?></div>';
                             }
                         }
                         container.innerHTML = html;
                     })
                     .catch(err => {
                         console.error('Error fetching top customers:', err);
-                        container.innerHTML = '<div class="text-center text-danger small py-4">Failed to load data</div>';
+                        container.innerHTML = '<div class="text-center text-danger small py-4"><?= esc(lang('App.failed_to_load_data'), 'js') ?></div>';
                     });
             });
         }
@@ -646,7 +646,7 @@
                     </div>
                     <div style="min-width: 0; flex: 1 1 auto;">
                         <div class="fw-bold text-dark small" style="white-space: normal; word-break: break-word;">${escapeHtml(prod.product_name)}</div>
-                        <div class="text-muted small">Vol: ${Number(prod.total_qty).toLocaleString()} Units</div>
+                        <div class="text-muted small"><?= esc(lang('App.vol_short'), 'js') ?>: ${Number(prod.total_qty).toLocaleString()} <?= esc(lang('App.units'), 'js') ?></div>
                     </div>
                     <div class="text-end fw-bolder text-success" style="font-size: 0.85rem; flex: 0 0 auto; white-space: nowrap;">
                         ₹${Number(prod.total_revenue).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
@@ -665,7 +665,7 @@
                     </div>
                     <div style="min-width: 0; flex: 1 1 auto;">
                         <div class="fw-bold text-dark small" style="white-space: normal; word-break: break-word;">${escapeHtml(cust.name)}</div>
-                        <div class="text-muted small">Orders: ${cust.total_orders}</div>
+                        <div class="text-muted small"><?= esc(lang('App.orders'), 'js') ?>: ${cust.total_orders}</div>
                     </div>
                     <div class="text-end fw-bolder text-primary" style="font-size: 0.85rem; flex: 0 0 auto; white-space: nowrap;">
                         ₹${Number(cust.total_spent).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}

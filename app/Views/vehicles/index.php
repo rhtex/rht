@@ -4,29 +4,27 @@
 
 <?= $this->section('header') ?>
 <div class="row mb-3 align-items-center">
-    <div class="col-sm-6">
+    <div class="col-12 col-sm-6">
         <h1 class="m-0"><i class="fas fa-truck text-primary me-2"></i>Vehicles</h1>
         <p class="text-muted small mb-0">Manage fleet conveyance & transport vehicles for operations and e-Way Bill generation</p>
     </div>
-    <div class="col-sm-6 text-end">
-        <div class="d-inline-flex gap-2 align-items-center">
-            <a href="<?= site_url('vehicles') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
-                <i class="fas fa-sync-alt me-1"></i> Refresh
-            </a>
-            <?php if (can('vehicle.create')): ?>
-            <a href="<?= site_url('vehicles/create') ?>" class="btn btn-sm btn-primary">
-                <i class="fas fa-plus me-1"></i> Add New Vehicle
-            </a>
-            <?php endif; ?>
-        </div>
+    <div class="col-12 col-sm-6 d-flex flex-wrap gap-2 justify-content-sm-end mt-2 mt-sm-0">
+        <a href="<?= site_url('vehicles') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
+            <i class="fas fa-sync-alt me-1"></i> Refresh
+        </a>
+        <?php if (can('vehicle.create')): ?>
+        <a href="<?= site_url('vehicles/create') ?>" class="btn btn-sm btn-primary">
+            <i class="fas fa-plus me-1"></i> Add New Vehicle
+        </a>
+        <?php endif; ?>
     </div>
 </div>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-md-4 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-md-4">
         <div class="bt-stat bt-g-blue">
             <i class="fas fa-truck bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['total'] ?? 0) ?></div>
@@ -34,7 +32,7 @@
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-md-4 col-sm-6">
+    <div class="col-6 col-md-4">
         <div class="bt-stat bt-g-teal">
             <i class="fas fa-check-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['active'] ?? 0) ?></div>
@@ -42,7 +40,7 @@
             <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total']) && $stats['total'] > 0) ? min(100, round(($stats['active'] / $stats['total']) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-md-4 col-sm-6">
+    <div class="col-12 col-md-4">
         <div class="bt-stat bt-g-purple">
             <i class="fas fa-layer-group bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['regular'] ?? 0) ?></div>
@@ -59,13 +57,13 @@
     </div>
     <div class="card-body">
         <form action="<?= site_url('vehicles') ?>" method="get" class="row g-2 align-items-end">
-            <div class="col-md-10 col-sm-9">
+            <div class="col-md-9 col-sm-8">
                 <label for="search" class="form-label">Search</label>
                 <input type="text" name="search" id="search" class="form-control" placeholder="Search by vehicle number, name, model, or type..." value="<?= esc($search ?? '') ?>">
             </div>
-            <div class="col-md-2 col-sm-3 d-flex gap-1">
-                <button type="submit" class="btn btn-primary w-100" title="Apply Filter"><i class="fas fa-search"></i> Search</button>
-                <a href="<?= site_url('vehicles') ?>" class="btn btn-outline-secondary" title="Reset Filters"><i class="fas fa-undo"></i></a>
+            <div class="col-md-3 col-sm-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill text-nowrap" title="Apply Filter"><i class="fas fa-search me-1"></i>Search</button>
+                <a href="<?= site_url('vehicles') ?>" class="btn btn-outline-secondary text-nowrap" title="Reset Filters"><i class="fas fa-undo"></i></a>
             </div>
         </form>
     </div>
@@ -74,8 +72,38 @@
 <!-- Table Card -->
 <div class="card shadow-sm border-0">
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+        <!-- Mobile Card List -->
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if (!empty($vehicles)): ?>
+                <?php foreach ($vehicles as $v): ?>
+                    <a href="<?= can('vehicle.edit') ? site_url('vehicles/edit/' . $v['id']) : '#' ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark font-monospace" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($v['vehicle_number']) ?>
+                            </div>
+                            <span class="badge bg-<?= $v['status'] === 'active' ? 'success' : 'secondary' ?>" style="flex: 0 0 auto;">
+                                <?= $v['status'] === 'active' ? 'Active' : 'Inactive' ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc(!empty($v['vehicle_name']) ? $v['vehicle_name'] : '-') ?>
+                                <?php if (!empty($v['vehicle_model'])): ?>
+                                    &middot; <?= esc($v['vehicle_model']) ?>
+                                <?php endif; ?>
+                                &middot; <?= $v['vehicle_type'] === 'Over Dimensional Cargo' ? 'Over Dimensional' : 'Regular' ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No vehicles registered yet.</div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 60px;">#</th>

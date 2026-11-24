@@ -365,12 +365,12 @@ code {
 
 /* ---------- Mobile: stacked card rows (only mobile cards on mobile devices / < 992px) ---------- */
 @media (max-width: 991.98px), (hover: none) and (pointer: coarse) {
-    .lu-wrap { max-height: none; overflow: visible; }
+    .lu-wrap { max-height: none; overflow-x: hidden !important; overflow-y: visible; max-width: 100% !important; }
     .lu-table.lu-stack thead { display: none !important; }
     .lu-table.lu-stack,
     .lu-table.lu-stack tbody,
     .lu-table.lu-stack tr,
-    .lu-table.lu-stack td { display: block !important; width: 100% !important; }
+    .lu-table.lu-stack td { display: block !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
     .lu-table.lu-stack tbody tr {
         margin-bottom: 12px;
         border: 1px solid var(--lu-border) !important;
@@ -406,12 +406,12 @@ code {
     .lu-toolbar .lu-left, .lu-toolbar .lu-right { width: 100%; }
 }
 
-body.is-mobile-device .lu-wrap { max-height: none; overflow: visible; }
+body.is-mobile-device .lu-wrap { max-height: none; overflow-x: hidden !important; overflow-y: visible; max-width: 100% !important; }
 body.is-mobile-device .lu-table.lu-stack thead { display: none !important; }
 body.is-mobile-device .lu-table.lu-stack,
 body.is-mobile-device .lu-table.lu-stack tbody,
 body.is-mobile-device .lu-table.lu-stack tr,
-body.is-mobile-device .lu-table.lu-stack td { display: block !important; width: 100% !important; }
+body.is-mobile-device .lu-table.lu-stack td { display: block !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
 body.is-mobile-device .lu-table.lu-stack tbody tr {
     margin-bottom: 12px;
     border: 1px solid var(--lu-border) !important;

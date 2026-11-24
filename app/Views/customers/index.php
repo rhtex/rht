@@ -106,6 +106,22 @@
                 --bs-table-bg: #fff;
                 --bs-table-striped-bg: #fff;
                 --bs-table-hover-bg: #e0e7ff;
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .customers-list-table thead {
+                display: none !important;
+            }
+            .customers-list-table tbody {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .card-body > .table-responsive {
+                overflow-x: hidden !important;
+                width: 100% !important;
+                max-width: 100% !important;
             }
             .customers-list-table tbody tr td:nth-child(1),
             .customers-list-table tbody tr td:nth-child(3),
@@ -183,6 +199,22 @@
             --bs-table-bg: #fff;
             --bs-table-striped-bg: #fff;
             --bs-table-hover-bg: #e0e7ff;
+            display: block !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        body.is-mobile-device .customers-list-table thead {
+            display: none !important;
+        }
+        body.is-mobile-device .customers-list-table tbody {
+            display: block !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        body.is-mobile-device .card-body > .table-responsive {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100% !important;
         }
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(1),
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(3),

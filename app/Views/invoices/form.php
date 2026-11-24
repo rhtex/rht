@@ -121,15 +121,23 @@
 
 <div class="gst-container mb-4">
     <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
+        <div class="card-header text-white py-3 px-4 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-file-invoice-dollar me-2"></i><?= $invoice ? 'Edit Tax Invoice' : 'Create Tax Invoice' ?>
+            </h5>
+            <span class="badge bg-light text-dark fw-bold px-3 py-2">
+                <i class="fas fa-hashtag me-1"></i><?= esc($invoice['invoice_number'] ?? $invoice_number) ?>
+            </span>
+        </div>
         
         <!-- TOP ROW: Party & Voucher Details -->
         <div class="row g-0 border-bottom border-secondary-subtle">
             
             <!-- LEFT: Party Details -->
             <div class="col-md-6 border-end border-secondary-subtle p-3">
-                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                <div class="d-flex justify-content-between align-items-center rounded-2 px-3 py-2 mb-3 text-white" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);">
                     <h6 class="fw-bold mb-0 text-uppercase"><i class="fas fa-user-tie me-1"></i> Billed To</h6>
-                    <span id="taxModeIndicator" class="badge bg-secondary" style="display: none;">
+                    <span id="taxModeIndicator" class="badge bg-light text-dark" style="display: none;">
                         <span id="taxModeText">Tax Mode</span>
                     </span>
                 </div>
@@ -177,7 +185,9 @@
 
             <!-- RIGHT: Voucher Details -->
             <div class="col-md-6 p-3">
-                <h6 class="fw-bold text-uppercase border-bottom pb-2 mb-3"><i class="fas fa-file-invoice me-1"></i> Invoice Details</h6>
+                <div class="rounded-2 px-3 py-2 mb-3 text-white" style="background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);">
+                    <h6 class="fw-bold text-uppercase mb-0"><i class="fas fa-file-invoice me-1"></i> Invoice Details</h6>
+                </div>
                 
                 <div class="row g-2 mb-2">
                     <div class="col-sm-6">
@@ -296,7 +306,7 @@
 
         <!-- LINE ITEMS -->
         <div class="position-relative" id="lineItemsCardWrapper">
-            <div class="d-flex justify-content-between align-items-center bg-light text-dark border-bottom border-secondary-subtle p-2">
+            <div class="d-flex justify-content-between align-items-center text-white border-bottom border-secondary-subtle p-2 px-3" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
                 <div class="d-flex align-items-center gap-2">
                     <h6 class="mb-0 text-uppercase fw-bold"><i class="fas fa-list me-1"></i> Item Details</h6>
                     <span id="barcodeStatusMsg" class="badge bg-success-subtle text-success border border-success-subtle scan-feedback" style="display: none;"></span>

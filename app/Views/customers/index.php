@@ -100,55 +100,110 @@
 
 <div class="card card-outline card-primary shadow-sm">
     <style>
+        .cust-mobile-meta { display: none; }
         @media (max-width: 991.98px), (hover: none) and (pointer: coarse) {
+            .customers-list-table tbody tr td:nth-child(1),
             .customers-list-table tbody tr td:nth-child(3),
             .customers-list-table tbody tr td:nth-child(4),
             .customers-list-table tbody tr td:nth-child(5),
             .customers-list-table tbody tr td:nth-child(6),
             .customers-list-table tbody tr td:nth-child(7),
             .customers-list-table .bt-avatar,
+            .customers-list-table .cust-desktop-city,
             .customers-list-table .cust-contact-person {
                 display: none !important;
             }
             .customers-list-table tbody tr {
-                display: flex !important;
-                align-items: center;
-                padding: 4px 6px;
-            }
-            .customers-list-table tbody tr td:nth-child(1) {
-                width: auto !important;
-                border-bottom: 0 !important;
-                padding-right: 4px !important;
-                flex-shrink: 0;
+                display: block !important;
+                padding: 4px 2px;
             }
             .customers-list-table tbody tr td:nth-child(2) {
+                display: block !important;
+                width: 100% !important;
                 border-bottom: 0 !important;
-                flex: 1;
+                text-align: left !important;
+            }
+            .customers-list-table tbody tr td:nth-child(2) .d-flex.align-items-center {
+                display: block !important;
+            }
+            .customers-list-table .cust-name-link {
+                display: block;
+                white-space: normal;
+                word-break: break-word;
+                line-height: 1.3;
+            }
+            .customers-list-table .cust-mobile-meta {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 10px;
+                margin-top: 4px;
+                width: 100%;
+            }
+            .customers-list-table .cust-mobile-city {
+                white-space: normal;
+                word-break: break-word;
+                text-align: left;
+                font-size: 0.78rem;
+                color: #64748b;
+            }
+            .customers-list-table .cust-mobile-bal {
+                flex-shrink: 0;
+                font-weight: 700;
+                font-size: 0.82rem;
+                text-align: right;
             }
         }
+        body.is-mobile-device .customers-list-table tbody tr td:nth-child(1),
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(3),
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(4),
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(5),
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(6),
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(7),
         body.is-mobile-device .customers-list-table .bt-avatar,
+        body.is-mobile-device .customers-list-table .cust-desktop-city,
         body.is-mobile-device .customers-list-table .cust-contact-person {
             display: none !important;
         }
         body.is-mobile-device .customers-list-table tbody tr {
-            display: flex !important;
-            align-items: center;
-            padding: 4px 6px;
-        }
-        body.is-mobile-device .customers-list-table tbody tr td:nth-child(1) {
-            width: auto !important;
-            border-bottom: 0 !important;
-            padding-right: 4px !important;
-            flex-shrink: 0;
+            display: block !important;
+            padding: 4px 2px;
         }
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(2) {
+            display: block !important;
+            width: 100% !important;
             border-bottom: 0 !important;
-            flex: 1;
+            text-align: left !important;
+        }
+        body.is-mobile-device .customers-list-table tbody tr td:nth-child(2) .d-flex.align-items-center {
+            display: block !important;
+        }
+        body.is-mobile-device .customers-list-table .cust-name-link {
+            display: block;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.3;
+        }
+        body.is-mobile-device .customers-list-table .cust-mobile-meta {
+            display: flex !important;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 4px;
+            width: 100%;
+        }
+        body.is-mobile-device .customers-list-table .cust-mobile-city {
+            white-space: normal;
+            word-break: break-word;
+            text-align: left;
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+        body.is-mobile-device .customers-list-table .cust-mobile-bal {
+            flex-shrink: 0;
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-align: right;
         }
     </style>
     <div class="card-header py-2">
@@ -204,13 +259,17 @@
                                         <span class="bt-avatar"><?= esc(strtoupper(mb_substr($customer['name'], 0, 1))) ?></span>
                                         <div>
                                             <strong><a href="<?= site_url('customers/view/' . $customer['id']) ?>"
-                                                    class="text-dark"><?= esc($customer['name']) ?></a></strong>
+                                                    class="text-dark cust-name-link"><?= esc($customer['name']) ?></a></strong>
                                             <?php if ($customer['city']): ?>
-                                                <span class="badge bg-light text-dark border ms-1"><i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($customer['city']) ?></span>
+                                                <span class="badge bg-light text-dark border ms-1 cust-desktop-city"><i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($customer['city']) ?></span>
                                             <?php endif; ?>
                                             <?php if (!empty($customer['contact_person'])): ?>
                                                 <div class="small text-muted cust-contact-person"><i class="far fa-user me-1"></i><?= esc($customer['contact_person']) ?></div>
                                             <?php endif; ?>
+                                            <div class="cust-mobile-meta">
+                                                <span class="cust-mobile-city"><i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($customer['city'] ?: '-') ?></span>
+                                                <span class="cust-mobile-bal <?= $customer['pending_balance'] >= 0 ? 'text-danger' : 'text-success' ?>">₹<?= format_inr(abs($customer['pending_balance'])) ?> <?= $customer['pending_balance'] >= 0 ? 'Dr' : 'Cr' ?></span>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -320,9 +379,13 @@
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="bt-avatar">${firstLetter}</span>
                                             <div>
-                                                <strong><a href="<?= site_url('customers/view/') ?>${customer.id}" class="text-dark">${customer.name}</a></strong>
-                                                ${customer.city ? `<span class="badge bg-light text-dark border ms-1"><i class="fas fa-map-marker-alt text-danger me-1"></i>${customer.city}</span>` : ''}
+                                                <strong><a href="<?= site_url('customers/view/') ?>${customer.id}" class="text-dark cust-name-link">${customer.name}</a></strong>
+                                                ${customer.city ? `<span class="badge bg-light text-dark border ms-1 cust-desktop-city"><i class="fas fa-map-marker-alt text-danger me-1"></i>${customer.city}</span>` : ''}
                                                 ${customer.contact_person ? `<div class="small text-muted cust-contact-person"><i class="far fa-user me-1"></i>${customer.contact_person}</div>` : ''}
+                                                <div class="cust-mobile-meta">
+                                                    <span class="cust-mobile-city"><i class="fas fa-map-marker-alt text-danger me-1"></i>${customer.city || '-'}</span>
+                                                    <span class="cust-mobile-bal ${balanceClass}">${formattedBalance}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>

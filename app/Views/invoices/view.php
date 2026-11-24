@@ -2,12 +2,12 @@
 
 <?= $this->section('content') ?>
 <div class="container-fluid">
-    <div class="row mb-2">
-        <div class="col-sm-6">
-            <h1 class="m-0 text-dark"><?= $title ?></h1>
+    <div class="row mb-2 align-items-center">
+        <div class="col-12 col-sm-6">
+            <h1 class="m-0 text-dark fs-4 fs-sm-3"><?= $title ?></h1>
         </div>
-        <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-end">
+        <div class="col-sm-6 d-none d-sm-block">
+            <ol class="breadcrumb float-sm-end mb-0">
                 <li class="breadcrumb-item"><a href="<?= base_url('dashboard') ?>">Home</a></li>
                 <li class="breadcrumb-item"><a href="<?= base_url('invoices') ?>">Invoices</a></li>
                 <li class="breadcrumb-item active">View</li>
@@ -15,17 +15,63 @@
         </div>
     </div>
 
+    <!-- Mobile Quick Summary Banner -->
+    <div class="erp-mobile-list mb-3">
+        <div class="erp-mobile-card mb-0" style="cursor: default;">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+                <div style="min-width: 0; flex: 1 1 auto;">
+                    <div class="fw-bold text-primary"><?= esc($invoice['invoice_number']) ?></div>
+                    <div class="fw-semibold text-dark mt-1" style="white-space: normal; word-break: break-word;">
+                        <?php if (!empty($invoice['customer_id'])): ?>
+                            <a href="<?= site_url('customers/view/' . $invoice['customer_id']) ?>" class="text-decoration-none text-dark">
+                                <?= esc($invoice['customer_name']) ?> <i class="fas fa-external-link-alt small text-primary ms-1"></i>
+                            </a>
+                        <?php else: ?>
+                            <?= esc($invoice['customer_name']) ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="text-end" style="flex: 0 0 auto;">
+                    <?php
+                    $statusColorsTop = [
+                        'Draft' => 'secondary',
+                        'Open' => 'primary',
+                        'Paid' => 'success',
+                        'Partially Paid' => 'info',
+                        'Overdue' => 'danger',
+                        'Void' => 'dark'
+                    ];
+                    $topColor = $statusColorsTop[$invoice['status']] ?? 'secondary';
+                    ?>
+                    <span class="badge text-bg-<?= $topColor ?>"><?= esc($invoice['status']) ?></span>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center gap-2 mt-2 pt-2 border-top">
+                <div>
+                    <div class="text-muted small">Total: <strong class="text-dark">₹<?= format_inr((float)$invoice['total_amount']) ?></strong></div>
+                    <div class="text-muted small">Date: <?= date('d/m/Y', strtotime($invoice['invoice_date'])) ?></div>
+                </div>
+                <div class="text-end">
+                    <div class="small text-muted">Balance Due</div>
+                    <div class="fw-bold <?= $invoice['balance'] > 0 ? 'text-danger' : 'text-success' ?>">
+                        ₹<?= format_inr((float)$invoice['balance']) ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Invoice Header -->
     <div class="card card-outline card-primary">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
             <h3 class="card-title mb-0">Invoice Information</h3>
-            <div class="card-tools d-flex gap-2 align-items-center ms-auto">
+            <div class="card-tools d-flex flex-wrap gap-2 align-items-center ms-auto">
                 <?php if (empty($is_single)): ?>
-                    <a href="<?= site_url('invoices/view/' . $invoice['id']) ?>?mode=single" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark" title="View Full Standalone Page">
+                    <a href="<?= site_url('invoices/view/' . $invoice['id']) ?>?mode=single" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark d-none d-lg-inline-flex align-items-center" title="View Full Standalone Page">
                         <i class="fas fa-expand me-1 text-primary"></i> Full Page View
                     </a>
                 <?php else: ?>
-                    <a href="<?= site_url('invoices') ?>" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark" title="Back to Split Invoices View">
+                    <a href="<?= site_url('invoices') ?>" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark d-none d-lg-inline-flex align-items-center" title="Back to Split Invoices View">
                         <i class="fas fa-columns me-1 text-primary"></i> Split View
                     </a>
                 <?php endif; ?>
@@ -217,7 +263,150 @@
             <h3 class="card-title">Line Items</h3>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive">
+            <?php
+            // Group taxes by percentage (mirroring BILL logic)
+            $cgstGroups = [];
+            $sgstGroups = [];
+            $igstGroups = [];
+
+            $subtotal = $invoice['subtotal'];
+            $discountAmt = ($invoice['discount_type'] == 'Percentage') ? ($subtotal * $invoice['discount_amount'] / 100) : $invoice['discount_amount'];
+
+            foreach ($invoice['items'] as $item) {
+                $itemAmt = $item['quantity'] * $item['rate'];
+                $itemDiscount = ($subtotal > 0) ? ($itemAmt / $subtotal * $discountAmt) : 0;
+                $taxableVal = $itemAmt - $itemDiscount;
+
+                $cr = (float)($item['cgst_rate'] ?? 0);
+                if ($cr > 0) {
+                    if (!isset($cgstGroups["$cr"])) $cgstGroups["$cr"] = 0;
+                    $cgstGroups["$cr"] += ($taxableVal * $cr) / 100;
+                }
+
+                $sr = (float)($item['sgst_rate'] ?? 0);
+                if ($sr > 0) {
+                    if (!isset($sgstGroups["$sr"])) $sgstGroups["$sr"] = 0;
+                    $sgstGroups["$sr"] += ($taxableVal * $sr) / 100;
+                }
+
+                $ir = (float)($item['igst_rate'] ?? 0);
+                if ($ir > 0) {
+                    if (!isset($igstGroups["$ir"])) $igstGroups["$ir"] = 0;
+                    $igstGroups["$ir"] += ($taxableVal * $ir) / 100;
+                }
+            }
+
+            ksort($cgstGroups);
+            ksort($sgstGroups);
+            ksort($igstGroups);
+
+            $totalCredits = !empty($invoice['credit_notes']) ? array_sum(array_column($invoice['credit_notes'], 'total_amount')) : 0;
+            $totalReceipts = !empty($invoice['payments']) ? array_sum(array_column($invoice['payments'], 'amount')) : 0;
+            ?>
+
+            <!-- Mobile Line Items Cards -->
+            <div class="erp-mobile-list p-2 bg-light">
+                <?php foreach ($invoice['items'] as $index => $item): ?>
+                    <?php
+                    $itemName = !empty($item['product_name']) ? $item['product_name'] : ($item['description'] ?? '-');
+                    $hsn = !empty($item['hsn_code']) ? $item['hsn_code'] : ($item['product_hsn'] ?? '');
+                    ?>
+                    <div class="erp-mobile-card" style="cursor: default;">
+                        <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
+                            <?= esc($itemName) ?>
+                        </div>
+                        <?php if (!empty($item['description']) && !empty($item['product_name']) && $item['description'] !== $item['product_name']): ?>
+                            <div class="small text-muted mt-1" style="white-space: normal; word-break: break-word;">
+                                <?= esc($item['description']) ?>
+                            </div>
+                        <?php endif; ?>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                Qty: <?= $item['quantity'] ?> &times; ₹<?= format_inr((float)$item['rate']) ?>
+                                <?php if ((float)$item['tax_percentage'] > 0): ?>
+                                    &middot; GST <?= $item['tax_percentage'] ?>%
+                                <?php endif; ?>
+                                <?php if (!empty($hsn)): ?>
+                                    &middot; HSN <?= esc($hsn) ?>
+                                <?php endif; ?>
+                            </span>
+                            <span class="fw-bold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">
+                                ₹<?= format_inr((float)$item['amount']) ?>
+                            </span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+
+                <!-- Mobile Invoice Totals Summary -->
+                <div class="bg-white border rounded-3 p-3 mt-1">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-muted">Subtotal</span>
+                        <span class="fw-semibold">₹<?= format_inr((float)$invoice['subtotal']) ?></span>
+                    </div>
+                    <?php if ($invoice['discount_amount'] > 0): ?>
+                        <?php $actualDiscount = ($invoice['discount_type'] == 'Percentage') ? ($invoice['subtotal'] * $invoice['discount_amount'] / 100) : $invoice['discount_amount']; ?>
+                        <div class="d-flex justify-content-between small text-danger mb-1">
+                            <span>Discount (<?= $invoice['discount_type'] == 'Percentage' ? esc($invoice['discount_amount']).'%' : 'Fixed' ?>)</span>
+                            <span>-₹<?= format_inr((float)$actualDiscount) ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($invoice['is_inter_state']): ?>
+                        <?php foreach($igstGroups as $r => $amt): ?>
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="text-muted">IGST (<?= $r+0 ?>%)</span>
+                                <span>₹<?= format_inr((float)$amt) ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <?php foreach($cgstGroups as $r => $amt): ?>
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="text-muted">CGST (<?= $r+0 ?>%)</span>
+                                <span>₹<?= format_inr((float)$amt) ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                        <?php foreach($sgstGroups as $r => $amt): ?>
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="text-muted">SGST (<?= $r+0 ?>%)</span>
+                                <span>₹<?= format_inr((float)$amt) ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    <?php if ($invoice['shipping_charge'] > 0): ?>
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span class="text-muted">Shipping Charges</span>
+                            <span>₹<?= format_inr((float)$invoice['shipping_charge']) ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($invoice['roundoff_amount'] != 0): ?>
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span class="text-muted">Roundoff</span>
+                            <span>₹<?= format_inr((float)$invoice['roundoff_amount']) ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2">
+                        <span>Total</span>
+                        <span class="text-primary">₹<?= format_inr((float)$invoice['total_amount']) ?></span>
+                    </div>
+                    <?php if ($totalReceipts > 0): ?>
+                        <div class="d-flex justify-content-between small text-success mt-1">
+                            <span>Payments Received</span>
+                            <span class="fw-semibold">₹<?= format_inr((float)$totalReceipts) ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($totalCredits > 0): ?>
+                        <div class="d-flex justify-content-between small text-danger mt-1">
+                            <span>Credits Applied (CN)</span>
+                            <span class="fw-semibold">₹<?= format_inr((float)$totalCredits) ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2">
+                        <span>Balance Due</span>
+                        <span class="<?= $invoice['balance'] > 0 ? 'text-danger' : 'text-success' ?>">₹<?= format_inr((float)$invoice['balance']) ?></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive erp-desktop-wrap">
                 <table class="table table-striped mb-0">
                 <thead class="table-light">
                     <tr>
@@ -349,7 +538,29 @@
             </span>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive">
+            <div class="erp-mobile-list p-2 bg-light">
+                <?php foreach ($invoice['payments'] as $payment): ?>
+                    <?php $ded = ($payment['discount_amount'] ?? 0) + ($payment['mahimai_amount'] ?? 0) + ($payment['postal_charges'] ?? 0); ?>
+                    <div class="erp-mobile-card" style="cursor: default;">
+                        <div class="fw-bold text-primary"><?= esc($payment['payment_number']) ?></div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= date('d/m/Y', strtotime($payment['payment_date'])) ?> &middot; <?= esc($payment['payment_mode']) ?>
+                                <?php if (!empty($payment['reference_number'])): ?>
+                                    &middot; Ref: <?= esc($payment['reference_number']) ?>
+                                <?php endif; ?>
+                                <?php if ($ded > 0): ?>
+                                    &middot; Ded: ₹<?= format_inr((float)$ded) ?>
+                                <?php endif; ?>
+                            </span>
+                            <span class="fw-bold small text-success" style="flex: 0 0 auto; white-space: nowrap;">
+                                ₹<?= format_inr((float)($payment['amount'] + $ded)) ?>
+                            </span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <div class="table-responsive erp-desktop-wrap">
                 <table class="table table-striped align-middle mb-0">
                     <thead class="table-light">
                         <tr>
@@ -402,7 +613,25 @@
             </span>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive">
+            <div class="erp-mobile-list p-2 bg-light">
+                <?php foreach ($invoice['credit_notes'] as $cn): ?>
+                    <a href="<?= site_url('sales_returns/view/' . $cn['id']) ?>?mode=single" class="erp-mobile-card">
+                        <div class="fw-bold text-primary"><?= esc($cn['return_number']) ?></div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= date('d/m/Y', strtotime($cn['return_date'])) ?> &middot; <?= esc($cn['status']) ?>
+                                <?php if (!empty($cn['reason'])): ?>
+                                    &middot; <?= esc($cn['reason']) ?>
+                                <?php endif; ?>
+                            </span>
+                            <span class="fw-bold small text-danger" style="flex: 0 0 auto; white-space: nowrap;">
+                                ₹<?= format_inr((float)$cn['total_amount']) ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            <div class="table-responsive erp-desktop-wrap">
                 <table class="table table-striped align-middle mb-0">
                     <thead class="table-light">
                         <tr>
@@ -449,7 +678,7 @@
     <?php endif; ?>
 
     <!-- Notes & Terms -->
-    <div class="row mb-3">
+    <div class="row g-3 mb-3">
         <div class="col-md-6">
             <div class="card card-outline card-info h-100">
                 <div class="card-header"><h3 class="card-title">Notes</h3></div>

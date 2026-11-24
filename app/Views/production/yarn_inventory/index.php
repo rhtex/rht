@@ -262,6 +262,13 @@ $hasActiveFilters = !empty($filters['search']) || !empty($filters['yarn_type']) 
                             </td>
                         </tr>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="12" class="text-center py-4 text-muted">
+                                <i class="fas fa-warehouse fa-2x text-muted mb-2 d-block"></i>
+                                No yarn inventory records found matching your filters.
+                            </td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -276,43 +283,34 @@ $hasActiveFilters = !empty($filters['search']) || !empty($filters['yarn_type']) 
 <?= $this->section('scripts') ?>
 <script>
     $(document).ready(function() {
-        if ($('#inventoryTable').length && $.fn.DataTable) {
-            var table = $('#inventoryTable').DataTable({
-                "order": [[8, "desc"]],
-                "pageLength": -1,
-                "dom": 'lfrtip',
-                "paging": false,
-                "info": false
+        var showCount = 25;
+        var desktopRows = $('#inventoryTable tbody tr').filter(function() {
+            return $(this).find('td[colspan]').length === 0;
+        });
+        var mobileCards = $('.erp-mobile-list .erp-mobile-card');
+        var totalRows = Math.max(desktopRows.length, mobileCards.length);
+
+        function updateRowsVisibility() {
+            desktopRows.each(function(index) {
+                $(this).toggle(index < showCount);
+            });
+            mobileCards.each(function(index) {
+                $(this).toggle(index < showCount);
             });
 
-            var showCount = 25;
-            var totalRows = $('#inventoryTable tbody tr').length;
-
-            function updateRowsVisibility() {
-                var visibleCount = 0;
-                $('#inventoryTable tbody tr').each(function(index) {
-                    if (index < showCount) {
-                        $(this).show();
-                        visibleCount++;
-                    } else {
-                        $(this).hide();
-                    }
-                });
-
-                if (showCount >= totalRows) {
-                    $('#loadMoreContainer').hide();
-                } else {
-                    $('#loadMoreContainer').show();
-                }
+            if (showCount >= totalRows || totalRows === 0) {
+                $('#loadMoreContainer').hide();
+            } else {
+                $('#loadMoreContainer').show();
             }
-
-            updateRowsVisibility();
-
-            $('#btnLoadMore').on('click', function() {
-                showCount += 25;
-                updateRowsVisibility();
-            });
         }
+
+        updateRowsVisibility();
+
+        $('#btnLoadMore').on('click', function() {
+            showCount += 25;
+            updateRowsVisibility();
+        });
 
         $('#filterCollapse').on('shown.bs.collapse', function () {
             $('#filterToggleIcon').removeClass('fa-plus').addClass('fa-minus');

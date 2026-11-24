@@ -82,18 +82,14 @@
                             </td>
                         </tr>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">No predefined yarns found.</td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-<?= $this->endSection() ?>
-
-<?= $this->section('scripts') ?>
-<script>
-    $(document).ready(function() {
-        $('#masterTable').DataTable();
-    });
-</script>
 <?= $this->endSection() ?>

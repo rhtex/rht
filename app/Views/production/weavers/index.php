@@ -216,20 +216,17 @@ if (!empty($weavers)) {
                             </td>
                         </tr>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                <i class="fas fa-industry fa-2x text-muted mb-2 d-block"></i>
+                                No weavers found matching the criteria.
+                            </td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-<?= $this->endSection() ?>
-
-<?= $this->section('scripts') ?>
-<script>
-    $(document).ready(function() {
-        if ($('#weaversTable').length && $.fn.DataTable) {
-            $('#weaversTable').DataTable();
-        }
-    });
-</script>
 <?= $this->endSection() ?>

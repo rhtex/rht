@@ -107,25 +107,14 @@
                                 </td>
                             </tr>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-4">No loaded beams present in the system.</td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        if (typeof $ !== 'undefined' && $.fn.DataTable) {
-            $('#loadedWarpsTable').DataTable({
-                "order": [[ 0, "asc" ]],
-                "pageLength": 25,
-                "language": {
-                    "search": "Quick Filter:",
-                    "searchPlaceholder": "Search load warps..."
-                }
-            });
-        }
-    });
-</script>
 <?= $this->endSection() ?>

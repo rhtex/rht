@@ -145,30 +145,17 @@ if (!empty($colors)) {
                             </td>
                         </tr>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="fas fa-palette fa-2x text-muted mb-2 d-block"></i>
+                                No colors found in the catalog.
+                            </td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-<?= $this->endSection() ?>
-
-<?= $this->section('scripts') ?>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        if (typeof $ !== 'undefined' && $.fn.DataTable) {
-            if ($.fn.DataTable.isDataTable('#colorsTable')) {
-                $('#colorsTable').DataTable().destroy();
-            }
-            $('#colorsTable').DataTable({
-                "order": [[ 0, "asc" ]],
-                "pageLength": 25,
-                "searching": true,
-                "language": {
-                    "emptyTable": "No colors found in the catalog."
-                }
-            });
-        }
-    });
-</script>
 <?= $this->endSection() ?>

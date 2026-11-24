@@ -208,40 +208,37 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        if (typeof $ !== 'undefined') {
-            // Destroy if already auto-initialized by other scripts
-            if ($.fn.DataTable.isDataTable('#allDcsTable')) {
-                $('#allDcsTable').DataTable().destroy();
-            }
+        const filterType = document.getElementById('filterType');
+        const filterStatus = document.getElementById('filterStatus');
+        const resetBtn = document.getElementById('resetFilters');
 
-            var table = $('#allDcsTable').DataTable({
-                "order": [[ 1, "desc" ]],
-                "pageLength": 25,
-                "searching": true,
-                "dom": "lrtip", 
-                "language": {
-                    "emptyTable": "No Delivery Challans found"
-                }
+        function applyFilters() {
+            const typeVal = (filterType ? filterType.value : '').trim().toLowerCase();
+            const statusVal = (filterStatus ? filterStatus.value : '').trim().toLowerCase();
+
+            document.querySelectorAll('#allDcsTable tbody tr.table-row-card').forEach(tr => {
+                const cells = tr.querySelectorAll('td');
+                const rowType = (cells[3]?.textContent || '').trim().toLowerCase();
+                const rowStatus = (cells[4]?.textContent || '').trim().toLowerCase();
+                const match = (!typeVal || rowType === typeVal) && (!statusVal || rowStatus === statusVal);
+                tr.style.display = match ? '' : 'none';
             });
 
-            // Bind filter dropdowns to DataTables columns
-            $('#filterType').on('change', function() {
-                var val = $(this).val();
-                table.column(3).search(val ? '^' + val + '$' : '', true, false).draw();
+            document.querySelectorAll('.erp-mobile-list .erp-mobile-card').forEach(card => {
+                const txt = (card.textContent || '').toLowerCase();
+                const badgeTxt = (card.querySelector('.badge')?.textContent || '').trim().toLowerCase();
+                const match = (!typeVal || txt.indexOf(typeVal) !== -1) && (!statusVal || badgeTxt === statusVal);
+                card.style.display = match ? '' : 'none';
             });
+        }
 
-            $('#filterStatus').on('change', function() {
-                var val = $(this).val();
-                table.column(4).search(val ? '^' + val + '$' : '', true, false).draw();
-            });
-
-            // Reset filters
-            $('#resetFilters').on('click', function() {
-                $('#filterType').val('');
-                $('#filterStatus').val('');
-                table.column(3).search('');
-                table.column(4).search('');
-                table.draw();
+        if (filterType) filterType.addEventListener('change', applyFilters);
+        if (filterStatus) filterStatus.addEventListener('change', applyFilters);
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+                if (filterType) filterType.value = '';
+                if (filterStatus) filterStatus.value = '';
+                applyFilters();
             });
         }
     });

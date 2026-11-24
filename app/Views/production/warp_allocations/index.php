@@ -115,7 +115,7 @@ if (!empty($allocations)) {
             <?php endif; ?>
         </div>
         <div class="table-responsive erp-desktop-wrap">
-            <table class="table table-striped table-hover align-middle mb-0 w-100 datatable">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
                         <th>Allocation #</th>
@@ -184,23 +184,17 @@ if (!empty($allocations)) {
                                 </td>
                             </tr>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-muted">
+                                <i class="fas fa-network-wired fa-2x text-muted mb-2 d-block"></i>
+                                No warp allocations found.
+                            </td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-<?= $this->endSection() ?>
-
-<?= $this->section('scripts') ?>
-<script>
-    $(document).ready(function() {
-        if ($('.datatable').length && $.fn.DataTable) {
-            $('.datatable').DataTable({
-                "order": [[ 0, "desc" ]],
-                "responsive": true
-            });
-        }
-    });
-</script>
 <?= $this->endSection() ?>

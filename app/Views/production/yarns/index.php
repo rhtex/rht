@@ -209,20 +209,17 @@ if (!empty($yarns)) {
                             </td>
                         </tr>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-muted">
+                                <i class="fas fa-layer-group fa-2x text-muted mb-2 d-block"></i>
+                                No yarn stock records found matching your filters.
+                            </td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-<?= $this->endSection() ?>
-
-<?= $this->section('scripts') ?>
-<script>
-    $(document).ready(function() {
-        if ($('#yarnsTable').length && $.fn.DataTable) {
-            $('#yarnsTable').DataTable();
-        }
-    });
-</script>
 <?= $this->endSection() ?>

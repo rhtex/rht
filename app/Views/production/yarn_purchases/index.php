@@ -184,23 +184,17 @@ $avgLanded = ($totalWeight > 0) ? ($totalAmount / $totalWeight) : 0;
                             </td>
                         </tr>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="11" class="text-center py-4 text-muted">
+                                <i class="fas fa-shopping-basket fa-2x text-muted mb-2 d-block"></i>
+                                No yarn purchase invoices recorded.
+                            </td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-<?= $this->endSection() ?>
-
-<?= $this->section('scripts') ?>
-<script>
-    $(document).ready(function() {
-        if ($('#purchasesTable').length && $.fn.DataTable) {
-            $('#purchasesTable').DataTable({
-                "order": [[0, "desc"]],
-                "pageLength": 15
-            });
-        }
-    });
-</script>
 <?= $this->endSection() ?>

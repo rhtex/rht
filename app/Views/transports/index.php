@@ -4,36 +4,34 @@
 
 <?= $this->section('header') ?>
 <div class="row mb-3 align-items-center">
-    <div class="col-sm-6">
+    <div class="col-12 col-sm-6">
         <h1 class="m-0"><i class="fas fa-truck-moving text-primary me-2"></i>Transport & Couriers</h1>
     </div>
-    <div class="col-sm-6 text-end">
-        <div class="d-inline-flex gap-2 align-items-center">
-            <a href="<?= site_url('transports') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
-                <i class="fas fa-sync-alt me-1"></i> Refresh
-            </a>
-            <?php if (can('transport.edit')): ?>
-            <form action="<?= site_url('transports/sync-zoho') ?>" method="post" class="d-inline" id="syncZohoForm">
-                <?= csrf_field() ?>
-                <button type="submit" class="btn btn-sm btn-outline-info" id="btnSyncZoho" title="Fetch & Update Transporters from Zoho Books">
-                    <i class="fas fa-cloud-download-alt me-1"></i> Sync from Zoho
-                </button>
-            </form>
-            <?php endif; ?>
-            <?php if (can('transport.create')): ?>
-            <a href="<?= site_url('transports/create') ?>" class="btn btn-sm btn-primary">
-                <i class="fas fa-plus me-1"></i> Add New Transport
-            </a>
-            <?php endif; ?>
-        </div>
+    <div class="col-12 col-sm-6 d-flex flex-wrap gap-2 justify-content-sm-end mt-2 mt-sm-0">
+        <a href="<?= site_url('transports') ?>" class="btn btn-sm btn-outline-secondary" title="Refresh List">
+            <i class="fas fa-sync-alt me-1"></i> Refresh
+        </a>
+        <?php if (can('transport.edit')): ?>
+        <form action="<?= site_url('transports/sync-zoho') ?>" method="post" class="d-inline" id="syncZohoForm">
+            <?= csrf_field() ?>
+            <button type="submit" class="btn btn-sm btn-outline-info" id="btnSyncZoho" title="Fetch & Update Transporters from Zoho Books">
+                <i class="fas fa-cloud-download-alt me-1"></i> Sync from Zoho
+            </button>
+        </form>
+        <?php endif; ?>
+        <?php if (can('transport.create')): ?>
+        <a href="<?= site_url('transports/create') ?>" class="btn btn-sm btn-primary">
+            <i class="fas fa-plus me-1"></i> Add New Transport
+        </a>
+        <?php endif; ?>
     </div>
 </div>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-md-4 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-md-4">
         <a href="<?= site_url('transports') ?>" class="bt-stat bt-g-blue text-decoration-none">
             <i class="fas fa-truck bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['total'] ?? count($transports)) ?></div>
@@ -41,7 +39,7 @@
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </a>
     </div>
-    <div class="col-md-4 col-sm-6">
+    <div class="col-6 col-md-4">
         <div class="bt-stat bt-g-teal" style="cursor:default;">
             <i class="fas fa-boxes bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['parcel'] ?? 0) ?></div>
@@ -49,7 +47,7 @@
             <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total']) && $stats['total'] > 0) ? min(100, round(($stats['parcel'] / $stats['total']) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-md-4 col-sm-6">
+    <div class="col-12 col-md-4">
         <div class="bt-stat bt-g-purple" style="cursor:default;">
             <i class="fas fa-shipping-fast bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['courier'] ?? 0) ?></div>
@@ -66,13 +64,13 @@
     </div>
     <div class="card-body">
         <form action="<?= site_url('transports') ?>" method="get" class="row g-2 align-items-end">
-            <div class="col-md-10 col-sm-9">
+            <div class="col-md-9 col-sm-8">
                 <label for="search" class="form-label">Search</label>
                 <input type="text" name="search" id="search" class="form-control" placeholder="Search by name, transport code, GSTIN, Zoho ID, phone, or branch..." value="<?= esc($filters['search'] ?? '') ?>">
             </div>
-            <div class="col-md-2 col-sm-3 d-flex gap-1">
-                <button type="submit" class="btn btn-primary w-100" title="Apply Filter"><i class="fas fa-search"></i> Search</button>
-                <a href="<?= site_url('transports') ?>" class="btn btn-outline-secondary" title="Reset Filters"><i class="fas fa-undo"></i></a>
+            <div class="col-md-3 col-sm-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill text-nowrap" title="Apply Filter"><i class="fas fa-search me-1"></i>Search</button>
+                <a href="<?= site_url('transports') ?>" class="btn btn-outline-secondary text-nowrap" title="Reset Filters"><i class="fas fa-undo"></i></a>
             </div>
         </form>
     </div>
@@ -81,18 +79,44 @@
 <!-- Transports Table -->
 <div class="card card-outline card-secondary shadow-sm">
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($transports)): ?>
+                <?php foreach($transports as $transport): ?>
+                    <a href="<?= site_url('transports/view/'.$transport['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($transport['transport_name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= ($transport['transport_type'] ?? 'Parcel Service') == 'Courier Service' ? 'primary' : 'info' ?>" style="flex: 0 0 auto;">
+                                <?= esc($transport['transport_type'] ?? 'Parcel Service') ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($transport['branch'] ?: '-') ?>
+                                <?php if(!empty($transport['branch_phone_number'])): ?>
+                                    &middot; <?= esc($transport['branch_phone_number']) ?>
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No transports found matching the search criteria.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 50px;">#</th>
-                        <th style="min-width: 200px;">Transport Name</th>
-                        <th style="min-width: 100px;">Code</th>
-                        <th style="min-width: 130px;">Type</th>
-                        <th style="min-width: 140px;">Branch</th>
-                        <th style="min-width: 130px;">Phone</th>
-                        <th style="min-width: 140px;">GST Number</th>
-                        <th class="text-end" style="min-width: 110px;">Actions</th>
+                        <th>Transport Name</th>
+                        <th>Code</th>
+                        <th>Type</th>
+                        <th>Branch</th>
+                        <th>Phone</th>
+                        <th>GST Number</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

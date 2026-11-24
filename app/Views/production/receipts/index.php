@@ -108,7 +108,7 @@ if (!empty($receipts)) {
             <?php endif; ?>
         </div>
         <div class="table-responsive erp-desktop-wrap">
-            <table class="table table-striped table-hover align-middle mb-0 w-100 datatable">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
                         <th>Receipt #</th>
@@ -170,25 +170,17 @@ if (!empty($receipts)) {
                                 </td>
                             </tr>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="fas fa-box-open fa-2x text-muted mb-2 d-block"></i>
+                                No fabric inward receipts recorded.
+                            </td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-<?= $this->endSection() ?>
-
-<?= $this->section('scripts') ?>
-<script>
-    $(document).ready(function() {
-        if ($('.datatable').length && $.fn.DataTable) {
-            $('.datatable').DataTable({
-                "order": [[ 0, "desc" ]],
-                "language": {
-                    "emptyTable": "No fabric inward receipts recorded."
-                }
-            });
-        }
-    });
-</script>
 <?= $this->endSection() ?>

@@ -108,18 +108,90 @@ h4,
 /* =============================
      Responsive Tweaks
      ============================= */
-@media (max-width: 600px) {
+@media (max-width: 991.98px) {
+    :root {
+        --font-size-base: 0.9375rem;
+        --font-size-h1: 1.25rem;
+        --font-size-h2: 1.15rem;
+        --font-size-h3: 1.05rem;
+        --font-size-h4: 0.98rem;
+        --font-size-card-title: 1rem;
+        --font-size-table: 0.875rem;
+        --font-size-sidebar: 0.9rem;
+    }
+
     body {
-        font-size: 0.75rem;
+        font-size: 0.9375rem !important;
+        line-height: 1.5;
     }
 
-    .table {
-        font-size: 0.7rem;
+    .form-control,
+    .form-select {
+        font-size: 0.95rem !important;
     }
 
-    .nav-header {
-        font-size: 0.6rem;
+    .form-control-sm,
+    .form-select-sm {
+        font-size: 0.875rem !important;
     }
+
+    .form-label {
+        font-size: 0.875rem !important;
+    }
+
+    .btn {
+        font-size: 0.875rem !important;
+    }
+
+    .btn-sm {
+        font-size: 0.82rem !important;
+    }
+
+    .erp-mobile-card {
+        font-size: 0.95rem;
+    }
+
+    .erp-mobile-card .small,
+    .erp-mobile-card small {
+        font-size: 0.84rem !important;
+    }
+}
+
+body.is-mobile-device {
+    --font-size-base: 0.9375rem;
+    --font-size-h1: 1.25rem;
+    --font-size-h2: 1.15rem;
+    --font-size-h3: 1.05rem;
+    --font-size-h4: 0.98rem;
+    --font-size-card-title: 1rem;
+    --font-size-table: 0.875rem;
+    --font-size-sidebar: 0.9rem;
+    font-size: 0.9375rem !important;
+    line-height: 1.5;
+}
+body.is-mobile-device .form-control,
+body.is-mobile-device .form-select {
+    font-size: 0.95rem !important;
+}
+body.is-mobile-device .form-control-sm,
+body.is-mobile-device .form-select-sm {
+    font-size: 0.875rem !important;
+}
+body.is-mobile-device .form-label {
+    font-size: 0.875rem !important;
+}
+body.is-mobile-device .btn {
+    font-size: 0.875rem !important;
+}
+body.is-mobile-device .btn-sm {
+    font-size: 0.82rem !important;
+}
+body.is-mobile-device .erp-mobile-card {
+    font-size: 0.95rem;
+}
+body.is-mobile-device .erp-mobile-card .small,
+body.is-mobile-device .erp-mobile-card small {
+    font-size: 0.84rem !important;
 }
 
 .text-primary {
@@ -534,13 +606,13 @@ h4,
 
     /* Badge sizes */
     .badge {
-        font-size: 0.65rem !important;
-        padding: 0.25em 0.45em !important;
+        font-size: 0.75rem !important;
+        padding: 0.3em 0.55em !important;
     }
 
     /* Floating / Single action buttons */
     .btn-sm {
-        padding: 0.25rem 0.45rem !important;
+        padding: 0.3rem 0.55rem !important;
     }
 }
 

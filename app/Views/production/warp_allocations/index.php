@@ -184,13 +184,6 @@ if (!empty($allocations)) {
                                 </td>
                             </tr>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="9" class="text-center py-4 text-muted">
-                                <i class="fas fa-network-wired fa-2x text-muted mb-2 d-block"></i>
-                                No warp allocations found.
-                            </td>
-                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>

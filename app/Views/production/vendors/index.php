@@ -210,13 +210,6 @@ if (!empty($vendors)) {
                             </td>
                         </tr>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="9" class="text-center py-4 text-muted">
-                                <i class="fas fa-tools fa-2x text-muted mb-2 d-block"></i>
-                                No job work vendors found matching your filters.
-                            </td>
-                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>

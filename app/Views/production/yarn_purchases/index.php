@@ -184,13 +184,6 @@ $avgLanded = ($totalWeight > 0) ? ($totalAmount / $totalWeight) : 0;
                             </td>
                         </tr>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="11" class="text-center py-4 text-muted">
-                                <i class="fas fa-shopping-basket fa-2x text-muted mb-2 d-block"></i>
-                                No yarn purchase invoices recorded.
-                            </td>
-                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>

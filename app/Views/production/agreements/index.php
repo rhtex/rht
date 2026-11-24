@@ -205,13 +205,6 @@ if (!empty($agreements)) {
                             </td>
                         </tr>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
-                                <i class="fas fa-file-signature fa-2x text-muted mb-2 d-block"></i>
-                                No agreements found matching your filters.
-                            </td>
-                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>

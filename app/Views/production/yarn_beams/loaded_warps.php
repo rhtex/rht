@@ -107,10 +107,6 @@
                                 </td>
                             </tr>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="9" class="text-center text-muted">No loaded beams present in the system.</td>
-                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>

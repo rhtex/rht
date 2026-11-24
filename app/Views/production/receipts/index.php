@@ -170,13 +170,6 @@ if (!empty($receipts)) {
                                 </td>
                             </tr>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
-                                <i class="fas fa-box-open fa-2x text-muted mb-2 d-block"></i>
-                                No fabric inward receipts recorded.
-                            </td>
-                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -191,7 +184,9 @@ if (!empty($receipts)) {
         if ($('.datatable').length && $.fn.DataTable) {
             $('.datatable').DataTable({
                 "order": [[ 0, "desc" ]],
-                "responsive": true
+                "language": {
+                    "emptyTable": "No fabric inward receipts recorded."
+                }
             });
         }
     });

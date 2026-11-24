@@ -262,13 +262,6 @@ $hasActiveFilters = !empty($filters['search']) || !empty($filters['yarn_type']) 
                             </td>
                         </tr>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="12" class="text-center py-4 text-muted">
-                                <i class="fas fa-warehouse fa-2x text-muted mb-2 d-block"></i>
-                                No yarn inventory records found matching your filters.
-                            </td>
-                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>

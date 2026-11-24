@@ -428,14 +428,101 @@ body.is-mobile-device .nav-sidebar .nav-icon {
 }
 
 .card-header {
-    background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%) !important;
-    border-bottom: 1px solid #1a252f !important;
-    padding-top: 12px !important;
-    padding-bottom: 12px !important;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+    color: #ffffff !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
 }
 
-.card-title {
+/* Distinct colored card headers across all modules */
+.card.card-primary > .card-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+}
+.card.card-info > .card-header {
+    background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%) !important;
+}
+.card.card-success > .card-header {
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%) !important;
+}
+.card.card-warning > .card-header {
+    background: linear-gradient(135deg, #92400e 0%, #d97706 100%) !important;
+}
+.card.card-danger > .card-header {
+    background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%) !important;
+}
+.card.card-secondary > .card-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+}
+.card.card-dark > .card-header {
+    background: linear-gradient(135deg, #111827 0%, #1f2937 100%) !important;
+}
+
+/* Alternate colors for sibling cards / columns without explicit card-outline variant */
+.row > [class*="col-"]:nth-child(6n+2) > .card:not([class*="card-outline"]) > .card-header,
+.card:not([class*="card-outline"]):nth-of-type(6n+2) > .card-header {
+    background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+}
+.row > [class*="col-"]:nth-child(6n+3) > .card:not([class*="card-outline"]) > .card-header,
+.card:not([class*="card-outline"]):nth-of-type(6n+3) > .card-header {
+    background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%) !important;
+}
+.row > [class*="col-"]:nth-child(6n+4) > .card:not([class*="card-outline"]) > .card-header,
+.card:not([class*="card-outline"]):nth-of-type(6n+4) > .card-header {
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%) !important;
+}
+.row > [class*="col-"]:nth-child(6n+5) > .card:not([class*="card-outline"]) > .card-header,
+.card:not([class*="card-outline"]):nth-of-type(6n+5) > .card-header {
+    background: linear-gradient(135deg, #6b21a8 0%, #9333ea 100%) !important;
+}
+.row > [class*="col-"]:nth-child(6n+6) > .card:not([class*="card-outline"]) > .card-header,
+.card:not([class*="card-outline"]):nth-of-type(6n+6) > .card-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+}
+
+.card-title,
+.card-header h1, .card-header h2, .card-header h3,
+.card-header h4, .card-header h5, .card-header h6,
+.card-header .card-title i,
+.card-header h1 i, .card-header h2 i, .card-header h3 i,
+.card-header h4 i, .card-header h5 i, .card-header h6 i {
     color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.card-header .text-dark:not(.btn):not(.badge):not(input):not(select),
+.card-header > span:not(.badge),
+.card-header > div > strong {
+    color: #ffffff !important;
+}
+
+.card-header .text-muted:not(.btn):not(.badge),
+.card-header .text-secondary:not(.btn):not(.badge) {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.card-header .btn-tool {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.card-header .btn-outline-secondary,
+.card-header .btn-outline-dark {
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.55) !important;
+}
+.card-header .btn-outline-secondary:hover,
+.card-header .btn-outline-dark:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+.card-header .nav-tabs .nav-link {
+    color: rgba(255, 255, 255, 0.88) !important;
+    border-color: transparent !important;
+}
+.card-header .nav-tabs .nav-link.active {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
     font-weight: 700 !important;
 }
 
@@ -462,31 +549,6 @@ body.is-mobile-device .nav-sidebar .nav-icon {
 
 .card-header.bg-success-subtle .text-muted {
     color: #cbd5e1 !important;
-}
-
-/* Light / White Card Headers: Allow clean crisp light styling with dark text */
-.card-header.bg-white,
-.card-header.bg-light {
-    background: #ffffff !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-}
-
-.card-header.bg-light {
-    background: #f8fafc !important;
-}
-
-.card-header.bg-white .card-title,
-.card-header.bg-light .card-title,
-.card-header.bg-white h1, .card-header.bg-white h2, .card-header.bg-white h3,
-.card-header.bg-white h4, .card-header.bg-white h5, .card-header.bg-white h6,
-.card-header.bg-light h1, .card-header.bg-light h2, .card-header.bg-light h3,
-.card-header.bg-light h4, .card-header.bg-light h5, .card-header.bg-light h6 {
-    color: #1e293b !important;
-}
-
-.card-header.bg-white .text-muted,
-.card-header.bg-light .text-muted {
-    color: #64748b !important;
 }
 
 /* Delete Button styling for Received Receipts card */

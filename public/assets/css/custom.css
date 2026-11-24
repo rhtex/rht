@@ -314,7 +314,7 @@ body.is-mobile-device .nav-sidebar .nav-icon {
     font-size: var(--font-size-table) !important;
 }
 
-/* Default & DataTable headers - deep charcoal (distinct from all colored card headers) */
+/* Default & DataTable headers - rich deep teal (colored, not black, distinct from card headers) */
 .table thead th,
 .table thead.table-light th,
 .table thead.bg-light th,
@@ -324,14 +324,14 @@ body.is-mobile-device .nav-sidebar .nav-icon {
 .table.table-sm thead th,
 table.dataTable thead th,
 table.dataTable thead td {
-    background: linear-gradient(180deg, #1f2937 0%, #111827 100%) !important;
-    background-color: #1f2937 !important;
+    background: linear-gradient(180deg, #0f766e 0%, #115e59 100%) !important;
+    background-color: #0f766e !important;
     font-size: 0.70rem !important;
     letter-spacing: 0.5px;
     color: #ffffff !important;
     font-weight: 700 !important;
-    border-top: 1px solid #374151 !important;
-    border-bottom: 2px solid #374151 !important;
+    border-top: 1px solid #0d9488 !important;
+    border-bottom: 2px solid #0d9488 !important;
     padding-top: 7px !important;
     padding-bottom: 7px !important;
     padding-left: 10px !important;
@@ -376,13 +376,13 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
 .table thead th:first-child,
 .table.table-sm thead th:first-child {
     border-top-left-radius: 6px;
-    border-left: 1px solid #374151 !important;
+    border-left: 1px solid #0d9488 !important;
 }
 
 .table thead th:last-child,
 .table.table-sm thead th:last-child {
     border-top-right-radius: 6px;
-    border-right: 1px solid #374151 !important;
+    border-right: 1px solid #0d9488 !important;
 }
 
 .table tbody tr {
@@ -465,7 +465,7 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
     background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%) !important;
 }
 .card.card-dark > .card-header {
-    background: linear-gradient(135deg, #115e59 0%, #0f766e 100%) !important;
+    background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%) !important;
 }
 
 /* Alternate colors for sibling cards / columns without explicit card-outline variant */
@@ -483,7 +483,7 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
 }
 .row > [class*="col-"]:nth-child(6n+5) > .card:not([class*="card-outline"]) > .card-header,
 .card:not([class*="card-outline"]):nth-of-type(6n+5) > .card-header {
-    background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+    background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%) !important;
 }
 .row > [class*="col-"]:nth-child(6n+6) > .card:not([class*="card-outline"]) > .card-header,
 .card:not([class*="card-outline"]):nth-of-type(6n+6) > .card-header {

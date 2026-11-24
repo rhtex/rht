@@ -97,7 +97,7 @@
                     <input type="text" name="bill_number" class="form-control" placeholder="Search Bill #" value="<?= esc($filters['bill_number'] ?? '') ?>">
                 </div>
             </div>
-            <div class="col-xl-3 col-md-3 col-sm-6">
+            <div class="col-xl-2 col-md-3 col-sm-6">
                 <label class="form-label small fw-semibold text-muted mb-1">Vendor</label>
                 <select name="vendor_id" class="form-select form-select-sm select2">
                     <option value="">All Vendors</option>
@@ -131,12 +131,12 @@
                 <label class="form-label small fw-semibold text-muted mb-1">To Date</label>
                 <input type="date" name="date_to" class="form-control form-control-sm" value="<?= esc($filters['date_to'] ?? '') ?>">
             </div>
-            <div class="col-xl-1 col-md-3 col-sm-6 d-flex gap-1">
-                <button type="submit" class="btn btn-sm btn-primary flex-fill" title="Apply Filters">
+            <div class="col-xl-2 col-md-3 col-sm-6 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary flex-fill text-nowrap" title="Apply Filters">
                     <i class="fas fa-search me-1"></i>Filter
                 </button>
-                <a href="<?= site_url('bills') ?>" class="btn btn-sm btn-outline-secondary" title="Reset Filters">
-                    <i class="fas fa-undo"></i>
+                <a href="<?= site_url('bills') ?>" class="btn btn-sm btn-outline-secondary text-nowrap" title="Reset Filters">
+                    <i class="fas fa-undo me-1"></i>Reset
                 </a>
             </div>
         </form>

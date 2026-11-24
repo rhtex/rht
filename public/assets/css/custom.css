@@ -283,15 +283,24 @@ body.is-mobile-device .nav-sidebar .nav-icon {
     font-size: var(--font-size-table) !important;
 }
 
-/* Default table headers - dark slate with crisp white text */
-.table thead th {
-    background-color: #2c3e50 !important;
+/* Default & DataTable headers - rich colored navy with crisp white text */
+.table thead th,
+.table thead.table-light th,
+.table thead.bg-light th,
+.table thead tr.table-light th,
+.table thead th.table-light,
+.table thead th.bg-light,
+.table.table-sm thead th,
+table.dataTable thead th,
+table.dataTable thead td {
+    background: linear-gradient(180deg, #1e3a8a 0%, #172554 100%) !important;
+    background-color: #1e3a8a !important;
     font-size: 0.70rem !important;
     letter-spacing: 0.5px;
     color: #ffffff !important;
     font-weight: 700 !important;
-    border-top: 1px solid #34495e !important;
-    border-bottom: 2px solid #34495e !important;
+    border-top: 1px solid #1e40af !important;
+    border-bottom: 2px solid #1e40af !important;
     padding-top: 7px !important;
     padding-bottom: 7px !important;
     padding-left: 10px !important;
@@ -299,80 +308,50 @@ body.is-mobile-device .nav-sidebar .nav-icon {
     vertical-align: middle !important;
 }
 
+.table.table-sm thead th {
+    font-size: 0.69rem !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+}
+
 .table thead th a,
 .table thead th span:not(.badge),
-.table thead th i {
+.table thead th i,
+.table thead.table-light th a,
+.table thead.table-light th span:not(.badge),
+.table thead.table-light th i,
+.table.table-sm thead th a,
+.table.table-sm thead th span:not(.badge),
+.table.table-sm thead th i,
+table.dataTable thead th a,
+table.dataTable thead th span:not(.badge),
+table.dataTable thead th i {
     color: #ffffff !important;
 }
 
-.table thead th:first-child {
-    border-top-left-radius: 6px;
-    border-left: 1px solid #34495e !important;
+/* DataTables sorting arrows visibility on dark colored header */
+table.dataTable thead > tr > th.sorting:before,
+table.dataTable thead > tr > th.sorting:after,
+table.dataTable thead > tr > th.sorting_asc:before,
+table.dataTable thead > tr > th.sorting_asc:after,
+table.dataTable thead > tr > th.sorting_desc:before,
+table.dataTable thead > tr > th.sorting_desc:after,
+table.dataTable thead > tr > th.dt-orderable-asc span.dt-column-order:before,
+table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
+    color: rgba(255, 255, 255, 0.85) !important;
+    opacity: 0.85 !important;
 }
 
-.table thead th:last-child {
-    border-top-right-radius: 6px;
-    border-right: 1px solid #34495e !important;
-}
-
-/* When .table-light or .bg-light is applied to thead/th:
-   Ensure clear, legible text color (#334155 dark slate) on light-gray background (#f1f5f9)
-   instead of dark-on-dark or muddy low contrast */
-.table thead.table-light th,
-.table thead.bg-light th,
-.table thead tr.table-light th,
-.table thead th.table-light,
-.table thead th.bg-light {
-    background-color: #f1f5f9 !important;
-    color: #1e293b !important;
-    font-weight: 700 !important;
-    border-top: 1px solid #e2e8f0 !important;
-    border-bottom: 2px solid #cbd5e1 !important;
-    letter-spacing: 0.4px;
-}
-
-.table thead.table-light th:first-child,
-.table thead.bg-light th:first-child,
-.table thead tr.table-light th:first-child {
-    border-left: 1px solid #e2e8f0 !important;
-}
-
-.table thead.table-light th:last-child,
-.table thead.bg-light th:last-child,
-.table thead tr.table-light th:last-child {
-    border-right: 1px solid #e2e8f0 !important;
-}
-
-.table thead.table-light th a,
-.table thead.table-light th span:not(.badge),
-.table thead.table-light th i {
-    color: #1e293b !important;
-}
-
-/* Secondary/Nested/Detail Tables Header Style (.table-sm) */
-.table.table-sm thead th {
-    background-color: #f1f5f9 !important;
-    color: #1e293b !important;
-    font-size: 0.69rem !important;
-    font-weight: 700 !important;
-    border-top: 1px solid #e2e8f0 !important;
-    border-bottom: 2px solid #cbd5e1 !important;
-    padding-top: 5px !important;
-    padding-bottom: 5px !important;
-}
-
-.table.table-sm thead th a,
-.table.table-sm thead th span:not(.badge),
-.table.table-sm thead th i {
-    color: #1e293b !important;
-}
-
+.table thead th:first-child,
 .table.table-sm thead th:first-child {
-    border-left: 1px solid #e2e8f0 !important;
+    border-top-left-radius: 6px;
+    border-left: 1px solid #1e40af !important;
 }
 
+.table thead th:last-child,
 .table.table-sm thead th:last-child {
-    border-right: 1px solid #e2e8f0 !important;
+    border-top-right-radius: 6px;
+    border-right: 1px solid #1e40af !important;
 }
 
 .table tbody tr {

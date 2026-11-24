@@ -159,13 +159,39 @@ class ProductController extends BaseController
         $db = \Config\Database::connect();
         $perPage = 100;
 
-        // Billed Analytics (across all non-Void invoices for this product)
-        $billedAgg = $db->table('invoice_items')
+        $analyticsFilters = [
+            'customer_id' => trim((string) ($this->request->getGet('customer_id') ?? '')),
+            'date_from'   => trim((string) ($this->request->getGet('date_from') ?? '')),
+            'date_to'     => trim((string) ($this->request->getGet('date_to') ?? '')),
+        ];
+        $data['analyticsFilters'] = $analyticsFilters;
+
+        // Customers list for filter dropdown (customers who have billed or returned this product)
+        $data['filterCustomers'] = $db->table('customers')
+            ->select('customers.id, customers.name')
+            ->orderBy('customers.name', 'ASC')
+            ->get()->getResultArray();
+
+        $applyBilledFilters = function ($builder) use ($id, $analyticsFilters) {
+            $builder->where('invoice_items.product_id', $id)
+                ->where('invoices.status !=', 'Void');
+            if ($analyticsFilters['customer_id'] !== '') {
+                $builder->where('invoices.customer_id', (int) $analyticsFilters['customer_id']);
+            }
+            if ($analyticsFilters['date_from'] !== '') {
+                $builder->where('invoices.invoice_date >=', $analyticsFilters['date_from']);
+            }
+            if ($analyticsFilters['date_to'] !== '') {
+                $builder->where('invoices.invoice_date <=', $analyticsFilters['date_to']);
+            }
+            return $builder;
+        };
+
+        // Billed Analytics (across all matching non-Void invoices for this product)
+        $billedAggBuilder = $db->table('invoice_items')
             ->select('COUNT(invoice_items.id) as row_count, COUNT(DISTINCT invoices.customer_id) as unique_customers, COALESCE(SUM(invoice_items.quantity), 0) as total_qty, COALESCE(SUM(invoice_items.amount), 0) as total_amount')
-            ->join('invoices', 'invoices.id = invoice_items.invoice_id')
-            ->where('invoice_items.product_id', $id)
-            ->where('invoices.status !=', 'Void')
-            ->get()->getRowArray();
+            ->join('invoices', 'invoices.id = invoice_items.invoice_id');
+        $billedAgg = $applyBilledFilters($billedAggBuilder)->get()->getRowArray();
 
         $totalBilledRows = (int) ($billedAgg['row_count'] ?? 0);
         $billedPage = max(1, (int) ($this->request->getGet('billed_page') ?? 1));
@@ -173,12 +199,11 @@ class ProductController extends BaseController
         if ($billedPage > $billedTotalPages) $billedPage = $billedTotalPages;
 
         // Billed History (100 rows per page)
-        $data['billedHistory'] = $db->table('invoice_items')
+        $billedListBuilder = $db->table('invoice_items')
             ->select('invoices.id as invoice_id, invoices.invoice_number, invoices.invoice_date, invoices.status, customers.id as customer_id, customers.name as customer_name, invoice_items.quantity, invoice_items.rate, invoice_items.amount')
             ->join('invoices', 'invoices.id = invoice_items.invoice_id')
-            ->join('customers', 'customers.id = invoices.customer_id', 'left')
-            ->where('invoice_items.product_id', $id)
-            ->where('invoices.status !=', 'Void')
+            ->join('customers', 'customers.id = invoices.customer_id', 'left');
+        $data['billedHistory'] = $applyBilledFilters($billedListBuilder)
             ->orderBy('invoices.invoice_date', 'DESC')
             ->orderBy('invoices.id', 'DESC')
             ->limit($perPage, ($billedPage - 1) * $perPage)
@@ -191,13 +216,26 @@ class ProductController extends BaseController
             'totalPages' => $billedTotalPages,
         ];
 
+        $applyReturnFilters = function ($builder) use ($id, $analyticsFilters) {
+            $builder->where('sales_return_items.product_id', $id)
+                ->where('sales_returns.status !=', 'Void');
+            if ($analyticsFilters['customer_id'] !== '') {
+                $builder->where('sales_returns.customer_id', (int) $analyticsFilters['customer_id']);
+            }
+            if ($analyticsFilters['date_from'] !== '') {
+                $builder->where('sales_returns.return_date >=', $analyticsFilters['date_from']);
+            }
+            if ($analyticsFilters['date_to'] !== '') {
+                $builder->where('sales_returns.return_date <=', $analyticsFilters['date_to']);
+            }
+            return $builder;
+        };
+
         // Customer Returns Analytics
-        $returnAgg = $db->table('sales_return_items')
+        $returnAggBuilder = $db->table('sales_return_items')
             ->select('COUNT(sales_return_items.id) as row_count, COALESCE(SUM(sales_return_items.quantity), 0) as total_qty, COALESCE(SUM(sales_return_items.amount), 0) as total_amount')
-            ->join('sales_returns', 'sales_returns.id = sales_return_items.sales_return_id')
-            ->where('sales_return_items.product_id', $id)
-            ->where('sales_returns.status !=', 'Void')
-            ->get()->getRowArray();
+            ->join('sales_returns', 'sales_returns.id = sales_return_items.sales_return_id');
+        $returnAgg = $applyReturnFilters($returnAggBuilder)->get()->getRowArray();
 
         $totalReturnRows = (int) ($returnAgg['row_count'] ?? 0);
         $returnPage = max(1, (int) ($this->request->getGet('return_page') ?? 1));
@@ -205,12 +243,11 @@ class ProductController extends BaseController
         if ($returnPage > $returnTotalPages) $returnPage = $returnTotalPages;
 
         // Customer Returns History (100 rows per page)
-        $data['returnHistory'] = $db->table('sales_return_items')
+        $returnListBuilder = $db->table('sales_return_items')
             ->select('sales_returns.id as return_id, sales_returns.return_number, sales_returns.return_date, sales_returns.status, sales_returns.reason, customers.id as customer_id, customers.name as customer_name, sales_return_items.quantity, sales_return_items.rate, sales_return_items.amount')
             ->join('sales_returns', 'sales_returns.id = sales_return_items.sales_return_id')
-            ->join('customers', 'customers.id = sales_returns.customer_id', 'left')
-            ->where('sales_return_items.product_id', $id)
-            ->where('sales_returns.status !=', 'Void')
+            ->join('customers', 'customers.id = sales_returns.customer_id', 'left');
+        $data['returnHistory'] = $applyReturnFilters($returnListBuilder)
             ->orderBy('sales_returns.return_date', 'DESC')
             ->orderBy('sales_returns.id', 'DESC')
             ->limit($perPage, ($returnPage - 1) * $perPage)

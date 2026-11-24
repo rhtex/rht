@@ -334,38 +334,128 @@ $buildPageUrl = function (string $param, int $targetPage) {
 };
 ?>
 
+<!-- Analytics & History Filters -->
+<div class="card card-outline card-info mt-3 mb-3 shadow-sm">
+    <div class="card-header py-2 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h3 class="card-title mb-0 fw-bold"><i class="fas fa-chart-bar me-2 text-info"></i>Sales &amp; Returns Analytics</h3>
+        <?php if (!empty($analyticsFilters['customer_id']) || !empty($analyticsFilters['date_from']) || !empty($analyticsFilters['date_to'])): ?>
+            <span class="badge bg-info-subtle text-info border border-info-subtle">Filtered</span>
+        <?php endif; ?>
+    </div>
+    <div class="card-body py-2">
+        <form method="get" action="<?= site_url('products/view/' . $product['id']) ?>" class="row g-2 align-items-end">
+            <?php if (!empty($filters['status'])): ?>
+                <input type="hidden" name="status" value="<?= esc($filters['status']) ?>">
+            <?php endif; ?>
+            <?php if (!empty($filters['is_approved'])): ?>
+                <input type="hidden" name="approval_status" value="<?= esc($filters['is_approved']) ?>">
+            <?php endif; ?>
+            <div class="col-md-4 col-sm-12">
+                <label class="form-label small fw-semibold text-muted mb-1">Customer</label>
+                <select name="customer_id" class="form-select form-select-sm select2">
+                    <option value="">All Customers</option>
+                    <?php foreach ($filterCustomers ?? [] as $fc): ?>
+                        <option value="<?= $fc['id'] ?>" <?= ((string)($analyticsFilters['customer_id'] ?? '') === (string)$fc['id']) ? 'selected' : '' ?>>
+                            <?= esc($fc['name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <label class="form-label small fw-semibold text-muted mb-1">From Date</label>
+                <input type="date" name="date_from" class="form-control form-control-sm" value="<?= esc($analyticsFilters['date_from'] ?? '') ?>">
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <label class="form-label small fw-semibold text-muted mb-1">To Date</label>
+                <input type="date" name="date_to" class="form-control form-control-sm" value="<?= esc($analyticsFilters['date_to'] ?? '') ?>">
+            </div>
+            <div class="col-md-2 col-sm-12 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary flex-fill text-nowrap"><i class="fas fa-filter me-1"></i>Filter</button>
+                <a href="<?= site_url('products/view/' . $product['id']) ?>" class="btn btn-sm btn-outline-secondary text-nowrap" title="Reset Filters"><i class="fas fa-undo"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .prod-stat-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 14px;
+        padding: 14px 16px;
+        color: #ffffff;
+        height: 100%;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .prod-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+    }
+    .prod-stat-card.grad-blue    { background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); }
+    .prod-stat-card.grad-emerald { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
+    .prod-stat-card.grad-purple  { background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%); }
+    .prod-stat-card.grad-amber   { background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); }
+    .prod-stat-icon {
+        position: absolute;
+        right: 12px;
+        top: 10px;
+        font-size: 2rem;
+        opacity: 0.22;
+        pointer-events: none;
+    }
+    .prod-stat-num {
+        font-size: 1.25rem;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 3px;
+    }
+    .prod-stat-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.92;
+    }
+    .prod-stat-sub {
+        font-size: 0.75rem;
+        opacity: 0.85;
+        margin-top: 6px;
+    }
+</style>
+
 <!-- Product Sales & Returns Analytics -->
-<div class="row g-2 g-md-3 mt-2 mb-3">
+<div class="row g-2 g-md-3 mb-3">
     <div class="col-6 col-xl-3">
-        <div class="bt-stat bt-g-blue" style="cursor:default;">
-            <i class="fas fa-cubes bt-stat-icon"></i>
-            <div class="bt-stat-num"><?= number_format((float)($pa['net_qty'] ?? 0), 2) ?> <small style="font-size:0.85rem;"><?= esc($product['unit'] ?? '') ?></small></div>
-            <div class="bt-stat-label">Net Sold Qty</div>
-            <div class="small opacity-75 mt-1">Billed <?= number_format($totalBilledQty, 0) ?> &middot; Ret <?= number_format($totalReturnedQty, 0) ?></div>
+        <div class="prod-stat-card grad-blue">
+            <i class="fas fa-cubes prod-stat-icon"></i>
+            <div class="prod-stat-num"><?= number_format((float)($pa['net_qty'] ?? 0), 2) ?> <small style="font-size:0.8rem;"><?= esc($product['unit'] ?? '') ?></small></div>
+            <div class="prod-stat-label">Net Sold Qty</div>
+            <div class="prod-stat-sub">Billed <?= number_format($totalBilledQty, 0) ?> &middot; Ret <?= number_format($totalReturnedQty, 0) ?></div>
         </div>
     </div>
     <div class="col-6 col-xl-3">
-        <div class="bt-stat bt-g-emerald" style="cursor:default;">
-            <i class="fas fa-rupee-sign bt-stat-icon"></i>
-            <div class="bt-stat-num">₹<?= format_inr((float)($pa['net_revenue'] ?? 0)) ?></div>
-            <div class="bt-stat-label">Net Sales Revenue</div>
-            <div class="small opacity-75 mt-1">Billed ₹<?= format_inr($totalBilledAmt) ?></div>
+        <div class="prod-stat-card grad-emerald">
+            <i class="fas fa-rupee-sign prod-stat-icon"></i>
+            <div class="prod-stat-num">₹<?= format_inr((float)($pa['net_revenue'] ?? 0)) ?></div>
+            <div class="prod-stat-label">Net Sales Revenue</div>
+            <div class="prod-stat-sub">Billed ₹<?= format_inr($totalBilledAmt) ?></div>
         </div>
     </div>
     <div class="col-6 col-xl-3">
-        <div class="bt-stat bt-g-purple" style="cursor:default;">
-            <i class="fas fa-tag bt-stat-icon"></i>
-            <div class="bt-stat-num">₹<?= format_inr((float)($pa['avg_rate'] ?? 0)) ?></div>
-            <div class="bt-stat-label">Avg Selling Rate</div>
-            <div class="small opacity-75 mt-1"><?= number_format((int)($pa['billed_count'] ?? 0)) ?> Invoice Lines</div>
+        <div class="prod-stat-card grad-purple">
+            <i class="fas fa-tag prod-stat-icon"></i>
+            <div class="prod-stat-num">₹<?= format_inr((float)($pa['avg_rate'] ?? 0)) ?></div>
+            <div class="prod-stat-label">Avg Selling Rate</div>
+            <div class="prod-stat-sub"><?= number_format((int)($pa['billed_count'] ?? 0)) ?> Invoice Lines</div>
         </div>
     </div>
     <div class="col-6 col-xl-3">
-        <div class="bt-stat bt-g-amber" style="cursor:default;">
-            <i class="fas fa-users bt-stat-icon"></i>
-            <div class="bt-stat-num"><?= number_format((int)($pa['unique_customers'] ?? 0)) ?></div>
-            <div class="bt-stat-label">Unique Customers</div>
-            <div class="small opacity-75 mt-1">Return Rate: <?= number_format((float)($pa['return_rate_pct'] ?? 0), 1) ?>%</div>
+        <div class="prod-stat-card grad-amber">
+            <i class="fas fa-users prod-stat-icon"></i>
+            <div class="prod-stat-num"><?= number_format((int)($pa['unique_customers'] ?? 0)) ?></div>
+            <div class="prod-stat-label">Unique Customers</div>
+            <div class="prod-stat-sub">Return Rate: <?= number_format((float)($pa['return_rate_pct'] ?? 0), 1) ?>%</div>
         </div>
     </div>
 </div>

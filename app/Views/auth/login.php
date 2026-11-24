@@ -35,7 +35,7 @@
             <div class="row">
                 <div class="col-8">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="remember">
+                        <input class="form-check-input" type="checkbox" id="remember" name="remember" value="1" <?= old('remember') ? 'checked' : '' ?>>
                         <label class="form-check-label" for="remember">
                             Remember Me
                         </label>

@@ -16,7 +16,7 @@ class AuthController extends BaseController
 
     public function login()
     {
-        if (session()->get('isLoggedIn')) {
+        if (session()->get('isLoggedIn') || $this->authService->attemptRememberLogin()) {
             return redirect()->to('dashboard'); // Assuming dashboard route exists
         }
         return view('auth/login');
@@ -41,6 +41,10 @@ class AuthController extends BaseController
         if ($user) {
             log_message('error', 'Login Successful for: ' . $email);
             $this->authService->loginUser($user);
+
+            if ($this->request->getPost('remember')) {
+                $this->authService->issueRememberToken((int) $user['id']);
+            }
 
             // If user is Admin and maintenance mode is active, set bypass cookie
             $flagFile = WRITEPATH . 'maintenance.flag';
@@ -76,7 +80,7 @@ class AuthController extends BaseController
             unset($_COOKIE['rht_maintenance_bypass']);
         }
 
-        session()->destroy();
+        $this->authService->logout();
         return redirect()->to('/login');
     }
 

@@ -12,6 +12,9 @@ class AuthFilter implements FilterInterface
     {
         $session = session();
         if (! $session->get('isLoggedIn')) {
+            if ((new \App\Services\AuthService())->attemptRememberLogin()) {
+                return;
+            }
             log_message('error', 'AuthFilter: User not logged in, redirecting to login.');
             return redirect()->to('login');
         }

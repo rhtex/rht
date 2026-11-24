@@ -169,6 +169,27 @@ h4,
         width: 30px !important;
         height: 30px !important;
     }
+
+    :root {
+        --sidebar-font-size: 1rem;
+        --sidebar-header-font-size: 0.85rem;
+        --sidebar-icon-size: 1.05rem;
+        --sidebar-link-padding: 0.55rem 0.9rem;
+    }
+
+    .sidebar-menu,
+    .nav-sidebar .nav-link,
+    .nav-sidebar .nav-link p {
+        font-size: 1rem !important;
+    }
+
+    .nav-sidebar .nav-header {
+        font-size: 0.85rem !important;
+    }
+
+    .nav-sidebar .nav-icon {
+        font-size: 1.05rem !important;
+    }
 }
 
 body.is-mobile-device {
@@ -217,6 +238,23 @@ body.is-mobile-device .app-header .nav-link i {
 body.is-mobile-device .app-header .user-menu .user-image {
     width: 30px !important;
     height: 30px !important;
+}
+body.is-mobile-device {
+    --sidebar-font-size: 1rem;
+    --sidebar-header-font-size: 0.85rem;
+    --sidebar-icon-size: 1.05rem;
+    --sidebar-link-padding: 0.55rem 0.9rem;
+}
+body.is-mobile-device .sidebar-menu,
+body.is-mobile-device .nav-sidebar .nav-link,
+body.is-mobile-device .nav-sidebar .nav-link p {
+    font-size: 1rem !important;
+}
+body.is-mobile-device .nav-sidebar .nav-header {
+    font-size: 0.85rem !important;
+}
+body.is-mobile-device .nav-sidebar .nav-icon {
+    font-size: 1.05rem !important;
 }
 
 .text-primary {

@@ -393,7 +393,7 @@ class Home extends BaseController
     {
         $db = \Config\Database::connect();
         return $db->table('invoice_items')
-            ->select('products.product_name, SUM(invoice_items.quantity) as total_qty, SUM(invoice_items.amount) as total_revenue')
+            ->select('products.id as product_id, products.product_name, SUM(invoice_items.quantity) as total_qty, SUM(invoice_items.amount) as total_revenue')
             ->join('invoices', 'invoices.id = invoice_items.invoice_id')
             ->join('products', 'products.id = invoice_items.product_id')
             ->whereNotIn('invoices.status', ['Void', 'Draft'])
@@ -409,7 +409,7 @@ class Home extends BaseController
     {
         $db = \Config\Database::connect();
         return $db->table('invoices')
-            ->select('customers.name, COUNT(invoices.id) as total_orders, SUM(invoices.total_amount) as total_spent')
+            ->select('customers.id as customer_id, customers.name, COUNT(invoices.id) as total_orders, SUM(invoices.total_amount) as total_spent')
             ->join('customers', 'customers.id = invoices.customer_id')
             ->whereNotIn('invoices.status', ['Void', 'Draft'])
             ->where('invoices.invoice_date >=', $startDate)

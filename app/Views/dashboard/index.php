@@ -314,7 +314,7 @@
                 <div class="card-body px-3 list-card-body-min">
                     <div id="topProductsContainer" class="list-group list-group-flush">
                         <?php foreach ($topProducts as $index => $prod): ?>
-                            <div class="list-group-item px-0 d-flex align-items-center gap-2 border-bottom border-light">
+                            <a href="<?= !empty($prod['product_id']) ? site_url('products/view/' . $prod['product_id']) : site_url('products') ?>" class="list-group-item list-group-item-action px-0 d-flex align-items-center gap-2 border-bottom border-light text-decoration-none">
                                 <div class="bg-primary bg-opacity-10 rounded text-primary fw-bold text-center" style="width: 32px; height: 32px; line-height: 32px; flex: 0 0 auto;">
                                     <?= $index + 1 ?>
                                 </div>
@@ -325,7 +325,7 @@
                                 <div class="text-end fw-bolder text-success" style="font-size: 0.85rem; flex: 0 0 auto; white-space: nowrap;">
                                     ₹<?= number_format($prod['total_revenue'], 2) ?>
                                 </div>
-                            </div>
+                            </a>
                         <?php endforeach; ?>
                         <?php if(empty($topProducts)): ?>
                             <div class="text-center text-muted small py-4">No data available</div>
@@ -350,7 +350,7 @@
                 <div class="card-body px-3 list-card-body-min">
                     <div id="topCustomersContainer" class="list-group list-group-flush">
                         <?php foreach ($topCustomers as $index => $cust): ?>
-                            <div class="list-group-item px-0 d-flex align-items-center gap-2 border-bottom border-light">
+                            <a href="<?= !empty($cust['customer_id']) ? site_url('customers/view/' . $cust['customer_id']) : site_url('customers') ?>" class="list-group-item list-group-item-action px-0 d-flex align-items-center gap-2 border-bottom border-light text-decoration-none">
                                 <div class="bg-info bg-opacity-10 rounded-circle text-info fw-bold text-center" style="width: 32px; height: 32px; line-height: 32px; font-size: 14px; flex: 0 0 auto;">
                                     <?= substr($cust['name'] ?? 'C', 0, 1) ?>
                                 </div>
@@ -361,7 +361,7 @@
                                 <div class="text-end fw-bolder text-primary" style="font-size: 0.85rem; flex: 0 0 auto; white-space: nowrap;">
                                     ₹<?= number_format($cust['total_spent'], 2) ?>
                                 </div>
-                            </div>
+                            </a>
                         <?php endforeach; ?>
                         <?php if(empty($topCustomers)): ?>
                             <div class="text-center text-muted small py-4">No data available</div>
@@ -391,13 +391,21 @@
                             <table class="table custom-table mb-0">
                                 <tbody>
                                     <?php foreach ($recentInvoices as $inv): ?>
-                                        <tr>
+                                        <tr style="cursor: pointer;" onclick="window.location='<?= site_url('invoices/view/' . $inv['id']) ?>'">
                                             <td class="ps-3">
-                                                <div class="fw-bold text-primary mb-1"><?= esc($inv['invoice_number']) ?></div>
+                                                <a href="<?= site_url('invoices/view/' . $inv['id']) ?>" class="fw-bold text-primary text-decoration-none d-inline-block mb-1" onclick="event.stopPropagation();">
+                                                    <?= esc($inv['invoice_number']) ?>
+                                                </a>
                                                 <div class="text-muted" style="font-size: 0.65rem;"><?= date('d M Y', strtotime($inv['invoice_date'])) ?></div>
                                             </td>
                                             <td>
-                                                <div style="white-space: normal; word-break: break-word;"><?= esc($inv['customer_name'] ?? 'N/A') ?></div>
+                                                <?php if (!empty($inv['customer_id'])): ?>
+                                                    <a href="<?= site_url('customers/view/' . $inv['customer_id']) ?>" class="text-dark text-decoration-none" style="white-space: normal; word-break: break-word;" onclick="event.stopPropagation();">
+                                                        <?= esc($inv['customer_name'] ?? 'N/A') ?>
+                                                    </a>
+                                                <?php else: ?>
+                                                    <div style="white-space: normal; word-break: break-word;"><?= esc($inv['customer_name'] ?? 'N/A') ?></div>
+                                                <?php endif; ?>
                                             </td>
                                             <td class="text-end pe-3 fw-bold text-nowrap">₹<?= number_format($inv['total_amount'], 2) ?></td>
                                         </tr>
@@ -409,13 +417,21 @@
                             <table class="table custom-table mb-0">
                                 <tbody>
                                     <?php foreach ($recentBills as $bill): ?>
-                                        <tr>
+                                        <tr style="cursor: pointer;" onclick="window.location='<?= site_url('bills/view/' . $bill['id']) ?>'">
                                             <td class="ps-3">
-                                                <div class="fw-bold text-warning mb-1"><?= esc($bill['bill_number']) ?></div>
+                                                <a href="<?= site_url('bills/view/' . $bill['id']) ?>" class="fw-bold text-warning text-decoration-none d-inline-block mb-1" onclick="event.stopPropagation();">
+                                                    <?= esc($bill['bill_number']) ?>
+                                                </a>
                                                 <div class="text-muted" style="font-size: 0.65rem;"><?= date('d M Y', strtotime($bill['bill_date'])) ?></div>
                                             </td>
                                             <td>
-                                                <div style="white-space: normal; word-break: break-word;"><?= esc($bill['vendor_name'] ?? 'N/A') ?></div>
+                                                <?php if (!empty($bill['vendor_id'])): ?>
+                                                    <a href="<?= site_url('vendors/view/' . $bill['vendor_id']) ?>" class="text-dark text-decoration-none" style="white-space: normal; word-break: break-word;" onclick="event.stopPropagation();">
+                                                        <?= esc($bill['vendor_name'] ?? 'N/A') ?>
+                                                    </a>
+                                                <?php else: ?>
+                                                    <div style="white-space: normal; word-break: break-word;"><?= esc($bill['vendor_name'] ?? 'N/A') ?></div>
+                                                <?php endif; ?>
                                             </td>
                                             <td class="text-end pe-3 fw-bold text-nowrap">₹<?= number_format($bill['total_amount'], 2) ?></td>
                                         </tr>
@@ -615,8 +631,9 @@
         }
 
         function renderProductRow(prod, rank, badgeClass) {
+            const href = prod.product_id ? ('<?= site_url('products/view/') ?>' + prod.product_id) : '<?= site_url('products') ?>';
             return `
-                <div class="list-group-item px-0 d-flex align-items-center gap-2 border-bottom border-light">
+                <a href="${href}" class="list-group-item list-group-item-action px-0 d-flex align-items-center gap-2 border-bottom border-light text-decoration-none">
                     <div class="${badgeClass} bg-opacity-10 rounded fw-bold text-center" style="width: 32px; height: 32px; line-height: 32px; flex: 0 0 auto;">
                         ${rank}
                     </div>
@@ -627,14 +644,15 @@
                     <div class="text-end fw-bolder text-success" style="font-size: 0.85rem; flex: 0 0 auto; white-space: nowrap;">
                         ₹${Number(prod.total_revenue).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                     </div>
-                </div>
+                </a>
             `;
         }
 
         function renderCustomerRow(cust, badgeClass) {
             const initial = (cust.name || 'C').charAt(0).toUpperCase();
+            const href = cust.customer_id ? ('<?= site_url('customers/view/') ?>' + cust.customer_id) : '<?= site_url('customers') ?>';
             return `
-                <div class="list-group-item px-0 d-flex align-items-center gap-2 border-bottom border-light">
+                <a href="${href}" class="list-group-item list-group-item-action px-0 d-flex align-items-center gap-2 border-bottom border-light text-decoration-none">
                     <div class="${badgeClass} bg-opacity-10 rounded-circle fw-bold text-center" style="width: 32px; height: 32px; line-height: 32px; font-size: 14px; flex: 0 0 auto;">
                         ${initial}
                     </div>
@@ -645,7 +663,7 @@
                     <div class="text-end fw-bolder text-primary" style="font-size: 0.85rem; flex: 0 0 auto; white-space: nowrap;">
                         ₹${Number(cust.total_spent).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                     </div>
-                </div>
+                </a>
             `;
         }
 

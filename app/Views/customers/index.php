@@ -102,6 +102,11 @@
     <style>
         .cust-mobile-meta { display: none; }
         @media (max-width: 991.98px), (hover: none) and (pointer: coarse) {
+            .customers-list-table {
+                --bs-table-bg: #fff;
+                --bs-table-striped-bg: #fff;
+                --bs-table-hover-bg: #e0e7ff;
+            }
             .customers-list-table tbody tr td:nth-child(1),
             .customers-list-table tbody tr td:nth-child(3),
             .customers-list-table tbody tr td:nth-child(4),
@@ -116,15 +121,32 @@
             .customers-list-table tbody tr {
                 display: block !important;
                 padding: 4px 2px;
+                background: #fff !important;
+                transition: background-color 0.12s ease;
+                -webkit-tap-highlight-color: rgba(79, 70, 229, 0.18);
+            }
+            .customers-list-table tbody tr:active,
+            .customers-list-table tbody tr:focus-within {
+                background: #e0e7ff !important;
+                border-color: #818cf8 !important;
+            }
+            .customers-list-table tbody tr:active td,
+            .customers-list-table tbody tr:focus-within td {
+                background: #e0e7ff !important;
             }
             .customers-list-table tbody tr td:nth-child(2) {
                 display: block !important;
                 width: 100% !important;
                 border-bottom: 0 !important;
                 text-align: left !important;
+                background: transparent !important;
             }
-            .customers-list-table tbody tr td:nth-child(2) .d-flex.align-items-center {
+            .customers-list-table tbody tr td:nth-child(2) > .d-flex {
                 display: block !important;
+                width: 100% !important;
+            }
+            .customers-list-table tbody tr td:nth-child(2) > .d-flex > div {
+                width: 100% !important;
             }
             .customers-list-table .cust-name-link {
                 display: block;
@@ -134,11 +156,11 @@
             }
             .customers-list-table .cust-mobile-meta {
                 display: flex !important;
-                justify-content: space-between;
+                justify-content: space-between !important;
                 align-items: flex-start;
                 gap: 10px;
-                margin-top: 4px;
-                width: 100%;
+                margin-top: 5px;
+                width: 100% !important;
             }
             .customers-list-table .cust-mobile-city {
                 white-space: normal;
@@ -146,13 +168,21 @@
                 text-align: left;
                 font-size: 0.78rem;
                 color: #64748b;
+                flex: 1 1 auto;
+                min-width: 0;
             }
             .customers-list-table .cust-mobile-bal {
-                flex-shrink: 0;
+                flex: 0 0 auto;
                 font-weight: 700;
                 font-size: 0.82rem;
                 text-align: right;
+                white-space: nowrap;
             }
+        }
+        body.is-mobile-device .customers-list-table {
+            --bs-table-bg: #fff;
+            --bs-table-striped-bg: #fff;
+            --bs-table-hover-bg: #e0e7ff;
         }
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(1),
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(3),
@@ -168,15 +198,32 @@
         body.is-mobile-device .customers-list-table tbody tr {
             display: block !important;
             padding: 4px 2px;
+            background: #fff !important;
+            transition: background-color 0.12s ease;
+            -webkit-tap-highlight-color: rgba(79, 70, 229, 0.18);
+        }
+        body.is-mobile-device .customers-list-table tbody tr:active,
+        body.is-mobile-device .customers-list-table tbody tr:focus-within {
+            background: #e0e7ff !important;
+            border-color: #818cf8 !important;
+        }
+        body.is-mobile-device .customers-list-table tbody tr:active td,
+        body.is-mobile-device .customers-list-table tbody tr:focus-within td {
+            background: #e0e7ff !important;
         }
         body.is-mobile-device .customers-list-table tbody tr td:nth-child(2) {
             display: block !important;
             width: 100% !important;
             border-bottom: 0 !important;
             text-align: left !important;
+            background: transparent !important;
         }
-        body.is-mobile-device .customers-list-table tbody tr td:nth-child(2) .d-flex.align-items-center {
+        body.is-mobile-device .customers-list-table tbody tr td:nth-child(2) > .d-flex {
             display: block !important;
+            width: 100% !important;
+        }
+        body.is-mobile-device .customers-list-table tbody tr td:nth-child(2) > .d-flex > div {
+            width: 100% !important;
         }
         body.is-mobile-device .customers-list-table .cust-name-link {
             display: block;
@@ -186,11 +233,11 @@
         }
         body.is-mobile-device .customers-list-table .cust-mobile-meta {
             display: flex !important;
-            justify-content: space-between;
+            justify-content: space-between !important;
             align-items: flex-start;
             gap: 10px;
-            margin-top: 4px;
-            width: 100%;
+            margin-top: 5px;
+            width: 100% !important;
         }
         body.is-mobile-device .customers-list-table .cust-mobile-city {
             white-space: normal;
@@ -198,12 +245,15 @@
             text-align: left;
             font-size: 0.78rem;
             color: #64748b;
+            flex: 1 1 auto;
+            min-width: 0;
         }
         body.is-mobile-device .customers-list-table .cust-mobile-bal {
-            flex-shrink: 0;
+            flex: 0 0 auto;
             font-weight: 700;
             font-size: 0.82rem;
             text-align: right;
+            white-space: nowrap;
         }
     </style>
     <div class="card-header py-2">

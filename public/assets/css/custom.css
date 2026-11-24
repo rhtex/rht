@@ -155,6 +155,20 @@ h4,
     .erp-mobile-card small {
         font-size: 0.84rem !important;
     }
+
+    .app-header .nav-link {
+        font-size: 1.1rem !important;
+        padding: 0.5rem 0.75rem !important;
+    }
+
+    .app-header .nav-link i {
+        font-size: 1.25rem !important;
+    }
+
+    .app-header .user-menu .user-image {
+        width: 30px !important;
+        height: 30px !important;
+    }
 }
 
 body.is-mobile-device {
@@ -192,6 +206,17 @@ body.is-mobile-device .erp-mobile-card {
 body.is-mobile-device .erp-mobile-card .small,
 body.is-mobile-device .erp-mobile-card small {
     font-size: 0.84rem !important;
+}
+body.is-mobile-device .app-header .nav-link {
+    font-size: 1.1rem !important;
+    padding: 0.5rem 0.75rem !important;
+}
+body.is-mobile-device .app-header .nav-link i {
+    font-size: 1.25rem !important;
+}
+body.is-mobile-device .app-header .user-menu .user-image {
+    width: 30px !important;
+    height: 30px !important;
 }
 
 .text-primary {

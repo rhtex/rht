@@ -20,7 +20,7 @@
                 <!-- Language Dropdown -->
                 <li class="nav-item dropdown">
                     <a class="nav-link" data-bs-toggle="dropdown" href="#">
-                        <i class="fas fa-globe"></i>
+                        <i class="fas fa-globe me-1"></i>
                         <span class="d-none d-md-inline"><?= session('lang') == 'ta' ? 'தமிழ்' : 'English' ?></span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end" data-bs-theme="light">

@@ -53,6 +53,49 @@
         display: flex; align-items: center; justify-content: center;
         font-size: 1.1rem;
     }
+    .dash-kpi-card {
+        position: relative;
+        overflow: hidden;
+        border: 0 !important;
+        border-radius: 14px !important;
+        padding: 14px 16px;
+        color: #ffffff;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12) !important;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .dash-kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18) !important;
+    }
+    .dash-kpi-card.grad-blue    { background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); }
+    .dash-kpi-card.grad-emerald { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
+    .dash-kpi-card.grad-amber   { background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); }
+    .dash-kpi-card.grad-rose    { background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%); }
+    .dash-kpi-icon {
+        position: absolute;
+        right: 12px;
+        top: 10px;
+        font-size: 2rem;
+        opacity: 0.22;
+        pointer-events: none;
+    }
+    .dash-kpi-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.92;
+    }
+    .dash-kpi-num {
+        font-size: 1.3rem;
+        font-weight: 800;
+        line-height: 1.2;
+        margin: 4px 0;
+    }
+    .dash-kpi-sub {
+        font-size: 0.74rem;
+        opacity: 0.9;
+    }
 
     .metric-box-v2 {
         background: linear-gradient(145deg, #ffffff, #f8fafc);
@@ -111,90 +154,54 @@
     <!-- Top Row: Financial KPIs -->
     <div class="row compact-row mb-3">
         <div class="col-xl-3 col-sm-6 mb-2 d-flex">
-            <div class="card kpi-card-v3 flex-fill">
-                <div class="card-body p-3 d-flex flex-column justify-content-between">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <div>
-                                <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Sales</div>
-                                <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Gross Sales</div>
-                            </div>
-                            <div class="kpi-icon-wrap bg-primary bg-opacity-10 text-primary" style="width: 32px; height: 32px; font-size: 0.9rem;">
-                                <i class="fas fa-wallet"></i>
-                            </div>
-                        </div>
-                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= format_inr($totalSales) ?></h3>
-                    </div>
-                    <div class="text-muted small fw-semibold" style="font-size: 0.72rem;">
-                        <span class="text-success"><i class="fas fa-chart-line me-1"></i>All Time</span> Total Revenue
-                    </div>
+            <div class="dash-kpi-card grad-blue flex-fill d-flex flex-column justify-content-between">
+                <i class="fas fa-wallet dash-kpi-icon"></i>
+                <div>
+                    <div class="dash-kpi-label">Total Sales &middot; Gross</div>
+                    <div class="dash-kpi-num">₹<?= format_inr($totalSales) ?></div>
+                </div>
+                <div class="dash-kpi-sub mt-1">
+                    <i class="fas fa-chart-line me-1"></i>All Time Total Revenue
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6 mb-2 d-flex">
-            <div class="card kpi-card-v3 flex-fill">
-                <div class="card-body p-3 d-flex flex-column justify-content-between">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <div>
-                                <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Purchases</div>
-                                <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Total Purchases</div>
-                            </div>
-                            <div class="kpi-icon-wrap bg-info bg-opacity-10 text-info" style="width: 32px; height: 32px; font-size: 0.9rem;">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                        </div>
-                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= format_inr($totalPurchases) ?></h3>
-                    </div>
-                    <div class="text-muted small fw-semibold" style="font-size: 0.72rem;">
-                        <span class="text-primary"><i class="fas fa-chart-line me-1"></i>All Time</span> Total Purchases
-                    </div>
+            <div class="dash-kpi-card grad-emerald flex-fill d-flex flex-column justify-content-between">
+                <i class="fas fa-shopping-cart dash-kpi-icon"></i>
+                <div>
+                    <div class="dash-kpi-label">Total Purchases</div>
+                    <div class="dash-kpi-num">₹<?= format_inr($totalPurchases) ?></div>
+                </div>
+                <div class="dash-kpi-sub mt-1">
+                    <i class="fas fa-chart-line me-1"></i>All Time Total Purchases
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6 mb-2 d-flex">
-            <div class="card kpi-card-v3 flex-fill">
-                <div class="card-body p-3 d-flex flex-column justify-content-between">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <div>
-                                <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Receivables</div>
-                                <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Total Unpaid Invoices</div>
-                            </div>
-                            <div class="kpi-icon-wrap bg-warning bg-opacity-10 text-warning" style="width: 32px; height: 32px; font-size: 0.9rem;">
-                                <i class="fas fa-hand-holding-usd"></i>
-                            </div>
-                        </div>
-                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= format_inr($accountsReceivable) ?></h3>
-                    </div>
-                    <div class="text-muted small fw-semibold d-flex flex-wrap gap-2" style="font-size: 0.72rem;">
-                        <span>Current : <strong class="text-success">₹<?= format_inr($receivableCurrent) ?></strong></span>
-                        <span class="text-muted">|</span>
-                        <span>Overdue : <strong class="text-danger">₹<?= format_inr($receivableOverdue) ?></strong></span>
-                    </div>
+            <div class="dash-kpi-card grad-amber flex-fill d-flex flex-column justify-content-between">
+                <i class="fas fa-hand-holding-usd dash-kpi-icon"></i>
+                <div>
+                    <div class="dash-kpi-label">Total Receivables &middot; Unpaid</div>
+                    <div class="dash-kpi-num">₹<?= format_inr($accountsReceivable) ?></div>
+                </div>
+                <div class="dash-kpi-sub d-flex flex-wrap gap-2 mt-1">
+                    <span>Cur: <strong>₹<?= format_inr($receivableCurrent) ?></strong></span>
+                    <span>|</span>
+                    <span>Overdue: <strong>₹<?= format_inr($receivableOverdue) ?></strong></span>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6 mb-2 d-flex">
-            <div class="card kpi-card-v3 flex-fill">
-                <div class="card-body p-3 d-flex flex-column justify-content-between">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <div>
-                                <div class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Payables</div>
-                                <div class="text-secondary fw-semibold" style="font-size: 0.7rem;">Total Unpaid Bills</div>
-                            </div>
-                            <div class="kpi-icon-wrap bg-danger bg-opacity-10 text-danger" style="width: 32px; height: 32px; font-size: 0.9rem;">
-                                <i class="fas fa-file-invoice-dollar"></i>
-                            </div>
-                        </div>
-                        <h3 class="fw-black mb-1 text-dark" style="font-weight: 800; font-size: 1.25rem;">₹<?= format_inr($accountsPayable) ?></h3>
-                    </div>
-                    <div class="text-muted small fw-semibold d-flex flex-wrap gap-2" style="font-size: 0.72rem;">
-                        <span>Current : <strong class="text-success">₹<?= format_inr($payableCurrent) ?></strong></span>
-                        <span class="text-muted">|</span>
-                        <span>Overdue : <strong class="text-danger">₹<?= format_inr($payableOverdue) ?></strong></span>
-                    </div>
+            <div class="dash-kpi-card grad-rose flex-fill d-flex flex-column justify-content-between">
+                <i class="fas fa-file-invoice-dollar dash-kpi-icon"></i>
+                <div>
+                    <div class="dash-kpi-label">Total Payables &middot; Unpaid</div>
+                    <div class="dash-kpi-num">₹<?= format_inr($accountsPayable) ?></div>
+                </div>
+                <div class="dash-kpi-sub d-flex flex-wrap gap-2 mt-1">
+                    <span>Cur: <strong>₹<?= format_inr($payableCurrent) ?></strong></span>
+                    <span>|</span>
+                    <span>Overdue: <strong>₹<?= format_inr($payableOverdue) ?></strong></span>
                 </div>
             </div>
         </div>

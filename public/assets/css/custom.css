@@ -543,3 +543,69 @@ h4,
         padding: 0.25rem 0.45rem !important;
     }
 }
+
+/* 4. Compact Mobile Outer Margins & Padding (< 992px or .is-mobile-device) */
+@media (max-width: 991.98px) {
+    .app-content-header {
+        padding: 0.35rem 0.25rem !important;
+    }
+    .app-content {
+        padding: 0 0.25rem 0.5rem !important;
+    }
+    .app-content-header > .container-fluid,
+    .app-content > .container-fluid {
+        padding-left: 0.25rem !important;
+        padding-right: 0.25rem !important;
+    }
+    .app-content .container-fluid .container-fluid {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .app-content .card {
+        margin-bottom: 0.6rem !important;
+    }
+    .app-content .card-header {
+        padding: 0.5rem 0.65rem !important;
+    }
+    .app-content .card-body:not(.p-0) {
+        padding: 0.6rem !important;
+    }
+    .erp-mobile-list {
+        padding: 0.35rem !important;
+    }
+    .erp-mobile-card {
+        padding: 8px 10px !important;
+        margin-bottom: 6px !important;
+    }
+}
+body.is-mobile-device .app-content-header {
+    padding: 0.35rem 0.25rem !important;
+}
+body.is-mobile-device .app-content {
+    padding: 0 0.25rem 0.5rem !important;
+}
+body.is-mobile-device .app-content-header > .container-fluid,
+body.is-mobile-device .app-content > .container-fluid {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+}
+body.is-mobile-device .app-content .container-fluid .container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+body.is-mobile-device .app-content .card {
+    margin-bottom: 0.6rem !important;
+}
+body.is-mobile-device .app-content .card-header {
+    padding: 0.5rem 0.65rem !important;
+}
+body.is-mobile-device .app-content .card-body:not(.p-0) {
+    padding: 0.6rem !important;
+}
+body.is-mobile-device .erp-mobile-list {
+    padding: 0.35rem !important;
+}
+body.is-mobile-device .erp-mobile-card {
+    padding: 8px 10px !important;
+    margin-bottom: 6px !important;
+}

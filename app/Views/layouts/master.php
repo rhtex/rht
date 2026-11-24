@@ -43,7 +43,7 @@
         }
     </style>
 </head>
-<body class="layout-fixed sidebar-expand-lg bg-body-tertiary text-sm">
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary text-sm <?= service('request')->getUserAgent()->isMobile() ? 'is-mobile-device' : '' ?>">
     <div class="app-wrapper">
         
         <!-- Header -->

@@ -400,11 +400,48 @@
         render();
     }
 
+    function isDataTableEl(table) {
+        return table.classList.contains('dataTable') ||
+            (window.jQuery && jQuery.fn.dataTable && jQuery.fn.dataTable.isDataTable(table));
+    }
+
+    function applyMobileStackLabels(table) {
+        if (table.closest('[data-no-enhance], .modal, form .gst-container')) return;
+        if (table.hasAttribute('data-no-enhance') || table.classList.contains('table-borderless')) return;
+        if (!table.tHead || !table.tBodies.length) return;
+        var heads = headerCells(table);
+        if (heads.length < 3) return;
+        var body = table.tBodies[0];
+        if (body.querySelector('input[type=text], input[type=number], input[type=date], input[type=time], select, textarea')) return;
+        if (body.querySelector('[rowspan]')) return;
+
+        var labels = heads.map(function (th) { return txt(th); });
+        table.classList.add('lu-table', 'lu-stack');
+        function labelAll() {
+            Array.prototype.forEach.call(body.rows, function (tr) {
+                if (isEmptyRow(tr)) return;
+                Array.prototype.forEach.call(tr.cells, function (td, i) {
+                    if (!td.hasAttribute('data-label')) td.setAttribute('data-label', labels[i] || '');
+                });
+            });
+        }
+        labelAll();
+        if (window.jQuery && jQuery.fn.dataTable && jQuery.fn.dataTable.isDataTable(table)) {
+            jQuery(table).off('draw.luStack').on('draw.luStack', labelAll);
+        }
+    }
+
     function init() {
         if (SKIP_PATH.test(window.location.pathname)) return;
         var tables = document.querySelectorAll('.app-content table.table');
         Array.prototype.forEach.call(tables, function (t) {
-            try { if (isListTable(t)) enhance(t); } catch (e) { if (window.console) console.warn('list-ui:', e); }
+            try {
+                if (isListTable(t)) {
+                    enhance(t);
+                } else if (isDataTableEl(t)) {
+                    applyMobileStackLabels(t);
+                }
+            } catch (e) { if (window.console) console.warn('list-ui:', e); }
         });
 
         // "/" focuses the first quick search

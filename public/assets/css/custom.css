@@ -495,14 +495,54 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
     color: #ffffff !important;
 }
 
-.card-header .nav-tabs .nav-link {
-    color: rgba(255, 255, 255, 0.88) !important;
-    border-color: transparent !important;
+/* Tabs & Pills inside colored Card Headers */
+.card-header .nav-tabs,
+.card-header .nav-pills,
+.card-header .nav-tabs.bg-light,
+.card-header .nav-pills.bg-light,
+.card-header .nav-tabs.bg-white,
+.card-header .nav-pills.bg-white {
+    background-color: transparent !important;
+    border-bottom: none !important;
+    gap: 4px;
 }
-.card-header .nav-tabs .nav-link.active {
+
+.card-header .nav-tabs .nav-link,
+.card-header .nav-pills .nav-link {
+    color: rgba(255, 255, 255, 0.92) !important;
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+}
+
+.card-header .nav-tabs .nav-link {
+    border-radius: 8px 8px 0 0 !important;
+}
+
+.card-header .nav-tabs .nav-link:not(.active) i,
+.card-header .nav-pills .nav-link:not(.active) i {
+    color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.card-header .nav-tabs .nav-link:not(.active):hover,
+.card-header .nav-pills .nav-link:not(.active):hover {
+    background-color: rgba(255, 255, 255, 0.24) !important;
+    color: #ffffff !important;
+}
+
+.card-header .nav-tabs .nav-link.active,
+.card-header .nav-pills .nav-link.active {
     background-color: #ffffff !important;
     color: #1e293b !important;
+    border-color: #ffffff !important;
     font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
+}
+
+.card-header .nav-tabs .nav-link.active i,
+.card-header .nav-pills .nav-link.active i {
+    color: #1e3a8a !important;
 }
 
 .badge {

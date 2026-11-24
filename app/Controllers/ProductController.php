@@ -156,6 +156,30 @@ class ProductController extends BaseController
         $data['last_item'] = $lastItem;
         $data['next_barcode'] = $nextBarcode;
 
+        $db = \Config\Database::connect();
+
+        // Billed History (Invoices containing this product)
+        $data['billedHistory'] = $db->table('invoice_items')
+            ->select('invoices.id as invoice_id, invoices.invoice_number, invoices.invoice_date, invoices.status, customers.id as customer_id, customers.name as customer_name, invoice_items.quantity, invoice_items.rate, invoice_items.amount')
+            ->join('invoices', 'invoices.id = invoice_items.invoice_id')
+            ->join('customers', 'customers.id = invoices.customer_id', 'left')
+            ->where('invoice_items.product_id', $id)
+            ->where('invoices.status !=', 'Void')
+            ->orderBy('invoices.invoice_date', 'DESC')
+            ->orderBy('invoices.id', 'DESC')
+            ->get()->getResultArray();
+
+        // Customer Returns History (Sales Returns / Credit Notes containing this product)
+        $data['returnHistory'] = $db->table('sales_return_items')
+            ->select('sales_returns.id as return_id, sales_returns.return_number, sales_returns.return_date, sales_returns.status, sales_returns.reason, customers.id as customer_id, customers.name as customer_name, sales_return_items.quantity, sales_return_items.rate, sales_return_items.amount')
+            ->join('sales_returns', 'sales_returns.id = sales_return_items.sales_return_id')
+            ->join('customers', 'customers.id = sales_returns.customer_id', 'left')
+            ->where('sales_return_items.product_id', $id)
+            ->where('sales_returns.status !=', 'Void')
+            ->orderBy('sales_returns.return_date', 'DESC')
+            ->orderBy('sales_returns.id', 'DESC')
+            ->get()->getResultArray();
+
         return view('products/view', $data);
     }
 

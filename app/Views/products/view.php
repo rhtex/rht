@@ -317,4 +317,208 @@
         </div>
     </div>
 </div>
+
+<?php
+$totalBilledQty = 0;
+$totalBilledAmt = 0;
+foreach ($billedHistory ?? [] as $bh) {
+    $totalBilledQty += (float)($bh['quantity'] ?? 0);
+    $totalBilledAmt += (float)($bh['amount'] ?? 0);
+}
+$totalReturnedQty = 0;
+$totalReturnedAmt = 0;
+foreach ($returnHistory ?? [] as $rh) {
+    $totalReturnedQty += (float)($rh['quantity'] ?? 0);
+    $totalReturnedAmt += (float)($rh['amount'] ?? 0);
+}
+?>
+
+<!-- Billed / Sales History -->
+<div class="card card-outline card-primary mt-3 shadow-sm">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h3 class="card-title mb-0"><i class="fas fa-file-invoice me-2 text-primary"></i>Billed History (<?= count($billedHistory ?? []) ?>)</h3>
+        <div class="d-flex flex-wrap gap-2 ms-auto">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                Total Qty: <?= number_format($totalBilledQty, 2) ?> <?= esc($product['unit'] ?? '') ?>
+            </span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                Total Billed: ₹<?= format_inr($totalBilledAmt) ?>
+            </span>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if (!empty($billedHistory)): ?>
+                <?php foreach ($billedHistory as $bh): ?>
+                    <a href="<?= site_url('invoices/view/' . $bh['invoice_id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($bh['customer_name'] ?? 'Customer') ?>
+                            </div>
+                            <span class="badge text-bg-<?= $bh['status'] === 'Paid' ? 'success' : ($bh['status'] === 'Overdue' ? 'danger' : 'primary') ?>" style="flex: 0 0 auto;">
+                                <?= esc($bh['status']) ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($bh['invoice_number']) ?> &middot; <?= date('d/m/Y', strtotime($bh['invoice_date'])) ?> &middot; Qty: <?= $bh['quantity'] ?> &times; ₹<?= format_inr((float)$bh['rate']) ?>
+                            </span>
+                            <span class="fw-bold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">
+                                ₹<?= format_inr((float)$bh['amount']) ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No invoices billed for this product yet.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
+                <thead class="table-light">
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th class="text-end">Qty</th>
+                        <th class="text-end">Price (Rate)</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($billedHistory)): ?>
+                        <?php foreach ($billedHistory as $bh): ?>
+                            <tr>
+                                <td>
+                                    <a href="<?= site_url('invoices/view/' . $bh['invoice_id']) ?>" class="fw-bold text-primary text-decoration-none">
+                                        <?= esc($bh['invoice_number']) ?>
+                                    </a>
+                                </td>
+                                <td><?= date('d/m/Y', strtotime($bh['invoice_date'])) ?></td>
+                                <td>
+                                    <?php if (!empty($bh['customer_id'])): ?>
+                                        <a href="<?= site_url('customers/view/' . $bh['customer_id']) ?>" class="text-dark fw-semibold text-decoration-none">
+                                            <?= esc($bh['customer_name'] ?? 'N/A') ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <?= esc($bh['customer_name'] ?? 'N/A') ?>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-end fw-semibold"><?= number_format((float)$bh['quantity'], 2) ?> <?= esc($product['unit'] ?? '') ?></td>
+                                <td class="text-end">₹<?= format_inr((float)$bh['rate']) ?></td>
+                                <td class="text-end fw-bold text-dark">₹<?= format_inr((float)$bh['amount']) ?></td>
+                                <td class="text-center">
+                                    <span class="badge text-bg-<?= $bh['status'] === 'Paid' ? 'success' : ($bh['status'] === 'Overdue' ? 'danger' : 'primary') ?>">
+                                        <?= esc($bh['status']) ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No invoices billed for this product yet.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Customer Returns / Credit Notes History -->
+<div class="card card-outline card-warning mt-3 mb-3 shadow-sm">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h3 class="card-title mb-0"><i class="fas fa-undo me-2 text-warning"></i>Customer Returns (<?= count($returnHistory ?? []) ?>)</h3>
+        <div class="d-flex flex-wrap gap-2 ms-auto">
+            <span class="badge bg-warning-subtle text-dark border border-warning-subtle">
+                Returned Qty: <?= number_format($totalReturnedQty, 2) ?> <?= esc($product['unit'] ?? '') ?>
+            </span>
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                Total Returned: ₹<?= format_inr($totalReturnedAmt) ?>
+            </span>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if (!empty($returnHistory)): ?>
+                <?php foreach ($returnHistory as $rh): ?>
+                    <a href="<?= site_url('sales_returns/view/' . $rh['return_id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($rh['customer_name'] ?? 'Customer') ?>
+                            </div>
+                            <span class="badge text-bg-<?= $rh['status'] === 'Closed' ? 'success' : 'warning' ?>" style="flex: 0 0 auto;">
+                                <?= esc($rh['status']) ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($rh['return_number']) ?> &middot; <?= date('d/m/Y', strtotime($rh['return_date'])) ?> &middot; Qty: <?= $rh['quantity'] ?> &times; ₹<?= format_inr((float)$rh['rate']) ?>
+                                <?php if (!empty($rh['reason'])): ?> &middot; <?= esc($rh['reason']) ?><?php endif; ?>
+                            </span>
+                            <span class="fw-bold small text-danger" style="flex: 0 0 auto; white-space: nowrap;">
+                                ₹<?= format_inr((float)$rh['amount']) ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No customer returns recorded for this product.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
+                <thead class="table-light">
+                    <tr>
+                        <th>Return #</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th class="text-end">Qty</th>
+                        <th class="text-end">Price (Rate)</th>
+                        <th class="text-end">Amount</th>
+                        <th>Reason</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($returnHistory)): ?>
+                        <?php foreach ($returnHistory as $rh): ?>
+                            <tr>
+                                <td>
+                                    <a href="<?= site_url('sales_returns/view/' . $rh['return_id']) ?>" class="fw-bold text-primary text-decoration-none">
+                                        <?= esc($rh['return_number']) ?>
+                                    </a>
+                                </td>
+                                <td><?= date('d/m/Y', strtotime($rh['return_date'])) ?></td>
+                                <td>
+                                    <?php if (!empty($rh['customer_id'])): ?>
+                                        <a href="<?= site_url('customers/view/' . $rh['customer_id']) ?>" class="text-dark fw-semibold text-decoration-none">
+                                            <?= esc($rh['customer_name'] ?? 'N/A') ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <?= esc($rh['customer_name'] ?? 'N/A') ?>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-end fw-semibold"><?= number_format((float)$rh['quantity'], 2) ?> <?= esc($product['unit'] ?? '') ?></td>
+                                <td class="text-end">₹<?= format_inr((float)$rh['rate']) ?></td>
+                                <td class="text-end fw-bold text-danger">₹<?= format_inr((float)$rh['amount']) ?></td>
+                                <td class="small text-muted"><?= esc($rh['reason'] ?: '-') ?></td>
+                                <td class="text-center">
+                                    <span class="badge text-bg-<?= $rh['status'] === 'Closed' ? 'success' : 'warning' ?>">
+                                        <?= esc($rh['status']) ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">No customer returns recorded for this product.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 <?= $this->endSection() ?>

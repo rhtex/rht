@@ -215,6 +215,8 @@
                                 <td>
                                     <?php if (!empty($customer['phone'])): ?>
                                         <div><a href="tel:<?= esc($customer['phone']) ?>" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i><?= esc($customer['phone']) ?></a></div>
+                                    <?php elseif (!empty($customer['whatsapp_number'])): ?>
+                                        <div><a href="tel:<?= esc($customer['whatsapp_number']) ?>" class="text-decoration-none fw-semibold text-success"><i class="fab fa-whatsapp me-1"></i><?= esc($customer['whatsapp_number']) ?></a></div>
                                     <?php else: ?>
                                         <span class="text-muted">-</span>
                                     <?php endif; ?>
@@ -319,7 +321,11 @@
                                         </div>
                                     </td>
                                     <td>
-                                        ${customer.phone ? `<div><a href="tel:${customer.phone}" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i>${customer.phone}</a></div>` : '<div>-</div>'}
+                                        ${customer.phone
+                                            ? `<div><a href="tel:${customer.phone}" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i>${customer.phone}</a></div>`
+                                            : (customer.whatsapp_number
+                                                ? `<div><a href="tel:${customer.whatsapp_number}" class="text-decoration-none fw-semibold text-success"><i class="fab fa-whatsapp me-1"></i>${customer.whatsapp_number}</a></div>`
+                                                : '<div>-</div>')}
                                     </td>
                                     <td>${customer.gstin ? `<code>${customer.gstin}</code>` : '<span class="text-muted small">N/A</span>'}</td>
                                     <td class="text-end fw-bold ${balanceClass}">

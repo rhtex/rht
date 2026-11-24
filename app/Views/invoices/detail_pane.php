@@ -303,7 +303,11 @@
                         <tbody>
                             <?php foreach ($invoice['payments'] as $payment): ?>
                                 <tr>
-                                    <td class="fw-bold text-primary"><?= esc($payment['payment_number']) ?></td>
+                                    <td class="fw-bold">
+                                        <a href="<?= site_url('invoice_payments/view/' . $payment['id']) ?>" class="text-primary text-decoration-none">
+                                            <?= esc($payment['payment_number']) ?>
+                                        </a>
+                                    </td>
                                     <td><?= date('d/m/Y', strtotime($payment['payment_date'])) ?></td>
                                     <td><span class="badge bg-light text-dark border"><?= esc($payment['payment_mode']) ?></span></td>
                                     <td class="text-end fw-semibold">₹<?= number_format($payment['amount'], 2) ?></td>

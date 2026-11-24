@@ -541,7 +541,7 @@
             <div class="erp-mobile-list p-2 bg-light">
                 <?php foreach ($invoice['payments'] as $payment): ?>
                     <?php $ded = ($payment['discount_amount'] ?? 0) + ($payment['mahimai_amount'] ?? 0) + ($payment['postal_charges'] ?? 0); ?>
-                    <div class="erp-mobile-card" style="cursor: default;">
+                    <a href="<?= site_url('invoice_payments/view/' . $payment['id']) ?>" class="erp-mobile-card">
                         <div class="fw-bold text-primary"><?= esc($payment['payment_number']) ?></div>
                         <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
                             <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
@@ -557,7 +557,7 @@
                                 ₹<?= format_inr((float)($payment['amount'] + $ded)) ?>
                             </span>
                         </div>
-                    </div>
+                    </a>
                 <?php endforeach; ?>
             </div>
             <div class="table-responsive erp-desktop-wrap">
@@ -577,7 +577,11 @@
                     <tbody>
                         <?php foreach ($invoice['payments'] as $payment): ?>
                             <tr>
-                                <td class="fw-bold text-primary"><?= esc($payment['payment_number']) ?></td>
+                                <td class="fw-bold">
+                                    <a href="<?= site_url('invoice_payments/view/' . $payment['id']) ?>" class="text-primary text-decoration-none">
+                                        <?= esc($payment['payment_number']) ?>
+                                    </a>
+                                </td>
                                 <td><?= date('d/m/Y', strtotime($payment['payment_date'])) ?></td>
                                 <td><span class="badge bg-light text-dark border"><?= esc($payment['payment_mode']) ?></span></td>
                                 <td class="text-end fw-semibold">₹<?= number_format($payment['amount'], 2) ?></td>

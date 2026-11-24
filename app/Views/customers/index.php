@@ -100,199 +100,63 @@
 
 <div class="card card-outline card-primary shadow-sm">
     <style>
-        .cust-mobile-meta { display: none; }
-        @media (max-width: 991.98px), (hover: none) and (pointer: coarse) {
-            .customers-list-table {
-                --bs-table-bg: #fff;
-                --bs-table-striped-bg: #fff;
-                --bs-table-hover-bg: #e0e7ff;
-                display: block !important;
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-            .customers-list-table thead {
-                display: none !important;
-            }
-            .customers-list-table tbody {
-                display: block !important;
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-            .card-body > .table-responsive {
-                overflow-x: hidden !important;
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-            .customers-list-table tbody tr td:nth-child(1),
-            .customers-list-table tbody tr td:nth-child(3),
-            .customers-list-table tbody tr td:nth-child(4),
-            .customers-list-table tbody tr td:nth-child(5),
-            .customers-list-table tbody tr td:nth-child(6),
-            .customers-list-table tbody tr td:nth-child(7),
-            .customers-list-table .bt-avatar,
-            .customers-list-table .cust-desktop-city,
-            .customers-list-table .cust-contact-person {
-                display: none !important;
-            }
-            .customers-list-table tbody tr {
-                display: block !important;
-                padding: 4px 2px;
-                background: #fff !important;
-                transition: background-color 0.12s ease;
-                -webkit-tap-highlight-color: rgba(79, 70, 229, 0.18);
-            }
-            .customers-list-table tbody tr:active,
-            .customers-list-table tbody tr:focus-within {
-                background: #e0e7ff !important;
-                border-color: #818cf8 !important;
-            }
-            .customers-list-table tbody tr:active td,
-            .customers-list-table tbody tr:focus-within td {
-                background: #e0e7ff !important;
-            }
-            .customers-list-table tbody tr td:nth-child(2) {
-                display: block !important;
-                width: 100% !important;
-                border-bottom: 0 !important;
-                text-align: left !important;
-                background: transparent !important;
-            }
-            .customers-list-table tbody tr td:nth-child(2) > .d-flex {
-                display: block !important;
-                width: 100% !important;
-            }
-            .customers-list-table tbody tr td:nth-child(2) > .d-flex > div {
-                width: 100% !important;
-            }
-            .customers-list-table .cust-name-link {
-                display: block;
-                white-space: normal;
-                word-break: break-word;
-                line-height: 1.3;
-            }
-            .customers-list-table .cust-mobile-meta {
-                display: flex !important;
-                justify-content: space-between !important;
-                align-items: flex-start;
-                gap: 10px;
-                margin-top: 5px;
-                width: 100% !important;
-            }
-            .customers-list-table .cust-mobile-city {
-                white-space: normal;
-                word-break: break-word;
-                text-align: left;
-                font-size: 0.78rem;
-                color: #64748b;
-                flex: 1 1 auto;
-                min-width: 0;
-            }
-            .customers-list-table .cust-mobile-bal {
-                flex: 0 0 auto;
-                font-weight: 700;
-                font-size: 0.82rem;
-                text-align: right;
-                white-space: nowrap;
-            }
+        .cust-desktop-wrap { display: none !important; }
+        .cust-mobile-list  { display: block !important; }
+        @media (min-width: 992px) and (hover: hover) and (pointer: fine) {
+            body:not(.is-mobile-device) .cust-desktop-wrap { display: block !important; }
+            body:not(.is-mobile-device) .cust-mobile-list  { display: none !important; }
         }
-        body.is-mobile-device .customers-list-table {
-            --bs-table-bg: #fff;
-            --bs-table-striped-bg: #fff;
-            --bs-table-hover-bg: #e0e7ff;
-            display: block !important;
-            width: 100% !important;
-            max-width: 100% !important;
-        }
-        body.is-mobile-device .customers-list-table thead {
-            display: none !important;
-        }
-        body.is-mobile-device .customers-list-table tbody {
-            display: block !important;
-            width: 100% !important;
-            max-width: 100% !important;
-        }
-        body.is-mobile-device .card-body > .table-responsive {
-            overflow-x: hidden !important;
-            width: 100% !important;
-            max-width: 100% !important;
-        }
-        body.is-mobile-device .customers-list-table tbody tr td:nth-child(1),
-        body.is-mobile-device .customers-list-table tbody tr td:nth-child(3),
-        body.is-mobile-device .customers-list-table tbody tr td:nth-child(4),
-        body.is-mobile-device .customers-list-table tbody tr td:nth-child(5),
-        body.is-mobile-device .customers-list-table tbody tr td:nth-child(6),
-        body.is-mobile-device .customers-list-table tbody tr td:nth-child(7),
-        body.is-mobile-device .customers-list-table .bt-avatar,
-        body.is-mobile-device .customers-list-table .cust-desktop-city,
-        body.is-mobile-device .customers-list-table .cust-contact-person {
-            display: none !important;
-        }
-        body.is-mobile-device .customers-list-table tbody tr {
-            display: block !important;
-            padding: 4px 2px;
-            background: #fff !important;
-            transition: background-color 0.12s ease;
+        .cust-mobile-card {
+            display: block;
+            text-decoration: none;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            color: inherit;
+            transition: background-color 0.12s ease, border-color 0.12s ease;
             -webkit-tap-highlight-color: rgba(79, 70, 229, 0.18);
         }
-        body.is-mobile-device .customers-list-table tbody tr:active,
-        body.is-mobile-device .customers-list-table tbody tr:focus-within {
-            background: #e0e7ff !important;
-            border-color: #818cf8 !important;
-        }
-        body.is-mobile-device .customers-list-table tbody tr:active td,
-        body.is-mobile-device .customers-list-table tbody tr:focus-within td {
-            background: #e0e7ff !important;
-        }
-        body.is-mobile-device .customers-list-table tbody tr td:nth-child(2) {
-            display: block !important;
-            width: 100% !important;
-            border-bottom: 0 !important;
-            text-align: left !important;
-            background: transparent !important;
-        }
-        body.is-mobile-device .customers-list-table tbody tr td:nth-child(2) > .d-flex {
-            display: block !important;
-            width: 100% !important;
-        }
-        body.is-mobile-device .customers-list-table tbody tr td:nth-child(2) > .d-flex > div {
-            width: 100% !important;
-        }
-        body.is-mobile-device .customers-list-table .cust-name-link {
-            display: block;
-            white-space: normal;
-            word-break: break-word;
-            line-height: 1.3;
-        }
-        body.is-mobile-device .customers-list-table .cust-mobile-meta {
-            display: flex !important;
-            justify-content: space-between !important;
-            align-items: flex-start;
-            gap: 10px;
-            margin-top: 5px;
-            width: 100% !important;
-        }
-        body.is-mobile-device .customers-list-table .cust-mobile-city {
-            white-space: normal;
-            word-break: break-word;
-            text-align: left;
-            font-size: 0.78rem;
-            color: #64748b;
-            flex: 1 1 auto;
-            min-width: 0;
-        }
-        body.is-mobile-device .customers-list-table .cust-mobile-bal {
-            flex: 0 0 auto;
-            font-weight: 700;
-            font-size: 0.82rem;
-            text-align: right;
-            white-space: nowrap;
+        .cust-mobile-card:active,
+        .cust-mobile-card:focus {
+            background: #e0e7ff;
+            border-color: #818cf8;
         }
     </style>
     <div class="card-header py-2">
         <h3 class="card-title fw-bold"><i class="fas fa-list me-1"></i> List of Customers</h3>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
+        <!-- Mobile Card List (only < 992px or mobile device) -->
+        <div class="cust-mobile-list p-2 bg-light" id="customerMobileList">
+            <?php if (!empty($customers)): ?>
+                <?php foreach ($customers as $customer): ?>
+                    <?php
+                    $isDr = $customer['pending_balance'] >= 0;
+                    $balText = '₹' . format_inr(abs($customer['pending_balance'])) . ' ' . ($isDr ? 'Dr' : 'Cr');
+                    ?>
+                    <a href="<?= site_url('customers/view/' . $customer['id']) ?>" class="cust-mobile-card">
+                        <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
+                            <?= esc($customer['name']) ?>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($customer['city'] ?: '-') ?>
+                            </span>
+                            <span class="fw-bold small <?= $isDr ? 'text-danger' : 'text-success' ?>" style="flex: 0 0 auto; white-space: nowrap;">
+                                <?= $balText ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No customers found</div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Desktop Table (only >= 992px & non-mobile device) -->
+        <div class="table-responsive cust-desktop-wrap">
             <table class="table table-bordered table-striped customers-list-table">
                 <thead>
                     <?php
@@ -506,6 +370,21 @@
                                 </tr>
                             `;
                                 tbody.insertAdjacentHTML('beforeend', row);
+
+                                const mobileList = document.getElementById('customerMobileList');
+                                if (mobileList) {
+                                    mobileList.insertAdjacentHTML('beforeend', `
+                                        <a href="<?= site_url('customers/view/') ?>${customer.id}" class="cust-mobile-card">
+                                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">${customer.name}</div>
+                                            <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                                                <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                                    <i class="fas fa-map-marker-alt text-danger me-1"></i>${customer.city || '-'}
+                                                </span>
+                                                <span class="fw-bold small ${balanceClass}" style="flex: 0 0 auto; white-space: nowrap;">${formattedBalance}</span>
+                                            </div>
+                                        </a>
+                                    `);
+                                }
                             });
 
                             if (data.has_more) {

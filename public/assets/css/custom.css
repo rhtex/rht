@@ -744,3 +744,48 @@ body.is-mobile-device .erp-mobile-card {
     padding: 8px 10px !important;
     margin-bottom: 6px !important;
 }
+
+/* ==========================================================================
+   5. DataTables Wrapper Spacing inside .card-body.p-0
+   ========================================================================== */
+.card-body.p-0 .dataTables_wrapper > .row:first-child {
+    padding: 0.75rem 1rem 0.5rem;
+    margin-left: 0;
+    margin-right: 0;
+    align-items: center;
+    row-gap: 0.5rem;
+}
+.card-body.p-0 .dataTables_wrapper > .row:last-child {
+    padding: 0.65rem 1rem 0.75rem;
+    margin-left: 0;
+    margin-right: 0;
+    align-items: center;
+    row-gap: 0.5rem;
+    border-top: 1px solid #f1f5f9;
+}
+.card-body.p-0 .dataTables_wrapper > .row > [class*="col-"] {
+    padding-left: 0;
+    padding-right: 0;
+}
+.dataTables_wrapper .dataTables_length label,
+.dataTables_wrapper .dataTables_filter label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0;
+    font-weight: 500;
+    color: #475569;
+}
+.dataTables_wrapper .dataTables_paginate .pagination {
+    margin-bottom: 0;
+    justify-content: flex-end;
+}
+.dataTables_wrapper .dataTables_info {
+    padding-top: 0 !important;
+    color: #64748b;
+    font-size: 0.8rem;
+}
+.dataTables_wrapper table.dataTable {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}

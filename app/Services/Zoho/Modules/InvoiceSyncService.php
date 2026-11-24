@@ -637,6 +637,7 @@ class InvoiceSyncService extends AbstractModuleSyncService
             'tax_amount'      => round((float) ($inv['tax_amount'] ?? 0), 2),
             'total_amount'    => round((float) ($inv['total_amount'] ?? 0), 2),
             'items_count'     => count($items),
+            'is_draft'        => (($inv['status'] ?? '') === 'Draft') ? 1 : 0,
         ];
     }
 
@@ -651,6 +652,7 @@ class InvoiceSyncService extends AbstractModuleSyncService
             'tax_amount'      => round((float) ($z['tax_total'] ?? 0), 2),
             'total_amount'    => round((float) ($z['total'] ?? 0), 2),
             'items_count'     => isset($z['line_items']) && is_array($z['line_items']) ? count($z['line_items']) : 0,
+            'is_draft'        => (strtolower((string) ($z['status'] ?? '')) === 'draft') ? 1 : 0,
         ];
     }
 

@@ -213,16 +213,11 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div>
-                                        <?php if (!empty($customer['phone'])): ?>
-                                            <div><a href="tel:<?= esc($customer['phone']) ?>" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i><?= esc($customer['phone']) ?></a></div>
-                                        <?php else: ?>
-                                            <span class="text-muted">-</span>
-                                        <?php endif; ?>
-                                        <?php if (!empty($customer['email'])): ?>
-                                            <div class="small text-muted text-break"><i class="far fa-envelope me-1"></i><?= esc($customer['email']) ?></div>
-                                        <?php endif; ?>
-                                    </div>
+                                    <?php if (!empty($customer['phone'])): ?>
+                                        <div><a href="tel:<?= esc($customer['phone']) ?>" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i><?= esc($customer['phone']) ?></a></div>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if (!empty($customer['gstin'])): ?>
@@ -324,10 +319,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div>
-                                            ${customer.phone ? `<div><a href="tel:${customer.phone}" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i>${customer.phone}</a></div>` : '<div>-</div>'}
-                                            ${customer.email ? `<div class="small text-muted text-break"><i class="far fa-envelope me-1"></i>${customer.email}</div>` : ''}
-                                        </div>
+                                        ${customer.phone ? `<div><a href="tel:${customer.phone}" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i>${customer.phone}</a></div>` : '<div>-</div>'}
                                     </td>
                                     <td>${customer.gstin ? `<code>${customer.gstin}</code>` : '<span class="text-muted small">N/A</span>'}</td>
                                     <td class="text-end fw-bold ${balanceClass}">

@@ -313,7 +313,7 @@
                     ?>
                     <div class="erp-mobile-card" style="cursor: default;">
                         <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
-                            <?= esc($itemName) ?>
+                            <span class="text-muted me-1"><?= $index + 1 ?>.</span><?= esc($itemName) ?>
                         </div>
                         <?php if (!empty($item['description']) && !empty($item['product_name']) && $item['description'] !== $item['product_name']): ?>
                             <div class="small text-muted mt-1" style="white-space: normal; word-break: break-word;">

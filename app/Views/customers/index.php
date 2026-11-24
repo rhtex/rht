@@ -209,13 +209,6 @@
                                             <?php if ($customer['city']): ?>
                                                 <span class="badge bg-light text-dark border ms-1 cust-desktop-city"><i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($customer['city']) ?></span>
                                             <?php endif; ?>
-                                            <?php if (!empty($customer['contact_person'])): ?>
-                                                <div class="small text-muted cust-contact-person"><i class="far fa-user me-1"></i><?= esc($customer['contact_person']) ?></div>
-                                            <?php endif; ?>
-                                            <div class="cust-mobile-meta">
-                                                <span class="cust-mobile-city"><i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($customer['city'] ?: '-') ?></span>
-                                                <span class="cust-mobile-bal <?= $customer['pending_balance'] >= 0 ? 'text-danger' : 'text-success' ?>">₹<?= format_inr(abs($customer['pending_balance'])) ?> <?= $customer['pending_balance'] >= 0 ? 'Dr' : 'Cr' ?></span>
-                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -250,17 +243,17 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="<?= site_url('customers/view/' . $customer['id']) ?>" class="btn btn-outline-info" title="View">
+                                    <div class="d-inline-flex gap-1">
+                                        <a href="<?= site_url('customers/view/' . $customer['id']) ?>" class="btn btn-sm text-white" style="background-color: #1e3a8a; border-color: #1e3a8a;" title="View">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <?php if (can('customer.edit')): ?>
-                                        <a href="<?= site_url('customers/edit/' . $customer['id']) ?>" class="btn btn-outline-warning" title="Edit">
+                                        <a href="<?= site_url('customers/edit/' . $customer['id']) ?>" class="btn btn-sm text-white" style="background-color: #92400e; border-color: #92400e;" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <?php endif; ?>
                                         <?php if (can('customer.delete')): ?>
-                                        <a href="<?= site_url('customers/delete/' . $customer['id']) ?>" class="btn btn-outline-danger" onclick="return confirm('Are you sure?')" title="Delete">
+                                        <a href="<?= site_url('customers/delete/' . $customer['id']) ?>" class="btn btn-sm text-white" style="background-color: #991b1b; border-color: #991b1b;" onclick="return confirm('Are you sure?')" title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                         <?php endif; ?>
@@ -327,11 +320,6 @@
                                             <div>
                                                 <strong><a href="<?= site_url('customers/view/') ?>${customer.id}" class="text-dark cust-name-link">${customer.name}</a></strong>
                                                 ${customer.city ? `<span class="badge bg-light text-dark border ms-1 cust-desktop-city"><i class="fas fa-map-marker-alt text-danger me-1"></i>${customer.city}</span>` : ''}
-                                                ${customer.contact_person ? `<div class="small text-muted cust-contact-person"><i class="far fa-user me-1"></i>${customer.contact_person}</div>` : ''}
-                                                <div class="cust-mobile-meta">
-                                                    <span class="cust-mobile-city"><i class="fas fa-map-marker-alt text-danger me-1"></i>${customer.city || '-'}</span>
-                                                    <span class="cust-mobile-bal ${balanceClass}">${formattedBalance}</span>
-                                                </div>
                                             </div>
                                         </div>
                                     </td>
@@ -351,17 +339,17 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="<?= site_url('customers/view/') ?>${customer.id}" class="btn btn-outline-info" title="View">
+                                        <div class="d-inline-flex gap-1">
+                                            <a href="<?= site_url('customers/view/') ?>${customer.id}" class="btn btn-sm text-white" style="background-color: #1e3a8a; border-color: #1e3a8a;" title="View">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <?php if (can('customer.edit')): ?>
-                                            <a href="<?= site_url('customers/edit/') ?>${customer.id}" class="btn btn-outline-warning" title="Edit">
+                                            <a href="<?= site_url('customers/edit/') ?>${customer.id}" class="btn btn-sm text-white" style="background-color: #92400e; border-color: #92400e;" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <?php endif; ?>
                                             <?php if (can('customer.delete')): ?>
-                                            <a href="<?= site_url('customers/delete/') ?>${customer.id}" class="btn btn-outline-danger" onclick="return confirm('Are you sure?')" title="Delete">
+                                            <a href="<?= site_url('customers/delete/') ?>${customer.id}" class="btn btn-sm text-white" style="background-color: #991b1b; border-color: #991b1b;" onclick="return confirm('Are you sure?')" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                             <?php endif; ?>

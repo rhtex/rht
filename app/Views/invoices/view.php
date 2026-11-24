@@ -259,7 +259,7 @@
 
     <!-- Line Items -->
     <div class="card card-outline card-secondary">
-        <div class="card-header text-white" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;">
+        <div class="card-header text-white" style="background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%) !important;">
             <h3 class="card-title text-white fw-bold mb-0"><i class="fas fa-boxes me-2"></i>Line Items</h3>
         </div>
         <div class="card-body p-0">

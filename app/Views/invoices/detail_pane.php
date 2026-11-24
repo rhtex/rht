@@ -148,7 +148,7 @@
 
     <!-- Line Items Table -->
     <div class="card card-outline card-secondary mb-3 shadow-none border">
-        <div class="card-header py-2 text-white" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;">
+        <div class="card-header py-2 text-white" style="background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%) !important;">
             <h6 class="card-title m-0 fw-bold text-white"><i class="fas fa-boxes me-1"></i> Line Items (<?= count($invoice['items'] ?? []) ?>)</h6>
         </div>
         <div class="card-body p-0">

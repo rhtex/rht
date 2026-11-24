@@ -306,7 +306,7 @@
 
         <!-- LINE ITEMS -->
         <div class="position-relative" id="lineItemsCardWrapper">
-            <div class="d-flex justify-content-between align-items-center text-white border-bottom border-secondary-subtle p-2 px-3" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+            <div class="d-flex justify-content-between align-items-center text-white border-bottom border-secondary-subtle p-2 px-3" style="background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);">
                 <div class="d-flex align-items-center gap-2">
                     <h6 class="mb-0 text-uppercase fw-bold"><i class="fas fa-list me-1"></i> Item Details</h6>
                     <span id="barcodeStatusMsg" class="badge bg-success-subtle text-success border border-success-subtle scan-feedback" style="display: none;"></span>

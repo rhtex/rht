@@ -2,6 +2,7 @@
 
 return [
     // Header & Sidebar
+    'home'          => 'Home',
     'dashboard'     => 'Dashboard',
     'admin'         => 'Administration',
     'hr'            => 'Human Resources',

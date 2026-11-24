@@ -8,7 +8,7 @@
                 </a>
             </li>
             <li class="nav-item d-none d-md-block">
-                <a href="<?= site_url('dashboard') ?>" class="nav-link">Home</a>
+                <a href="<?= site_url('dashboard') ?>" class="nav-link"><?= lang('App.home') ?></a>
             </li>
         </ul>
         <!-- End Navbar Links -->

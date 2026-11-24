@@ -382,27 +382,22 @@ code {
     .lu-table.lu-stack tbody tr td {
         display: flex !important;
         flex-wrap: wrap;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: center;
-        gap: 6px 12px;
-        text-align: right !important;
+        gap: 6px 10px;
+        text-align: left !important;
         border: 0 !important;
         border-bottom: 1px dashed #eef1f6 !important;
-        padding: 8px 12px !important;
+        padding: 7px 12px !important;
         min-width: 0;
         word-break: break-word;
     }
     .lu-table.lu-stack tbody tr td:last-child { border-bottom: 0 !important; }
-    .lu-table.lu-stack tbody tr td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        font-size: .68rem;
-        text-transform: uppercase;
-        color: var(--lu-muted);
-        text-align: left;
-        flex-shrink: 0;
+    .lu-table.lu-stack tbody tr td::before { display: none !important; }
+    .lu-table.lu-stack tbody tr td:last-child .btn:not([title*="View"]):not([href*="/view/"]),
+    .lu-table.lu-stack tbody tr td:last-child a.btn:not([title*="View"]):not([href*="/view/"]) {
+        display: none !important;
     }
-    .lu-table.lu-stack tbody tr td[data-label=""]::before { display: none; }
     .lu-table.lu-stack tbody tr.lu-empty td,
     .lu-table.lu-stack tbody tr.lu-nomatch td { display: block !important; text-align: center !important; }
     .lu-table.lu-stack tbody tr.lu-empty td::before { content: "\f07c"; }
@@ -428,27 +423,22 @@ body.is-mobile-device .lu-table.lu-stack tbody tr {
 body.is-mobile-device .lu-table.lu-stack tbody tr td {
     display: flex !important;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
-    gap: 6px 12px;
-    text-align: right !important;
+    gap: 6px 10px;
+    text-align: left !important;
     border: 0 !important;
     border-bottom: 1px dashed #eef1f6 !important;
-    padding: 8px 12px !important;
+    padding: 7px 12px !important;
     min-width: 0;
     word-break: break-word;
 }
 body.is-mobile-device .lu-table.lu-stack tbody tr td:last-child { border-bottom: 0 !important; }
-body.is-mobile-device .lu-table.lu-stack tbody tr td::before {
-    content: attr(data-label);
-    font-weight: 700;
-    font-size: .68rem;
-    text-transform: uppercase;
-    color: var(--lu-muted);
-    text-align: left;
-    flex-shrink: 0;
+body.is-mobile-device .lu-table.lu-stack tbody tr td::before { display: none !important; }
+body.is-mobile-device .lu-table.lu-stack tbody tr td:last-child .btn:not([title*="View"]):not([href*="/view/"]),
+body.is-mobile-device .lu-table.lu-stack tbody tr td:last-child a.btn:not([title*="View"]):not([href*="/view/"]) {
+    display: none !important;
 }
-body.is-mobile-device .lu-table.lu-stack tbody tr td[data-label=""]::before { display: none; }
 body.is-mobile-device .lu-table.lu-stack tbody tr.lu-empty td,
 body.is-mobile-device .lu-table.lu-stack tbody tr.lu-nomatch td { display: block !important; text-align: center !important; }
 body.is-mobile-device .lu-search { min-width: 100%; }

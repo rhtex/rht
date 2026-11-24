@@ -23,9 +23,30 @@
     <div class="card-header">
         <h3 class="card-title">List of Predefined Yarns (Yarn Master)</h3>
     </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped" id="masterTable">
+    <div class="card-body p-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($masterYarns)): ?>
+                <?php foreach($masterYarns as $my): ?>
+                    <a href="<?= can('yarn_master.edit') ? site_url('production/yarns/master/edit/'.$my['id']) : '#' ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($my['name']) ?>
+                            </div>
+                            <span class="badge bg-<?= $my['yarn_type'] === 'Dyed' ? 'info' : 'light text-dark border' ?>" style="flex: 0 0 auto;">
+                                <?= esc($my['yarn_type']) ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small">Count: <?= esc($my['yarn_count']) ?></span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No predefined yarns found.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-bordered table-striped mb-0 w-100" id="masterTable">
                 <thead>
                     <tr>
                         <th>ID</th>

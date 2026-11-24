@@ -44,8 +44,8 @@ if (!empty($agreements)) {
 ?>
 
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('production/agreements') ?>" class="bt-stat bt-g-blue text-decoration-none <?= empty($filters['status']) ? 'active' : '' ?>">
             <i class="fas fa-file-contract bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalAgreements) ?></div>
@@ -53,7 +53,7 @@ if (!empty($agreements)) {
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('production/agreements?status=active') ?>" class="bt-stat bt-g-green text-decoration-none <?= ($filters['status'] ?? '') === 'active' ? 'active' : '' ?>">
             <i class="fas fa-check-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($activeCount) ?></div>
@@ -61,7 +61,7 @@ if (!empty($agreements)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalAgreements > 0) ? min(100, round(($activeCount / $totalAgreements) * 100)) : 0 ?>%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('production/agreements?status=expired') ?>" class="bt-stat bt-g-amber text-decoration-none <?= ($filters['status'] ?? '') === 'expired' ? 'active' : '' ?>">
             <i class="fas fa-clock bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($expiredCount) ?></div>
@@ -69,7 +69,7 @@ if (!empty($agreements)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalAgreements > 0) ? min(100, round(($expiredCount / $totalAgreements) * 100)) : 0 ?>%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('production/agreements?status=terminated') ?>" class="bt-stat bt-g-slate text-decoration-none <?= ($filters['status'] ?? '') === 'terminated' ? 'active' : '' ?>">
             <i class="fas fa-ban bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($terminatedCount) ?></div>
@@ -110,17 +110,52 @@ if (!empty($agreements)) {
 <!-- Agreements Table -->
 <div class="card card-outline card-secondary shadow-sm">
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0" id="agreementsTable">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($agreements)): ?>
+                <?php foreach($agreements as $agreement): ?>
+                    <?php
+                        $badgeClass = match($agreement['status']) {
+                            'active'     => 'success',
+                            'expired'    => 'warning',
+                            'terminated' => 'danger',
+                            default      => 'secondary'
+                        };
+                    ?>
+                    <a href="<?= site_url('production/agreements/view/'.$agreement['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($agreement['title']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= $badgeClass ?>" style="flex: 0 0 auto;"><?= ucfirst($agreement['status'] ?? 'unknown') ?></span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($agreement['party_name']) ?>
+                                <?php if (!empty($agreement['start_date'])): ?>
+                                    &middot; <?= date('d/m/Y', strtotime($agreement['start_date'])) ?>
+                                <?php endif; ?>
+                                <?php if (!empty($agreement['end_date'])): ?>
+                                    - <?= date('d/m/Y', strtotime($agreement['end_date'])) ?>
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No agreements found.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100" id="agreementsTable">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 50px;">#</th>
-                        <th style="min-width: 200px;">Agreement Title</th>
-                        <th style="min-width: 180px;">Partner / Party Name</th>
-                        <th style="min-width: 110px;">Start Date</th>
-                        <th style="min-width: 110px;">End Date</th>
-                        <th class="text-center" style="min-width: 100px;">Status</th>
-                        <th class="text-end" style="min-width: 120px;">Actions</th>
+                        <th>Agreement Title</th>
+                        <th>Partner / Party Name</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

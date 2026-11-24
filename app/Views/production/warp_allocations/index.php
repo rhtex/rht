@@ -38,8 +38,8 @@ if (!empty($allocations)) {
 ?>
 
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-blue" style="cursor:default;">
             <i class="fas fa-network-wired bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalAllocations) ?></div>
@@ -47,7 +47,7 @@ if (!empty($allocations)) {
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-indigo" style="cursor:default;">
             <i class="fas fa-dolly bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($allocatedCount) ?></div>
@@ -55,7 +55,7 @@ if (!empty($allocations)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalAllocations > 0) ? min(100, round(($allocatedCount / $totalAllocations) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-amber" style="cursor:default;">
             <i class="fas fa-cogs bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($weavingCount) ?></div>
@@ -63,7 +63,7 @@ if (!empty($allocations)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalAllocations > 0) ? min(100, round(($weavingCount / $totalAllocations) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-green" style="cursor:default;">
             <i class="fas fa-check-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($completedCount) ?></div>
@@ -78,19 +78,55 @@ if (!empty($allocations)) {
         <h3 class="card-title fw-bold">Warp Allocation Records</h3>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0 datatable">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($allocations)): ?>
+                <?php foreach($allocations as $allocation): ?>
+                    <?php
+                        $statusClass = match($allocation['status']) {
+                            'Allocated'          => 'primary',
+                            'In Weaving'         => 'warning',
+                            'Partially Returned' => 'info',
+                            'Completed'          => 'success',
+                            default              => 'secondary'
+                        };
+                    ?>
+                    <a href="<?= site_url('production/warp-allocations/view/' . $allocation['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($allocation['weaver_name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= $statusClass ?>" style="flex: 0 0 auto;"><?= esc($allocation['status']) ?></span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($allocation['allocation_number']) ?> &middot; <?= date('d/m/Y', strtotime($allocation['allocation_date'])) ?>
+                                <?php if(!empty($allocation['loom_number'])): ?>
+                                    &middot; Loom <?= esc($allocation['loom_number']) ?>
+                                <?php endif; ?>
+                                <?php if(!empty($allocation['beam_number'])): ?>
+                                    &middot; Beam <?= esc($allocation['beam_number']) ?>
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No warp allocations found.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100 datatable">
                 <thead class="table-light">
                     <tr>
-                        <th style="min-width: 130px;">Allocation #</th>
-                        <th style="min-width: 100px;">Date</th>
-                        <th style="min-width: 180px;">Weaver</th>
-                        <th style="min-width: 90px;">Loom</th>
-                        <th style="min-width: 120px;">Warp Beam #</th>
-                        <th class="text-center" style="min-width: 110px;">Contract Type</th>
-                        <th style="min-width: 130px;">Ref Doc</th>
-                        <th class="text-center" style="min-width: 120px;">Status</th>
-                        <th class="text-end" style="min-width: 120px;">Actions</th>
+                        <th>Allocation #</th>
+                        <th>Date</th>
+                        <th>Weaver</th>
+                        <th>Loom</th>
+                        <th>Warp Beam #</th>
+                        <th class="text-center">Contract Type</th>
+                        <th>Ref Doc</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

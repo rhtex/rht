@@ -38,8 +38,8 @@ if (!empty($dcs)) {
 ?>
 
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-blue" style="cursor:default;">
             <i class="fas fa-ring bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalDcs) ?></div>
@@ -47,7 +47,7 @@ if (!empty($dcs)) {
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-indigo" style="cursor:default;">
             <i class="fas fa-clock bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($openCount) ?></div>
@@ -55,7 +55,7 @@ if (!empty($dcs)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalDcs > 0) ? min(100, round(($openCount / $totalDcs) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-amber" style="cursor:default;">
             <i class="fas fa-hourglass-half bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($partialCount) ?></div>
@@ -63,7 +63,7 @@ if (!empty($dcs)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalDcs > 0) ? min(100, round(($partialCount / $totalDcs) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-green" style="cursor:default;">
             <i class="fas fa-check-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($completedCount) ?></div>
@@ -78,17 +78,51 @@ if (!empty($dcs)) {
         <h3 class="card-title fw-bold">Warping & Sizing Delivery Challans</h3>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($dcs)): ?>
+                <?php foreach($dcs as $dc): ?>
+                    <?php
+                    $statusClass = match($dc['status']) {
+                        'Open'               => 'primary',
+                        'Partially Received' => 'warning',
+                        'Completed'          => 'success',
+                        'Cancelled'          => 'danger',
+                        default              => 'secondary'
+                    };
+                    ?>
+                    <a href="<?= site_url('production/yarn-warping-sizing/view/'.$dc['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($dc['vendor_name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= $statusClass ?>" style="flex: 0 0 auto;"><?= esc($dc['status']) ?></span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($dc['dc_number']) ?> &middot; <?= date('d/m/Y', strtotime($dc['dc_date'])) ?>
+                                <?php if(!empty($dc['design_pattern'])): ?> &middot; <?= esc($dc['design_pattern']) ?><?php endif; ?>
+                            </span>
+                            <span class="fw-semibold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">
+                                <?= esc($dc['total_ends'] ?: '0') ?> Ends
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No warping and sizing delivery challans found.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
-                        <th style="min-width: 140px;">DC Number</th>
-                        <th style="min-width: 110px;">Date</th>
-                        <th style="min-width: 180px;">Vendor (Sizer)</th>
-                        <th style="min-width: 150px;">Design Pattern</th>
-                        <th class="text-center" style="min-width: 90px;">Total Ends</th>
-                        <th class="text-center" style="min-width: 130px;">Status</th>
-                        <th class="text-end" style="min-width: 120px;">Actions</th>
+                        <th>DC Number</th>
+                        <th>Date</th>
+                        <th>Vendor (Sizer)</th>
+                        <th>Design Pattern</th>
+                        <th class="text-center">Total Ends</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

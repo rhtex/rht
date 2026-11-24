@@ -38,8 +38,8 @@ if (!empty($colors)) {
 ?>
 
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-md-4 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-md-4">
         <div class="bt-stat bt-g-blue" style="cursor:default;">
             <i class="fas fa-palette bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalColors) ?></div>
@@ -47,7 +47,7 @@ if (!empty($colors)) {
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-md-4 col-sm-6">
+    <div class="col-6 col-md-4">
         <div class="bt-stat bt-g-green" style="cursor:default;">
             <i class="fas fa-check-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($activeColors) ?></div>
@@ -55,7 +55,7 @@ if (!empty($colors)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalColors > 0) ? min(100, round(($activeColors / $totalColors) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-md-4 col-sm-6">
+    <div class="col-12 col-md-4">
         <div class="bt-stat bt-g-slate" style="cursor:default;">
             <i class="fas fa-pause-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($inactiveColors) ?></div>
@@ -70,15 +70,44 @@ if (!empty($colors)) {
         <h3 class="card-title fw-bold">Yarn & Fabric Color Master</h3>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0" id="colorsTable">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($colors)): ?>
+                <?php foreach($colors as $color): ?>
+                    <a href="<?= can('color.edit') ? site_url('production/colors/edit/'.$color['id']) : '#' ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark d-flex align-items-center gap-2" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?php if(!empty($color['color_palette'])): ?>
+                                    <span class="d-inline-block rounded-circle border shadow-sm" style="width: 18px; height: 18px; flex: 0 0 auto; background-color: <?= esc($color['color_palette']) ?>;"></span>
+                                <?php endif; ?>
+                                <span><?= esc($color['name']) ?></span>
+                            </div>
+                            <span class="badge text-bg-<?= ($color['status'] ?? '') === 'Active' ? 'success' : 'secondary' ?>" style="flex: 0 0 auto;">
+                                <?= esc($color['status'] ?? 'Inactive') ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small">
+                                Code: <?= esc($color['code'] ?: '-') ?>
+                                <?php if(!empty($color['color_palette'])): ?>
+                                    &middot; <?= esc($color['color_palette']) ?>
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center text-muted py-4">No colors found in the catalog.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100" id="colorsTable">
                 <thead class="table-light">
                     <tr>
-                        <th style="min-width: 180px;">Color Name</th>
-                        <th style="min-width: 120px;">Color Code</th>
-                        <th class="text-center" style="min-width: 150px;">Color Swatch</th>
-                        <th class="text-center" style="min-width: 100px;">Status</th>
-                        <th class="text-end" style="min-width: 110px;">Actions</th>
+                        <th>Color Name</th>
+                        <th>Color Code</th>
+                        <th class="text-center">Color Swatch</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

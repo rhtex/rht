@@ -44,8 +44,8 @@ if (!empty($vendors)) {
 ?>
 
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('production/vendors') ?>" class="bt-stat bt-g-blue text-decoration-none <?= empty($filters['status']) ? 'active' : '' ?>">
             <i class="fas fa-tools bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalVendors) ?></div>
@@ -53,7 +53,7 @@ if (!empty($vendors)) {
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('production/vendors?status=active') ?>" class="bt-stat bt-g-green text-decoration-none <?= ($filters['status'] ?? '') === 'active' ? 'active' : '' ?>">
             <i class="fas fa-check-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($activeCount) ?></div>
@@ -61,7 +61,7 @@ if (!empty($vendors)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalVendors > 0) ? min(100, round(($activeCount / $totalVendors) * 100)) : 0 ?>%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('production/vendors?status=inactive') ?>" class="bt-stat bt-g-slate text-decoration-none <?= ($filters['status'] ?? '') === 'inactive' ? 'active' : '' ?>">
             <i class="fas fa-pause-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($inactiveCount) ?></div>
@@ -69,7 +69,7 @@ if (!empty($vendors)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalVendors > 0) ? min(100, round(($inactiveCount / $totalVendors) * 100)) : 0 ?>%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-teal" style="cursor:default;">
             <i class="fas fa-file-invoice bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($gstCount) ?></div>
@@ -109,19 +109,45 @@ if (!empty($vendors)) {
 <!-- Vendors Table -->
 <div class="card card-outline card-secondary shadow-sm">
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0" id="vendorsTable">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($vendors)): ?>
+                <?php foreach($vendors as $vendor): ?>
+                    <a href="<?= site_url('production/vendors/view/'.$vendor['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($vendor['name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= ($vendor['status'] ?? '') === 'active' ? 'success' : 'secondary' ?>" style="flex: 0 0 auto;">
+                                <?= ucfirst($vendor['status'] ?? 'inactive') ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($vendor['business_type'] ?: 'Job Work') ?>
+                                <?php if(!empty($vendor['phone'])): ?>
+                                    &middot; <?= esc($vendor['phone']) ?>
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No job work vendors found.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100" id="vendorsTable">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 50px;">#</th>
-                        <th style="min-width: 190px;">Vendor Name</th>
-                        <th style="min-width: 130px;">Process / Business</th>
-                        <th style="min-width: 140px;">GST Number</th>
-                        <th style="min-width: 110px;">PAN</th>
-                        <th style="min-width: 130px;">Phone</th>
-                        <th style="min-width: 120px;">Location</th>
-                        <th class="text-center" style="min-width: 90px;">Status</th>
-                        <th class="text-end" style="min-width: 120px;">Actions</th>
+                        <th>Vendor Name</th>
+                        <th>Process / Business</th>
+                        <th>GST Number</th>
+                        <th>PAN</th>
+                        <th>Phone</th>
+                        <th>Location</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -42,8 +42,8 @@ if (!empty($yarns)) {
 ?>
 
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('production/yarns') ?>" class="bt-stat bt-g-blue text-decoration-none <?= empty($filters['yarn_type']) ? 'active' : '' ?>">
             <i class="fas fa-layer-group bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalYarns) ?></div>
@@ -51,7 +51,7 @@ if (!empty($yarns)) {
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-purple" style="cursor:default;">
             <i class="fas fa-weight-hanging bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalStock, 2) ?> <small style="font-size:1rem;">KGs</small></div>
@@ -59,7 +59,7 @@ if (!empty($yarns)) {
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('production/yarns?yarn_type=Dyed') ?>" class="bt-stat bt-g-teal text-decoration-none <?= ($filters['yarn_type'] ?? '') === 'Dyed' ? 'active' : '' ?>">
             <i class="fas fa-palette bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($dyedCount) ?></div>
@@ -67,7 +67,7 @@ if (!empty($yarns)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalYarns > 0) ? min(100, round(($dyedCount / $totalYarns) * 100)) : 0 ?>%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('production/yarns?yarn_type=Raw') ?>" class="bt-stat bt-g-amber text-decoration-none <?= ($filters['yarn_type'] ?? '') === 'Raw' ? 'active' : '' ?>">
             <i class="fas fa-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($rawCount) ?></div>
@@ -118,19 +118,48 @@ if (!empty($yarns)) {
         <h3 class="card-title fw-bold">Yarn Stock Records</h3>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0" id="yarnsTable">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($yarns)): ?>
+                <?php foreach($yarns as $yarn): ?>
+                    <a href="<?= site_url('production/yarns/view/'.$yarn['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($yarn['name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= $yarn['yarn_type'] === 'Dyed' ? 'info' : 'secondary' ?>" style="flex: 0 0 auto;">
+                                <?= esc($yarn['yarn_type']) ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                Count: <?= esc($yarn['yarn_count']) ?> &middot; <?= esc($yarn['color'] ?: 'Raw') ?>
+                                <?php if(!empty($yarn['brand'])): ?>
+                                    &middot; <?= esc($yarn['brand']) ?>
+                                <?php endif; ?>
+                            </span>
+                            <span class="fw-bold small text-primary" style="flex: 0 0 auto; white-space: nowrap;">
+                                <?= number_format($yarn['stock_kg'], 2) ?> KGs
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No yarn stock records found.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100" id="yarnsTable">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 50px;">#</th>
-                        <th style="min-width: 180px;">Yarn Name</th>
-                        <th class="text-center" style="min-width: 80px;">Count</th>
-                        <th class="text-center" style="min-width: 90px;">Type</th>
-                        <th style="min-width: 110px;">Color</th>
-                        <th style="min-width: 140px;">Brand / Mill</th>
-                        <th class="text-end" style="min-width: 120px;">Stock (KGs)</th>
-                        <th class="text-center" style="min-width: 90px;">Status</th>
-                        <th class="text-end" style="min-width: 120px;">Actions</th>
+                        <th>Yarn Name</th>
+                        <th class="text-center">Count</th>
+                        <th class="text-center">Type</th>
+                        <th>Color</th>
+                        <th>Brand / Mill</th>
+                        <th class="text-end">Stock (KGs)</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

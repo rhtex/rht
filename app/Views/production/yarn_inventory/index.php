@@ -46,8 +46,8 @@ $hasActiveFilters = !empty($filters['search']) || !empty($filters['yarn_type']) 
 ?>
 
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('production/yarn-inventory') ?>" class="bt-stat bt-g-blue text-decoration-none">
             <i class="fas fa-boxes bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalLines) ?></div>
@@ -55,7 +55,7 @@ $hasActiveFilters = !empty($filters['search']) || !empty($filters['yarn_type']) 
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-purple" style="cursor:default;">
             <i class="fas fa-weight-hanging bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalWeight, 2) ?> <small style="font-size:1rem;">Kg</small></div>
@@ -63,15 +63,15 @@ $hasActiveFilters = !empty($filters['search']) || !empty($filters['yarn_type']) 
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
-        <div class="bt-stat bt-g-emerald" style="cursor:default;">
+    <div class="col-6 col-xl-3">
+        <a href="<?= site_url('production/yarn-inventory?yarn_type=Dyed') ?>" class="bt-stat bt-g-emerald text-decoration-none" style="cursor:default;">
             <i class="fas fa-coins bt-stat-icon"></i>
             <div class="bt-stat-num">₹<?= number_format($totalValuation, 2) ?></div>
             <div class="bt-stat-label">Total Inventory Valuation</div>
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
-        </div>
+        </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-teal" style="cursor:default;">
             <i class="fas fa-palette bt-stat-icon"></i>
             <div class="bt-stat-num"><?= $dyedCount ?> <small style="font-size:0.9rem;opacity:0.8;">Dyed</small> / <?= $rawCount ?> <small style="font-size:0.9rem;opacity:0.8;">Raw</small></div>
@@ -164,22 +164,62 @@ $hasActiveFilters = !empty($filters['search']) || !empty($filters['yarn_type']) 
         <h3 class="card-title fw-bold">Available Yarn Stock Inventory</h3>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0" id="inventoryTable">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($inventory)): ?>
+                <?php foreach($inventory as $item): ?>
+                    <?php
+                    $histUrl = site_url('production/yarn-inventory/history?' . http_build_query([
+                        'name'      => $item['yarn_name'],
+                        'count'     => $item['yarn_count'],
+                        'type'      => $item['yarn_type'],
+                        'color'     => $item['color'],
+                        'mill'      => $item['brand_mill'],
+                        'lot'       => $item['lot_number'],
+                        'csp'       => $item['csp'],
+                        'warp_weft' => $item['warp_weft'],
+                        'warehouse' => $item['warehouse']
+                    ]));
+                    ?>
+                    <a href="<?= $histUrl ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($item['brand_mill'] ?: 'Unknown Mill') ?>
+                            </div>
+                            <span class="badge text-bg-<?= $item['yarn_type'] === 'Dyed' ? 'info' : 'secondary' ?>" style="flex: 0 0 auto;">
+                                <?= esc($item['yarn_type']) ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($item['yarn_count']) ?> &middot; <?= esc($item['warp_weft']) ?> &middot; <?= esc($item['color'] ?: 'Raw') ?>
+                                <?php if(!empty($item['lot_number'])): ?> &middot; Lot <?= esc($item['lot_number']) ?><?php endif; ?>
+                            </span>
+                            <span class="fw-bold small text-primary" style="flex: 0 0 auto; white-space: nowrap;">
+                                <?= number_format($item['quantity_available'], 2) ?> Kg
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No yarn inventory records found matching your filters.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100" id="inventoryTable">
                 <thead class="table-light">
                     <tr>
-                        <th style="min-width: 140px;">Mill / Brand</th>
-                        <th class="text-center" style="min-width: 80px;">Count</th>
-                        <th style="min-width: 90px;">Warp / Weft</th>
-                        <th style="min-width: 80px;">CSP</th>
-                        <th style="min-width: 90px;">Lot #</th>
-                        <th style="min-width: 120px;">Color</th>
-                        <th class="text-center" style="min-width: 80px;">Type</th>
-                        <th style="min-width: 130px;">Warehouse</th>
-                        <th class="text-end" style="min-width: 120px;">Stock Available</th>
-                        <th class="text-end" style="min-width: 110px;">Avg Cost / Kg</th>
-                        <th class="text-end" style="min-width: 120px;">Total Value</th>
-                        <th class="text-end" style="min-width: 100px;">History</th>
+                        <th>Mill / Brand</th>
+                        <th class="text-center">Count</th>
+                        <th>Warp/Weft</th>
+                        <th>CSP</th>
+                        <th>Lot #</th>
+                        <th>Color</th>
+                        <th class="text-center">Type</th>
+                        <th>Warehouse</th>
+                        <th class="text-end">Available</th>
+                        <th class="text-end">Avg/Kg</th>
+                        <th class="text-end">Value</th>
+                        <th class="text-end">History</th>
                     </tr>
                 </thead>
                 <tbody>

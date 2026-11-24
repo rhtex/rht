@@ -263,9 +263,38 @@
             </div>
         <?php else: ?>
 
+        <!-- MOBILE CARD LIST -->
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php foreach ($beams as $beam):
+                $isLoaded  = $beam['status'] === 'Loaded';
+                $isDamaged = $beam['condition_status'] === 'Damaged';
+                $loc       = $beam['location'];
+                $holder    = $beam['current_holder'] ?: 'In-House';
+            ?>
+                <a href="<?= site_url('production/yarn-beams/ledger/' . $beam['id']) ?>" class="erp-mobile-card">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                            Beam <?= esc($beam['beam_number']) ?>
+                        </div>
+                        <span class="badge text-bg-<?= $isDamaged ? 'danger' : ($isLoaded ? 'success' : 'secondary') ?>" style="flex: 0 0 auto;">
+                            <?= $isDamaged ? 'Damaged' : ($isLoaded ? 'Loaded' : 'Empty') ?>
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                        <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                            <?= esc($loc) ?> &middot; <?= esc($holder) ?>
+                        </span>
+                        <span class="text-muted small" style="flex: 0 0 auto; white-space: nowrap;">
+                            <?= date('d M Y', strtotime($beam['updated_at'])) ?>
+                        </span>
+                    </div>
+                </a>
+            <?php endforeach; ?>
+        </div>
+
         <!-- TABLE VIEW -->
-        <div id="btTableWrap" class="table-responsive">
-            <table class="table align-middle mb-0" id="beamsTable">
+        <div id="btTableWrap" class="table-responsive erp-desktop-wrap">
+            <table class="table align-middle mb-0 w-100" id="beamsTable">
                 <thead>
                     <tr>
                         <th class="ps-3">Beam</th>

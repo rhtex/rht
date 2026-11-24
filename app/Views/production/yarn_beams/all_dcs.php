@@ -51,8 +51,37 @@
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table align-middle table-hover custom-premium-table mb-0" id="allDcsTable">
+        <div class="erp-mobile-list p-2 bg-light rounded-3">
+            <?php if(!empty($dcs)): ?>
+                <?php foreach($dcs as $dc): ?>
+                    <?php
+                    $statusClass = 'secondary';
+                    if ($dc['status'] === 'Open') $statusClass = 'info';
+                    if ($dc['status'] === 'Partially Received') $statusClass = 'warning text-dark';
+                    if ($dc['status'] === 'Completed') $statusClass = 'success';
+                    if ($dc['status'] === 'Cancelled') $statusClass = 'danger';
+                    ?>
+                    <a href="<?= site_url($dc['view_url'] . '/' . $dc['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($dc['vendor_name']) ?>
+                            </div>
+                            <span class="badge rounded-pill bg-<?= $statusClass ?>" style="flex: 0 0 auto;"><?= esc($dc['status']) ?></span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($dc['dc_number']) ?> &middot; <?= date('d-M-Y', strtotime($dc['dc_date'])) ?> &middot; <?= esc($dc['type']) ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center text-muted py-4">No Delivery Challans found.</div>
+            <?php endif; ?>
+        </div>
+
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table align-middle table-hover custom-premium-table mb-0 w-100" id="allDcsTable">
                 <thead>
                     <tr>
                         <th class="py-2 px-3 text-secondary fw-bold text-uppercase border-bottom">DC Number</th>

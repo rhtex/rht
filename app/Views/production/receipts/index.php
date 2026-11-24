@@ -38,8 +38,8 @@ if (!empty($receipts)) {
 ?>
 
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-blue" style="cursor:default;">
             <i class="fas fa-box-open bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalReceipts) ?></div>
@@ -47,7 +47,7 @@ if (!empty($receipts)) {
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-green" style="cursor:default;">
             <i class="fas fa-check-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($approvedCount) ?></div>
@@ -55,7 +55,7 @@ if (!empty($receipts)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalReceipts > 0) ? min(100, round(($approvedCount / $totalReceipts) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-amber" style="cursor:default;">
             <i class="fas fa-clipboard-check bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($pendingQcCount) ?></div>
@@ -63,7 +63,7 @@ if (!empty($receipts)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalReceipts > 0) ? min(100, round(($pendingQcCount / $totalReceipts) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-slate" style="cursor:default;">
             <i class="fas fa-times-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($cancelledCount) ?></div>
@@ -78,17 +78,46 @@ if (!empty($receipts)) {
         <h3 class="card-title fw-bold">Fabric & Goods Inward Receipts</h3>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0 datatable">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($receipts)): ?>
+                <?php foreach($receipts as $receipt): ?>
+                    <?php
+                        $statusClass = match($receipt['status']) {
+                            'Pending QC' => 'warning',
+                            'Approved'   => 'success',
+                            'Cancelled'  => 'danger',
+                            default      => 'secondary'
+                        };
+                    ?>
+                    <a href="<?= site_url('production/receipts/view/' . $receipt['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($receipt['weaver_name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= $statusClass ?>" style="flex: 0 0 auto;"><?= esc($receipt['status']) ?></span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($receipt['receipt_number']) ?> &middot; <?= date('d/m/Y', strtotime($receipt['receipt_date'])) ?> &middot; <?= esc($receipt['allocation_number']) ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No fabric inward receipts recorded.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100 datatable">
                 <thead class="table-light">
                     <tr>
-                        <th style="min-width: 140px;">Receipt #</th>
-                        <th style="min-width: 110px;">Date</th>
-                        <th style="min-width: 190px;">Weaver</th>
-                        <th style="min-width: 140px;">Allocation #</th>
-                        <th class="text-center" style="min-width: 120px;">QC Status</th>
-                        <th style="min-width: 140px;">Ref Doc</th>
-                        <th class="text-end" style="min-width: 100px;">Actions</th>
+                        <th>Receipt #</th>
+                        <th>Date</th>
+                        <th>Weaver</th>
+                        <th>Allocation #</th>
+                        <th class="text-center">QC Status</th>
+                        <th>Ref Doc</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

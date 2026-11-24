@@ -21,10 +21,38 @@
     <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
         <h3 class="card-title text-success fw-bold"><i class="fas fa-list me-1"></i> Loaded Warp Beams</h3>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($beams)): ?>
+                <?php foreach($beams as $beam): ?>
+                    <a href="<?= site_url('production/yarn-beams/ledger/'.$beam['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                Beam <?= esc($beam['beam_number']) ?>
+                            </div>
+                            <span class="badge bg-<?= $beam['location'] === 'In-House' ? 'info' : ($beam['location'] === 'At Job Work' ? 'warning text-dark' : 'indigo') ?>" style="flex: 0 0 auto;">
+                                <?= esc($beam['location']) ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($beam['color'] ?: '-') ?>
+                                <?php if(!empty($beam['ends'])): ?> &middot; <?= esc($beam['ends']) ?> Ends<?php endif; ?>
+                                <?php if($beam['meters']): ?> &middot; <?= number_format($beam['meters'], 2) ?> M<?php endif; ?>
+                            </span>
+                            <span class="fw-bold small text-success" style="flex: 0 0 auto; white-space: nowrap;">
+                                <?= !empty($beam['cost']) ? '₹' . number_format($beam['cost'], 2) : '-' ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center text-muted py-4">No loaded beams present in the system.</div>
+            <?php endif; ?>
+        </div>
         <!-- Beams Table -->
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped align-middle" id="loadedWarpsTable">
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-bordered table-striped align-middle mb-0 w-100" id="loadedWarpsTable">
                 <thead>
                     <tr class="bg-light">
                         <th>Beam Number</th>

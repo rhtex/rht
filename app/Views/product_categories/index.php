@@ -38,8 +38,8 @@ if (!empty($categories)) {
 ?>
 
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-md-4 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-md-4">
         <div class="bt-stat bt-g-blue" style="cursor:default;">
             <i class="fas fa-folder-tree bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalCats) ?></div>
@@ -47,7 +47,7 @@ if (!empty($categories)) {
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-md-4 col-sm-6">
+    <div class="col-6 col-md-4">
         <div class="bt-stat bt-g-purple" style="cursor:default;">
             <i class="fas fa-folder bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($rootCount) ?></div>
@@ -55,7 +55,7 @@ if (!empty($categories)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalCats > 0) ? min(100, round(($rootCount / $totalCats) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-md-4 col-sm-6">
+    <div class="col-12 col-md-4">
         <div class="bt-stat bt-g-teal" style="cursor:default;">
             <i class="fas fa-folder-open bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($subCount) ?></div>
@@ -116,14 +116,37 @@ if (!empty($categories)) {
                 <h3 class="card-title fw-bold">Product Category Hierarchy</h3>
             </div>
             <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle mb-0">
+                <div class="erp-mobile-list p-2 bg-light">
+                    <?php if(!empty($categories)): ?>
+                        <?php foreach($categories as $category): ?>
+                            <a href="<?= can('product_category.edit') ? site_url('product_categories/edit/'.$category['id']) : '#' ?>" class="erp-mobile-card">
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                        <?= esc($category['category_name']) ?>
+                                    </div>
+                                    <span class="badge text-bg-<?= ($category['status'] ?? '') == 'active' ? 'success' : 'secondary' ?>" style="flex: 0 0 auto;">
+                                        <?= ucfirst($category['status'] ?? 'inactive') ?>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                                    <span class="text-muted small" style="white-space: normal; word-break: break-word;">
+                                        <?= esc($categoryPaths[$category['id']] ?? $category['category_name']) ?>
+                                    </span>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="text-center py-4 text-muted">No product categories found.</div>
+                    <?php endif; ?>
+                </div>
+                <div class="table-responsive erp-desktop-wrap">
+                    <table class="table table-striped table-hover align-middle mb-0 w-100">
                         <thead class="table-light">
                             <tr>
-                                <th style="min-width: 200px;">Category Name</th>
-                                <th style="min-width: 220px;">Breadcrumb Path</th>
-                                <th class="text-center" style="min-width: 100px;">Status</th>
-                                <th class="text-end" style="min-width: 100px;">Actions</th>
+                                <th>Category Name</th>
+                                <th>Breadcrumb Path</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>

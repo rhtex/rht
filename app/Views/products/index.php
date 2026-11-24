@@ -24,8 +24,8 @@
 
 <?= $this->section('content') ?>
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('products') ?>" class="bt-stat bt-g-blue text-decoration-none <?= empty($applied_filters['status']) ? 'active' : '' ?>">
             <i class="fas fa-cubes bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['total'] ?? count($products)) ?></div>
@@ -33,7 +33,7 @@
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('products?status=active') ?>" class="bt-stat bt-g-green text-decoration-none <?= ($applied_filters['status'] ?? '') === 'active' ? 'active' : '' ?>">
             <i class="fas fa-check-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['active'] ?? 0) ?></div>
@@ -41,7 +41,7 @@
             <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total']) && $stats['total'] > 0) ? min(100, round(($stats['active'] / $stats['total']) * 100)) : 0 ?>%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('products?status=inactive') ?>" class="bt-stat bt-g-slate text-decoration-none <?= ($applied_filters['status'] ?? '') === 'inactive' ? 'active' : '' ?>">
             <i class="fas fa-pause-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['inactive'] ?? 0) ?></div>
@@ -49,7 +49,7 @@
             <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total']) && $stats['total'] > 0) ? min(100, round(($stats['inactive'] / $stats['total']) * 100)) : 0 ?>%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-red" style="cursor:default;">
             <i class="fas fa-exclamation-triangle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['out_stock'] ?? 0) ?></div>
@@ -100,19 +100,47 @@
 <!-- Products Table -->
 <div class="card card-outline card-secondary shadow-sm">
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($products)): ?>
+                <?php foreach($products as $product): ?>
+                    <?php $stock = (float)($product['total_stock'] ?? 0); ?>
+                    <a href="<?= site_url('products/view/' . $product['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($product['product_name']) ?>
+                            </div>
+                            <span class="badge <?= $stock > 0 ? 'text-bg-success' : 'text-bg-danger' ?>" style="flex: 0 0 auto;">
+                                <?= $stock ?> <?= esc($product['unit'] ?? '') ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($category_paths[$product['category_id']] ?? $product['category_name'] ?? 'Uncategorized') ?>
+                                <?php if(!empty($product['hsn_code'])): ?> &middot; HSN <?= esc($product['hsn_code']) ?><?php endif; ?>
+                            </span>
+                            <span class="fw-bold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">
+                                ₹<?= format_inr((float)($product['selling_price'] ?? 0)) ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No products found.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 60px;">#</th>
                         <th style="width: 70px;">Image</th>
-                        <th style="min-width: 220px;">Product Name</th>
-                        <th style="min-width: 160px;">Category</th>
-                        <th style="min-width: 100px;">HSN Code</th>
-                        <th class="text-end" style="min-width: 120px;">Selling Price</th>
-                        <th class="text-center" style="min-width: 110px;">Stock</th>
-                        <th class="text-center" style="min-width: 100px;">Status</th>
-                        <th class="text-end" style="min-width: 130px;">Actions</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>HSN Code</th>
+                        <th class="text-end">Selling Price</th>
+                        <th class="text-center">Stock</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

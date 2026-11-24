@@ -24,8 +24,8 @@
 
 <?= $this->section('content') ?>
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('employees') ?>" class="bt-stat bt-g-blue text-decoration-none <?= empty($filters['status']) ? 'active' : '' ?>">
             <i class="fas fa-users bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['total'] ?? count($employees)) ?></div>
@@ -33,7 +33,7 @@
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('employees?status=active') ?>" class="bt-stat bt-g-green text-decoration-none <?= ($filters['status'] ?? '') === 'active' ? 'active' : '' ?>">
             <i class="fas fa-user-check bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['active'] ?? 0) ?></div>
@@ -41,7 +41,7 @@
             <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total']) && $stats['total'] > 0) ? min(100, round(($stats['active'] / $stats['total']) * 100)) : 0 ?>%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('employees?status=inactive') ?>" class="bt-stat bt-g-slate text-decoration-none <?= ($filters['status'] ?? '') === 'inactive' ? 'active' : '' ?>">
             <i class="fas fa-user-slash bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['inactive'] ?? 0) ?></div>
@@ -49,7 +49,7 @@
             <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total']) && $stats['total'] > 0) ? min(100, round(($stats['inactive'] / $stats['total']) * 100)) : 0 ?>%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-purple" style="cursor:default;">
             <i class="fas fa-briefcase bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['permanent'] ?? 0) ?></div>
@@ -98,19 +98,44 @@
 <!-- Employees Table -->
 <div class="card card-outline card-secondary shadow-sm">
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if (!empty($employees)): ?>
+                <?php foreach ($employees as $employee): ?>
+                    <a href="<?= site_url('employees/view/' . $employee['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($employee['first_name'] . ' ' . $employee['last_name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= ($employee['status'] ?? '') === 'active' ? 'success' : 'secondary' ?>" style="flex: 0 0 auto;">
+                                <?= ucfirst($employee['status'] ?? 'inactive') ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($employee['employment_type'] ?? 'Permanent') ?>
+                                <?php if (!empty($employee['mobile_number'])): ?> &middot; <?= esc($employee['mobile_number']) ?><?php endif; ?>
+                                <?php if (!empty($employee['city'])): ?> &middot; <?= esc($employee['city']) ?><?php endif; ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No employees found.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 50px;">#</th>
                         <th style="width: 60px;">Photo</th>
-                        <th style="min-width: 180px;">Employee Name</th>
-                        <th style="min-width: 130px;">Contact</th>
-                        <th style="min-width: 150px;">Location</th>
-                        <th style="min-width: 110px;">Type</th>
-                        <th style="min-width: 110px;">Joining Date</th>
-                        <th class="text-center" style="min-width: 90px;">Status</th>
-                        <th class="text-end" style="min-width: 140px;">Actions</th>
+                        <th>Employee Name</th>
+                        <th>Contact</th>
+                        <th>Location</th>
+                        <th>Type</th>
+                        <th>Joining Date</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -77,8 +77,26 @@ if (!empty($countries)) {
                 <?php endif; ?>
             </div>
         <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 list-ui-table">
+            <div class="erp-mobile-list p-2 bg-light">
+                <?php foreach($countries as $country): ?>
+                    <a href="<?= can('country.edit') ? site_url('countries/edit/'.$country['id']) : '#' ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($country['name']) ?>
+                            </div>
+                            <?php if (!empty($country['phone_code'])): ?>
+                                <span class="badge text-bg-info font-monospace" style="flex: 0 0 auto;">+<?= ltrim(esc($country['phone_code']), '+') ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="text-muted small mt-1">
+                            <?= !empty($country['iso_code_2']) ? esc($country['iso_code_2']) : '-' ?>
+                            <?php if (!empty($country['iso_code_3'])): ?> / <?= esc($country['iso_code_3']) ?><?php endif; ?>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            <div class="table-responsive erp-desktop-wrap">
+                <table class="table table-hover align-middle mb-0 w-100 list-ui-table">
                     <thead class="table-light text-uppercase small text-muted">
                         <tr>
                             <th style="width: 50px;">#</th>

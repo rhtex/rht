@@ -24,8 +24,8 @@
 
 <?= $this->section('content') ?>
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('salaries?month='.$month) ?>" class="bt-stat bt-g-blue text-decoration-none <?= empty($filters['is_paid']) ? 'active' : '' ?>">
             <i class="fas fa-users-cog bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['total'] ?? count($salaries)) ?></div>
@@ -33,7 +33,7 @@
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-purple" style="cursor:default;">
             <i class="fas fa-wallet bt-stat-icon"></i>
             <div class="bt-stat-num">₹<?= number_format($stats['total_net'] ?? 0, 2) ?></div>
@@ -41,7 +41,7 @@
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('salaries?month='.$month.'&is_paid=1') ?>" class="bt-stat bt-g-green text-decoration-none <?= ($filters['is_paid'] ?? '') === '1' ? 'active' : '' ?>">
             <i class="fas fa-check-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['paid_count'] ?? 0) ?></div>
@@ -49,7 +49,7 @@
             <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total']) && $stats['total'] > 0) ? min(100, round(($stats['paid_count'] / $stats['total']) * 100)) : 0 ?>%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('salaries?month='.$month.'&is_paid=0') ?>" class="bt-stat bt-g-amber text-decoration-none <?= ($filters['is_paid'] ?? '') === '0' ? 'active' : '' ?>">
             <i class="fas fa-clock bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['unpaid_count'] ?? 0) ?></div>
@@ -101,18 +101,44 @@
         <h3 class="card-title fw-bold">Salaries for <?= date('F Y', strtotime($month)) ?></h3>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($salaries)): ?>
+                <?php foreach($salaries as $salary): ?>
+                    <a href="<?= site_url('salaries/payslip/'.$salary['id']) ?>" target="_blank" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($salary['first_name'] . ' ' . $salary['last_name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= $salary['is_paid'] == 1 ? 'success' : 'warning' ?>" style="flex: 0 0 auto;">
+                                <?= $salary['is_paid'] == 1 ? 'Paid' : 'Unpaid' ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                Basic ₹<?= format_inr((float)$salary['basic_salary']) ?> &middot; Ded ₹<?= format_inr((float)$salary['deductions']) ?>
+                            </span>
+                            <span class="fw-bold small text-success" style="flex: 0 0 auto; white-space: nowrap;">
+                                Net ₹<?= format_inr((float)$salary['net_salary']) ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No salary records found.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 50px;">#</th>
-                        <th style="min-width: 190px;">Employee</th>
-                        <th class="text-end" style="min-width: 120px;">Basic Salary</th>
-                        <th class="text-end" style="min-width: 120px;">Deductions</th>
-                        <th class="text-end" style="min-width: 120px;">Net Salary</th>
-                        <th class="text-center" style="min-width: 110px;">Status</th>
-                        <th style="min-width: 110px;">Generated On</th>
-                        <th class="text-end" style="min-width: 130px;">Actions</th>
+                        <th>Employee</th>
+                        <th class="text-end">Basic Salary</th>
+                        <th class="text-end">Deductions</th>
+                        <th class="text-end">Net Salary</th>
+                        <th class="text-center">Status</th>
+                        <th>Generated On</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

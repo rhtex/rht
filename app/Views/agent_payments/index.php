@@ -24,8 +24,8 @@
 
 <?= $this->section('content') ?>
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-md-6 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6">
         <a href="<?= site_url('agent-payments') ?>" class="bt-stat bt-g-blue text-decoration-none">
             <i class="fas fa-file-invoice-dollar bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($total_count) ?></div>
@@ -33,7 +33,7 @@
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </a>
     </div>
-    <div class="col-md-6 col-sm-6">
+    <div class="col-6">
         <div class="bt-stat bt-g-green" style="cursor:default;">
             <i class="fas fa-coins bt-stat-icon"></i>
             <div class="bt-stat-num">₹<?= number_format($total_amount ?? 0, 2) ?></div>
@@ -92,18 +92,39 @@
 <!-- Payments List -->
 <div class="card card-outline card-secondary shadow-sm">
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
+        <div class="erp-mobile-list p-2 bg-light" id="agentPaymentsMobileList">
+            <?php if (empty($payments)): ?>
+                <div class="text-center py-4 text-muted">No commission payments found matching the criteria.</div>
+            <?php else: ?>
+                <?php foreach ($payments as $p): ?>
+                    <a href="<?= site_url('agent-payments/view/' . $p['id']) ?>" class="erp-mobile-card">
+                        <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
+                            <?= esc($p['agent_name'] ?? 'Agent') ?>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($p['payment_number'] ?? '#'.$p['id']) ?> &middot; <?= date('d/m/Y', strtotime($p['payment_date'])) ?> &middot; <?= esc($p['payment_mode'] ?? '') ?>
+                            </span>
+                            <span class="fw-bold small text-success" style="flex: 0 0 auto; white-space: nowrap;">
+                                ₹<?= format_inr((float)($p['total_amount'] ?? $p['amount'] ?? 0)) ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
-                        <th style="min-width: 140px;">Payment #</th>
-                        <th style="min-width: 110px;">Date</th>
-                        <th style="min-width: 180px;">Agent</th>
-                        <th style="min-width: 130px;">Phone</th>
-                        <th style="min-width: 120px;">Payment Mode</th>
-                        <th style="min-width: 130px;">Reference</th>
-                        <th class="text-end" style="min-width: 120px;">Amount</th>
-                        <th class="text-end" style="min-width: 100px;">Actions</th>
+                        <th>Payment #</th>
+                        <th>Date</th>
+                        <th>Agent</th>
+                        <th>Phone</th>
+                        <th>Payment Mode</th>
+                        <th>Reference</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="payments-tbody">

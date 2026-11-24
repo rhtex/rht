@@ -40,8 +40,8 @@ if (!empty($users)) {
 ?>
 
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-md-4 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-md-4">
         <div class="bt-stat bt-g-blue" style="cursor:default;">
             <i class="fas fa-users bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalUsers) ?></div>
@@ -49,7 +49,7 @@ if (!empty($users)) {
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-md-4 col-sm-6">
+    <div class="col-6 col-md-4">
         <div class="bt-stat bt-g-green" style="cursor:default;">
             <i class="fas fa-user-check bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($activeUsers) ?></div>
@@ -57,7 +57,7 @@ if (!empty($users)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalUsers > 0) ? min(100, round(($activeUsers / $totalUsers) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-md-4 col-sm-6">
+    <div class="col-12 col-md-4">
         <div class="bt-stat bt-g-slate" style="cursor:default;">
             <i class="fas fa-user-slash bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($inactiveUsers) ?></div>
@@ -72,17 +72,40 @@ if (!empty($users)) {
         <h3 class="card-title fw-bold">System Users</h3>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($users)): ?>
+                <?php foreach($users as $user): ?>
+                    <a href="<?= can('user.edit') ? site_url('users/edit/'.$user['id']) : '#' ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($user['name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= ($user['status'] ?? '') == 'active' ? 'success' : 'secondary' ?>" style="flex: 0 0 auto;">
+                                <?= ucfirst($user['status'] ?? 'inactive') ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($user['email']) ?> &middot; <?= esc($user['role_name'] ?: 'Staff') ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No users found in the system.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 50px;">#</th>
-                        <th style="min-width: 190px;">Full Name</th>
-                        <th style="min-width: 200px;">Email Address</th>
-                        <th style="min-width: 130px;">Security Role</th>
-                        <th class="text-center" style="min-width: 100px;">Status</th>
-                        <th style="min-width: 140px;">Last Login</th>
-                        <th class="text-end" style="min-width: 110px;">Actions</th>
+                        <th>Full Name</th>
+                        <th>Email Address</th>
+                        <th>Security Role</th>
+                        <th class="text-center">Status</th>
+                        <th>Last Login</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -81,8 +81,25 @@ $distinctModules = count($moduleSet);
                 <?php endif; ?>
             </div>
         <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 list-ui-table">
+            <div class="erp-mobile-list p-2 bg-light">
+                <?php foreach($permissions as $perm): ?>
+                    <a href="<?= can('permission.edit') ? site_url('permissions/edit/'.$perm['id']) : '#' ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($perm['permission_name']) ?>
+                            </div>
+                            <span class="badge text-bg-info text-dark" style="flex: 0 0 auto;">
+                                <?= esc($perm['module_name'] ?? 'General') ?>
+                            </span>
+                        </div>
+                        <div class="text-muted small mt-1 font-monospace" style="white-space: normal; word-break: break-word;">
+                            <?= esc($perm['permission_key']) ?>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            <div class="table-responsive erp-desktop-wrap">
+                <table class="table table-hover align-middle mb-0 w-100 list-ui-table">
                     <thead class="table-light text-uppercase small text-muted">
                         <tr>
                             <th style="width: 50px;">#</th>

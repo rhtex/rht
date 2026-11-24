@@ -24,8 +24,8 @@
 
 <?= $this->section('content') ?>
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-md-6 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6">
         <a href="<?= site_url('agents') ?>" class="bt-stat bt-g-blue text-decoration-none">
             <i class="fas fa-users-cog bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['total'] ?? count($agents)) ?></div>
@@ -33,7 +33,7 @@
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </a>
     </div>
-    <div class="col-md-6 col-sm-6">
+    <div class="col-6">
         <div class="bt-stat bt-g-purple" style="cursor:default;">
             <i class="fas fa-percentage bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['avg_commission'] ?? 0, 2) ?>%</div>
@@ -50,13 +50,13 @@
     </div>
     <div class="card-body">
         <form action="<?= site_url('agents') ?>" method="get" class="row g-2 align-items-end">
-            <div class="col-md-10 col-sm-9">
+            <div class="col-md-9 col-sm-8">
                 <label for="search" class="form-label">Search Agent</label>
                 <input type="text" name="search" id="search" class="form-control" placeholder="Search by agent name, phone, or city..." value="<?= esc($filters['search'] ?? '') ?>">
             </div>
-            <div class="col-md-2 col-sm-3 d-flex gap-1">
-                <button type="submit" class="btn btn-primary w-100" title="Apply Filter"><i class="fas fa-search"></i> Search</button>
-                <a href="<?= site_url('agents') ?>" class="btn btn-outline-secondary" title="Reset Filters"><i class="fas fa-undo"></i></a>
+            <div class="col-md-3 col-sm-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill text-nowrap" title="Apply Filter"><i class="fas fa-search me-1"></i>Search</button>
+                <a href="<?= site_url('agents') ?>" class="btn btn-outline-secondary text-nowrap" title="Reset Filters"><i class="fas fa-undo"></i></a>
             </div>
         </form>
     </div>
@@ -65,16 +65,42 @@
 <!-- Agents Table -->
 <div class="card card-outline card-secondary shadow-sm">
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($agents)): ?>
+                <?php foreach($agents as $agent): ?>
+                    <a href="<?= site_url('agents/view/'.$agent['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($agent['agent_name']) ?>
+                            </div>
+                            <span class="badge text-bg-primary" style="flex: 0 0 auto;">
+                                <?= number_format($agent['commission_percentage'], 2) ?>%
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($agent['city'] ?? '') ?><?= (!empty($agent['city']) && !empty($agent['state_name'])) ? ', ' : '' ?><?= esc($agent['state_name'] ?? '') ?>
+                                <?php if(!empty($agent['phone_number'])): ?>
+                                    &middot; <?= esc($agent['phone_number']) ?>
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No agents found matching the search criteria.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 60px;">#</th>
-                        <th style="min-width: 200px;">Agent Name</th>
-                        <th style="min-width: 140px;">Phone</th>
-                        <th style="min-width: 180px;">City & State</th>
-                        <th class="text-center" style="min-width: 130px;">Commission Rate</th>
-                        <th class="text-end" style="min-width: 120px;">Actions</th>
+                        <th>Agent Name</th>
+                        <th>Phone</th>
+                        <th>City & State</th>
+                        <th class="text-center">Commission Rate</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

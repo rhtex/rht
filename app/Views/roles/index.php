@@ -41,14 +41,32 @@
         <h3 class="card-title fw-bold">Defined Roles & Access Levels</h3>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($roles)): ?>
+                <?php foreach($roles as $role): ?>
+                    <a href="<?= can('role.edit') ? site_url('roles/permissions/'.$role['id']) : '#' ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-primary" style="white-space: normal; word-break: break-word; line-height: 1.35;">
+                                <?= ucfirst(esc($role['role_name'])) ?>
+                            </div>
+                        </div>
+                        <div class="text-muted small mt-1" style="white-space: normal; word-break: break-word;">
+                            <?= esc($role['description'] ?: 'No description provided') ?>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No roles defined.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 60px;">#</th>
-                        <th style="min-width: 180px;">Role Name</th>
-                        <th style="min-width: 250px;">Description</th>
-                        <th class="text-end" style="min-width: 130px;">Actions</th>
+                        <th>Role Name</th>
+                        <th>Description</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -40,8 +40,8 @@ if (!empty($taxes)) {
 ?>
 
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-md-4 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-md-4">
         <div class="bt-stat bt-g-blue" style="cursor:default;">
             <i class="fas fa-percentage bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalTaxes) ?></div>
@@ -49,7 +49,7 @@ if (!empty($taxes)) {
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-md-4 col-sm-6">
+    <div class="col-6 col-md-4">
         <div class="bt-stat bt-g-green" style="cursor:default;">
             <i class="fas fa-check-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($activeTaxes) ?></div>
@@ -57,7 +57,7 @@ if (!empty($taxes)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalTaxes > 0) ? min(100, round(($activeTaxes / $totalTaxes) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-md-4 col-sm-6">
+    <div class="col-12 col-md-4">
         <div class="bt-stat bt-g-slate" style="cursor:default;">
             <i class="fas fa-pause-circle bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($inactiveTaxes) ?></div>
@@ -72,14 +72,36 @@ if (!empty($taxes)) {
         <h3 class="card-title fw-bold">GST & Applicable Tax Slabs</h3>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0" id="taxesTable">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($taxes)): ?>
+                <?php foreach ($taxes as $tax): ?>
+                    <a href="<?= can('tax.edit') ? base_url('settings/taxes/edit/' . $tax['id']) : '#' ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($tax['name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= ($tax['status'] ?? '') === 'Active' ? 'success' : 'secondary' ?>" style="flex: 0 0 auto;">
+                                <?= esc($tax['status']) ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small">Tax Rate</span>
+                            <span class="fw-bold small text-primary"><?= esc($tax['percentage']) ?>%</span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No tax rates configured.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100" id="taxesTable">
                 <thead class="table-light">
                     <tr>
-                        <th style="min-width: 180px;">Tax Name</th>
-                        <th class="text-center" style="min-width: 120px;">Percentage</th>
-                        <th class="text-center" style="min-width: 100px;">Status</th>
-                        <th class="text-end" style="min-width: 110px;">Actions</th>
+                        <th>Tax Name</th>
+                        <th class="text-center">Percentage</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -128,17 +150,4 @@ if (!empty($taxes)) {
         </div>
     </div>
 </div>
-<?= $this->endSection() ?>
-
-<?= $this->section('scripts') ?>
-<script>
-    $(function () {
-        if ($("#taxesTable").length && $.fn.DataTable) {
-            $("#taxesTable").DataTable({
-                "responsive": true,
-                "autoWidth": false,
-            });
-        }
-    });
-</script>
 <?= $this->endSection() ?>

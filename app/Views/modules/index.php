@@ -77,8 +77,25 @@ if (!empty($modules)) {
                 <?php endif; ?>
             </div>
         <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 list-ui-table">
+            <div class="erp-mobile-list p-2 bg-light">
+                <?php foreach($modules as $module): ?>
+                    <a href="<?= can('module.edit') ? site_url('modules/edit/'.$module['id']) : '#' ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($module['module_name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= ($module['status'] ?? '') === 'active' ? 'success' : 'danger' ?>" style="flex: 0 0 auto;">
+                                <?= ($module['status'] ?? '') === 'active' ? 'Active' : 'Inactive' ?>
+                            </span>
+                        </div>
+                        <div class="text-muted small mt-1 font-monospace" style="white-space: normal; word-break: break-word;">
+                            <?= esc($module['module_slug']) ?>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            <div class="table-responsive erp-desktop-wrap">
+                <table class="table table-hover align-middle mb-0 w-100 list-ui-table">
                     <thead class="table-light text-uppercase small text-muted">
                         <tr>
                             <th style="width: 50px;">#</th>

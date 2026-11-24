@@ -85,8 +85,36 @@ if (!empty($accounts)) {
                 </a>
             </div>
         <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 list-ui-table">
+            <div class="erp-mobile-list p-2 bg-light">
+                <?php foreach ($accounts as $account): ?>
+                    <?php
+                        $unmatchedCr = (int)($account['summary']['unmatched_credits'] ?? 0);
+                        $unmatchedDr = (int)($account['summary']['unmatched_debits'] ?? 0);
+                        $unmatchedTotal = $unmatchedCr + $unmatchedDr;
+                        $matched = (int)($account['summary']['matched_transactions'] ?? 0);
+                    ?>
+                    <a href="<?= base_url('reconciliation/account/' . $account['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($account['bank_name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= $unmatchedTotal > 0 ? 'warning' : 'success' ?>" style="flex: 0 0 auto;">
+                                <?= $unmatchedTotal > 0 ? $unmatchedTotal . ' Unmatched' : 'Matched' ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($account['account_number']) ?> &middot; <?= $matched ?> Matched
+                            </span>
+                            <span class="fw-bold small text-primary" style="flex: 0 0 auto; white-space: nowrap;">
+                                ₹<?= format_inr((float)$account['current_balance']) ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            <div class="table-responsive erp-desktop-wrap">
+                <table class="table table-hover align-middle mb-0 w-100 list-ui-table">
                     <thead class="table-light text-uppercase small text-muted">
                         <tr>
                             <th style="width: 50px;">#</th>

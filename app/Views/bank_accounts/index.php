@@ -24,8 +24,8 @@
 
 <?= $this->section('content') ?>
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('bank_accounts') ?>" class="bt-stat bt-g-blue text-decoration-none <?= empty($filters['status']) && empty($filters['account_type']) ? 'active' : '' ?>">
             <i class="fas fa-university bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['total'] ?? count($accounts)) ?></div>
@@ -33,7 +33,7 @@
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-emerald" style="cursor:default;">
             <i class="fas fa-coins bt-stat-icon"></i>
             <div class="bt-stat-num">₹<?= number_format($stats['total_balance'] ?? 0, 2) ?></div>
@@ -41,7 +41,7 @@
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('bank_accounts?account_type=Bank') ?>" class="bt-stat bt-g-purple text-decoration-none <?= ($filters['account_type'] ?? '') === 'Bank' ? 'active' : '' ?>">
             <i class="fas fa-landmark bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['bank_count'] ?? 0) ?></div>
@@ -49,7 +49,7 @@
             <div class="progress"><div class="progress-bar" style="width:<?= (!empty($stats['total']) && $stats['total'] > 0) ? min(100, round(($stats['bank_count'] / $stats['total']) * 100)) : 0 ?>%"></div></div>
         </a>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <a href="<?= site_url('bank_accounts?account_type=Cash') ?>" class="bt-stat bt-g-amber text-decoration-none <?= ($filters['account_type'] ?? '') === 'Cash' ? 'active' : '' ?>">
             <i class="fas fa-money-bill-wave bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($stats['cash_count'] ?? 0) ?></div>
@@ -97,19 +97,45 @@
 <!-- Bank Accounts Table -->
 <div class="card card-outline card-secondary shadow-sm">
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if(!empty($accounts)): ?>
+                <?php foreach($accounts as $account): ?>
+                    <a href="<?= site_url('bank_accounts/statement/'.$account['id']) ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($account['bank_name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= ($account['account_type'] ?? 'Bank') === 'Cash' ? 'warning' : 'info' ?>" style="flex: 0 0 auto;">
+                                <?= esc($account['account_type'] ?? 'Bank') ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($account['account_number']) ?> &middot; <?= ucfirst($account['status']) ?>
+                            </span>
+                            <span class="fw-bold small <?= ($account['current_balance'] >= 0) ? 'text-success' : 'text-danger' ?>" style="flex: 0 0 auto; white-space: nowrap;">
+                                ₹<?= format_inr((float)$account['current_balance']) ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No bank accounts found.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
+            <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 50px;">#</th>
-                        <th style="min-width: 180px;">Bank / Name</th>
-                        <th style="min-width: 90px;">Type</th>
-                        <th style="min-width: 140px;">Account Number</th>
-                        <th style="min-width: 130px;">Branch</th>
-                        <th style="min-width: 120px;">IFSC Code</th>
-                        <th class="text-end" style="min-width: 130px;">Current Balance</th>
-                        <th class="text-center" style="min-width: 90px;">Status</th>
-                        <th class="text-end" style="min-width: 120px;">Actions</th>
+                        <th>Bank / Name</th>
+                        <th>Type</th>
+                        <th>Account Number</th>
+                        <th>Branch</th>
+                        <th>IFSC Code</th>
+                        <th class="text-end">Current Balance</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

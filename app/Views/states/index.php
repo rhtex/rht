@@ -86,8 +86,31 @@ if (!empty($states)) {
                 <?php endif; ?>
             </div>
         <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 list-ui-table">
+            <div class="erp-mobile-list p-2 bg-light">
+                <?php foreach($states as $state): ?>
+                    <a href="<?= can('state.edit') ? site_url('states/edit/'.$state['id']) : '#' ?>" class="erp-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($state['name']) ?>
+                            </div>
+                            <span class="badge text-bg-<?= ($state['status'] ?? '') === 'active' ? 'success' : 'danger' ?>" style="flex: 0 0 auto;">
+                                <?= ($state['status'] ?? '') === 'active' ? 'Active' : 'Inactive' ?>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small">
+                                <?= esc($state['country_name'] ?? 'N/A') ?>
+                                <?php if (!empty($state['state_code'])): ?> &middot; <?= esc($state['state_code']) ?><?php endif; ?>
+                            </span>
+                            <?php if (!empty($state['gst_state_code'])): ?>
+                                <span class="badge text-bg-primary font-monospace">GST <?= str_pad(esc($state['gst_state_code']), 2, '0', STR_PAD_LEFT) ?></span>
+                            <?php endif; ?>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            <div class="table-responsive erp-desktop-wrap">
+                <table class="table table-hover align-middle mb-0 w-100 list-ui-table">
                     <thead class="table-light text-uppercase small text-muted">
                         <tr>
                             <th style="width: 50px;">#</th>

@@ -38,8 +38,8 @@ if (!empty($employees)) {
 ?>
 
 <!-- Summary Stat Cards -->
-<div class="row g-3 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-blue" style="cursor:default;">
             <i class="fas fa-users bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totalStaff) ?></div>
@@ -47,7 +47,7 @@ if (!empty($employees)) {
             <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-green" style="cursor:default;">
             <i class="fas fa-user-check bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($presentCount) ?></div>
@@ -55,7 +55,7 @@ if (!empty($employees)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalStaff > 0) ? min(100, round(($presentCount / $totalStaff) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-teal" style="cursor:default;">
             <i class="fas fa-adjust bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($halfDayCount) ?></div>
@@ -63,7 +63,7 @@ if (!empty($employees)) {
             <div class="progress"><div class="progress-bar" style="width:<?= ($totalStaff > 0) ? min(100, round(($halfDayCount / $totalStaff) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-red" style="cursor:default;">
             <i class="fas fa-user-times bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($absentCount) ?></div>
@@ -77,13 +77,13 @@ if (!empty($employees)) {
     <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 py-2 bg-white">
         <h3 class="card-title fw-bold mb-0">Roster for <?= date('l, d F Y', strtotime($date)) ?></h3>
         
-        <div class="d-flex align-items-center gap-2">
-            <div class="input-group input-group-sm" style="width: 170px;">
-                <span class="input-group-text bg-light text-muted small">Shift In</span>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <div class="input-group input-group-sm" style="width: 155px;">
+                <span class="input-group-text bg-light text-muted small">In</span>
                 <input type="time" id="defaultCheckIn" class="form-control" value="09:00">
             </div>
-            <div class="input-group input-group-sm" style="width: 170px;">
-                <span class="input-group-text bg-light text-muted small">Shift Out</span>
+            <div class="input-group input-group-sm" style="width: 155px;">
+                <span class="input-group-text bg-light text-muted small">Out</span>
                 <input type="time" id="defaultCheckOut" class="form-control" value="18:00">
             </div>
             <button type="button" class="btn btn-success btn-sm text-nowrap rounded-pill px-3 shadow-sm" onclick="markAllPresent()">
@@ -97,18 +97,18 @@ if (!empty($employees)) {
 
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0 w-100">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 50px">#</th>
-                            <th style="min-width: 200px">Employee</th>
-                            <th style="min-width: 230px">Status</th>
-                            <th style="min-width: 120px">Check-In</th>
-                            <th style="min-width: 120px">Check-Out</th>
-                            <th class="text-center" style="min-width: 90px">Target</th>
-                            <th class="text-center" style="min-width: 90px">Worked</th>
-                            <th class="text-center" style="min-width: 100px">Balance</th>
-                            <th class="text-center" style="min-width: 90px">2x Pay</th>
+                            <th>Employee</th>
+                            <th>Status</th>
+                            <th>Check-In</th>
+                            <th>Check-Out</th>
+                            <th class="text-center">Target</th>
+                            <th class="text-center">Worked</th>
+                            <th class="text-center">Balance</th>
+                            <th class="text-center">2x Pay</th>
                         </tr>
                     </thead>
                     <tbody>

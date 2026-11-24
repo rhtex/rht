@@ -4,12 +4,12 @@
 
 <?= $this->section('header') ?>
 <div class="row align-items-center mb-0">
-    <div class="col-sm-6">
+    <div class="col-12 col-sm-6">
         <h3 class="fw-bolder text-uppercase ls-1 mb-0" style="color: #1e293b; letter-spacing: -0.5px;">Analytics <span class="text-primary">Studio</span></h3>
         <p class="text-muted small fw-bold mb-0">Comprehensive Business Overview</p>
     </div>
-    <div class="col-sm-6 text-end">
-        <div class="btn-group shadow-sm rounded-3 me-2">
+    <div class="col-12 col-sm-6 d-flex flex-wrap gap-2 justify-content-sm-end mt-2 mt-sm-0">
+        <div class="btn-group shadow-sm rounded-3">
             <?php if (can('invoice.create')): ?>
             <a href="<?= site_url('invoices/create') ?>" class="btn btn-outline-primary btn-sm fw-bold"><i class="fas fa-plus me-1"></i> Invoice</a>
             <?php endif; ?>
@@ -20,7 +20,7 @@
             <a href="<?= site_url('bills/create') ?>" class="btn btn-outline-warning btn-sm fw-bold"><i class="fas fa-plus me-1"></i> Bill</a>
             <?php endif; ?>
         </div>
-        <div class="btn-group shadow-sm rounded-3">
+        <div class="btn-group shadow-sm rounded-3 d-none d-sm-inline-flex">
             <button class="btn btn-white btn-sm fw-bold border-0 px-3"><i class="fas fa-sync-alt me-1 text-primary"></i> Live</button>
             <button class="btn btn-primary btn-sm fw-bold border-0 px-3"><?= date('M d, Y') ?></button>
         </div>
@@ -91,6 +91,17 @@
     .custom-table th { color: #94a3b8; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; border-bottom: 2px solid #f1f5f9 !important; letter-spacing: 0.5px; }
     .custom-table td { font-weight: 600; color: #334155; padding: 8px 8px; vertical-align: middle; border-bottom: 1px solid #f8fafc; }
     .badge-soft { font-weight: 700; font-size: 0.65rem; padding: 4px 8px; border-radius: 6px; }
+    .chart-body-wrap { height: 320px; }
+    .list-card-body-min { min-height: 310px; }
+    @media (max-width: 991.98px) {
+        .dashboard-container { padding: 2px; border-radius: 8px; }
+        .chart-body-wrap { height: 230px !important; }
+        .list-card-body-min { min-height: auto !important; }
+        .metric-box-v2 { padding: 10px 8px; border-radius: 12px; }
+        .metric-box-v2 .lbl { font-size: 0.72rem !important; }
+        .custom-table { font-size: 0.85rem !important; }
+        .custom-table td { padding: 8px 6px; }
+    }
 </style>
 <?= $this->endSection() ?>
 
@@ -191,25 +202,25 @@
 
     <!-- Second Row: Operational Metrics -->
     <div class="row compact-row mb-3">
-        <div class="col-xl-3 col-sm-6 mb-2">
+        <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
                 <div class="val text-primary"><?= number_format($pendingQuotations) ?></div>
                 <div class="lbl"><?= lang("App.active_quotes") ?></div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-2">
+        <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
                 <div class="val text-info"><?= number_format($activeSalesOrders) ?></div>
                 <div class="lbl"><?= lang("App.pending_sales_orders") ?></div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-2">
+        <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
                 <div class="val text-warning"><?= number_format($pendingReturns) ?></div>
                 <div class="lbl"><?= lang("App.pending_returns") ?></div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-2">
+        <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
                 <div class="val text-success"><?= number_format($itemsInStock) ?></div>
                 <div class="lbl"><?= lang("App.units_in_stock") ?></div>
@@ -219,25 +230,25 @@
 
     <!-- Third Row: Production Metrics -->
     <div class="row compact-row mb-3">
-        <div class="col-xl-3 col-sm-6 mb-2">
+        <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
                 <div class="val" style="color: #8b5cf6 !important;"><?= number_format($totalWeavers) ?></div>
                 <div class="lbl"><?= lang("App.active_weavers") ?></div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-2">
+        <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
                 <div class="val" style="color: #3b82f6 !important;"><?= number_format($totalYarnStock) ?> <span style="font-size: 0.8rem; font-weight: 700;">kg</span></div>
                 <div class="lbl"><?= lang("App.total_yarn_stock") ?></div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-2">
+        <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
                 <div class="val" style="color: #ec4899 !important;"><?= number_format($yarnPurchasedYTD) ?> <span style="font-size: 0.8rem; font-weight: 700;">kg</span></div>
                 <div class="lbl"><?= lang("App.yarn_purchased_ytd") ?></div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-2">
+        <div class="col-6 col-xl-3 mb-2">
             <div class="metric-box-v2">
                 <div class="val" style="color: #f59e0b !important;"><?= number_format($pendingWeavingJobs) ?></div>
                 <div class="lbl"><?= lang("App.pending_weaving_jobs") ?></div>
@@ -249,9 +260,9 @@
     <div class="row compact-row mb-3">
         <div class="col-xl-8">
             <div class="card chart-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <span id="chartTitle"><?= lang("App.financial_velocity") ?></span>
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
                         <select id="chartFilter" class="form-select form-select-sm border-0 fw-bold" style="background-color: rgba(255,255,255,0.1); color: #fff; width: auto; cursor: pointer; border-radius: 8px;">
                             <option value="current_fy" style="color:#000;" selected><?= lang("App.financial_year") ?></option>
                             <option value="compare_last_year" style="color:#000;"><?= lang("App.compare_last_year") ?></option>
@@ -263,7 +274,7 @@
                             <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #15803d; font-size: 10px;"></i> <?= lang("App.revenue") ?></span>
                             <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #c2410c; font-size: 10px;"></i> <?= lang("App.expense") ?></span>
                         </div>
-                        <div id="chartLegendCompare" class="d-none gap-2 text-white">
+                        <div id="chartLegendCompare" class="d-none flex-wrap gap-2 text-white">
                             <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #15803d; font-size: 10px;"></i> Rev (Cur FY)</span>
                             <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #c2410c; font-size: 10px;"></i> Exp (Cur FY)</span>
                             <span class="small d-flex align-items-center"><i class="fas fa-circle me-1" style="color: #86efac; font-size: 10px;"></i> Rev (Last FY)</span>
@@ -271,7 +282,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body" style="height: 320px;">
+                <div class="card-body chart-body-wrap">
                     <canvas id="mainBarChart"></canvas>
                 </div>
             </div>
@@ -279,7 +290,7 @@
         <div class="col-xl-4">
             <div class="card chart-card">
                 <div class="card-header text-center"><?= lang("App.revenue_by_category") ?></div>
-                <div class="card-body" style="height: 320px; display: flex; align-items: center; justify-content: center;">
+                <div class="card-body chart-body-wrap" style="display: flex; align-items: center; justify-content: center;">
                     <canvas id="categoryDoughnutChart"></canvas>
                 </div>
             </div>
@@ -300,18 +311,18 @@
                         <option value="compare_both" style="color:#000;">Compare Both FY</option>
                     </select>
                 </div>
-                <div class="card-body px-3" style="min-height: 310px;">
+                <div class="card-body px-3 list-card-body-min">
                     <div id="topProductsContainer" class="list-group list-group-flush">
                         <?php foreach ($topProducts as $index => $prod): ?>
-                            <div class="list-group-item px-0 d-flex align-items-center border-bottom border-light">
-                                <div class="bg-primary bg-opacity-10 rounded text-primary fw-bold text-center me-3" style="width: 32px; height: 32px; line-height: 32px;">
+                            <div class="list-group-item px-0 d-flex align-items-center gap-2 border-bottom border-light">
+                                <div class="bg-primary bg-opacity-10 rounded text-primary fw-bold text-center" style="width: 32px; height: 32px; line-height: 32px; flex: 0 0 auto;">
                                     <?= $index + 1 ?>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-bold text-dark small text-truncate" style="max-width: 150px;"><?= esc($prod['product_name']) ?></div>
-                                    <div class="text-muted" style="font-size: 0.7rem;">Vol: <?= number_format($prod['total_qty']) ?> Units</div>
+                                <div style="min-width: 0; flex: 1 1 auto;">
+                                    <div class="fw-bold text-dark small" style="white-space: normal; word-break: break-word;"><?= esc($prod['product_name']) ?></div>
+                                    <div class="text-muted small">Vol: <?= number_format($prod['total_qty']) ?> Units</div>
                                 </div>
-                                <div class="text-end fw-bolder text-success" style="font-size: 0.85rem;">
+                                <div class="text-end fw-bolder text-success" style="font-size: 0.85rem; flex: 0 0 auto; white-space: nowrap;">
                                     ₹<?= number_format($prod['total_revenue'], 2) ?>
                                 </div>
                             </div>
@@ -336,18 +347,18 @@
                         <option value="compare_both" style="color:#000;">Compare Both FY</option>
                     </select>
                 </div>
-                <div class="card-body px-3" style="min-height: 310px;">
+                <div class="card-body px-3 list-card-body-min">
                     <div id="topCustomersContainer" class="list-group list-group-flush">
                         <?php foreach ($topCustomers as $index => $cust): ?>
-                            <div class="list-group-item px-0 d-flex align-items-center border-bottom border-light">
-                                <div class="bg-info bg-opacity-10 rounded-circle text-info fw-bold text-center me-3" style="width: 32px; height: 32px; line-height: 32px; font-size: 14px;">
+                            <div class="list-group-item px-0 d-flex align-items-center gap-2 border-bottom border-light">
+                                <div class="bg-info bg-opacity-10 rounded-circle text-info fw-bold text-center" style="width: 32px; height: 32px; line-height: 32px; font-size: 14px; flex: 0 0 auto;">
                                     <?= substr($cust['name'] ?? 'C', 0, 1) ?>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-bold text-dark small text-truncate" style="max-width: 150px;"><?= esc($cust['name']) ?></div>
-                                    <div class="text-muted" style="font-size: 0.7rem;">Orders: <?= $cust['total_orders'] ?></div>
+                                <div style="min-width: 0; flex: 1 1 auto;">
+                                    <div class="fw-bold text-dark small" style="white-space: normal; word-break: break-word;"><?= esc($cust['name']) ?></div>
+                                    <div class="text-muted small">Orders: <?= $cust['total_orders'] ?></div>
                                 </div>
-                                <div class="text-end fw-bolder text-primary" style="font-size: 0.85rem;">
+                                <div class="text-end fw-bolder text-primary" style="font-size: 0.85rem; flex: 0 0 auto; white-space: nowrap;">
                                     ₹<?= number_format($cust['total_spent'], 2) ?>
                                 </div>
                             </div>
@@ -363,7 +374,7 @@
         <!-- <?= lang("App.recent_activity") ?> -->
         <div class="col-xl-4 col-md-12 mb-3">
             <div class="card list-card border-0">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <span class="fw-bold text-white"><?= lang("App.recent_activity") ?></span>
                     <ul class="nav nav-pills nav-sm" id="recentTab" role="tablist">
                         <li class="nav-item" role="presentation">
@@ -386,9 +397,9 @@
                                                 <div class="text-muted" style="font-size: 0.65rem;"><?= date('d M Y', strtotime($inv['invoice_date'])) ?></div>
                                             </td>
                                             <td>
-                                                <div class="text-truncate" style="max-width: 100px;"><?= esc($inv['customer_name'] ?? 'N/A') ?></div>
+                                                <div style="white-space: normal; word-break: break-word;"><?= esc($inv['customer_name'] ?? 'N/A') ?></div>
                                             </td>
-                                            <td class="text-end pe-3 fw-bold">₹<?= number_format($inv['total_amount'], 2) ?></td>
+                                            <td class="text-end pe-3 fw-bold text-nowrap">₹<?= number_format($inv['total_amount'], 2) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -404,9 +415,9 @@
                                                 <div class="text-muted" style="font-size: 0.65rem;"><?= date('d M Y', strtotime($bill['bill_date'])) ?></div>
                                             </td>
                                             <td>
-                                                <div class="text-truncate" style="max-width: 100px;"><?= esc($bill['vendor_name'] ?? 'N/A') ?></div>
+                                                <div style="white-space: normal; word-break: break-word;"><?= esc($bill['vendor_name'] ?? 'N/A') ?></div>
                                             </td>
-                                            <td class="text-end pe-3 fw-bold">₹<?= number_format($bill['total_amount'], 2) ?></td>
+                                            <td class="text-end pe-3 fw-bold text-nowrap">₹<?= number_format($bill['total_amount'], 2) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -605,15 +616,15 @@
 
         function renderProductRow(prod, rank, badgeClass) {
             return `
-                <div class="list-group-item px-0 d-flex align-items-center border-bottom border-light">
-                    <div class="${badgeClass} bg-opacity-10 rounded fw-bold text-center me-3" style="width: 32px; height: 32px; line-height: 32px;">
+                <div class="list-group-item px-0 d-flex align-items-center gap-2 border-bottom border-light">
+                    <div class="${badgeClass} bg-opacity-10 rounded fw-bold text-center" style="width: 32px; height: 32px; line-height: 32px; flex: 0 0 auto;">
                         ${rank}
                     </div>
-                    <div class="flex-grow-1">
-                        <div class="fw-bold text-dark small text-truncate" style="max-width: 150px;">${escapeHtml(prod.product_name)}</div>
-                        <div class="text-muted" style="font-size: 0.7rem;">Vol: ${Number(prod.total_qty).toLocaleString()} Units</div>
+                    <div style="min-width: 0; flex: 1 1 auto;">
+                        <div class="fw-bold text-dark small" style="white-space: normal; word-break: break-word;">${escapeHtml(prod.product_name)}</div>
+                        <div class="text-muted small">Vol: ${Number(prod.total_qty).toLocaleString()} Units</div>
                     </div>
-                    <div class="text-end fw-bolder text-success" style="font-size: 0.85rem;">
+                    <div class="text-end fw-bolder text-success" style="font-size: 0.85rem; flex: 0 0 auto; white-space: nowrap;">
                         ₹${Number(prod.total_revenue).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                     </div>
                 </div>
@@ -623,15 +634,15 @@
         function renderCustomerRow(cust, badgeClass) {
             const initial = (cust.name || 'C').charAt(0).toUpperCase();
             return `
-                <div class="list-group-item px-0 d-flex align-items-center border-bottom border-light">
-                    <div class="${badgeClass} bg-opacity-10 rounded-circle fw-bold text-center me-3" style="width: 32px; height: 32px; line-height: 32px; font-size: 14px;">
+                <div class="list-group-item px-0 d-flex align-items-center gap-2 border-bottom border-light">
+                    <div class="${badgeClass} bg-opacity-10 rounded-circle fw-bold text-center" style="width: 32px; height: 32px; line-height: 32px; font-size: 14px; flex: 0 0 auto;">
                         ${initial}
                     </div>
-                    <div class="flex-grow-1">
-                        <div class="fw-bold text-dark small text-truncate" style="max-width: 150px;">${escapeHtml(cust.name)}</div>
-                        <div class="text-muted" style="font-size: 0.7rem;">Orders: ${cust.total_orders}</div>
+                    <div style="min-width: 0; flex: 1 1 auto;">
+                        <div class="fw-bold text-dark small" style="white-space: normal; word-break: break-word;">${escapeHtml(cust.name)}</div>
+                        <div class="text-muted small">Orders: ${cust.total_orders}</div>
                     </div>
-                    <div class="text-end fw-bolder text-primary" style="font-size: 0.85rem;">
+                    <div class="text-end fw-bolder text-primary" style="font-size: 0.85rem; flex: 0 0 auto; white-space: nowrap;">
                         ₹${Number(cust.total_spent).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                     </div>
                 </div>

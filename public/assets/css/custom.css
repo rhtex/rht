@@ -471,8 +471,15 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
 
 .card-header .text-dark:not(.btn):not(.badge):not(input):not(select),
 .card-header > span:not(.badge),
-.card-header > div > strong {
+.card-header > div > strong,
+.card-header .form-label,
+.card-header label {
     color: #ffffff !important;
+}
+
+.card-header .btn-primary {
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
 }
 
 .card-header .text-muted:not(.btn):not(.badge),

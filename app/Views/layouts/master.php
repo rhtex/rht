@@ -120,7 +120,7 @@
                 });
             }
 
-            // Initialize Select2 on all .select2 and .form-select dropdowns globally
+            // Initialize Select2 on remaining .select2 and .form-select dropdowns after page scripts run
             window.initStyledSelects = function(root) {
                 const $scope = root ? $(root) : $(document);
                 $scope.find('select.select2, select.form-select:not(.select2):not(.no-select2):not(.flatpickr-monthDropdown-months):not([multiple])').each(function() {
@@ -132,12 +132,13 @@
                         if (inlineStyle.indexOf('width:50px') !== -1 || inlineStyle.indexOf('width:55px') !== -1) return;
                     }
                     const $modal = $el.closest('.modal');
-                    const inHeaderOrGroup = $el.closest('.card-header, .input-group').length > 0;
+                    const inGridCol = $el.parent().is('[class*="col-"]');
+                    const inCompactHeaderOrGroup = !inGridCol && $el.closest('.card-header, .input-group').length > 0;
                     const hasExplicitWidth = $el.data('width') || ($el.attr('style') && $el.attr('style').indexOf('width') !== -1);
                     const opts = {
                         theme: 'bootstrap-5',
-                        width: $el.data('width') ? $el.data('width') : (inHeaderOrGroup || hasExplicitWidth ? 'resolve' : '100%'),
-                        dropdownAutoWidth: inHeaderOrGroup,
+                        width: $el.data('width') ? $el.data('width') : (inCompactHeaderOrGroup || hasExplicitWidth ? 'resolve' : '100%'),
+                        dropdownAutoWidth: inCompactHeaderOrGroup,
                         placeholder: $el.data('placeholder'),
                         minimumResultsForSearch: $el.hasClass('select2') ? 0 : 7
                     };
@@ -151,7 +152,7 @@
                     $el.select2(opts);
                 });
             };
-            window.initStyledSelects();
+            setTimeout(function() { window.initStyledSelects(); }, 0);
 
             // Initialize Flatpickr for all date inputs
             flatpickr("input[type=date]", {

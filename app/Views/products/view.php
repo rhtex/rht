@@ -392,10 +392,10 @@ $buildPageUrl = function (string $param, int $targetPage) {
         transform: translateY(-2px);
         box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
     }
-    .prod-stat-card.grad-blue    { background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); }
-    .prod-stat-card.grad-emerald { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
-    .prod-stat-card.grad-purple  { background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%); }
-    .prod-stat-card.grad-amber   { background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); }
+    .prod-stat-card.grad-blue    { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%); }
+    .prod-stat-card.grad-emerald { background: linear-gradient(135deg, #064e3b 0%, #047857 100%); }
+    .prod-stat-card.grad-purple  { background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%); }
+    .prod-stat-card.grad-amber   { background: linear-gradient(135deg, #78350f 0%, #b45309 100%); }
     .prod-stat-icon {
         position: absolute;
         right: 12px;

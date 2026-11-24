@@ -67,10 +67,10 @@
         transform: translateY(-2px);
         box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18) !important;
     }
-    .dash-kpi-card.grad-blue    { background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); }
-    .dash-kpi-card.grad-emerald { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
-    .dash-kpi-card.grad-amber   { background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); }
-    .dash-kpi-card.grad-rose    { background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%); }
+    .dash-kpi-card.grad-blue    { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%); }
+    .dash-kpi-card.grad-emerald { background: linear-gradient(135deg, #064e3b 0%, #047857 100%); }
+    .dash-kpi-card.grad-amber   { background: linear-gradient(135deg, #78350f 0%, #b45309 100%); }
+    .dash-kpi-card.grad-rose    { background: linear-gradient(135deg, #881337 0%, #be123c 100%); }
     .dash-kpi-icon {
         position: absolute;
         right: 12px;

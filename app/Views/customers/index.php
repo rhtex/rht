@@ -99,12 +99,30 @@
 </div>
 
 <div class="card card-outline card-primary shadow-sm">
+    <style>
+        @media (max-width: 991.98px), (hover: none) and (pointer: coarse) {
+            .customers-list-table tbody tr td:nth-child(1),
+            .customers-list-table tbody tr td:nth-child(3),
+            .customers-list-table tbody tr td:nth-child(4),
+            .customers-list-table tbody tr td:nth-child(7),
+            .customers-list-table .cust-contact-person {
+                display: none !important;
+            }
+        }
+        body.is-mobile-device .customers-list-table tbody tr td:nth-child(1),
+        body.is-mobile-device .customers-list-table tbody tr td:nth-child(3),
+        body.is-mobile-device .customers-list-table tbody tr td:nth-child(4),
+        body.is-mobile-device .customers-list-table tbody tr td:nth-child(7),
+        body.is-mobile-device .customers-list-table .cust-contact-person {
+            display: none !important;
+        }
+    </style>
     <div class="card-header py-2">
         <h3 class="card-title fw-bold"><i class="fas fa-list me-1"></i> List of Customers</h3>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-bordered table-striped">
+            <table class="table table-bordered table-striped customers-list-table">
                 <thead>
                     <?php
                     $currentSortBy = $filters['sort_by'] ?? 'customers.id';
@@ -157,7 +175,7 @@
                                                 <span class="badge bg-light text-dark border ms-1"><i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($customer['city']) ?></span>
                                             <?php endif; ?>
                                             <?php if (!empty($customer['contact_person'])): ?>
-                                                <div class="small text-muted"><i class="far fa-user me-1"></i><?= esc($customer['contact_person']) ?></div>
+                                                <div class="small text-muted cust-contact-person"><i class="far fa-user me-1"></i><?= esc($customer['contact_person']) ?></div>
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -270,7 +288,7 @@
                                             <div>
                                                 <strong><a href="<?= site_url('customers/view/') ?>${customer.id}" class="text-dark">${customer.name}</a></strong>
                                                 ${customer.city ? `<span class="badge bg-light text-dark border ms-1"><i class="fas fa-map-marker-alt text-danger me-1"></i>${customer.city}</span>` : ''}
-                                                ${customer.contact_person ? `<div class="small text-muted"><i class="far fa-user me-1"></i>${customer.contact_person}</div>` : ''}
+                                                ${customer.contact_person ? `<div class="small text-muted cust-contact-person"><i class="far fa-user me-1"></i>${customer.contact_person}</div>` : ''}
                                             </div>
                                         </div>
                                     </td>

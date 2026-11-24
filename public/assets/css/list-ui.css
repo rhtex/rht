@@ -149,8 +149,9 @@
 
 /* ---------- Table container ---------- */
 .lu-wrap {
-    max-height: calc(100vh - 230px);
-    overflow: auto;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: visible;
     border-radius: 10px;
 }
 .lu-wrap::-webkit-scrollbar { height: 8px; width: 8px; }
@@ -380,13 +381,16 @@ code {
     }
     .lu-table.lu-stack tbody tr td {
         display: flex !important;
+        flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
-        gap: 12px;
+        gap: 6px 12px;
         text-align: right !important;
         border: 0 !important;
         border-bottom: 1px dashed #eef1f6 !important;
         padding: 8px 12px !important;
+        min-width: 0;
+        word-break: break-word;
     }
     .lu-table.lu-stack tbody tr td:last-child { border-bottom: 0 !important; }
     .lu-table.lu-stack tbody tr td::before {
@@ -423,13 +427,16 @@ body.is-mobile-device .lu-table.lu-stack tbody tr {
 }
 body.is-mobile-device .lu-table.lu-stack tbody tr td {
     display: flex !important;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 6px 12px;
     text-align: right !important;
     border: 0 !important;
     border-bottom: 1px dashed #eef1f6 !important;
     padding: 8px 12px !important;
+    min-width: 0;
+    word-break: break-word;
 }
 body.is-mobile-device .lu-table.lu-stack tbody tr td:last-child { border-bottom: 0 !important; }
 body.is-mobile-device .lu-table.lu-stack tbody tr td::before {

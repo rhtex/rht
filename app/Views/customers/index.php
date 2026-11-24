@@ -3,12 +3,12 @@
 <?= $this->section('title') ?>Customers<?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
-<div class="row mb-3 align-items-center">
-    <div class="col-sm-6">
+<div class="row mb-3 align-items-center g-2">
+    <div class="col-12 col-md-6">
         <h1 class="m-0"><i class="fas fa-users text-primary me-2"></i>Customer Management</h1>
     </div>
-    <div class="col-sm-6 text-end">
-        <div class="d-inline-flex gap-2 align-items-center">
+    <div class="col-12 col-md-6">
+        <div class="d-flex flex-wrap justify-content-md-end gap-2 align-items-center">
             <a href="<?= base_url('sample_customer.csv') ?>" class="btn btn-sm btn-outline-secondary" title="Download Sample CSV">
                 <i class="fas fa-download me-1"></i> Sample CSV
             </a>
@@ -163,14 +163,16 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <?php if (!empty($customer['phone'])): ?>
-                                        <a href="tel:<?= esc($customer['phone']) ?>" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i><?= esc($customer['phone']) ?></a><br>
-                                    <?php else: ?>
-                                        <span class="text-muted">-</span>
-                                    <?php endif; ?>
-                                    <?php if (!empty($customer['email'])): ?>
-                                        <small class="text-muted"><i class="far fa-envelope me-1"></i><?= esc($customer['email']) ?></small>
-                                    <?php endif; ?>
+                                    <div>
+                                        <?php if (!empty($customer['phone'])): ?>
+                                            <div><a href="tel:<?= esc($customer['phone']) ?>" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i><?= esc($customer['phone']) ?></a></div>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                        <?php if (!empty($customer['email'])): ?>
+                                            <div class="small text-muted text-break"><i class="far fa-envelope me-1"></i><?= esc($customer['email']) ?></div>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                                 <td>
                                     <?php if (!empty($customer['gstin'])): ?>
@@ -181,7 +183,7 @@
                                 </td>
                                 <td class="text-end fw-bold">
                                     <span class="<?= $customer['pending_balance'] >= 0 ? 'text-danger' : 'text-success' ?>">
-                                        ₹<?= number_format(abs($customer['pending_balance']), 2) ?>
+                                        ₹<?= format_inr(abs($customer['pending_balance'])) ?>
                                         <?= $customer['pending_balance'] >= 0 ? 'Dr' : 'Cr' ?>
                                     </span>
                                 </td>
@@ -256,7 +258,7 @@
                                 const pendingBalance = parseFloat(customer.pending_balance);
                                 const balanceType = pendingBalance >= 0 ? 'Dr' : 'Cr';
                                 const balanceClass = pendingBalance >= 0 ? 'text-danger' : 'text-success';
-                                const formattedBalance = '₹' + Math.abs(pendingBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + balanceType;
+                                const formattedBalance = '₹' + Math.abs(pendingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + balanceType;
 
                                 const firstLetter = (customer.name || 'C').charAt(0).toUpperCase();
                                 const row = `
@@ -273,8 +275,10 @@
                                         </div>
                                     </td>
                                     <td>
-                                        ${customer.phone ? `<a href="tel:${customer.phone}" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i>${customer.phone}</a><br>` : '-<br>'}
-                                        ${customer.email ? `<small class="text-muted"><i class="far fa-envelope me-1"></i>${customer.email}</small>` : ''}
+                                        <div>
+                                            ${customer.phone ? `<div><a href="tel:${customer.phone}" class="text-decoration-none fw-semibold"><i class="fas fa-phone-alt text-success me-1"></i>${customer.phone}</a></div>` : '<div>-</div>'}
+                                            ${customer.email ? `<div class="small text-muted text-break"><i class="far fa-envelope me-1"></i>${customer.email}</div>` : ''}
+                                        </div>
                                     </td>
                                     <td>${customer.gstin ? `<code>${customer.gstin}</code>` : '<span class="text-muted small">N/A</span>'}</td>
                                     <td class="text-end fw-bold ${balanceClass}">

@@ -150,6 +150,10 @@
                         opts.dropdownParent = $modal;
                     }
                     $el.select2(opts);
+                    $el.off('select2:select.nativeBridge select2:clear.nativeBridge')
+                       .on('select2:select.nativeBridge select2:clear.nativeBridge', function() {
+                           this.dispatchEvent(new Event('change', { bubbles: true }));
+                       });
                 });
             };
             setTimeout(function() { window.initStyledSelects(); }, 0);

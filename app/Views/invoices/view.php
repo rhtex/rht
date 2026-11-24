@@ -63,8 +63,8 @@
 
     <!-- Invoice Header -->
     <div class="card card-outline card-primary">
-        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <h3 class="card-title mb-0">Invoice Information</h3>
+        <div class="card-header text-white d-flex flex-wrap justify-content-between align-items-center gap-2" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;">
+            <h3 class="card-title text-white fw-bold mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Invoice Information</h3>
             <div class="card-tools d-flex flex-wrap gap-2 align-items-center ms-auto">
                 <?php if (empty($is_single)): ?>
                     <a href="<?= site_url('invoices/view/' . $invoice['id']) ?>?mode=single" class="btn btn-sm btn-light border fw-semibold shadow-sm text-dark d-none d-lg-inline-flex align-items-center" title="View Full Standalone Page">
@@ -216,8 +216,8 @@
     <!-- Agent Commission Information -->
     <?php if (!empty($invoice['agent_id']) && !empty($agent)): ?>
     <div class="card card-outline card-info">
-        <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-user-tie"></i> Agent Commission</h3>
+        <div class="card-header text-white" style="background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%) !important;">
+            <h3 class="card-title text-white fw-bold"><i class="fas fa-user-tie me-1"></i> Agent Commission</h3>
             <?php if ($invoice['agent_commission_status'] == 'Unpaid' && $invoice['agent_commission_amount'] > 0): ?>
                 <div class="card-tools">
                     <a href="<?= site_url('agent-payments/create/' . $invoice['agent_id']) ?>" class="btn btn-sm btn-success">
@@ -259,8 +259,8 @@
 
     <!-- Line Items -->
     <div class="card card-outline card-secondary">
-        <div class="card-header">
-            <h3 class="card-title">Line Items</h3>
+        <div class="card-header text-white" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;">
+            <h3 class="card-title text-white fw-bold mb-0"><i class="fas fa-boxes me-2"></i>Line Items</h3>
         </div>
         <div class="card-body p-0">
             <?php
@@ -531,9 +531,9 @@
     <!-- Receipts / Payment History -->
     <?php if (!empty($invoice['payments'])): ?>
     <div class="card card-outline card-success mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0"><i class="fas fa-receipt me-2"></i>Receipt History (<?= count($invoice['payments']) ?>)</h3>
-            <span class="badge bg-success-subtle text-success border border-success-subtle">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #065f46 0%, #059669 100%) !important;">
+            <h3 class="card-title text-white fw-bold mb-0"><i class="fas fa-receipt me-2"></i>Receipt History (<?= count($invoice['payments']) ?>)</h3>
+            <span class="badge bg-light text-success fw-bold">
                 Total Receipts: ₹<?= number_format(array_sum(array_column($invoice['payments'], 'amount')), 2) ?>
             </span>
         </div>
@@ -616,9 +616,9 @@
     <!-- Credit Note / Return History -->
     <?php if (!empty($invoice['credit_notes'])): ?>
     <div class="card card-outline card-warning mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0"><i class="fas fa-undo me-2"></i>Credit Note / Sales Return History (<?= count($invoice['credit_notes']) ?>)</h3>
-            <span class="badge bg-warning-subtle text-dark border border-warning-subtle">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #92400e 0%, #d97706 100%) !important;">
+            <h3 class="card-title text-white fw-bold mb-0"><i class="fas fa-undo me-2"></i>Credit Note / Sales Return History (<?= count($invoice['credit_notes']) ?>)</h3>
+            <span class="badge bg-light text-dark fw-bold">
                 Total Credited: ₹<?= number_format(array_sum(array_column($invoice['credit_notes'], 'total_amount')), 2) ?>
             </span>
         </div>
@@ -691,13 +691,13 @@
     <div class="row g-3 mb-3">
         <div class="col-md-6">
             <div class="card card-outline card-info h-100">
-                <div class="card-header"><h3 class="card-title">Notes</h3></div>
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%) !important;"><h3 class="card-title text-white fw-bold mb-0"><i class="fas fa-sticky-note me-2"></i>Notes</h3></div>
                 <div class="card-body"><?= nl2br(esc($invoice['notes'])) ?: 'No notes provided.' ?></div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="card card-outline card-info h-100">
-                <div class="card-header"><h3 class="card-title">Terms & Conditions</h3></div>
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #6b21a8 0%, #9333ea 100%) !important;"><h3 class="card-title text-white fw-bold mb-0"><i class="fas fa-file-contract me-2"></i>Terms & Conditions</h3></div>
                 <div class="card-body"><?= nl2br(esc($invoice['terms'])) ?: 'Standard terms apply.' ?></div>
             </div>
         </div>
@@ -705,10 +705,10 @@
 
     <!-- Delivery History Timeline -->
     <div class="card card-outline card-info mb-3">
-        <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-history me-1"></i> Delivery History</h3>
-            <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;">
+            <h3 class="card-title text-white fw-bold mb-0"><i class="fas fa-history me-1"></i> Delivery History</h3>
+            <div class="card-tools ms-auto">
+                <button type="button" class="btn btn-tool text-white" data-card-widget="collapse">
                     <i class="fas fa-minus"></i>
                 </button>
             </div>

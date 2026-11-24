@@ -319,24 +319,61 @@
 </div>
 
 <?php
-$totalBilledQty = 0;
-$totalBilledAmt = 0;
-foreach ($billedHistory ?? [] as $bh) {
-    $totalBilledQty += (float)($bh['quantity'] ?? 0);
-    $totalBilledAmt += (float)($bh['amount'] ?? 0);
-}
-$totalReturnedQty = 0;
-$totalReturnedAmt = 0;
-foreach ($returnHistory ?? [] as $rh) {
-    $totalReturnedQty += (float)($rh['quantity'] ?? 0);
-    $totalReturnedAmt += (float)($rh['amount'] ?? 0);
-}
+$pa = $productAnalytics ?? [];
+$totalBilledQty   = (float)($pa['billed_qty'] ?? 0);
+$totalBilledAmt   = (float)($pa['billed_amount'] ?? 0);
+$totalReturnedQty = (float)($pa['return_qty'] ?? 0);
+$totalReturnedAmt = (float)($pa['return_amount'] ?? 0);
+$bp = $billedPagination ?? ['page' => 1, 'perPage' => 100, 'total' => count($billedHistory ?? []), 'totalPages' => 1];
+$rp = $returnPagination ?? ['page' => 1, 'perPage' => 100, 'total' => count($returnHistory ?? []), 'totalPages' => 1];
+
+$buildPageUrl = function (string $param, int $targetPage) {
+    $q = $_GET ?? [];
+    $q[$param] = $targetPage;
+    return current_url() . '?' . http_build_query($q);
+};
 ?>
 
+<!-- Product Sales & Returns Analytics -->
+<div class="row g-2 g-md-3 mt-2 mb-3">
+    <div class="col-6 col-xl-3">
+        <div class="bt-stat bt-g-blue" style="cursor:default;">
+            <i class="fas fa-cubes bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format((float)($pa['net_qty'] ?? 0), 2) ?> <small style="font-size:0.85rem;"><?= esc($product['unit'] ?? '') ?></small></div>
+            <div class="bt-stat-label">Net Sold Qty</div>
+            <div class="small opacity-75 mt-1">Billed <?= number_format($totalBilledQty, 0) ?> &middot; Ret <?= number_format($totalReturnedQty, 0) ?></div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="bt-stat bt-g-emerald" style="cursor:default;">
+            <i class="fas fa-rupee-sign bt-stat-icon"></i>
+            <div class="bt-stat-num">₹<?= format_inr((float)($pa['net_revenue'] ?? 0)) ?></div>
+            <div class="bt-stat-label">Net Sales Revenue</div>
+            <div class="small opacity-75 mt-1">Billed ₹<?= format_inr($totalBilledAmt) ?></div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="bt-stat bt-g-purple" style="cursor:default;">
+            <i class="fas fa-tag bt-stat-icon"></i>
+            <div class="bt-stat-num">₹<?= format_inr((float)($pa['avg_rate'] ?? 0)) ?></div>
+            <div class="bt-stat-label">Avg Selling Rate</div>
+            <div class="small opacity-75 mt-1"><?= number_format((int)($pa['billed_count'] ?? 0)) ?> Invoice Lines</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="bt-stat bt-g-amber" style="cursor:default;">
+            <i class="fas fa-users bt-stat-icon"></i>
+            <div class="bt-stat-num"><?= number_format((int)($pa['unique_customers'] ?? 0)) ?></div>
+            <div class="bt-stat-label">Unique Customers</div>
+            <div class="small opacity-75 mt-1">Return Rate: <?= number_format((float)($pa['return_rate_pct'] ?? 0), 1) ?>%</div>
+        </div>
+    </div>
+</div>
+
 <!-- Billed / Sales History -->
-<div class="card card-outline card-primary mt-3 shadow-sm">
+<div class="card card-outline card-primary mt-2 shadow-sm">
     <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <h3 class="card-title mb-0"><i class="fas fa-file-invoice me-2 text-primary"></i>Billed History (<?= count($billedHistory ?? []) ?>)</h3>
+        <h3 class="card-title mb-0"><i class="fas fa-file-invoice me-2 text-primary"></i>Billed History (<?= number_format($bp['total']) ?>)</h3>
         <div class="d-flex flex-wrap gap-2 ms-auto">
             <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
                 Total Qty: <?= number_format($totalBilledQty, 2) ?> <?= esc($product['unit'] ?? '') ?>
@@ -424,12 +461,32 @@ foreach ($returnHistory ?? [] as $rh) {
             </table>
         </div>
     </div>
+    <?php if ($bp['totalPages'] > 1): ?>
+        <?php
+        $bFrom = ($bp['page'] - 1) * $bp['perPage'] + 1;
+        $bTo   = min($bp['total'], $bp['page'] * $bp['perPage']);
+        ?>
+        <div class="card-footer bg-white border-top py-2 px-3 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+            <div class="text-muted small">Showing <?= $bFrom ?> to <?= $bTo ?> of <?= $bp['total'] ?> records</div>
+            <ul class="pagination pagination-sm flex-wrap justify-content-center mb-0 gap-1">
+                <?php if ($bp['page'] > 1): ?>
+                    <li class="page-item"><a class="page-link" href="<?= esc($buildPageUrl('billed_page', $bp['page'] - 1)) ?>">&lsaquo;</a></li>
+                <?php endif; ?>
+                <?php for ($p = max(1, $bp['page'] - 2); $p <= min($bp['totalPages'], $bp['page'] + 2); $p++): ?>
+                    <li class="page-item <?= $p === $bp['page'] ? 'active' : '' ?>"><a class="page-link" href="<?= esc($buildPageUrl('billed_page', $p)) ?>"><?= $p ?></a></li>
+                <?php endfor; ?>
+                <?php if ($bp['page'] < $bp['totalPages']): ?>
+                    <li class="page-item"><a class="page-link" href="<?= esc($buildPageUrl('billed_page', $bp['page'] + 1)) ?>">&rsaquo;</a></li>
+                <?php endif; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
 </div>
 
 <!-- Customer Returns / Credit Notes History -->
 <div class="card card-outline card-warning mt-3 mb-3 shadow-sm">
     <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <h3 class="card-title mb-0"><i class="fas fa-undo me-2 text-warning"></i>Customer Returns (<?= count($returnHistory ?? []) ?>)</h3>
+        <h3 class="card-title mb-0"><i class="fas fa-undo me-2 text-warning"></i>Customer Returns (<?= number_format($rp['total']) ?>)</h3>
         <div class="d-flex flex-wrap gap-2 ms-auto">
             <span class="badge bg-warning-subtle text-dark border border-warning-subtle">
                 Returned Qty: <?= number_format($totalReturnedQty, 2) ?> <?= esc($product['unit'] ?? '') ?>
@@ -520,5 +577,25 @@ foreach ($returnHistory ?? [] as $rh) {
             </table>
         </div>
     </div>
+    <?php if ($rp['totalPages'] > 1): ?>
+        <?php
+        $rFrom = ($rp['page'] - 1) * $rp['perPage'] + 1;
+        $rTo   = min($rp['total'], $rp['page'] * $rp['perPage']);
+        ?>
+        <div class="card-footer bg-white border-top py-2 px-3 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+            <div class="text-muted small">Showing <?= $rFrom ?> to <?= $rTo ?> of <?= $rp['total'] ?> records</div>
+            <ul class="pagination pagination-sm flex-wrap justify-content-center mb-0 gap-1">
+                <?php if ($rp['page'] > 1): ?>
+                    <li class="page-item"><a class="page-link" href="<?= esc($buildPageUrl('return_page', $rp['page'] - 1)) ?>">&lsaquo;</a></li>
+                <?php endif; ?>
+                <?php for ($p = max(1, $rp['page'] - 2); $p <= min($rp['totalPages'], $rp['page'] + 2); $p++): ?>
+                    <li class="page-item <?= $p === $rp['page'] ? 'active' : '' ?>"><a class="page-link" href="<?= esc($buildPageUrl('return_page', $p)) ?>"><?= $p ?></a></li>
+                <?php endfor; ?>
+                <?php if ($rp['page'] < $rp['totalPages']): ?>
+                    <li class="page-item"><a class="page-link" href="<?= esc($buildPageUrl('return_page', $rp['page'] + 1)) ?>">&rsaquo;</a></li>
+                <?php endif; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
 </div>
 <?= $this->endSection() ?>

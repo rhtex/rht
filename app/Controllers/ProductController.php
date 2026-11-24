@@ -157,8 +157,22 @@ class ProductController extends BaseController
         $data['next_barcode'] = $nextBarcode;
 
         $db = \Config\Database::connect();
+        $perPage = 100;
 
-        // Billed History (Invoices containing this product)
+        // Billed Analytics (across all non-Void invoices for this product)
+        $billedAgg = $db->table('invoice_items')
+            ->select('COUNT(invoice_items.id) as row_count, COUNT(DISTINCT invoices.customer_id) as unique_customers, COALESCE(SUM(invoice_items.quantity), 0) as total_qty, COALESCE(SUM(invoice_items.amount), 0) as total_amount')
+            ->join('invoices', 'invoices.id = invoice_items.invoice_id')
+            ->where('invoice_items.product_id', $id)
+            ->where('invoices.status !=', 'Void')
+            ->get()->getRowArray();
+
+        $totalBilledRows = (int) ($billedAgg['row_count'] ?? 0);
+        $billedPage = max(1, (int) ($this->request->getGet('billed_page') ?? 1));
+        $billedTotalPages = max(1, (int) ceil($totalBilledRows / $perPage));
+        if ($billedPage > $billedTotalPages) $billedPage = $billedTotalPages;
+
+        // Billed History (100 rows per page)
         $data['billedHistory'] = $db->table('invoice_items')
             ->select('invoices.id as invoice_id, invoices.invoice_number, invoices.invoice_date, invoices.status, customers.id as customer_id, customers.name as customer_name, invoice_items.quantity, invoice_items.rate, invoice_items.amount')
             ->join('invoices', 'invoices.id = invoice_items.invoice_id')
@@ -167,9 +181,30 @@ class ProductController extends BaseController
             ->where('invoices.status !=', 'Void')
             ->orderBy('invoices.invoice_date', 'DESC')
             ->orderBy('invoices.id', 'DESC')
+            ->limit($perPage, ($billedPage - 1) * $perPage)
             ->get()->getResultArray();
 
-        // Customer Returns History (Sales Returns / Credit Notes containing this product)
+        $data['billedPagination'] = [
+            'page'       => $billedPage,
+            'perPage'    => $perPage,
+            'total'      => $totalBilledRows,
+            'totalPages' => $billedTotalPages,
+        ];
+
+        // Customer Returns Analytics
+        $returnAgg = $db->table('sales_return_items')
+            ->select('COUNT(sales_return_items.id) as row_count, COALESCE(SUM(sales_return_items.quantity), 0) as total_qty, COALESCE(SUM(sales_return_items.amount), 0) as total_amount')
+            ->join('sales_returns', 'sales_returns.id = sales_return_items.sales_return_id')
+            ->where('sales_return_items.product_id', $id)
+            ->where('sales_returns.status !=', 'Void')
+            ->get()->getRowArray();
+
+        $totalReturnRows = (int) ($returnAgg['row_count'] ?? 0);
+        $returnPage = max(1, (int) ($this->request->getGet('return_page') ?? 1));
+        $returnTotalPages = max(1, (int) ceil($totalReturnRows / $perPage));
+        if ($returnPage > $returnTotalPages) $returnPage = $returnTotalPages;
+
+        // Customer Returns History (100 rows per page)
         $data['returnHistory'] = $db->table('sales_return_items')
             ->select('sales_returns.id as return_id, sales_returns.return_number, sales_returns.return_date, sales_returns.status, sales_returns.reason, customers.id as customer_id, customers.name as customer_name, sales_return_items.quantity, sales_return_items.rate, sales_return_items.amount')
             ->join('sales_returns', 'sales_returns.id = sales_return_items.sales_return_id')
@@ -178,7 +213,34 @@ class ProductController extends BaseController
             ->where('sales_returns.status !=', 'Void')
             ->orderBy('sales_returns.return_date', 'DESC')
             ->orderBy('sales_returns.id', 'DESC')
+            ->limit($perPage, ($returnPage - 1) * $perPage)
             ->get()->getResultArray();
+
+        $data['returnPagination'] = [
+            'page'       => $returnPage,
+            'perPage'    => $perPage,
+            'total'      => $totalReturnRows,
+            'totalPages' => $returnTotalPages,
+        ];
+
+        $billedQty = (float) ($billedAgg['total_qty'] ?? 0);
+        $billedAmt = (float) ($billedAgg['total_amount'] ?? 0);
+        $returnQty = (float) ($returnAgg['total_qty'] ?? 0);
+        $returnAmt = (float) ($returnAgg['total_amount'] ?? 0);
+
+        $data['productAnalytics'] = [
+            'billed_count'     => $totalBilledRows,
+            'billed_qty'       => $billedQty,
+            'billed_amount'    => $billedAmt,
+            'unique_customers' => (int) ($billedAgg['unique_customers'] ?? 0),
+            'avg_rate'         => $billedQty > 0 ? ($billedAmt / $billedQty) : 0,
+            'return_count'     => $totalReturnRows,
+            'return_qty'       => $returnQty,
+            'return_amount'    => $returnAmt,
+            'net_qty'          => $billedQty - $returnQty,
+            'net_revenue'      => $billedAmt - $returnAmt,
+            'return_rate_pct'  => $billedQty > 0 ? (($returnQty / $billedQty) * 100) : 0,
+        ];
 
         return view('products/view', $data);
     }

@@ -32,7 +32,7 @@ class Home extends BaseController
         // 2. Stock Management
         $data['itemsInStock'] = $productModel->selectSum('total_stock')->get()->getRow()->total_stock ?? 0;
 
-        // 3. Financial Totals (Current Financial Year: Apr to Mar)
+        // 3. Financial Totals (All-Time, excluding Void and Draft)
         $currentMonth = (int) date('n');
         $currentYear  = (int) date('Y');
         $fyStartYear  = ($currentMonth < 4) ? $currentYear - 1 : $currentYear;
@@ -40,104 +40,39 @@ class Home extends BaseController
         $fyStartDate  = "{$fyStartYear}-04-01";
         $fyEndDate    = "{$fyEndYear}-03-31";
 
-        $data['fyLabel'] = "FY {$fyStartYear}-" . substr((string) $fyEndYear, 2);
+        $data['fyLabel'] = "All Time";
 
         $data['totalSales'] = (float) ($invoiceModel->selectSum('total_amount')
             ->where('status !=', 'Void')
             ->where('status !=', 'Draft')
-            ->where('invoice_date >=', $fyStartDate)
-            ->where('invoice_date <=', $fyEndDate)
             ->get()->getRow()->total_amount ?? 0);
 
         $data['totalPurchases'] = (float) ($billModel->selectSum('total_amount')
             ->where('status !=', 'Void')
             ->where('status !=', 'Draft')
-            ->where('bill_date >=', $fyStartDate)
-            ->where('bill_date <=', $fyEndDate)
             ->get()->getRow()->total_amount ?? 0);
 
-        // 4. Accounts Receivable & Payable (Net Customer & Vendor Balances: Opening + Docs - Payments - Credit/Debit Notes)
+        // 4. Accounts Receivable & Payable (Matching Zoho Books: Outstanding Invoice & Bill Balances)
         $today = date('Y-m-d');
+        $invoiceBalances = $invoiceModel->select("
+            COALESCE(SUM(balance), 0) as total,
+            COALESCE(SUM(CASE WHEN due_date >= '$today' THEN balance ELSE 0 END), 0) as current,
+            COALESCE(SUM(CASE WHEN due_date < '$today' THEN balance ELSE 0 END), 0) as overdue
+        ")->whereNotIn('status', ['Void', 'Draft'])->where('balance >', 0)->first();
 
-        $receivableRows = $db->query("
-            SELECT
-                c.id,
-                (CASE WHEN c.balance_type = 'Dr' THEN COALESCE(c.opening_balance, 0) ELSE -COALESCE(c.opening_balance, 0) END)
-                + COALESCE(inv.net_inv, 0)
-                - COALESCE(ret.tot_ret, 0) AS net_bal,
-                COALESCE(inv.overdue_bal, 0) AS raw_overdue
-            FROM customers c
-            LEFT JOIN (
-                SELECT
-                    customer_id,
-                    SUM(total_amount - paid_amount) AS net_inv,
-                    SUM(CASE WHEN due_date < ? AND balance > 0 THEN balance ELSE 0 END) AS overdue_bal
-                FROM invoices
-                WHERE status NOT IN ('Void', 'Draft')
-                GROUP BY customer_id
-            ) inv ON inv.customer_id = c.id
-            LEFT JOIN (
-                SELECT customer_id, SUM(total_amount) AS tot_ret
-                FROM sales_returns
-                WHERE status != 'Void'
-                GROUP BY customer_id
-            ) ret ON ret.customer_id = c.id
-        ", [$today])->getResultArray();
+        $billBalances = $billModel->select("
+            COALESCE(SUM(balance), 0) as total,
+            COALESCE(SUM(CASE WHEN due_date >= '$today' THEN balance ELSE 0 END), 0) as current,
+            COALESCE(SUM(CASE WHEN due_date < '$today' THEN balance ELSE 0 END), 0) as overdue
+        ")->whereNotIn('status', ['Void', 'Draft'])->where('balance >', 0)->first();
 
-        $recTotal = 0.0; $recOverdue = 0.0; $recCurrent = 0.0;
-        foreach ($receivableRows as $r) {
-            $net = max(0.0, (float) $r['net_bal']);
-            if ($net > 0) {
-                $ovd = min($net, max(0.0, (float) $r['raw_overdue']));
-                $recTotal   += $net;
-                $recOverdue += $ovd;
-                $recCurrent += ($net - $ovd);
-            }
-        }
+        $data['accountsReceivable'] = (float) ($invoiceBalances['total'] ?? 0);
+        $data['receivableCurrent']  = (float) ($invoiceBalances['current'] ?? 0);
+        $data['receivableOverdue']  = (float) ($invoiceBalances['overdue'] ?? 0);
 
-        $payableRows = $db->query("
-            SELECT
-                v.id,
-                (CASE WHEN v.balance_type = 'Cr' THEN COALESCE(v.opening_balance, 0) ELSE -COALESCE(v.opening_balance, 0) END)
-                + COALESCE(bl.net_bill, 0)
-                - COALESCE(vc.tot_vc, 0) AS net_bal,
-                COALESCE(bl.overdue_bal, 0) AS raw_overdue
-            FROM vendors v
-            LEFT JOIN (
-                SELECT
-                    vendor_id,
-                    SUM(total_amount - paid_amount) AS net_bill,
-                    SUM(CASE WHEN due_date < ? AND balance > 0 THEN balance ELSE 0 END) AS overdue_bal
-                FROM bills
-                WHERE status NOT IN ('Void', 'Draft')
-                GROUP BY vendor_id
-            ) bl ON bl.vendor_id = v.id
-            LEFT JOIN (
-                SELECT vendor_id, SUM(balance) AS tot_vc
-                FROM vendor_credits
-                WHERE status NOT IN ('Void', 'Closed')
-                GROUP BY vendor_id
-            ) vc ON vc.vendor_id = v.id
-        ", [$today])->getResultArray();
-
-        $payTotal = 0.0; $payOverdue = 0.0; $payCurrent = 0.0;
-        foreach ($payableRows as $p) {
-            $net = max(0.0, (float) $p['net_bal']);
-            if ($net > 0) {
-                $ovd = min($net, max(0.0, (float) $p['raw_overdue']));
-                $payTotal   += $net;
-                $payOverdue += $ovd;
-                $payCurrent += ($net - $ovd);
-            }
-        }
-
-        $data['accountsReceivable'] = round($recTotal, 2);
-        $data['receivableCurrent']  = round($recCurrent, 2);
-        $data['receivableOverdue']  = round($recOverdue, 2);
-
-        $data['accountsPayable']    = round($payTotal, 2);
-        $data['payableCurrent']     = round($payCurrent, 2);
-        $data['payableOverdue']     = round($payOverdue, 2);
+        $data['accountsPayable']    = (float) ($billBalances['total'] ?? 0);
+        $data['payableCurrent']     = (float) ($billBalances['current'] ?? 0);
+        $data['payableOverdue']     = (float) ($billBalances['overdue'] ?? 0);
 
         // 5. Sales Funnel & Operational Metrics
         $data['pendingQuotations'] = $quotationModel->whereIn('status', ['Draft', 'Sent'])->countAllResults();

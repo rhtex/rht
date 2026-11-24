@@ -102,7 +102,31 @@
 <!-- Receipts Table -->
 <div class="card card-outline card-secondary shadow-sm">
     <div class="card-body p-0">
-        <div class="table-responsive">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if (!empty($payments)): ?>
+                <?php foreach ($payments as $payment): ?>
+                    <a href="<?= site_url('invoice_payments/view/' . $payment['id']) ?>" class="erp-mobile-card">
+                        <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
+                            <?= esc($payment['customer_name'] ?? 'Customer') ?>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= esc($payment['payment_number']) ?> &middot; <?= date('d M Y', strtotime($payment['payment_date'])) ?>
+                                <?php if (!empty($payment['invoice_number'])): ?>
+                                    &middot; <?= esc($payment['invoice_number']) ?>
+                                <?php endif; ?>
+                            </span>
+                            <span class="fw-bold small text-success" style="flex: 0 0 auto; white-space: nowrap;">
+                                &#8377;<?= format_inr((float)$payment['amount']) ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No customer receipts found matching the filters.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
             <table class="table table-striped table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>

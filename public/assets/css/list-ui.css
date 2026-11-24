@@ -578,4 +578,31 @@ body.is-mobile-device .lu-toolbar .lu-right { width: 100%; }
     padding: 14px 18px;
 }
 
+/* ==========================================================================
+   Dedicated Mobile Card List (.erp-mobile-list / .erp-desktop-wrap)
+   ========================================================================== */
+.erp-desktop-wrap { display: none !important; }
+.erp-mobile-list  { display: block !important; }
+@media (min-width: 992px) and (hover: hover) and (pointer: fine) {
+    body:not(.is-mobile-device) .erp-desktop-wrap { display: block !important; }
+    body:not(.is-mobile-device) .erp-mobile-list  { display: none !important; }
+}
+.erp-mobile-card {
+    display: block;
+    text-decoration: none !important;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    color: inherit;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+    -webkit-tap-highlight-color: rgba(79, 70, 229, 0.18);
+}
+.erp-mobile-card:active,
+.erp-mobile-card:focus {
+    background: #e0e7ff !important;
+    border-color: #818cf8 !important;
+}
+
 

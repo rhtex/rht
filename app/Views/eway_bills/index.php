@@ -112,8 +112,44 @@
                 </div>
             </div>
 
-            <div class="card-body p-0 table-responsive">
-                <table class="table table-hover align-middle mb-0">
+            <div class="card-body p-0">
+                <div class="erp-mobile-list p-2 bg-light">
+                    <?php if (empty($records)): ?>
+                        <div class="text-center py-4 text-muted">No e-Way Bill records found.</div>
+                    <?php else: ?>
+                        <?php foreach ($records as $row): ?>
+                            <?php
+                            $docHref = '#';
+                            if (!empty($row['document_id'])) {
+                                $docHref = ($row['document_type'] ?? '') === 'bill'
+                                    ? site_url('bills/view/' . $row['document_id'])
+                                    : site_url('invoices/view/' . $row['document_id']);
+                            }
+                            ?>
+                            <a href="<?= $docHref ?>" class="erp-mobile-card">
+                                <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
+                                    <?= esc($row['ewaybill_number'] ?: ($row['document_number'] ?? 'e-Way Bill')) ?>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                                    <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                        <?= esc($row['document_number'] ?? '') ?>
+                                        <?php if (!empty($row['to_place'])): ?>
+                                            &middot; <?= esc($row['to_place']) ?>
+                                        <?php endif; ?>
+                                        <?php if (!empty($row['ewaybill_date'])): ?>
+                                            &middot; <?= date('d M Y', strtotime($row['ewaybill_date'])) ?>
+                                        <?php endif; ?>
+                                    </span>
+                                    <span class="fw-bold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">
+                                        &#8377;<?= format_inr((float)($row['total_amount'] ?? 0)) ?>
+                                    </span>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+                <div class="table-responsive erp-desktop-wrap">
+                    <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 50px;">#</th>
@@ -251,6 +287,7 @@
                         <?php endif; ?>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     </div>

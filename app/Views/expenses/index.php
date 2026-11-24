@@ -103,7 +103,31 @@
 <!-- Expenses Table -->
 <div class="card card-outline card-secondary shadow-sm">
     <div class="card-body p-0">
-        <div class="table-responsive">
+        <div class="erp-mobile-list p-2 bg-light">
+            <?php if (!empty($expenses)): ?>
+                <?php foreach ($expenses as $expense): ?>
+                    <a href="<?= can('expense.edit') ? site_url('expenses/edit/' . $expense['id']) : '#' ?>" class="erp-mobile-card">
+                        <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
+                            <?= esc($expense['category_name'] ?? 'Expense') ?>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <?= date('d M Y', strtotime($expense['expense_date'])) ?>
+                                <?php if (!empty($expense['description'])): ?>
+                                    &middot; <?= esc($expense['description']) ?>
+                                <?php endif; ?>
+                            </span>
+                            <span class="fw-bold small text-danger" style="flex: 0 0 auto; white-space: nowrap;">
+                                &#8377;<?= format_inr((float)$expense['amount']) ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No expenses recorded matching the filter criteria.</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
             <table class="table table-striped table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>

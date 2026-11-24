@@ -128,7 +128,38 @@
                 <span class="text-muted small">Loaded <strong id="loadedCreditsCount"><?= count($credits) ?></strong> credits</span>
             </div>
             <div class="card-body p-0 position-relative">
-                <div id="creditListScrollContainer" style="overflow-y: auto; overflow-x: hidden;">
+                <div class="erp-mobile-list p-2 bg-light" id="creditMobileList">
+                    <?php if (empty($credits)): ?>
+                        <div class="text-center py-4 text-muted">No vendor credits found.</div>
+                    <?php else: ?>
+                        <?php foreach ($credits as $c): ?>
+                            <a href="<?= site_url('vendor_credits/view/' . $c['id']) ?>" class="erp-mobile-card">
+                                <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
+                                    <?= esc($c['vendor_name'] ?? 'N/A') ?>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                                    <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                        <?= esc($c['reference_no']) ?>
+                                        <?php if (!empty($c['credit_note_date'])): ?>
+                                            &middot; <?= date('d-m-Y', strtotime($c['credit_note_date'])) ?>
+                                        <?php endif; ?>
+                                    </span>
+                                    <span class="fw-bold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">
+                                        &#8377;<?= format_inr((float)($c['amount'] ?? 0)) ?>
+                                    </span>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                        <?php if (count($credits) >= 50): ?>
+                            <div class="text-center pt-1 pb-2" id="creditMobileLoadMoreWrap">
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-4" onclick="loadMoreCredits()">
+                                    View More <i class="fas fa-chevron-down ms-1"></i>
+                                </button>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+                <div id="creditListScrollContainer" class="erp-desktop-wrap" style="overflow-y: auto; overflow-x: hidden;">
                     <table class="table table-hover align-middle mb-0 w-100" id="creditsMasterTable" data-no-enhance="true" style="table-layout: fixed;">
                         <thead class="table-light sticky-top bg-light" style="z-index: 10;">
                             <tr>
@@ -287,6 +318,30 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 tbody.insertAdjacentHTML('beforeend', html);
                 const newlyAdded = tbody.querySelectorAll('.credit-row:not([data-bound])');
+                const mobileList = document.getElementById('creditMobileList');
+                const mobileLoadWrap = document.getElementById('creditMobileLoadMoreWrap');
+                if (mobileList) {
+                    const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+                    newlyAdded.forEach(tr => {
+                        const id = tr.dataset.id;
+                        const docNo = tr.querySelector('td:nth-child(1) span.text-primary')?.textContent.trim() || '';
+                        const party = tr.querySelector('td:nth-child(2) .fw-bold')?.textContent.trim() || '';
+                        const amt = tr.querySelector('td:nth-child(3) .fw-bold')?.textContent.trim() || '';
+                        const cardHtml = `
+                            <a href="<?= site_url('vendor_credits/view/') ?>${id}" class="erp-mobile-card">
+                                <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">${escapeHtml(party)}</div>
+                                <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                                    <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">${escapeHtml(docNo)}</span>
+                                    <span class="fw-bold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">${escapeHtml(amt)}</span>
+                                </div>
+                            </a>`;
+                        if (mobileLoadWrap) {
+                            mobileLoadWrap.insertAdjacentHTML('beforebegin', cardHtml);
+                        } else {
+                            mobileList.insertAdjacentHTML('beforeend', cardHtml);
+                        }
+                    });
+                }
                 currentOffset += newlyAdded.length;
                 if (countBadge) {
                     countBadge.textContent = document.querySelectorAll('.credit-row').length;
@@ -294,6 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 bindRowClicks(tbody);
                 if (newlyAdded.length < 20) {
                     hasMoreRows = false;
+                    if (mobileLoadWrap) mobileLoadWrap.remove();
                     if (spinner) {
                         spinner.innerHTML = '<small class="text-muted"><i class="fas fa-check-circle me-1 text-success"></i>All credits loaded.</small>';
                         spinner.style.display = 'block';

@@ -121,7 +121,38 @@
                 <span class="text-muted small">Loaded <strong id="loadedOrdersCount"><?= count($orders) ?></strong> orders</span>
             </div>
             <div class="card-body p-0 position-relative" id="orderListBody">
-                <div id="orderListScrollContainer" style="overflow-y: auto; overflow-x: hidden;">
+                <div class="erp-mobile-list p-2 bg-light" id="orderMobileList">
+                    <?php if (empty($orders)): ?>
+                        <div class="text-center py-4 text-muted">No sales orders found matching criteria.</div>
+                    <?php else: ?>
+                        <?php foreach ($orders as $order): ?>
+                            <a href="<?= site_url('sales_orders/view/' . $order['id']) ?>" class="erp-mobile-card">
+                                <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
+                                    <?= esc($order['customer_name']) ?>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                                    <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                        <?= esc($order['sales_order_number']) ?> &middot; <?= date('d/m/Y', strtotime($order['order_date'])) ?>
+                                        <?php if (!empty($order['customer_city'])): ?>
+                                            &middot; <?= esc($order['customer_city']) ?>
+                                        <?php endif; ?>
+                                    </span>
+                                    <span class="fw-bold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">
+                                        &#8377;<?= format_inr((float)$order['total_amount']) ?>
+                                    </span>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                        <?php if (count($orders) >= 20): ?>
+                            <div class="text-center pt-1 pb-2" id="orderMobileLoadMoreWrap">
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-4" onclick="loadMoreOrders()">
+                                    View More <i class="fas fa-chevron-down ms-1"></i>
+                                </button>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+                <div id="orderListScrollContainer" class="erp-desktop-wrap" style="overflow-y: auto; overflow-x: hidden;">
                     <table class="table table-hover align-middle mb-0 w-100" id="ordersMasterTable" data-no-enhance="true" style="table-layout: fixed;">
                         <thead class="table-light sticky-top bg-light" style="z-index: 10;">
                             <tr>
@@ -476,6 +507,31 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 tbody.insertAdjacentHTML('beforeend', html);
                 const newlyAdded = tbody.querySelectorAll('.order-row:not([data-bound])');
+                const mobileList = document.getElementById('orderMobileList');
+                const mobileLoadWrap = document.getElementById('orderMobileLoadMoreWrap');
+                if (mobileList) {
+                    const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+                    newlyAdded.forEach(tr => {
+                        const id = tr.dataset.id;
+                        const docNo = tr.querySelector('td:nth-child(1) .fw-bold')?.textContent.trim() || '';
+                        const docDate = tr.querySelector('td:nth-child(1) small')?.textContent.trim() || '';
+                        const party = tr.querySelector('td:nth-child(2) .fw-semibold')?.textContent.trim() || '';
+                        const amt = tr.querySelector('td:nth-child(3) .fw-bold')?.textContent.trim() || '';
+                        const cardHtml = `
+                            <a href="<?= site_url('sales_orders/view/') ?>${id}" class="erp-mobile-card">
+                                <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">${escapeHtml(party)}</div>
+                                <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                                    <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">${escapeHtml(docNo)} &middot; ${escapeHtml(docDate)}</span>
+                                    <span class="fw-bold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">${escapeHtml(amt)}</span>
+                                </div>
+                            </a>`;
+                        if (mobileLoadWrap) {
+                            mobileLoadWrap.insertAdjacentHTML('beforebegin', cardHtml);
+                        } else {
+                            mobileList.insertAdjacentHTML('beforeend', cardHtml);
+                        }
+                    });
+                }
                 currentOffset += newlyAdded.length;
                 if (countBadge) {
                     countBadge.textContent = document.querySelectorAll('.order-row').length;
@@ -485,6 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (newlyAdded.length < 20) {
                     hasMoreRows = false;
+                    if (mobileLoadWrap) mobileLoadWrap.remove();
                     if (spinner) {
                         spinner.innerHTML = '<small class="text-muted"><i class="fas fa-check-circle me-1 text-success"></i>All orders loaded.</small>';
                         spinner.style.display = 'block';

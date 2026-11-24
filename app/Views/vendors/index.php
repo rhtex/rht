@@ -92,7 +92,32 @@
         <h3 class="card-title fw-bold"><i class="fas fa-list me-1"></i> List of Vendors</h3>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
+        <div class="erp-mobile-list p-2 bg-light" id="vendorMobileList">
+            <?php if (!empty($vendors)): ?>
+                <?php foreach ($vendors as $vendor): ?>
+                    <?php
+                    $isPayable = $vendor['pending_balance'] >= 0;
+                    $balText = '&#8377;' . format_inr(abs($vendor['pending_balance'])) . ' ' . ($isPayable ? 'Payable' : 'Advance');
+                    ?>
+                    <a href="<?= site_url('vendors/view/' . $vendor['id']) ?>" class="erp-mobile-card">
+                        <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
+                            <?= esc($vendor['name']) ?>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                <i class="fas fa-map-marker-alt text-danger me-1"></i><?= esc($vendor['city'] ?: '-') ?>
+                            </span>
+                            <span class="fw-bold small <?= $isPayable ? 'text-danger' : 'text-success' ?>" style="flex: 0 0 auto; white-space: nowrap;">
+                                <?= $balText ?>
+                            </span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-4 text-muted">No vendors found</div>
+            <?php endif; ?>
+        </div>
+        <div class="table-responsive erp-desktop-wrap">
             <table class="table table-bordered table-striped">
                 <thead>
                     <?php
@@ -240,12 +265,32 @@
                     .then(data => {
                         if (data.status === 'success') {
                             const tbody = document.getElementById('vendorTableBody');
+                            const mobileList = document.getElementById('vendorMobileList');
                             data.data.forEach(vendor => {
                                 const rowIndex = tbody.querySelectorAll('tr').length + 1;
                                 const pendingBalance = parseFloat(vendor.pending_balance);
                                 const balanceType = pendingBalance >= 0 ? 'Payable' : 'Advance';
                                 const balanceClass = pendingBalance >= 0 ? 'text-danger' : 'text-success';
-                                const formattedBalance = '₹' + Math.abs(pendingBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + balanceType;
+                                const formattedBalance = '₹' + Math.abs(pendingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + balanceType;
+
+                                if (mobileList) {
+                                    const escapeHtml = (str) => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+                                    const card = `
+                                    <a href="<?= site_url('vendors/view/') ?>${vendor.id}" class="erp-mobile-card">
+                                        <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
+                                            ${escapeHtml(vendor.name)}
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                                            <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                                <i class="fas fa-map-marker-alt text-danger me-1"></i>${escapeHtml(vendor.city || '-')}
+                                            </span>
+                                            <span class="fw-bold small ${balanceClass}" style="flex: 0 0 auto; white-space: nowrap;">
+                                                ${formattedBalance}
+                                            </span>
+                                        </div>
+                                    </a>`;
+                                    mobileList.insertAdjacentHTML('beforeend', card);
+                                }
 
                                 const firstLetter = (vendor.name || 'V').charAt(0).toUpperCase();
                                 const row = `

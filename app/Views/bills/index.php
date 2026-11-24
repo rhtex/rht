@@ -153,7 +153,38 @@
                 <span class="text-muted small">Loaded <strong id="loadedBillsCount"><?= count($bills) ?></strong> bills</span>
             </div>
             <div class="card-body p-0 position-relative" id="billListBody">
-                <div id="billListScrollContainer" style="overflow-y: auto; overflow-x: hidden;">
+                <div class="erp-mobile-list p-2 bg-light" id="billMobileList">
+                    <?php if (empty($bills)): ?>
+                        <div class="text-center py-4 text-muted">No purchase bills found matching criteria.</div>
+                    <?php else: ?>
+                        <?php foreach ($bills as $b): ?>
+                            <a href="<?= site_url('bills/view/' . $b['id']) ?>" class="erp-mobile-card">
+                                <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">
+                                    <?= esc($b['vendor_name']) ?>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                                    <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">
+                                        <?= esc($b['bill_number']) ?> &middot; <?= date('d/m/Y', strtotime($b['bill_date'])) ?>
+                                        <?php if (!empty($b['vendor_city'])): ?>
+                                            &middot; <?= esc($b['vendor_city']) ?>
+                                        <?php endif; ?>
+                                    </span>
+                                    <span class="fw-bold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">
+                                        &#8377;<?= format_inr((float)$b['total_amount']) ?>
+                                    </span>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                        <?php if (count($bills) >= 20): ?>
+                            <div class="text-center pt-1 pb-2" id="billMobileLoadMoreWrap">
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-4" onclick="loadMoreBills()">
+                                    View More <i class="fas fa-chevron-down ms-1"></i>
+                                </button>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+                <div id="billListScrollContainer" class="erp-desktop-wrap" style="overflow-y: auto; overflow-x: hidden;">
                     <table class="table table-hover align-middle mb-0 w-100" id="billsMasterTable" data-no-enhance="true" style="table-layout: fixed;">
                         <thead class="table-light sticky-top bg-light" style="z-index: 10;">
                             <tr>
@@ -506,6 +537,31 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 tbody.insertAdjacentHTML('beforeend', html);
                 const newlyAdded = tbody.querySelectorAll('.bill-row:not([data-bound])');
+                const mobileList = document.getElementById('billMobileList');
+                const mobileLoadWrap = document.getElementById('billMobileLoadMoreWrap');
+                if (mobileList) {
+                    const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+                    newlyAdded.forEach(tr => {
+                        const id = tr.dataset.id;
+                        const docNo = tr.querySelector('td:nth-child(1) .fw-bold')?.textContent.trim() || '';
+                        const docDate = tr.querySelector('td:nth-child(1) small')?.textContent.trim() || '';
+                        const party = tr.querySelector('td:nth-child(2) .fw-semibold')?.textContent.trim() || '';
+                        const amt = tr.querySelector('td:nth-child(3) .fw-bold')?.textContent.trim() || '';
+                        const cardHtml = `
+                            <a href="<?= site_url('bills/view/') ?>${id}" class="erp-mobile-card">
+                                <div class="fw-bold text-dark" style="white-space: normal; word-break: break-word; line-height: 1.35;">${escapeHtml(party)}</div>
+                                <div class="d-flex justify-content-between align-items-start gap-2 mt-1">
+                                    <span class="text-muted small" style="white-space: normal; word-break: break-word; min-width: 0; flex: 1 1 auto;">${escapeHtml(docNo)} &middot; ${escapeHtml(docDate)}</span>
+                                    <span class="fw-bold small text-dark" style="flex: 0 0 auto; white-space: nowrap;">${escapeHtml(amt)}</span>
+                                </div>
+                            </a>`;
+                        if (mobileLoadWrap) {
+                            mobileLoadWrap.insertAdjacentHTML('beforebegin', cardHtml);
+                        } else {
+                            mobileList.insertAdjacentHTML('beforeend', cardHtml);
+                        }
+                    });
+                }
                 currentOffset += newlyAdded.length;
                 if (countBadge) {
                     countBadge.textContent = document.querySelectorAll('.bill-row').length;
@@ -515,6 +571,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (newlyAdded.length < 20) {
                     hasMoreRows = false;
+                    if (mobileLoadWrap) mobileLoadWrap.remove();
                     if (spinner) {
                         spinner.innerHTML = '<small class="text-muted"><i class="fas fa-check-circle me-1 text-success"></i>All bills loaded.</small>';
                         spinner.style.display = 'block';

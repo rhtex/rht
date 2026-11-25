@@ -531,7 +531,7 @@
     <!-- Receipts / Payment History -->
     <?php if (!empty($invoice['payments'])): ?>
     <div class="card card-outline card-success mb-3">
-        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #065f46 0%, #059669 100%) !important;">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #be185d 0%, #e11d48 100%) !important;">
             <h3 class="card-title text-white fw-bold mb-0"><i class="fas fa-receipt me-2"></i>Receipt History (<?= count($invoice['payments']) ?>)</h3>
             <span class="badge bg-light text-success fw-bold">
                 Total Receipts: ₹<?= number_format(array_sum(array_column($invoice['payments'], 'amount')), 2) ?>
@@ -705,7 +705,7 @@
 
     <!-- Delivery History Timeline -->
     <div class="card card-outline card-info mb-3">
-        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%) !important;">
             <h3 class="card-title text-white fw-bold mb-0"><i class="fas fa-history me-1"></i> Delivery History</h3>
             <div class="card-tools ms-auto">
                 <button type="button" class="btn btn-tool text-white" data-card-widget="collapse">

@@ -280,7 +280,7 @@
     <!-- Receipts / Payments -->
     <?php if (!empty($invoice['payments'])): ?>
         <div class="card card-outline card-success mb-3 shadow-none border">
-            <div class="card-header py-2 text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #065f46 0%, #059669 100%) !important;">
+            <div class="card-header py-2 text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #be185d 0%, #e11d48 100%) !important;">
                 <h6 class="card-title m-0 fw-bold text-white"><i class="fas fa-receipt me-1"></i> Receipts & Payments (<?= count($invoice['payments']) ?>)</h6>
                 <span class="badge bg-light text-success fw-bold small">
                     ₹<?= number_format(array_sum(array_column($invoice['payments'], 'amount')), 2) ?>

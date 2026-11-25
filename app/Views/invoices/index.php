@@ -271,7 +271,7 @@
     <!-- Right Side Invoice View Column (No scrollbar, full content flows naturally; hidden on mobile) -->
     <div class="col-lg-7 col-xl-7 transition-col d-none d-lg-block" id="invoiceDetailCol">
         <div class="card card-outline card-primary shadow-sm mb-3" id="invoiceDetailCard">
-            <div class="card-header text-white py-2 d-flex justify-content-between align-items-center" id="invoiceDetailCardHeader" style="background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;">
+            <div class="card-header text-white py-2 d-flex justify-content-between align-items-center" id="invoiceDetailCardHeader" style="background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%) !important;">
                 <h5 class="card-title fw-bold text-white m-0" id="detailPaneTitle">
                     <i class="fas fa-eye me-2"></i>Invoice Details
                 </h5>

@@ -185,7 +185,7 @@
 
             <!-- RIGHT: Voucher Details -->
             <div class="col-md-6 p-3">
-                <div class="rounded-2 px-3 py-2 mb-3 text-white" style="background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);">
+                <div class="rounded-2 px-3 py-2 mb-3 text-white" style="background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);">
                     <h6 class="fw-bold text-uppercase mb-0"><i class="fas fa-file-invoice me-1"></i> Invoice Details</h6>
                 </div>
                 

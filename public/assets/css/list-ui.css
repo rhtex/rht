@@ -485,83 +485,91 @@ body.is-mobile-device .lu-toolbar .lu-right { width: 100%; }
     color: #fff !important;
 }
 
-/* Stat cards (Clean neutral styling with subtle borders & soft hover) */
+/* Stat / Analytics Cards across List Pages (Dark colored backgrounds with light text) */
 .bt-stat {
     position: relative;
     overflow: hidden;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 8px;
-    background: #ffffff !important;
-    color: #1e293b !important;
-    padding: 7px 12px 7px;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+    color: #ffffff !important;
+    padding: 9px 14px 9px;
     height: 100%;
     cursor: pointer;
     text-decoration: none !important;
     display: block;
     transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, .04);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, .14);
 }
 .bt-stat:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
-    border-color: #cbd5e1 !important;
-    color: #0f172a !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, .22);
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    color: #ffffff !important;
 }
 .bt-stat.active {
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 1px #3b82f6, 0 4px 10px rgba(59, 130, 246, .12);
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 8px 20px rgba(15, 23, 42, .28);
     outline: none !important;
 }
 .bt-stat .bt-stat-icon {
     position: absolute;
-    right: 10px;
-    top: 8px;
+    right: 11px;
+    top: 9px;
     font-size: 20px;
-    color: #94a3b8 !important;
-    opacity: .35;
+    color: #ffffff !important;
+    opacity: .24;
     pointer-events: none;
 }
 .bt-stat .bt-stat-num {
-    font-size: 0.90rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    line-height: 1.1;
-    margin-bottom: 2px;
-    color: #0f172a !important;
+    line-height: 1.15;
+    margin-bottom: 3px;
+    color: #ffffff !important;
 }
 .bt-stat .bt-stat-label {
-    font-size: .56rem;
+    font-size: .60rem;
     text-transform: uppercase;
-    letter-spacing: .35px;
+    letter-spacing: .38px;
     font-weight: 700;
-    color: #64748b !important;
+    color: rgba(255, 255, 255, 0.86) !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.bt-stat .text-dark,
+.bt-stat .text-primary,
+.bt-stat .text-success,
+.bt-stat .text-danger,
+.bt-stat .text-warning,
+.bt-stat .text-info {
+    color: #ffffff !important;
+}
+.bt-stat .text-muted {
+    color: rgba(255, 255, 255, 0.82) !important;
+}
 .bt-stat .progress {
-    height: 2px;
-    background: #e2e8f0;
-    margin-top: 5px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.20);
+    margin-top: 6px;
     border-radius: 2px;
 }
-.bt-stat .progress-bar { background: #64748b; }
+.bt-stat .progress-bar { background: rgba(255, 255, 255, 0.88); }
 
-/* Vibrant Gradient Presets - Neutralized for clean, border-defined look */
-.bt-g-blue,
-.bt-g-indigo,
-.bt-g-slate,
-.bt-g-green,
-.bt-g-emerald,
-.bt-g-red,
-.bt-g-rose,
-.bt-g-amber,
-.bt-g-purple,
-.bt-g-teal,
-.bt-g-cyan,
-.bt-g-dark {
-    background: #ffffff !important;
-    color: #1e293b !important;
-}
+/* Rich Dark Gradient Presets for List Page Analytics Cards */
+.bt-g-blue    { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%) !important; color: #ffffff !important; }
+.bt-g-indigo  { background: linear-gradient(135deg, #312e81 0%, #4338ca 100%) !important; color: #ffffff !important; }
+.bt-g-slate   { background: linear-gradient(135deg, #334155 0%, #1e293b 100%) !important; color: #ffffff !important; }
+.bt-g-green   { background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important; color: #ffffff !important; }
+.bt-g-emerald { background: linear-gradient(135deg, #064e3b 0%, #059669 100%) !important; color: #ffffff !important; }
+.bt-g-red     { background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%) !important; color: #ffffff !important; }
+.bt-g-rose    { background: linear-gradient(135deg, #9f1239 0%, #be123c 100%) !important; color: #ffffff !important; }
+.bt-g-amber   { background: linear-gradient(135deg, #92400e 0%, #b45309 100%) !important; color: #ffffff !important; }
+.bt-g-purple  { background: linear-gradient(135deg, #581c87 0%, #7e22ce 100%) !important; color: #ffffff !important; }
+.bt-g-teal    { background: linear-gradient(135deg, #115e59 0%, #0f766e 100%) !important; color: #ffffff !important; }
+.bt-g-cyan    { background: linear-gradient(135deg, #155e75 0%, #0e7490 100%) !important; color: #ffffff !important; }
+.bt-g-dark    { background: linear-gradient(135deg, #111827 0%, #1f2937 100%) !important; color: #ffffff !important; }
 
 /* Main polished card wrapper */
 .bt-card {

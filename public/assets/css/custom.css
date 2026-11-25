@@ -534,6 +534,14 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
 }
 
 /* Tabs & Pills inside colored Card Headers */
+.card-header:has(.nav-tabs),
+.card-header.p-0:has(.nav-tabs) {
+    padding-top: 10px !important;
+    padding-bottom: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
 .card-header .nav-tabs,
 .card-header .nav-pills,
 .card-header .nav-tabs.bg-light,
@@ -542,7 +550,17 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
 .card-header .nav-pills.bg-white {
     background-color: transparent !important;
     border-bottom: none !important;
-    gap: 4px;
+    gap: 6px;
+}
+
+.card-header .nav-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
+.card-header .nav-tabs .nav-item {
+    display: flex;
 }
 
 .card-header .nav-tabs .nav-link,
@@ -551,11 +569,24 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
     background-color: rgba(255, 255, 255, 0.12) !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
     border-radius: 8px !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     transition: all 0.2s ease !important;
 }
 
 .card-header .nav-tabs .nav-link {
     border-radius: 8px 8px 0 0 !important;
+    border-bottom: none !important;
+    padding: 0.55rem 1rem !important;
+    height: 100%;
+}
+
+.card-header .nav-tabs .nav-link .badge,
+.card-header .nav-pills .nav-link .badge {
+    padding: 2px 7px !important;
+    font-size: 0.70rem !important;
+    line-height: 1.2 !important;
 }
 
 .card-header .nav-tabs .nav-link:not(.active) i,

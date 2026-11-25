@@ -74,8 +74,8 @@ if (!empty($pendingDcs)) {
 </div>
 
 <div class="card border-0 shadow-sm card-tabs">
-    <div class="card-header bg-white p-0 border-bottom d-print-none">
-        <ul class="nav nav-tabs border-0 px-3 pt-2" id="reportTabs" role="tablist">
+    <div class="card-header p-0 border-bottom d-print-none">
+        <ul class="nav nav-tabs border-0 px-3" id="reportTabs" role="tablist">
             <li class="nav-item">
                 <a class="nav-link active fw-semibold" id="inventory-tab" data-bs-toggle="pill" href="#inventory" role="tab">
                     <i class="fas fa-warehouse me-1 text-primary"></i> Inventory Report

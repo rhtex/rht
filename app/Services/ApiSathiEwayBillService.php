@@ -669,4 +669,55 @@ class ApiSathiEwayBillService
 
         return ['success' => false, 'message' => $res['message']];
     }
+
+    /**
+     * Extend E-Way Bill validity via API Sathi (`ewb-extend-validity-v1/`).
+     */
+    public function extendValidity(int $ewayBillId, array $data, ?int $userId = null): array
+    {
+        $existing = $this->ewayModel->find($ewayBillId);
+        if (!$existing || empty($existing['ewaybill_number'])) {
+            return ['success' => false, 'message' => 'Active e-Way Bill number not found for validity extension.'];
+        }
+
+        $creds = $this->getCredentials();
+        if ($err = $this->validateCredentials($creds)) {
+            return ['success' => false, 'message' => $err];
+        }
+
+        $vehicleNo = strtoupper(trim(str_replace(' ', '', (string) ($data['vehicle_number'] ?? ($existing['vehicle_number'] ?? '')))));
+        $payload   = [
+            'ewbNo'             => (int) preg_replace('/\D/', '', (string) $existing['ewaybill_number']),
+            'remainingDistance' => max(1, (int) ($data['remaining_distance'] ?? 0)),
+            'extnRsnCode'       => max(1, (int) ($data['extn_reason_code'] ?? 1)),
+            'extnRemarks'       => trim((string) ($data['extn_remarks'] ?? 'In transit')),
+            'fromPincode'       => (int) ($data['from_pincode'] ?? ($existing['from_pincode'] ?? 0)),
+            'fromState'         => (int) ($data['from_state_code'] ?? ($existing['from_state_code'] ?? 33)),
+            'transDocNo'        => trim((string) ($data['transporter_doc_number'] ?? ($existing['transporter_doc_number'] ?? ''))),
+            'transDocDate'      => !empty($data['transporter_doc_date'])
+                ? $this->formatNicDate((string) $data['transporter_doc_date'])
+                : (!empty($existing['transporter_doc_date']) ? $this->formatNicDate((string) $existing['transporter_doc_date']) : ''),
+            'transMode'         => $this->mapNicTransMode($data['transport_mode'] ?? ($existing['transport_mode'] ?? '1')),
+            'vehicleNo'         => $vehicleNo,
+            'consignmentStatus' => strtoupper(trim((string) ($data['consignment_status'] ?? 'T'))),
+            'transitType'       => strtoupper(trim((string) ($data['transit_type'] ?? 'R'))),
+        ];
+
+        $res = $this->request('ewb-extend-validity-v1', $payload, $creds);
+
+        if ($res['success']) {
+            $validUntil = $this->parseNicDateTime($res['data']['validUpto'] ?? null) ?? $existing['valid_until'];
+            $this->ewayModel->update($ewayBillId, [
+                'valid_until'      => $validUntil,
+                'vehicle_number'   => $vehicleNo ?: $existing['vehicle_number'],
+                'last_sync_at'     => date('Y-m-d H:i:s'),
+                'response_payload' => json_encode($res['raw']),
+                'error_message'    => null,
+                'updated_by'       => $userId,
+            ]);
+            return ['success' => true, 'message' => 'e-Way Bill validity extended successfully via API Sathi.'];
+        }
+
+        return ['success' => false, 'message' => $res['message']];
+    }
 }

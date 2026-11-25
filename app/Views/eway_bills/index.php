@@ -251,11 +251,26 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
+                                            <!-- View e-Way Bill (Part-A / Part-B / API Response) -->
+                                            <?php if (can('eway_bill.view')): ?>
+                                                <a href="<?= site_url('eway_bills/view/' . $row['id']) ?>" class="btn btn-outline-info" title="View e-Way Bill Details &amp; Response">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            <?php endif; ?>
+
                                             <!-- Update Part B / Vehicle -->
                                             <?php if (in_array($row['status'], ['generated', 'part_a_generated']) && can('eway_bill.edit')): ?>
                                                 <button type="button" class="btn btn-outline-primary" title="Update Part-B / Vehicle" 
                                                     onclick="openPartBModal(<?= htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8') ?>)">
                                                     <i class="fas fa-truck-moving"></i>
+                                                </button>
+                                            <?php endif; ?>
+
+                                            <!-- Extend Validity -->
+                                            <?php if (in_array($row['status'], ['generated', 'part_a_generated']) && !empty($row['ewaybill_number']) && can('eway_bill.edit')): ?>
+                                                <button type="button" class="btn btn-outline-success" title="Extend e-Way Bill Validity"
+                                                    onclick="openExtendModal(<?= htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8') ?>)">
+                                                    <i class="fas fa-clock"></i>
                                                 </button>
                                             <?php endif; ?>
 
@@ -407,6 +422,79 @@
     </div>
 </div>
 
+<!-- Modal: Extend e-Way Bill Validity -->
+<div class="modal fade" id="modalExtend" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" id="formExtend" action="">
+            <?= csrf_field() ?>
+            <div class="modal-content shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-clock me-2"></i> Extend e-Way Bill Validity</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">Extend validity for e-Way Bill <strong id="extend_ewb_display"></strong> (allowed 8 hours before/after expiry).</p>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Remaining Distance (Km) <span class="text-danger">*</span></label>
+                            <input type="number" name="remaining_distance" id="extend_distance" class="form-control" min="1" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Reason <span class="text-danger">*</span></label>
+                            <select name="extn_reason_code" class="form-select" required>
+                                <option value="1">1 - Natural Calamity</option>
+                                <option value="2">2 - Law and Order Situation</option>
+                                <option value="3">3 - Transhipment</option>
+                                <option value="4">4 - Accident</option>
+                                <option value="5">5 - Others</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Vehicle Number</label>
+                            <input type="text" name="vehicle_number" id="extend_vehicle_number" class="form-control text-uppercase">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">From Pincode</label>
+                            <input type="text" name="from_pincode" id="extend_from_pincode" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">State Code</label>
+                            <input type="text" name="from_state_code" id="extend_from_state" class="form-control" value="33">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Consignment Status</label>
+                            <select name="consignment_status" class="form-select">
+                                <option value="T">In Transit (T)</option>
+                                <option value="M">Movement (M)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Transit Type</label>
+                            <select name="transit_type" class="form-select">
+                                <option value="R">Road (R)</option>
+                                <option value="W">Warehouse (W)</option>
+                                <option value="O">Others (O)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Extension Remarks <span class="text-danger">*</span></label>
+                        <textarea name="extn_remarks" class="form-control" rows="2" placeholder="Reason for extending validity..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-clock me-1"></i> Extend Validity</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function openPartBModal(row) {
     document.getElementById('formPartB').action = '<?= site_url('eway_bills/update-part-b') ?>/' + row.id;
@@ -424,6 +512,16 @@ function openCancelModal(id, ewbNumber) {
     document.getElementById('formCancel').action = '<?= site_url('eway_bills/cancel') ?>/' + id;
     document.getElementById('cancel_ewb_display').innerText = '#' + ewbNumber;
     new bootstrap.Modal(document.getElementById('modalCancel')).show();
+}
+
+function openExtendModal(row) {
+    document.getElementById('formExtend').action = '<?= site_url('eway_bills/extend-validity') ?>/' + row.id;
+    document.getElementById('extend_ewb_display').innerText = '#' + (row.ewaybill_number || row.document_number);
+    document.getElementById('extend_distance').value = row.distance_km > 0 ? row.distance_km : 10;
+    document.getElementById('extend_vehicle_number').value = row.vehicle_number || '';
+    document.getElementById('extend_from_pincode').value = row.from_pincode || '';
+    document.getElementById('extend_from_state').value = row.from_state_code || '33';
+    new bootstrap.Modal(document.getElementById('modalExtend')).show();
 }
 </script>
 <?= $this->endSection() ?>

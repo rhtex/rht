@@ -495,6 +495,48 @@ class EwayBillController extends BaseController
     }
 
     /**
+     * View Generated e-Way Bill Details (Part-A, Part-B status, stored API Sathi response)
+     */
+    public function view($id)
+    {
+        $ewayBill = $this->ewayModel->find((int) $id);
+        if (!$ewayBill) {
+            return redirect()->to(site_url('eway_bills'))->with('error', 'e-Way Bill record not found.');
+        }
+
+        return view('eway_bills/view', [
+            'title'    => 'e-Way Bill #' . ($ewayBill['ewaybill_number'] ?: $ewayBill['document_number']),
+            'ewayBill' => $ewayBill,
+        ]);
+    }
+
+    /**
+     * Extend e-Way Bill Validity
+     */
+    public function extendValidity($id)
+    {
+        $input  = $this->request->getPost();
+        $userId = session('user_id') ? (int) session('user_id') : 1;
+
+        $rules = [
+            'remaining_distance' => 'required|is_natural_no_zero',
+            'extn_reason_code'   => 'required',
+            'extn_remarks'       => 'required',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->with('error', implode('<br>', $this->validator->getErrors()));
+        }
+
+        $res = $this->ewayService->extendValidity((int) $id, $input, $userId);
+        if (!empty($res['success'])) {
+            return redirect()->to(site_url('eway_bills'))->with('success', $res['message']);
+        }
+
+        return redirect()->back()->with('error', $res['message'] ?? 'Failed to extend e-Way Bill validity.');
+    }
+
+    /**
      * Sync Status with API Sathi / NIC
      */
     public function sync($id)

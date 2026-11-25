@@ -226,7 +226,9 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('eway_bills/update-part-b/(:num)', 'EwayBillController::updatePartB/$1', ['filter' => 'permission:eway_bill.edit']);
     $routes->post('eway_bills/cancel/(:num)', 'EwayBillController::cancel/$1', ['filter' => 'permission:eway_bill.delete']);
     $routes->post('eway_bills/regenerate/(:num)', 'EwayBillController::regenerate/$1', ['filter' => 'permission:eway_bill.create']);
+    $routes->get('eway_bills/view/(:num)', 'EwayBillController::view/$1', ['filter' => 'permission:eway_bill.view']);
     $routes->get('eway_bills/sync/(:num)', 'EwayBillController::sync/$1', ['filter' => 'permission:eway_bill.view']);
+    $routes->post('eway_bills/extend-validity/(:num)', 'EwayBillController::extendValidity/$1', ['filter' => 'permission:eway_bill.edit']);
 
     // Purchase (Vendors) Management
     $routes->get('vendors', 'VendorController::index', ['filter' => 'permission:vendor.view']);
@@ -440,7 +442,9 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('eway_bills/update-part-b/(:num)', 'EwayBillController::updatePartB/$1', ['filter' => 'permission:eway_bill.edit']);
     $routes->post('eway_bills/cancel/(:num)', 'EwayBillController::cancel/$1', ['filter' => 'permission:eway_bill.delete']);
     $routes->post('eway_bills/regenerate/(:num)', 'EwayBillController::regenerate/$1', ['filter' => 'permission:eway_bill.create']);
+    $routes->get('eway_bills/view/(:num)', 'EwayBillController::view/$1', ['filter' => 'permission:eway_bill.view']);
     $routes->get('eway_bills/sync/(:num)', 'EwayBillController::sync/$1', ['filter' => 'permission:eway_bill.view']);
+    $routes->post('eway_bills/extend-validity/(:num)', 'EwayBillController::extendValidity/$1', ['filter' => 'permission:eway_bill.edit']);
 
     // Purchase (Vendors) Management
     $routes->get('vendors', 'VendorController::index', ['filter' => 'permission:vendor.view']);

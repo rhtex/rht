@@ -218,6 +218,11 @@ class ReconciliationModel extends Model
      */
     public function matchTransaction($transactionId, $paymentType, $paymentId)
     {
+        $paymentTable = $this->getPaymentTable($paymentType);
+        if ($paymentTable === null) {
+            return false;
+        }
+
         $db = \Config\Database::connect();
         
         // Start transaction
@@ -231,7 +236,6 @@ class ReconciliationModel extends Model
         ]);
         
         // Update payment record
-        $paymentTable = $this->getPaymentTable($paymentType);
         $db->table($paymentTable)->where('id', $paymentId)->update([
             'bank_transaction_id' => $transactionId
         ]);
@@ -258,6 +262,11 @@ class ReconciliationModel extends Model
         if (!$transaction || !$transaction['reference_type'] || !$transaction['reference_id']) {
             return false;
         }
+
+        $paymentTable = $this->getPaymentTable($transaction['reference_type']);
+        if ($paymentTable === null) {
+            return false;
+        }
         
         // Start transaction
         $db->transStart();
@@ -270,7 +279,6 @@ class ReconciliationModel extends Model
         ]);
         
         // Update payment record
-        $paymentTable = $this->getPaymentTable($transaction['reference_type']);
         $db->table($paymentTable)->where('id', $transaction['reference_id'])->update([
             'bank_transaction_id' => null
         ]);
@@ -284,7 +292,7 @@ class ReconciliationModel extends Model
     /**
      * Get payment table name from type
      */
-    protected function getPaymentTable($paymentType)
+    protected function getPaymentTable($paymentType): ?string
     {
         $tables = [
             'invoice_payment' => 'invoice_payments',
@@ -293,7 +301,7 @@ class ReconciliationModel extends Model
             'agent_payment' => 'agent_payments',
         ];
         
-        return $tables[$paymentType] ?? 'payments';
+        return $tables[$paymentType] ?? null;
     }
 
     /**

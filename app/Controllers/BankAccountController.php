@@ -97,6 +97,11 @@ class BankAccountController extends BaseController
 
     public function update($id)
     {
+        $existing = $this->bankAccountModel->find($id);
+        if (!$existing) {
+            return redirect()->to('bank_accounts')->with('error', 'Bank account not found.');
+        }
+
         $data = $this->request->getPost();
         if (empty($data['account_type'])) {
             $data['account_type'] = 'Bank';
@@ -124,7 +129,23 @@ class BankAccountController extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        $newBalance = round((float) $data['current_balance'], 2);
+        $oldBalance = round((float) ($existing['current_balance'] ?? 0), 2);
+        $diff = round($newBalance - $oldBalance, 2);
+
         $this->bankAccountModel->update($id, $data);
+
+        if ($diff != 0.0) {
+            (new \App\Models\BankTransactionModel())->save([
+                'bank_account_id'  => $id,
+                'transaction_date' => date('Y-m-d'),
+                'type'             => $diff > 0 ? 'credit' : 'debit',
+                'amount'           => abs($diff),
+                'description'      => 'Manual Balance Adjustment on Account Edit',
+                'balance_after'    => $newBalance,
+            ]);
+        }
+
         return redirect()->to('bank_accounts')->with('success', 'Bank account updated successfully.');
     }
 

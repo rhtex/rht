@@ -37,10 +37,37 @@ class BankTransactionController extends BaseController
         return view('bank_accounts/statement', $data);
     }
 
+    /**
+     * Recalculate balance_after on all transactions for an account backward from its latest balance.
+     */
+    private function recalculateRunningBalances(int $accountId, float $latestBalance): void
+    {
+        $rows = $this->transactionModel
+            ->where('bank_account_id', $accountId)
+            ->orderBy('transaction_date', 'DESC')
+            ->orderBy('id', 'DESC')
+            ->findAll();
+
+        $running = round($latestBalance, 2);
+        foreach ($rows as $row) {
+            if (round((float) ($row['balance_after'] ?? 0), 2) !== $running) {
+                $this->transactionModel->update($row['id'], ['balance_after' => $running]);
+            }
+            $amt = (float) ($row['amount'] ?? 0);
+            $running = ($row['type'] === 'credit')
+                ? round($running - $amt, 2)
+                : round($running + $amt, 2);
+        }
+    }
+
     public function store()
     {
-        $accountId = $this->request->getPost('bank_account_id');
-        
+        $accountId = (int) $this->request->getPost('bank_account_id');
+        $account = $this->accountModel->find($accountId);
+        if (!$account) {
+            return redirect()->back()->withInput()->with('error', 'Bank account not found.');
+        }
+
         if (!$this->validate($this->transactionModel->getValidationRules())) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
@@ -48,23 +75,19 @@ class BankTransactionController extends BaseController
         $db = \Config\Database::connect();
         $db->transStart();
 
-        $account = $this->accountModel->find($accountId);
         $type = $this->request->getPost('type');
-        $amount = $this->request->getPost('amount');
-        
-        $newBalance = $account['current_balance'];
-        if ($type === 'credit') {
-            $newBalance += $amount;
-        } else {
-            $newBalance -= $amount;
-        }
+        $amount = round((float) $this->request->getPost('amount'), 2);
+
+        $newBalance = round((float) ($account['current_balance'] ?? 0), 2);
+        $newBalance = ($type === 'credit')
+            ? round($newBalance + $amount, 2)
+            : round($newBalance - $amount, 2);
 
         $transactionData = $this->request->getPost();
+        $transactionData['amount'] = $amount;
         $transactionData['balance_after'] = $newBalance;
 
         $this->transactionModel->save($transactionData);
-        
-        // Update account balance
         $this->accountModel->update($accountId, ['current_balance' => $newBalance]);
 
         $db->transComplete();
@@ -104,31 +127,35 @@ class BankTransactionController extends BaseController
         $db = \Config\Database::connect();
         $db->transStart();
 
-        $accountId = $oldTransaction['bank_account_id'];
+        $accountId = (int) $oldTransaction['bank_account_id'];
         $account = $this->accountModel->find($accountId);
-        
+
         // Reverse old transaction
-        $balance = $account['current_balance'];
-        if ($oldTransaction['type'] === 'credit') {
-            $balance -= $oldTransaction['amount'];
-        } else {
-            $balance += $oldTransaction['amount'];
-        }
+        $balance = round((float) ($account['current_balance'] ?? 0), 2);
+        $oldAmount = round((float) ($oldTransaction['amount'] ?? 0), 2);
+        $balance = ($oldTransaction['type'] === 'credit')
+            ? round($balance - $oldAmount, 2)
+            : round($balance + $oldAmount, 2);
 
         // Apply new transaction
         $newType = $this->request->getPost('type');
-        $newAmount = $this->request->getPost('amount');
-        if ($newType === 'credit') {
-            $balance += $newAmount;
-        } else {
-            $balance -= $newAmount;
+        $newAmount = round((float) $this->request->getPost('amount'), 2);
+        $balance = ($newType === 'credit')
+            ? round($balance + $newAmount, 2)
+            : round($balance - $newAmount, 2);
+
+        // If reconciled and amount/type changed, unmatch linked payment to avoid stale reconciliation
+        if (!empty($oldTransaction['is_reconciled']) && ($oldTypeChanged = ($newType !== $oldTransaction['type'] || $newAmount !== $oldAmount))) {
+            (new \App\Models\ReconciliationModel())->unmatchTransaction($id);
         }
 
         $transactionData = $this->request->getPost();
+        $transactionData['amount'] = $newAmount;
         $transactionData['balance_after'] = $balance;
 
         $this->transactionModel->update($id, $transactionData);
         $this->accountModel->update($accountId, ['current_balance' => $balance]);
+        $this->recalculateRunningBalances($accountId, $balance);
 
         $db->transComplete();
 
@@ -145,18 +172,23 @@ class BankTransactionController extends BaseController
         $db = \Config\Database::connect();
         $db->transStart();
 
-        $accountId = $transaction['bank_account_id'];
-        $account = $this->accountModel->find($accountId);
-        
-        $balance = $account['current_balance'];
-        if ($transaction['type'] === 'credit') {
-            $balance -= $transaction['amount'];
-        } else {
-            $balance += $transaction['amount'];
+        // Unmatch linked payment first if this transaction was reconciled
+        if (!empty($transaction['is_reconciled'])) {
+            (new \App\Models\ReconciliationModel())->unmatchTransaction($id);
         }
+
+        $accountId = (int) $transaction['bank_account_id'];
+        $account = $this->accountModel->find($accountId);
+
+        $balance = round((float) ($account['current_balance'] ?? 0), 2);
+        $amt = round((float) ($transaction['amount'] ?? 0), 2);
+        $balance = ($transaction['type'] === 'credit')
+            ? round($balance - $amt, 2)
+            : round($balance + $amt, 2);
 
         $this->transactionModel->delete($id);
         $this->accountModel->update($accountId, ['current_balance' => $balance]);
+        $this->recalculateRunningBalances($accountId, $balance);
 
         $db->transComplete();
 

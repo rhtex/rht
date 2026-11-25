@@ -184,11 +184,29 @@ class ReconciliationController extends BaseController
         $unmatchedInvoicePayments = $this->reconciliationModel->getUnmatchedInvoicePayments($accountId, $startDate, $endDate);
         $unmatchedOutgoingPayments = $this->reconciliationModel->getAllUnmatchedOutgoingPayments($accountId, $startDate, $endDate);
         
-        // Calculate balances
-        $openingBalance = 0; // You may want to get this from account history
-        $totalCredits = array_sum(array_column($matchedTransactions, 'type') === 'credit' ? array_column($matchedTransactions, 'amount') : [0]);
-        $totalDebits = array_sum(array_column($matchedTransactions, 'type') === 'debit' ? array_column($matchedTransactions, 'amount') : [0]);
-        $closingBalance = $account['current_balance'];
+        // Calculate balances accurately
+        $totalCredits = 0.0;
+        $totalDebits = 0.0;
+        foreach ($matchedTransactions as $txn) {
+            if (($txn['type'] ?? '') === 'credit') {
+                $totalCredits += (float) ($txn['amount'] ?? 0);
+            } elseif (($txn['type'] ?? '') === 'debit') {
+                $totalDebits += (float) ($txn['amount'] ?? 0);
+            }
+        }
+        $totalCredits = round($totalCredits, 2);
+        $totalDebits = round($totalDebits, 2);
+
+        $closingBalance = round((float) ($account['current_balance'] ?? 0), 2);
+        // Opening balance = current_balance minus net movements from $startDate onward
+        $db = \Config\Database::connect();
+        $netFromStart = $db->table('bank_transactions')
+            ->select("COALESCE(SUM(CASE WHEN type = 'credit' THEN amount ELSE -amount END), 0) AS net_amount", false)
+            ->where('bank_account_id', $accountId)
+            ->where('transaction_date >=', $startDate)
+            ->get()
+            ->getRowArray();
+        $openingBalance = round($closingBalance - (float) ($netFromStart['net_amount'] ?? 0), 2);
         
         $data = [
             'title' => 'Reconciliation Report - ' . $account['bank_name'],

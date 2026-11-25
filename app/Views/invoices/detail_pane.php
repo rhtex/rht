@@ -106,7 +106,7 @@
 
         <div class="col-md-6">
             <div class="card card-outline card-info h-100 shadow-none border">
-                <div class="card-header py-2 text-white" style="background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%) !important;">
+                <div class="card-header py-2 text-white" style="background: linear-gradient(135deg, #9d174d 0%, #db2777 100%) !important;">
                     <h6 class="card-title m-0 fw-bold text-white"><i class="fas fa-calendar-alt me-1"></i> Dates & References</h6>
                 </div>
                 <div class="card-body p-2">

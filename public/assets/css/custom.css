@@ -450,7 +450,7 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
     background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
 }
 .card.card-info > .card-header {
-    background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%) !important;
+    background: linear-gradient(135deg, #9d174d 0%, #db2777 100%) !important;
 }
 .card.card-success > .card-header {
     background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%) !important;
@@ -521,7 +521,7 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
 }
 
 .card-header .btn-info {
-    background-color: #0284c7 !important;
+    background-color: #4f46e5 !important;
     color: #ffffff !important;
     border: 1px solid rgba(255, 255, 255, 0.45) !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;

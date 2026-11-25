@@ -216,7 +216,7 @@
     <!-- Agent Commission Information -->
     <?php if (!empty($invoice['agent_id']) && !empty($agent)): ?>
     <div class="card card-outline card-info">
-        <div class="card-header text-white" style="background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%) !important;">
+        <div class="card-header text-white" style="background: linear-gradient(135deg, #9d174d 0%, #db2777 100%) !important;">
             <h3 class="card-title text-white fw-bold"><i class="fas fa-user-tie me-1"></i> Agent Commission</h3>
             <?php if ($invoice['agent_commission_status'] == 'Unpaid' && $invoice['agent_commission_amount'] > 0): ?>
                 <div class="card-tools">
@@ -705,7 +705,7 @@
 
     <!-- Delivery History Timeline -->
     <div class="card card-outline card-info mb-3">
-        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%) !important;">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #78350f 0%, #b45309 100%) !important;">
             <h3 class="card-title text-white fw-bold mb-0"><i class="fas fa-history me-1"></i> Delivery History</h3>
             <div class="card-tools ms-auto">
                 <button type="button" class="btn btn-tool text-white" data-card-widget="collapse">

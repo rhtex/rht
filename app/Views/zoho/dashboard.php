@@ -263,7 +263,7 @@
 <!-- Recent Synchronization Runs & Audit Logs -->
 <div class="row g-4">
     <div class="col-lg-6">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card border-0 shadow-sm rounded-4 h-100 card-info">
             <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                 <h6 class="card-title mb-0 fw-bold"><i class="fas fa-tasks text-info me-2"></i>Recent Synchronization Runs</h6>
             </div>
@@ -319,7 +319,7 @@
     </div>
 
     <div class="col-lg-6">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card border-0 shadow-sm rounded-4 h-100 card-success">
             <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                 <h6 class="card-title mb-0 fw-bold"><i class="fas fa-satellite-dish text-primary me-2"></i>Recent API Calls</h6>
                 <a href="<?= site_url('settings/integrations/zoho/logs') ?>" class="btn btn-xs btn-outline-primary fw-semibold">View All Logs</a>

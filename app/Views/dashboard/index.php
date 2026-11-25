@@ -266,7 +266,7 @@
     <!-- Main Analytics Row -->
     <div class="row compact-row mb-3">
         <div class="col-xl-8">
-            <div class="card chart-card">
+            <div class="card chart-card card-primary">
                 <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <span id="chartTitle"><?= lang("App.financial_velocity") ?></span>
                     <div class="d-flex flex-wrap align-items-center gap-2">
@@ -295,7 +295,7 @@
             </div>
         </div>
         <div class="col-xl-4">
-            <div class="card chart-card">
+            <div class="card chart-card card-info">
                 <div class="card-header text-center"><?= lang("App.revenue_by_category") ?></div>
                 <div class="card-body chart-body-wrap" style="display: flex; align-items: center; justify-content: center;">
                     <canvas id="categoryDoughnutChart"></canvas>
@@ -308,7 +308,7 @@
     <div class="row compact-row">
         <!-- Top Products -->
         <div class="col-xl-4 col-md-6 mb-3">
-            <div class="card list-card border-0">
+            <div class="card list-card border-0 card-success">
                 <div class="card-header fw-bold d-flex justify-content-between align-items-center">
                     <span style="font-size: 0.85rem;"><?= lang("App.top_performing_products") ?></span>
                     <select id="topProductsFilter" class="form-select form-select-sm border-0 fw-semibold text-white" style="background-color: rgba(255,255,255,0.15); width: auto; font-size: 0.72rem; padding: 2px 24px 2px 8px; cursor: pointer; border-radius: 6px;">
@@ -344,7 +344,7 @@
 
         <!-- <?= lang("App.top_customers") ?> -->
         <div class="col-xl-4 col-md-6 mb-3">
-            <div class="card list-card border-0">
+            <div class="card list-card border-0 card-secondary">
                 <div class="card-header fw-bold d-flex justify-content-between align-items-center">
                     <span style="font-size: 0.85rem;"><?= lang("App.top_customers") ?></span>
                     <select id="topCustomersFilter" class="form-select form-select-sm border-0 fw-semibold text-white" style="background-color: rgba(255,255,255,0.15); width: auto; font-size: 0.72rem; padding: 2px 24px 2px 8px; cursor: pointer; border-radius: 6px;">
@@ -380,7 +380,7 @@
 
         <!-- <?= lang("App.recent_activity") ?> -->
         <div class="col-xl-4 col-md-12 mb-3">
-            <div class="card list-card border-0">
+            <div class="card list-card border-0 card-warning">
                 <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <span class="fw-bold text-white"><?= lang("App.recent_activity") ?></span>
                     <ul class="nav nav-pills nav-sm" id="recentTab" role="tablist">

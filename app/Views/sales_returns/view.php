@@ -199,7 +199,7 @@
         <div class="row">
             <!-- Tax Slabs Breakdown (CGST, SGST, IGST) -->
             <div class="col-md-6 mb-3">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm h-100 card-success">
                     <div class="card-header bg-light">
                         <h6 class="card-title fw-bold mb-0"><i class="fas fa-percentage me-1"></i> GST Breakdown</h6>
                     </div>
@@ -260,7 +260,7 @@
 
             <!-- Totals Summary Card -->
             <div class="col-md-6 mb-3">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm h-100 card-warning">
                     <div class="card-header bg-light">
                         <h6 class="card-title fw-bold mb-0"><i class="fas fa-calculator me-1"></i> Amount Summary</h6>
                     </div>

@@ -99,7 +99,7 @@
     <!-- Left: Configuration Builder -->
     <div class="col-lg-6 mb-3">
         <!-- Page Setup Card -->
-        <div class="card mb-3">
+        <div class="card mb-3 card-primary">
             <div class="card-header bg-light py-2">
                 <strong><i class="fas fa-sliders-h me-1"></i> Page & Typography Setup — <?= esc($docTypes[$activeDoc]['label']) ?></strong>
             </div>
@@ -136,7 +136,7 @@
         </div>
 
         <!-- Default Notes & Terms Card -->
-        <div class="card mb-3">
+        <div class="card mb-3 card-info">
             <div class="card-header bg-light py-2">
                 <strong><i class="fas fa-align-left me-1"></i> Default Terms & Conditions and Notes — <?= esc($docTypes[$activeDoc]['label']) ?></strong>
             </div>
@@ -242,7 +242,7 @@
 
     <!-- Right: Live Print Preview -->
     <div class="col-lg-6">
-        <div class="card preview-pane-sticky">
+        <div class="card preview-pane-sticky card-success">
             <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
                 <strong><i class="fas fa-eye me-1"></i> Live Print Preview (Sample Data)</strong>
                 <div class="d-flex align-items-center gap-2">

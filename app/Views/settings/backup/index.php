@@ -344,7 +344,7 @@
                             </div>
 
                             <div class="col-md-5">
-                                <div class="card bg-light border">
+                                <div class="card bg-light border card-info">
                                     <div class="card-header bg-white fw-bold">
                                         <i class="fas fa-terminal me-1"></i> Cron / Task Scheduler Setup
                                     </div>
@@ -498,7 +498,7 @@
                             </div>
 
                             <div class="col-md-4">
-                                <div class="card bg-light border">
+                                <div class="card bg-light border card-success">
                                     <div class="card-header bg-white fw-bold">
                                         <i class="fab fa-google text-danger me-1"></i> How to get Google Drive Credentials
                                     </div>

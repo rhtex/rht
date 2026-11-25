@@ -346,7 +346,7 @@
         <div class="row">
             <?php if (!empty($bill['notes'])): ?>
                 <div class="col-md-6 mb-3">
-                    <div class="card shadow-sm h-100">
+                    <div class="card shadow-sm h-100 card-info">
                         <div class="card-header bg-light">
                             <h6 class="card-title fw-bold mb-0"><i class="fas fa-sticky-note me-1"></i> Vendor / Purchase Notes</h6>
                         </div>
@@ -358,7 +358,7 @@
             <?php endif; ?>
             <?php if (!empty($bill['terms'])): ?>
                 <div class="col-md-6 mb-3">
-                    <div class="card shadow-sm h-100">
+                    <div class="card shadow-sm h-100 card-warning">
                         <div class="card-header bg-light">
                             <h6 class="card-title fw-bold mb-0"><i class="fas fa-gavel me-1"></i> Payment & Purchase Terms</h6>
                         </div>

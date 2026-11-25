@@ -215,7 +215,7 @@
     <div class="row">
         <!-- Tax Breakdown by Slab -->
         <div class="col-md-6 mb-3">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm h-100 card-info">
                 <div class="card-header bg-light">
                     <h6 class="card-title fw-bold mb-0"><i class="fas fa-percent me-1"></i> GST Breakdown By Slab</h6>
                 </div>
@@ -283,7 +283,7 @@
 
         <!-- Totals Summary Card -->
         <div class="col-md-6 mb-3">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm h-100 card-success">
                 <div class="card-header bg-light">
                     <h6 class="card-title fw-bold mb-0"><i class="fas fa-calculator me-1"></i> Amount Summary</h6>
                 </div>
@@ -330,7 +330,7 @@
         <div class="row">
             <?php if (!empty($quotation['notes'])): ?>
                 <div class="col-md-6 mb-3">
-                    <div class="card shadow-sm h-100">
+                    <div class="card shadow-sm h-100 card-warning">
                         <div class="card-header bg-light">
                             <h6 class="card-title fw-bold mb-0"><i class="fas fa-sticky-note me-1"></i> Customer Notes</h6>
                         </div>
@@ -342,7 +342,7 @@
             <?php endif; ?>
             <?php if (!empty($quotation['terms'])): ?>
                 <div class="col-md-6 mb-3">
-                    <div class="card shadow-sm h-100">
+                    <div class="card shadow-sm h-100 card-dark">
                         <div class="card-header bg-light">
                             <h6 class="card-title fw-bold mb-0"><i class="fas fa-gavel me-1"></i> Terms & Conditions</h6>
                         </div>

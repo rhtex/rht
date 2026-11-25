@@ -52,7 +52,7 @@
         </div>
 
         <!-- Contact Info Card -->
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 card-primary">
             <div class="card-header bg-white border-0 py-3">
                 <h5 class="card-title mb-0 fw-bold"><i class="fas fa-info-circle me-2 text-primary"></i> Contact Information</h5>
             </div>
@@ -86,7 +86,7 @@
         </div>
 
         <!-- Address & Tax Card -->
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm card-info">
             <div class="card-header bg-white border-0 py-3">
                 <h5 class="card-title mb-0 fw-bold"><i class="fas fa-map-marker-alt me-2 text-primary"></i> Business Details</h5>
             </div>
@@ -120,7 +120,7 @@
 
     <!-- Right Column: Tabs for Transactions -->
     <div class="col-md-8">
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden card-success">
             <div class="card-header bg-white p-0 border-0">
                 <ul class="nav nav-pills nav-fill bg-light p-1" id="vendorTabs" role="tablist">
                     <li class="nav-item" role="presentation">

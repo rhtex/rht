@@ -127,7 +127,7 @@
 
         <!-- Informational Sidebar Column -->
         <div class="col-lg-4">
-            <div class="card bg-light border-0 shadow-sm mb-3">
+            <div class="card bg-light border-0 shadow-sm mb-3 card-primary">
                 <div class="card-header bg-white fw-bold">
                     <i class="fas fa-info-circle text-primary me-2"></i>How It Works on Shared Hosting
                 </div>
@@ -141,7 +141,7 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm card-info">
                 <div class="card-header bg-white fw-bold">
                     <i class="fas fa-desktop text-info me-2"></i>Preview Maintenance Screen
                 </div>

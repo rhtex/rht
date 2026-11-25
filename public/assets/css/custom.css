@@ -509,8 +509,26 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
 }
 
 .card-header .btn-primary {
-    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    background-color: #ffffff !important;
+    color: #1e3a8a !important;
+    border: 1px solid #ffffff !important;
+    font-weight: 600 !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
+}
+.card-header .btn-primary:hover {
+    background-color: #eff6ff !important;
+    color: #1e3a8a !important;
+}
+
+.card-header .btn-info {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
+.card-header .btn-secondary {
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
 }
 
 .card-header .text-muted:not(.btn):not(.badge),
@@ -522,14 +540,26 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
     color: rgba(255, 255, 255, 0.9) !important;
 }
 
+.card-header .btn-outline-primary,
 .card-header .btn-outline-secondary,
-.card-header .btn-outline-dark {
+.card-header .btn-outline-dark,
+.card-header .btn-outline-info,
+.card-header .btn-outline-success,
+.card-header .btn-outline-warning,
+.card-header .btn-outline-danger {
+    background-color: rgba(255, 255, 255, 0.14) !important;
     color: #ffffff !important;
     border-color: rgba(255, 255, 255, 0.55) !important;
 }
+.card-header .btn-outline-primary:hover,
 .card-header .btn-outline-secondary:hover,
-.card-header .btn-outline-dark:hover {
-    background-color: rgba(255, 255, 255, 0.15) !important;
+.card-header .btn-outline-dark:hover,
+.card-header .btn-outline-info:hover,
+.card-header .btn-outline-success:hover,
+.card-header .btn-outline-warning:hover,
+.card-header .btn-outline-danger:hover {
+    background-color: rgba(255, 255, 255, 0.28) !important;
+    border-color: #ffffff !important;
     color: #ffffff !important;
 }
 

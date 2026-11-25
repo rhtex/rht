@@ -132,9 +132,9 @@ if (!empty($pendingDcs)) {
                                 <?php 
                                     $stock = (float)$item['stock'];
                                     $cost = (float)$item['avg_cost'];
-                                    $valuation = $stock * $cost;
+                                    $rowValuation = $stock * $cost;
                                     $totalStock += $stock;
-                                    $totalValuation += $valuation;
+                                    $totalValuation += $rowValuation;
                                 ?>
                                 <tr>
                                     <td><span class="badge text-bg-primary font-monospace"><?= esc($item['yarn_count']) ?></span></td>
@@ -149,7 +149,7 @@ if (!empty($pendingDcs)) {
                                     <td><?= esc($item['brand_mill']) ?></td>
                                     <td><strong class="text-primary"><?= number_format($stock, 2) ?> Kg</strong></td>
                                     <td>₹<?= number_format($cost, 2) ?></td>
-                                    <td><strong class="text-success">₹<?= number_format($valuation, 2) ?></strong></td>
+                                    <td><strong class="text-success">₹<?= number_format($rowValuation, 2) ?></strong></td>
                                 </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -292,7 +292,7 @@ if (!empty($pendingDcs)) {
                             <?php 
                                 $grandValuation = 0;
                             ?>
-                            <?php if(!empty($valuation)): ?>
+                            <?php if (!empty($valuation) && is_array($valuation)): ?>
                                 <?php foreach($valuation as $v): ?>
                                 <?php 
                                     $val = (float)$v['total_value'];

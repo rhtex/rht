@@ -267,7 +267,7 @@
                                             <?php endif; ?>
 
                                             <!-- Extend Validity -->
-                                            <?php if (in_array($row['status'], ['generated', 'part_a_generated']) && !empty($row['ewaybill_number']) && can('eway_bill.edit')): ?>
+                                            <?php if (in_array($row['status'], ['generated', 'part_a_generated']) && can('eway_bill.edit')): ?>
                                                 <button type="button" class="btn btn-outline-success" title="Extend e-Way Bill Validity"
                                                     onclick="openExtendModal(<?= htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8') ?>)">
                                                     <i class="fas fa-clock"></i>
@@ -290,7 +290,7 @@
                                             <?php endif; ?>
 
                                             <!-- Sync status with API Sathi / NIC -->
-                                            <?php if (!empty($row['ewaybill_number']) && can('eway_bill.view')): ?>
+                                            <?php if ((!empty($row['ewaybill_number']) || in_array($row['status'], ['generated', 'part_a_generated'])) && can('eway_bill.view')): ?>
                                                 <a href="<?= site_url('eway_bills/sync/' . $row['id']) ?>" class="btn btn-outline-secondary" title="Sync Status from API Sathi / NIC">
                                                     <i class="fas fa-sync-alt"></i>
                                                 </a>

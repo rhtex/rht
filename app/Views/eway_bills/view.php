@@ -20,16 +20,21 @@ $decodedResp = !empty($ewayBill['response_payload']) ? json_decode($ewayBill['re
             <h1 class="h4 mb-0 fw-bold"><i class="fas fa-truck text-primary me-2"></i>e-Way Bill #<?= esc($ewayBill['ewaybill_number'] ?: 'Pending') ?></h1>
             <small class="text-muted">Document: <?= esc($ewayBill['document_number']) ?> (<?= esc(strtoupper(str_replace('_', ' ', $ewayBill['document_type']))) ?>)</small>
         </div>
-        <div class="d-flex flex-wrap gap-2">
+        <div class="d-flex flex-wrap gap-2 d-print-none">
             <a href="<?= site_url('eway_bills') ?>" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Back
             </a>
-            <?php if (!empty($ewayBill['ewaybill_number']) && can('eway_bill.view')): ?>
+            <?php if (in_array($ewayBill['status'] ?? '', ['generated', 'part_a_generated']) && can('eway_bill.edit')): ?>
+                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalExtendView">
+                    <i class="fas fa-clock me-1"></i> Extend Validity
+                </button>
+            <?php endif; ?>
+            <?php if ((!empty($ewayBill['ewaybill_number']) || in_array($ewayBill['status'] ?? '', ['generated', 'part_a_generated'])) && can('eway_bill.view')): ?>
                 <a href="<?= site_url('eway_bills/sync/' . $ewayBill['id']) ?>" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-sync-alt me-1"></i> Sync Status
                 </a>
             <?php endif; ?>
-            <button type="button" onclick="window.print()" class="btn btn-sm btn-dark d-print-none">
+            <button type="button" onclick="window.print()" class="btn btn-sm btn-dark">
                 <i class="fas fa-print me-1"></i> Print
             </button>
         </div>
@@ -112,4 +117,77 @@ $decodedResp = !empty($ewayBill['response_payload']) ? json_decode($ewayBill['re
         </div>
     </div>
 </div>
+
+<?php if (in_array($ewayBill['status'] ?? '', ['generated', 'part_a_generated']) && can('eway_bill.edit')): ?>
+<div class="modal fade" id="modalExtendView" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" action="<?= site_url('eway_bills/extend-validity/' . $ewayBill['id']) ?>">
+            <?= csrf_field() ?>
+            <div class="modal-content shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-clock me-2"></i> Extend e-Way Bill Validity</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Remaining Distance (Km) <span class="text-danger">*</span></label>
+                            <input type="number" name="remaining_distance" class="form-control" min="1" value="<?= max(1, (int) ($ewayBill['distance_km'] ?? 10)) ?>" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Reason <span class="text-danger">*</span></label>
+                            <select name="extn_reason_code" class="form-select" required>
+                                <option value="1">1 - Natural Calamity</option>
+                                <option value="2">2 - Law and Order Situation</option>
+                                <option value="3">3 - Transhipment</option>
+                                <option value="4">4 - Accident</option>
+                                <option value="5">5 - Others</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Vehicle Number</label>
+                            <input type="text" name="vehicle_number" class="form-control text-uppercase" value="<?= esc($ewayBill['vehicle_number'] ?? '') ?>">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">From Pincode</label>
+                            <input type="text" name="from_pincode" class="form-control" value="<?= esc($ewayBill['from_pincode'] ?? '') ?>">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">State Code</label>
+                            <input type="text" name="from_state_code" class="form-control" value="<?= esc($ewayBill['from_state_code'] ?? '33') ?>">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Consignment Status</label>
+                            <select name="consignment_status" class="form-select">
+                                <option value="T">In Transit (T)</option>
+                                <option value="M">Movement (M)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Transit Type</label>
+                            <select name="transit_type" class="form-select">
+                                <option value="R">Road (R)</option>
+                                <option value="W">Warehouse (W)</option>
+                                <option value="O">Others (O)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Extension Remarks <span class="text-danger">*</span></label>
+                        <textarea name="extn_remarks" class="form-control" rows="2" placeholder="Reason for extending validity..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-clock me-1"></i> Extend Validity</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<?php endif; ?>
 <?= $this->endSection() ?>

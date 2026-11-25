@@ -113,6 +113,7 @@ if (!empty($pendingDcs)) {
                     <table class="table table-hover align-middle mb-0 datatable-report">
                         <thead class="table-light text-uppercase small text-muted">
                             <tr>
+                                <th class="text-center" style="width: 48px;">#</th>
                                 <th>Yarn Count</th>
                                 <th>Type</th>
                                 <th>Color</th>
@@ -128,7 +129,7 @@ if (!empty($pendingDcs)) {
                                 $totalValuation = 0;
                             ?>
                             <?php if(!empty($inventorySummary)): ?>
-                                <?php foreach($inventorySummary as $item): ?>
+                                <?php foreach($inventorySummary as $idx => $item): ?>
                                 <?php 
                                     $stock = (float)$item['stock'];
                                     $cost = (float)$item['avg_cost'];
@@ -137,6 +138,7 @@ if (!empty($pendingDcs)) {
                                     $totalValuation += $rowValuation;
                                 ?>
                                 <tr>
+                                    <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                                     <td><span class="badge text-bg-primary font-monospace"><?= esc($item['yarn_count']) ?></span></td>
                                     <td>
                                         <span class="badge text-bg-<?= $item['yarn_type'] === 'Dyed' ? 'info' : 'secondary' ?>">
@@ -156,7 +158,7 @@ if (!empty($pendingDcs)) {
                         </tbody>
                         <tfoot class="table-light font-weight-bold">
                             <tr>
-                                <td colspan="4" class="text-end"><strong>Total Stock & Valuation:</strong></td>
+                                <td colspan="5" class="text-end"><strong>Total Stock & Valuation:</strong></td>
                                 <td><strong class="text-primary"><?= number_format($totalStock, 2) ?> Kg</strong></td>
                                 <td>-</td>
                                 <td><strong class="text-success fs-6">₹<?= number_format($totalValuation, 2) ?></strong></td>
@@ -176,6 +178,7 @@ if (!empty($pendingDcs)) {
                     <table class="table table-hover align-middle mb-0 datatable-report">
                         <thead class="table-light text-uppercase small text-muted">
                             <tr>
+                                <th class="text-center" style="width: 48px;">#</th>
                                 <th>DC Number</th>
                                 <th>DC Date</th>
                                 <th>Vendor Name</th>
@@ -188,13 +191,14 @@ if (!empty($pendingDcs)) {
                         </thead>
                         <tbody>
                             <?php if(!empty($pendingDcs)): ?>
-                                <?php foreach($pendingDcs as $dc): ?>
+                                <?php foreach($pendingDcs as $idx => $dc): ?>
                                 <?php 
                                     $issued = (float)$dc['total_issued'];
                                     $received = (float)$dc['total_received'];
                                     $pending = $issued - $received;
                                 ?>
                                 <tr>
+                                    <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                                     <td>
                                         <a href="<?= site_url('production/yarn-job-work/view/'.$dc['id']) ?>" class="fw-bold text-decoration-none">
                                             <?= esc($dc['dc_number']) ?>
@@ -219,7 +223,7 @@ if (!empty($pendingDcs)) {
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted py-4">No pending job work challans. All clear!</td>
+                                    <td colspan="9" class="text-center text-muted py-4">No pending job work challans. All clear!</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -237,6 +241,7 @@ if (!empty($pendingDcs)) {
                     <table class="table table-hover align-middle mb-0 datatable-report">
                         <thead class="table-light text-uppercase small text-muted">
                             <tr>
+                                <th class="text-center" style="width: 48px;">#</th>
                                 <th>Vendor Name</th>
                                 <th>Total Issued (Kg)</th>
                                 <th>Total Received (Kg)</th>
@@ -246,7 +251,7 @@ if (!empty($pendingDcs)) {
                         </thead>
                         <tbody>
                             <?php if(!empty($vendorWastage)): ?>
-                                <?php foreach($vendorWastage as $w): ?>
+                                <?php foreach($vendorWastage as $idx => $w): ?>
                                 <?php 
                                     $issued = (float)$w['issued'];
                                     $received = (float)$w['received'];
@@ -254,6 +259,7 @@ if (!empty($pendingDcs)) {
                                     $wastagePercent = $issued > 0 ? ($wastage / $issued) * 100 : 0;
                                 ?>
                                 <tr>
+                                    <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                                     <td><strong class="text-dark"><?= esc($w['vendor_name']) ?></strong></td>
                                     <td><?= number_format($issued, 2) ?> Kg</td>
                                     <td><?= number_format($received, 2) ?> Kg</td>
@@ -281,6 +287,7 @@ if (!empty($pendingDcs)) {
                     <table class="table table-hover align-middle mb-0 datatable-report">
                         <thead class="table-light text-uppercase small text-muted">
                             <tr>
+                                <th class="text-center" style="width: 48px;">#</th>
                                 <th>Yarn Count</th>
                                 <th>Yarn Type</th>
                                 <th>Color</th>
@@ -293,12 +300,13 @@ if (!empty($pendingDcs)) {
                                 $grandValuation = 0;
                             ?>
                             <?php if (!empty($valuation) && is_array($valuation)): ?>
-                                <?php foreach($valuation as $v): ?>
+                                <?php foreach($valuation as $idx => $v): ?>
                                 <?php 
                                     $val = (float)$v['total_value'];
                                     $grandValuation += $val;
                                 ?>
                                 <tr>
+                                    <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                                     <td><span class="badge text-bg-primary font-monospace"><?= esc($v['yarn_count']) ?></span></td>
                                     <td>
                                         <span class="badge text-bg-<?= $v['yarn_type'] === 'Dyed' ? 'info' : 'secondary' ?>">
@@ -314,7 +322,7 @@ if (!empty($pendingDcs)) {
                         </tbody>
                         <tfoot class="table-light font-weight-bold">
                             <tr>
-                                <td colspan="4" class="text-end"><strong>Grand Total Valuation:</strong></td>
+                                <td colspan="5" class="text-end"><strong>Grand Total Valuation:</strong></td>
                                 <td><strong class="text-success fs-5">₹<?= number_format($grandValuation, 2) ?></strong></td>
                             </tr>
                         </tfoot>

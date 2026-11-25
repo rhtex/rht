@@ -73,9 +73,15 @@
 
 <!-- Filter Card -->
 <div class="card card-outline card-primary mb-3 shadow-sm">
-    <div class="card-header py-2">
+    <div class="card-header py-2 d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false">
         <h3 class="card-title fw-bold"><i class="fas fa-filter me-1"></i> Filter Vendor Credits</h3>
+        <div class="card-tools ms-auto">
+            <button type="button" class="btn btn-tool" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-label="Toggle Filters">
+                <i class="fas fa-plus filter-toggle-icon"></i>
+            </button>
+        </div>
     </div>
+    <div id="filterCollapse" class="collapse">
     <div class="card-body">
         <form method="get" class="row g-2 align-items-end" id="vcFilterForm">
             <div class="col-md-3 col-sm-6">
@@ -115,6 +121,7 @@
                 <a href="<?= site_url('vendor_credits') ?>" class="btn btn-outline-secondary btn-sm px-3 ms-1"><i class="fas fa-undo me-1"></i> Reset</a>
             </div>
         </form>
+    </div>
     </div>
 </div>
 

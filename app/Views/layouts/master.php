@@ -158,6 +158,19 @@
             };
             setTimeout(function() { window.initStyledSelects(); }, 0);
 
+            // Sync +/- toggle icons on collapsible filter cards and re-init hidden Select2 widths
+            document.addEventListener('show.bs.collapse', function(e) {
+                const icon = e.target.closest('.card')?.querySelector('.filter-toggle-icon, #filterToggleIcon');
+                if (icon) { icon.classList.remove('fa-plus'); icon.classList.add('fa-minus'); }
+            });
+            document.addEventListener('shown.bs.collapse', function(e) {
+                if (window.initStyledSelects) window.initStyledSelects(e.target);
+            });
+            document.addEventListener('hide.bs.collapse', function(e) {
+                const icon = e.target.closest('.card')?.querySelector('.filter-toggle-icon, #filterToggleIcon');
+                if (icon) { icon.classList.remove('fa-minus'); icon.classList.add('fa-plus'); }
+            });
+
             // Initialize Flatpickr for all date inputs
             flatpickr("input[type=date]", {
                 dateFormat: "Y-m-d", // Format for the backend

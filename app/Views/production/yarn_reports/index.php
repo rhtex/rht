@@ -31,12 +31,9 @@ if (!empty($pendingDcs)) {
             <p class="mb-0 text-white-50 small">Consolidated analytics across raw materials, vendor job work pipelines, wastage, and inventory valuation.</p>
         </div>
         <div class="col-md-5 text-md-end">
-            <a href="<?= site_url('production/yarn-inventory') ?>" class="btn btn-light btn-sm fw-semibold shadow-sm me-2">
+            <a href="<?= site_url('production/yarn-inventory') ?>" class="btn btn-light btn-sm fw-semibold shadow-sm">
                 <i class="fas fa-warehouse me-1 text-primary"></i> Live Inventory
             </a>
-            <button onclick="window.print();" class="btn btn-warning btn-sm fw-semibold shadow-sm">
-                <i class="fas fa-print me-1"></i> Print All Reports
-            </button>
         </div>
     </div>
 </div>

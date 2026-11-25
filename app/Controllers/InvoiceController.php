@@ -369,6 +369,9 @@ class InvoiceController extends BaseController
 
         $data['title'] = 'Invoice #' . $data['invoice']['invoice_number'];
 
+        $ewayBillModel = new \App\Models\EwayBillModel();
+        $data['ewbState'] = $ewayBillModel->getActionStateForDocument('invoice', (int) $id);
+
         // AJAX request for side panel view
         if ($this->request->isAJAX() || $this->request->getGet('ajax') == 1) {
             return view('invoices/detail_pane', $data);

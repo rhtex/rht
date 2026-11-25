@@ -115,5 +115,37 @@ class EwayBillModel extends Model
 
         return null;
     }
+
+    /**
+     * Resolve the E-Way Bill UI action state ('view', 'regenerate', or 'generate')
+     * for a given document (e.g. 'invoice').
+     */
+    public function getActionStateForDocument(string $docType, int $docId): array
+    {
+        $active = $this->getActiveByDocument($docType, $docId);
+        if ($active && in_array($active['status'] ?? '', ['generated', 'part_a_generated'], true)) {
+            return [
+                'action'    => 'view',
+                'eway_bill' => $active,
+            ];
+        }
+
+        $latest = $this->where('document_type', $docType)
+            ->where('document_id', $docId)
+            ->orderBy('id', 'DESC')
+            ->first();
+
+        if ($latest && in_array($latest['status'] ?? '', ['cancelled', 'failed', 'draft'], true)) {
+            return [
+                'action'    => 'regenerate',
+                'eway_bill' => $latest,
+            ];
+        }
+
+        return [
+            'action'    => 'generate',
+            'eway_bill' => null,
+        ];
+    }
 }
 

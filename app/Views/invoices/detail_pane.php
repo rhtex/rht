@@ -40,6 +40,28 @@
             <a href="<?= site_url('invoices/print/' . $invoice['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white">
                 <i class="fas fa-print me-1"></i> Print
             </a>
+            <?php
+            $ewbAction = $ewbState['action'] ?? 'generate';
+            $ewbRecord = $ewbState['eway_bill'] ?? null;
+            ?>
+            <?php if ($ewbAction === 'view' && $ewbRecord && can('eway_bill.view')): ?>
+                <?php
+                $ewbUrl = !empty($ewbRecord['id'])
+                    ? site_url('eway_bills/view/' . $ewbRecord['id'])
+                    : site_url('eway_bills?search=' . urlencode((string) ($ewbRecord['ewaybill_number'] ?? '')));
+                ?>
+                <a href="<?= $ewbUrl ?>" class="btn btn-sm btn-outline-success" title="View e-Way Bill<?= !empty($ewbRecord['ewaybill_number']) ? ' #' . esc($ewbRecord['ewaybill_number']) : '' ?>">
+                    <i class="fas fa-truck me-1"></i> View e-Way Bill
+                </a>
+            <?php elseif ($ewbAction === 'regenerate' && !empty($ewbRecord['id']) && can('eway_bill.create')): ?>
+                <a href="<?= site_url('eway_bills/regenerate/' . $ewbRecord['id']) ?>" class="btn btn-sm btn-outline-warning text-dark" title="Regenerate e-Way Bill">
+                    <i class="fas fa-redo me-1"></i> Regenerate e-Way Bill
+                </a>
+            <?php elseif (can('eway_bill.create')): ?>
+                <a href="<?= site_url('eway_bills/create?doc_type=invoice&doc_id=' . $invoice['id']) ?>" class="btn btn-sm btn-outline-primary" title="Generate e-Way Bill">
+                    <i class="fas fa-truck me-1"></i> Generate e-Way Bill
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 

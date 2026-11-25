@@ -975,21 +975,31 @@ body.is-mobile-device .erp-mobile-card {
 }
 
 /* ==========================================================================
-   5. DataTables Wrapper Spacing inside .card-body.p-0
+   5. DataTables Wrapper Spacing (all containers + .card-body.p-0)
    ========================================================================== */
-.card-body.p-0 .dataTables_wrapper > .row:first-child {
-    padding: 0.75rem 1rem 0.5rem;
-    margin-left: 0;
-    margin-right: 0;
+.dataTables_wrapper > .row:first-child,
+.dt-container > .dt-layout-row:first-child {
+    margin-bottom: 0.75rem !important;
     align-items: center;
     row-gap: 0.5rem;
+}
+.dataTables_wrapper > .row:last-child,
+.dt-container > .dt-layout-row:last-child {
+    margin-top: 0.75rem !important;
+    align-items: center;
+    row-gap: 0.5rem;
+}
+.card-body.p-0 .dataTables_wrapper > .row:first-child {
+    padding: 0.75rem 1rem 0.65rem;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0 !important;
 }
 .card-body.p-0 .dataTables_wrapper > .row:last-child {
     padding: 0.65rem 1rem 0.75rem;
     margin-left: 0;
     margin-right: 0;
-    align-items: center;
-    row-gap: 0.5rem;
+    margin-top: 0 !important;
     border-top: 1px solid #f1f5f9;
 }
 .card-body.p-0 .dataTables_wrapper > .row > [class*="col-"] {

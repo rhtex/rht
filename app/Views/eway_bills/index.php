@@ -282,9 +282,13 @@
                                                 </button>
                                             <?php endif; ?>
 
-                                            <!-- Regenerate e-Way Bill -->
-                                            <?php if (in_array($row['status'], ['cancelled', 'failed', 'draft']) && can('eway_bill.create')): ?>
-                                                <a href="<?= site_url('eway_bills/regenerate/' . $row['id']) ?>" class="btn btn-outline-warning" title="Regenerate e-Way Bill (Full Details Page)">
+                                            <!-- Regenerate e-Way Bill (only if cancelled/failed/draft and no new active EWB exists for the document) -->
+                                            <?php
+                                            $docKey = ($row['document_type'] ?? 'invoice') . ':' . (int) ($row['document_id'] ?? 0);
+                                            $docHasActive = !empty($activeDocKeys[$docKey]);
+                                            ?>
+                                            <?php if (in_array($row['status'], ['cancelled', 'failed', 'draft']) && !$docHasActive && can('eway_bill.create')): ?>
+                                                <a href="<?= site_url('eway_bills/regenerate/' . $row['id']) ?>" class="btn btn-outline-warning" title="Regenerate New e-Way Bill">
                                                     <i class="fas fa-redo"></i>
                                                 </a>
                                             <?php endif; ?>

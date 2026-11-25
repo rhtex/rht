@@ -62,6 +62,26 @@ class EwayBillController extends BaseController
 
         $records = $builder->orderBy('id', 'DESC')->limit(100)->get()->getResultArray();
 
+        // Track documents that already have an active (non-cancelled) E-Way Bill
+        $activeDocKeys = [];
+        $activeRows    = $db->table('eway_bills')
+            ->select('document_type, document_id')
+            ->whereIn('status', ['generated', 'part_a_generated'])
+            ->get()
+            ->getResultArray();
+        foreach ($activeRows as $ar) {
+            $activeDocKeys[$ar['document_type'] . ':' . (int) $ar['document_id']] = true;
+        }
+        $invActive = $db->table('invoices')
+            ->select('id')
+            ->where('ewaybill_number IS NOT NULL')
+            ->where('ewaybill_number !=', '')
+            ->get()
+            ->getResultArray();
+        foreach ($invActive as $ir) {
+            $activeDocKeys['invoice:' . (int) $ir['id']] = true;
+        }
+
         // Summary counts
         $counts = [
             'total'             => $db->table('eway_bills')->countAllResults(),
@@ -72,11 +92,12 @@ class EwayBillController extends BaseController
         ];
 
         return view('eway_bills/index', [
-            'title'        => 'e-Way Bill Management Console',
-            'records'      => $records,
-            'counts'       => $counts,
-            'statusFilter' => $statusFilter,
-            'search'       => $search,
+            'title'         => 'e-Way Bill Management Console',
+            'records'       => $records,
+            'counts'        => $counts,
+            'statusFilter'  => $statusFilter,
+            'search'        => $search,
+            'activeDocKeys' => $activeDocKeys,
         ]);
     }
 
@@ -516,9 +537,13 @@ class EwayBillController extends BaseController
             return redirect()->to(site_url('eway_bills'))->with('error', 'e-Way Bill record not found.');
         }
 
+        $activeForDoc = $this->ewayModel->getActiveByDocument((string) $ewayBill['document_type'], (int) $ewayBill['document_id']);
+        $hasActiveEwb = $activeForDoc && in_array($activeForDoc['status'] ?? '', ['generated', 'part_a_generated'], true);
+
         return view('eway_bills/view', [
-            'title'    => 'e-Way Bill #' . ($ewayBill['ewaybill_number'] ?: $ewayBill['document_number']),
-            'ewayBill' => $ewayBill,
+            'title'        => 'e-Way Bill #' . ($ewayBill['ewaybill_number'] ?: $ewayBill['document_number']),
+            'ewayBill'     => $ewayBill,
+            'hasActiveEwb' => $hasActiveEwb,
         ]);
     }
 

@@ -29,6 +29,11 @@ $decodedResp = !empty($ewayBill['response_payload']) ? json_decode($ewayBill['re
                     <i class="fas fa-clock me-1"></i> Extend Validity
                 </button>
             <?php endif; ?>
+            <?php if (in_array($ewayBill['status'] ?? '', ['cancelled', 'failed', 'draft']) && empty($hasActiveEwb) && can('eway_bill.create')): ?>
+                <a href="<?= site_url('eway_bills/regenerate/' . $ewayBill['id']) ?>" class="btn btn-sm btn-warning fw-semibold">
+                    <i class="fas fa-redo me-1"></i> Regenerate New e-Way Bill
+                </a>
+            <?php endif; ?>
             <?php if ((!empty($ewayBill['ewaybill_number']) || in_array($ewayBill['status'] ?? '', ['generated', 'part_a_generated'])) && can('eway_bill.view')): ?>
                 <a href="<?= site_url('eway_bills/sync/' . $ewayBill['id']) ?>" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-sync-alt me-1"></i> Sync Status

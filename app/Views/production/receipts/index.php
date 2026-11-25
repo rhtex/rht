@@ -111,6 +111,7 @@ if (!empty($receipts)) {
             <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
+                        <th class="text-center" style="width: 48px;">#</th>
                         <th>Receipt #</th>
                         <th>Date</th>
                         <th>Weaver</th>
@@ -122,8 +123,9 @@ if (!empty($receipts)) {
                 </thead>
                 <tbody>
                     <?php if(!empty($receipts)): ?>
-                        <?php foreach($receipts as $receipt): ?>
+                        <?php foreach($receipts as $idx => $receipt): ?>
                             <tr>
+                                <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                                 <td>
                                     <a href="<?= site_url('production/receipts/view/' . $receipt['id']) ?>" class="fw-bold text-primary text-decoration-none">
                                         <?= esc($receipt['receipt_number']) ?>
@@ -172,7 +174,7 @@ if (!empty($receipts)) {
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
+                            <td colspan="8" class="text-center py-4 text-muted">
                                 <i class="fas fa-box-open fa-2x text-muted mb-2 d-block"></i>
                                 No fabric inward receipts recorded.
                             </td>

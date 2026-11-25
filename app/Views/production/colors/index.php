@@ -103,6 +103,7 @@ if (!empty($colors)) {
             <table class="table table-striped table-hover align-middle mb-0 w-100" id="colorsTable">
                 <thead class="table-light">
                     <tr>
+                        <th class="text-center" style="width: 48px;">#</th>
                         <th>Color Name</th>
                         <th>Color Code</th>
                         <th class="text-center">Color Swatch</th>
@@ -112,8 +113,9 @@ if (!empty($colors)) {
                 </thead>
                 <tbody>
                     <?php if(!empty($colors)): ?>
-                        <?php foreach($colors as $color): ?>
+                        <?php foreach($colors as $idx => $color): ?>
                         <tr>
+                            <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                             <td>
                                 <span class="fw-bold text-dark"><?= esc($color['name']) ?></span>
                             </td>
@@ -147,7 +149,7 @@ if (!empty($colors)) {
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
+                            <td colspan="6" class="text-center text-muted py-4">
                                 <i class="fas fa-palette fa-2x text-muted mb-2 d-block"></i>
                                 No colors found in the catalog.
                             </td>

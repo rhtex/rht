@@ -124,6 +124,7 @@
                         <table class="table table-hover table-striped align-middle" id="historyTable">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="text-center" style="width: 48px;">#</th>
                                     <th>Allocation #</th>
                                     <th>Date</th>
                                     <th>Beam ID</th>
@@ -131,8 +132,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($allocations as $alloc): ?>
+                                <?php foreach ($allocations as $idx => $alloc): ?>
                                 <tr>
+                                    <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                                     <td><strong><?= esc($alloc['allocation_number']) ?></strong></td>
                                     <td><?= date('d M Y', strtotime($alloc['allocation_date'])) ?></td>
                                     <td><span class="badge bg-secondary"><?= esc($alloc['warp_beam_id']) ?></span></td>

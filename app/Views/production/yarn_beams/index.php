@@ -297,6 +297,7 @@
             <table class="table align-middle mb-0 w-100" id="beamsTable">
                 <thead>
                     <tr>
+                        <th class="text-center" style="width: 48px;">#</th>
                         <th class="ps-3">Beam</th>
                         <th>Condition</th>
                         <th>Load Status</th>
@@ -308,7 +309,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($beams as $beam):
+                <?php foreach ($beams as $idx => $beam):
                     $isLoaded  = $beam['status'] === 'Loaded';
                     $isDamaged = $beam['condition_status'] === 'Damaged';
                     $loc       = $beam['location'];
@@ -317,6 +318,7 @@
                     $searchKey = strtolower($beam['beam_number'] . ' ' . $holder . ' ' . ($beam['remarks'] ?? '') . ' ' . $loc . ' ' . $beam['status']);
                 ?>
                     <tr class="bt-row <?= $isDamaged ? 'bt-damaged' : '' ?>" data-search="<?= esc($searchKey) ?>">
+                        <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                         <td class="ps-3">
                             <span class="bt-beam-no">
                                 <span class="bt-beam-dot <?= $dotClass ?>"><i class="fas fa-ring"></i></span>

@@ -122,6 +122,7 @@ $avgLanded = ($totalWeight > 0) ? ($totalAmount / $totalWeight) : 0;
             <table class="table table-striped table-hover align-middle mb-0 w-100" id="purchasesTable">
                 <thead class="table-light">
                     <tr>
+                        <th class="text-center" style="width: 48px;">#</th>
                         <th>Date</th>
                         <th>Supplier</th>
                         <th>Invoice #</th>
@@ -137,7 +138,7 @@ $avgLanded = ($totalWeight > 0) ? ($totalAmount / $totalWeight) : 0;
                 </thead>
                 <tbody>
                     <?php if(!empty($purchases)): ?>
-                        <?php foreach($purchases as $p): ?>
+                        <?php foreach($purchases as $idx => $p): ?>
                         <?php
                             $weight = (float)$p['total_weight_kg'];
                             $rate = (float)$p['rate_per_kg'];
@@ -149,6 +150,7 @@ $avgLanded = ($totalWeight > 0) ? ($totalAmount / $totalWeight) : 0;
                             $landedCostPerKgExcl = $weight > 0 ? ($totalExclTax / $weight) : 0;
                         ?>
                         <tr>
+                            <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                             <td class="text-nowrap"><?= date('d/m/Y', strtotime($p['purchase_date'])) ?></td>
                             <td style="white-space: normal; word-break: break-word;">
                                 <span class="fw-semibold text-dark"><?= esc($p['supplier']) ?></span>
@@ -186,7 +188,7 @@ $avgLanded = ($totalWeight > 0) ? ($totalAmount / $totalWeight) : 0;
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="11" class="text-center py-4 text-muted">
+                            <td colspan="12" class="text-center py-4 text-muted">
                                 <i class="fas fa-shopping-basket fa-2x text-muted mb-2 d-block"></i>
                                 No yarn purchase invoices recorded.
                             </td>

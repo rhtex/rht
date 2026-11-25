@@ -55,6 +55,7 @@
             <table class="table table-bordered table-striped align-middle mb-0 w-100" id="loadedWarpsTable">
                 <thead>
                     <tr class="bg-light">
+                        <th class="text-center" style="width: 48px;">#</th>
                         <th>Beam Number</th>
                         <th>Current Location</th>
                         <th class="text-center">Ends</th>
@@ -68,8 +69,9 @@
                 </thead>
                 <tbody>
                     <?php if(!empty($beams)): ?>
-                        <?php foreach($beams as $beam): ?>
+                        <?php foreach($beams as $idx => $beam): ?>
                             <tr>
+                                <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                                 <td>
                                     <strong style="font-size: 16px;"><?= esc($beam['beam_number']) ?></strong>
                                 </td>
@@ -109,7 +111,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="9" class="text-center text-muted py-4">No loaded beams present in the system.</td>
+                            <td colspan="10" class="text-center text-muted py-4">No loaded beams present in the system.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

@@ -84,6 +84,7 @@
             <table class="table align-middle table-hover custom-premium-table mb-0 w-100" id="allDcsTable">
                 <thead>
                     <tr>
+                        <th class="py-2 px-2 text-center" style="width: 48px;">#</th>
                         <th class="py-2 px-3 text-secondary fw-bold text-uppercase border-bottom">DC Number</th>
                         <th class="py-2 px-2 text-secondary fw-bold text-uppercase border-bottom">DC Date</th>
                         <th class="py-2 px-2 text-secondary fw-bold text-uppercase border-bottom">Vendor Name</th>
@@ -94,8 +95,9 @@
                 </thead>
                 <tbody class="table-group-divider">
                     <?php if(!empty($dcs)): ?>
-                        <?php foreach($dcs as $dc): ?>
+                        <?php foreach($dcs as $idx => $dc): ?>
                             <tr class="table-row-card">
+                                <td class="py-2 px-2 text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                                 <td class="py-2 px-3 fw-bold text-dark">
                                     <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle me-2" style="width: 28px; height: 28px;">
                                         <i class="fas fa-file-invoice" style="font-size: 0.8rem;"></i>

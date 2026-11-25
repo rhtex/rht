@@ -208,6 +208,7 @@ $hasActiveFilters = !empty($filters['search']) || !empty($filters['yarn_type']) 
             <table class="table table-striped table-hover align-middle mb-0 w-100" id="inventoryTable">
                 <thead class="table-light">
                     <tr>
+                        <th class="text-center" style="width: 48px;">#</th>
                         <th>Mill / Brand</th>
                         <th class="text-center">Count</th>
                         <th>Warp/Weft</th>
@@ -224,8 +225,9 @@ $hasActiveFilters = !empty($filters['search']) || !empty($filters['yarn_type']) 
                 </thead>
                 <tbody>
                     <?php if(!empty($inventory)): ?>
-                        <?php foreach($inventory as $item): ?>
+                        <?php foreach($inventory as $idx => $item): ?>
                         <tr>
+                            <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                             <td><strong><?= esc($item['brand_mill'] ?: 'Unknown Mill') ?></strong></td>
                             <td class="text-center"><span class="badge text-bg-secondary"><?= esc($item['yarn_count']) ?></span></td>
                             <td><?= esc($item['warp_weft']) ?></td>
@@ -264,7 +266,7 @@ $hasActiveFilters = !empty($filters['search']) || !empty($filters['yarn_type']) 
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="12" class="text-center py-4 text-muted">
+                            <td colspan="13" class="text-center py-4 text-muted">
                                 <i class="fas fa-warehouse fa-2x text-muted mb-2 d-block"></i>
                                 No yarn inventory records found matching your filters.
                             </td>

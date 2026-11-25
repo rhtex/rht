@@ -49,6 +49,7 @@
             <table class="table table-bordered table-striped mb-0 w-100" id="masterTable">
                 <thead>
                     <tr>
+                        <th class="text-center" style="width: 48px;">#</th>
                         <th>ID</th>
                         <th>Yarn Name</th>
                         <th>Yarn Count</th>
@@ -58,8 +59,9 @@
                 </thead>
                 <tbody>
                     <?php if(!empty($masterYarns)): ?>
-                        <?php foreach($masterYarns as $my): ?>
+                        <?php foreach($masterYarns as $idx => $my): ?>
                         <tr>
+                            <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                             <td><?= $my['id'] ?></td>
                             <td><strong><?= esc($my['name']) ?></strong></td>
                             <td><span class="badge bg-secondary"><?= esc($my['yarn_count']) ?></span></td>
@@ -84,7 +86,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">No predefined yarns found.</td>
+                            <td colspan="6" class="text-center py-4 text-muted">No predefined yarns found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

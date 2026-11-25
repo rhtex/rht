@@ -116,6 +116,7 @@ if (!empty($dcs)) {
             <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
+                        <th class="text-center" style="width: 48px;">#</th>
                         <th>DC Number</th>
                         <th>Date</th>
                         <th>Vendor (Sizer)</th>
@@ -127,8 +128,9 @@ if (!empty($dcs)) {
                 </thead>
                 <tbody>
                     <?php if(!empty($dcs)): ?>
-                        <?php foreach($dcs as $dc): ?>
+                        <?php foreach($dcs as $idx => $dc): ?>
                         <tr>
+                            <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                             <td>
                                 <a href="<?= site_url('production/yarn-warping-sizing/view/'.$dc['id']) ?>" class="fw-bold text-primary text-decoration-none">
                                     <i class="fas fa-file-invoice text-primary me-2"></i><?= esc($dc['dc_number']) ?>
@@ -176,7 +178,7 @@ if (!empty($dcs)) {
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
+                            <td colspan="8" class="text-center py-4 text-muted">
                                 <i class="fas fa-ring fa-2x text-muted mb-2 d-block"></i>
                                 No warping and sizing delivery challans found.
                             </td>

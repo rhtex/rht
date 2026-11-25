@@ -118,6 +118,7 @@ if (!empty($allocations)) {
             <table class="table table-striped table-hover align-middle mb-0 w-100">
                 <thead class="table-light">
                     <tr>
+                        <th class="text-center" style="width: 48px;">#</th>
                         <th>Allocation #</th>
                         <th>Date</th>
                         <th>Weaver</th>
@@ -131,8 +132,9 @@ if (!empty($allocations)) {
                 </thead>
                 <tbody>
                     <?php if(!empty($allocations)): ?>
-                        <?php foreach($allocations as $allocation): ?>
+                        <?php foreach($allocations as $idx => $allocation): ?>
                             <tr>
+                                <td class="text-center text-muted fw-semibold"><?= $idx + 1 ?></td>
                                 <td>
                                     <a href="<?= site_url('production/warp-allocations/view/' . $allocation['id']) ?>" class="fw-bold text-primary text-decoration-none">
                                         <?= esc($allocation['allocation_number']) ?>
@@ -186,7 +188,7 @@ if (!empty($allocations)) {
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="9" class="text-center py-4 text-muted">
+                            <td colspan="10" class="text-center py-4 text-muted">
                                 <i class="fas fa-network-wired fa-2x text-muted mb-2 d-block"></i>
                                 No warp allocations found.
                             </td>

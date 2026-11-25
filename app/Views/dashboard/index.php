@@ -119,14 +119,14 @@
         box-shadow: 0 4px 15px -5px rgba(0,0,0,0.05); margin-bottom: 12px;
     }
     .chart-card .card-header {
-        background: #1e293b; border-bottom: none; padding: 10px 14px;
+        border-bottom: none; padding: 10px 14px;
         font-weight: 700; color: #ffffff; font-size: 0.9rem;
         border-top-left-radius: 16px; border-top-right-radius: 16px;
     }
 
     .list-card { height: 100%; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 15px -5px rgba(0,0,0,0.05); }
     .list-card .card-header {
-        background: #1e293b !important; border-bottom: none !important; padding: 10px 14px !important;
+        border-bottom: none !important; padding: 10px 14px !important;
         color: #ffffff !important; font-size: 0.9rem;
         border-top-left-radius: 16px; border-top-right-radius: 16px;
     }

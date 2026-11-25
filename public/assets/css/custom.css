@@ -453,7 +453,7 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order:after {
     background: linear-gradient(135deg, #9d174d 0%, #db2777 100%) !important;
 }
 .card.card-success > .card-header {
-    background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%) !important;
+    background: linear-gradient(135deg, #78350f 0%, #b45309 100%) !important;
 }
 .card.card-warning > .card-header {
     background: linear-gradient(135deg, #9a3412 0%, #ea580c 100%) !important;

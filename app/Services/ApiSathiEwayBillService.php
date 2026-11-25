@@ -538,18 +538,42 @@ class ApiSathiEwayBillService
     }
 
     /**
+     * Resolve E-Way Bill number from the eway_bills row, falling back to invoices.ewaybill_number
+     * (or a numeric sandbox placeholder when using a test_ API key).
+     */
+    protected function resolveEwayBillNumber(array $existing, array $creds): string
+    {
+        $ewbNo = trim((string) ($existing['ewaybill_number'] ?? ''));
+        if ($ewbNo === '' && ($existing['document_type'] ?? '') === 'invoice' && !empty($existing['document_id'])) {
+            $inv = (new InvoiceModel())->select('ewaybill_number')->find((int) $existing['document_id']);
+            if ($inv && !empty(trim((string) ($inv['ewaybill_number'] ?? '')))) {
+                $ewbNo = trim((string) $inv['ewaybill_number']);
+            }
+        }
+        if ($ewbNo === '' && str_starts_with($creds['api_key'], 'test_')) {
+            $ewbNo = '990000' . str_pad((string) ($existing['id'] ?? 0), 6, '0', STR_PAD_LEFT);
+        }
+        return $ewbNo;
+    }
+
+    /**
      * Update Part-B (Vehicle details) via API Sathi (`ewb-update-partb-v1/`).
      */
     public function updatePartB(int $ewayBillId, array $data, ?int $userId = null): array
     {
         $existing = $this->ewayModel->find($ewayBillId);
-        if (!$existing || empty($existing['ewaybill_number'])) {
-            return ['success' => false, 'message' => 'Active e-Way Bill number not found for this record.'];
+        if (!$existing) {
+            return ['success' => false, 'message' => 'e-Way Bill record not found.'];
         }
 
         $creds = $this->getCredentials();
         if ($err = $this->validateCredentials($creds)) {
             return ['success' => false, 'message' => $err];
+        }
+
+        $ewbNo = $this->resolveEwayBillNumber($existing, $creds);
+        if ($ewbNo === '') {
+            return ['success' => false, 'message' => 'Active e-Way Bill number not found for this record.'];
         }
 
         $vehicleNo = strtoupper(trim(str_replace(' ', '', (string) ($data['vehicle_number'] ?? ''))));
@@ -561,7 +585,7 @@ class ApiSathiEwayBillService
         };
 
         $payload = [
-            'ewbNo'     => (int) preg_replace('/\D/', '', (string) $existing['ewaybill_number']),
+            'ewbNo'     => (int) preg_replace('/\D/', '', $ewbNo),
             'vehicleNo' => $vehicleNo,
             'fromPlace' => trim((string) ($data['from_place'] ?? ($existing['from_place'] ?? ''))),
             'fromState' => str_pad((string) ($data['from_state_code'] ?? ($existing['from_state_code'] ?? '33')), 2, '0', STR_PAD_LEFT),
@@ -575,6 +599,7 @@ class ApiSathiEwayBillService
         if ($res['success']) {
             $validUntil = $this->parseNicDateTime($res['data']['validUpto'] ?? null) ?? $existing['valid_until'];
             $this->ewayModel->update($ewayBillId, [
+                'ewaybill_number'  => $existing['ewaybill_number'] ?: $ewbNo,
                 'vehicle_number'   => $vehicleNo,
                 'status'           => 'generated',
                 'valid_until'      => $validUntil,
@@ -595,13 +620,18 @@ class ApiSathiEwayBillService
     public function cancel(int $ewayBillId, mixed $reasonCode, string $remarks, ?int $userId = null): array
     {
         $existing = $this->ewayModel->find($ewayBillId);
-        if (!$existing || empty($existing['ewaybill_number'])) {
-            return ['success' => false, 'message' => 'Active e-Way Bill number not found for this record.'];
+        if (!$existing) {
+            return ['success' => false, 'message' => 'e-Way Bill record not found.'];
         }
 
         $creds = $this->getCredentials();
         if ($err = $this->validateCredentials($creds)) {
             return ['success' => false, 'message' => $err];
+        }
+
+        $ewbNo = $this->resolveEwayBillNumber($existing, $creds);
+        if ($ewbNo === '') {
+            return ['success' => false, 'message' => 'Active e-Way Bill number not found for this record.'];
         }
 
         $nicCode = match (strtolower(trim((string) $reasonCode))) {
@@ -612,7 +642,7 @@ class ApiSathiEwayBillService
         };
 
         $payload = [
-            'ewbNo'         => (int) preg_replace('/\D/', '', (string) $existing['ewaybill_number']),
+            'ewbNo'         => (int) preg_replace('/\D/', '', $ewbNo),
             'cancelRsnCode' => $nicCode,
             'cancelRem'     => $remarks,
         ];
@@ -621,6 +651,7 @@ class ApiSathiEwayBillService
 
         if ($res['success']) {
             $this->ewayModel->update($ewayBillId, [
+                'ewaybill_number'    => $existing['ewaybill_number'] ?: $ewbNo,
                 'status'             => 'cancelled',
                 'cancel_reason_code' => (string) $nicCode,
                 'cancel_remarks'     => $remarks,
@@ -630,7 +661,10 @@ class ApiSathiEwayBillService
                 'error_message'      => null,
                 'updated_by'         => $userId,
             ]);
-            return ['success' => true, 'message' => 'e-Way Bill #' . $existing['ewaybill_number'] . ' cancelled successfully via API Sathi.'];
+            if (($existing['document_type'] ?? '') === 'invoice' && !empty($existing['document_id'])) {
+                (new InvoiceModel())->update((int) $existing['document_id'], ['ewaybill_number' => null]);
+            }
+            return ['success' => true, 'message' => 'e-Way Bill #' . $ewbNo . ' cancelled successfully via API Sathi.'];
         }
 
         return ['success' => false, 'message' => $res['message']];
@@ -658,8 +692,8 @@ class ApiSathiEwayBillService
     public function syncStatus(int $ewayBillId): array
     {
         $existing = $this->ewayModel->find($ewayBillId);
-        if (!$existing || empty($existing['ewaybill_number'])) {
-            return ['success' => false, 'message' => 'e-Way Bill number not found for sync.'];
+        if (!$existing) {
+            return ['success' => false, 'message' => 'e-Way Bill record not found.'];
         }
 
         $creds = $this->getCredentials();
@@ -667,8 +701,13 @@ class ApiSathiEwayBillService
             return ['success' => false, 'message' => $err];
         }
 
+        $ewbNo = $this->resolveEwayBillNumber($existing, $creds);
+        if ($ewbNo === '') {
+            return ['success' => false, 'message' => 'e-Way Bill number not found for sync.'];
+        }
+
         $res = $this->request('ewb-get-v1', [
-            'ewbNo' => (int) preg_replace('/\D/', '', (string) $existing['ewaybill_number']),
+            'ewbNo' => (int) preg_replace('/\D/', '', $ewbNo),
         ], $creds);
 
         if ($res['success']) {
@@ -680,6 +719,7 @@ class ApiSathiEwayBillService
             $validUntil = $this->parseNicDateTime($res['data']['validUpto'] ?? null) ?? $existing['valid_until'];
 
             $this->ewayModel->update($ewayBillId, [
+                'ewaybill_number'  => $existing['ewaybill_number'] ?: $ewbNo,
                 'status'           => $localStatus,
                 'valid_until'      => $validUntil,
                 'last_sync_at'     => date('Y-m-d H:i:s'),
@@ -699,8 +739,8 @@ class ApiSathiEwayBillService
     public function extendValidity(int $ewayBillId, array $data, ?int $userId = null): array
     {
         $existing = $this->ewayModel->find($ewayBillId);
-        if (!$existing || empty($existing['ewaybill_number'])) {
-            return ['success' => false, 'message' => 'Active e-Way Bill number not found for validity extension.'];
+        if (!$existing) {
+            return ['success' => false, 'message' => 'e-Way Bill record not found.'];
         }
 
         $creds = $this->getCredentials();
@@ -708,9 +748,14 @@ class ApiSathiEwayBillService
             return ['success' => false, 'message' => $err];
         }
 
+        $ewbNo = $this->resolveEwayBillNumber($existing, $creds);
+        if ($ewbNo === '') {
+            return ['success' => false, 'message' => 'Active e-Way Bill number not found for validity extension.'];
+        }
+
         $vehicleNo = strtoupper(trim(str_replace(' ', '', (string) ($data['vehicle_number'] ?? ($existing['vehicle_number'] ?? '')))));
         $payload   = [
-            'ewbNo'             => (int) preg_replace('/\D/', '', (string) $existing['ewaybill_number']),
+            'ewbNo'             => (int) preg_replace('/\D/', '', $ewbNo),
             'remainingDistance' => max(1, (int) ($data['remaining_distance'] ?? 0)),
             'extnRsnCode'       => max(1, (int) ($data['extn_reason_code'] ?? 1)),
             'extnRemarks'       => trim((string) ($data['extn_remarks'] ?? 'In transit')),

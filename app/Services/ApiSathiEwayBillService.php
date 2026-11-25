@@ -288,6 +288,16 @@ class ApiSathiEwayBillService
 
         $docType = $data['document_type'] ?? 'invoice';
         $docId   = (int) ($data['document_id'] ?? 0);
+
+        // Prevent duplicate generation if this document already has an active E-Way Bill
+        $existingActive = $this->ewayModel->getActiveByDocument($docType, $docId);
+        if ($existingActive && !empty($existingActive['ewaybill_number']) && in_array($existingActive['status'], ['generated', 'part_a_generated'], true)) {
+            return [
+                'success' => false,
+                'message' => 'e-Way Bill #' . $existingActive['ewaybill_number'] . ' is already generated for this document (' . strtoupper(str_replace('_', ' ', $existingActive['status'])) . '). Please cancel it first or update Part-B.',
+            ];
+        }
+
         $ctx     = $this->loadDocumentContext($docType, $docId);
         $doc     = $ctx['doc'];
 

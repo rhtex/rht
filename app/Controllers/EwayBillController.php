@@ -136,9 +136,10 @@ class EwayBillController extends BaseController
             }
         }
 
-        $transports = $this->transportModel->findAll();
-        $states     = $this->stateModel->findAll();
-        $vehicles   = $this->vehicleModel->getActiveVehicles();
+        $transports  = $this->transportModel->findAll();
+        $states      = $this->stateModel->findAll();
+        $vehicles    = $this->vehicleModel->getActiveVehicles();
+        $existingEwb = ($docId > 0) ? $this->ewayModel->getActiveByDocument($docType, $docId) : null;
 
         return view('eway_bills/generate', [
             'title'       => 'Generate e-Way Bill',
@@ -151,6 +152,7 @@ class EwayBillController extends BaseController
             'transports'  => $transports,
             'states'      => $states,
             'vehicles'    => $vehicles,
+            'existingEwb' => $existingEwb,
         ]);
     }
 

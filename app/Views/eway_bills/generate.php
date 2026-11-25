@@ -30,6 +30,19 @@
             </div>
         <?php endif; ?>
 
+        <?php if (!empty($existingEwb) && !empty($existingEwb['ewaybill_number']) && in_array($existingEwb['status'], ['generated', 'part_a_generated'], true)): ?>
+            <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2 shadow-sm" role="alert">
+                <div>
+                    <i class="fas fa-info-circle me-1"></i>
+                    <strong>Already Generated:</strong> e-Way Bill <strong>#<?= esc($existingEwb['ewaybill_number']) ?></strong>
+                    (<?= esc(strtoupper(str_replace('_', ' ', $existingEwb['status']))) ?>) already exists for this document.
+                </div>
+                <a href="<?= site_url('eway_bills/view/' . $existingEwb['id']) ?>" class="btn btn-sm btn-dark fw-semibold">
+                    <i class="fas fa-eye me-1"></i> View Existing e-Way Bill
+                </a>
+            </div>
+        <?php endif; ?>
+
         <form method="post" action="<?= site_url('eway_bills/store') ?>" id="ewaybillForm">
             <?= csrf_field() ?>
             <input type="hidden" name="document_id" id="document_id" value="<?= esc($docId ?: old('document_id')) ?>">

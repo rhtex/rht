@@ -318,7 +318,7 @@
                                 <div class="col-6">
                                     <label class="form-label">Approx Distance (Km)</label>
                                     <input type="number" name="distance_km" id="distance_km" class="form-control" value="0" min="0">
-                                    <div class="form-text text-muted small">Keep 0 for Zoho / NIC auto-calculation by pincode.</div>
+                                    <div class="form-text text-muted small">Keep 0 for NIC auto-calculation by pincode.</div>
                                 </div>
                             </div>
 
@@ -352,7 +352,7 @@
                                 <!-- Manual Vehicle Input (Shown if Others is selected) -->
                                 <div id="group_manual_vehicle" class="mt-2 <?= (!empty($initialDocVeh) && !$isMatched) ? '' : 'd-none' ?>">
                                     <label class="form-label text-primary small fw-bold mb-1"><i class="fas fa-pencil-alt me-1"></i> Enter Vehicle Number Manually:</label>
-                                    <input type="text" id="manual_vehicle_number" class="form-control text-uppercase"
+                                    <input type="text" name="manual_vehicle_number" id="manual_vehicle_number" class="form-control text-uppercase"
                                         placeholder="e.g. TN28BY9140"
                                         value="<?= (!empty($initialDocVeh) && !$isMatched) ? esc($initialDocVeh) : '' ?>"
                                         oninput="syncVehicleNumber()">
@@ -374,9 +374,9 @@
 
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
-                                    <label class="form-label">Zoho Transporter ID</label>
-                                    <input type="text" name="transporter_id" id="transporter_id" class="form-control bg-light" placeholder="Auto-populated from Zoho" readonly>
-                                    <div class="form-text small text-muted">Zoho Books internal ID (uneditable).</div>
+                                    <label class="form-label">Transporter ID (Optional)</label>
+                                    <input type="text" name="transporter_id" id="transporter_id" class="form-control bg-light" placeholder="Auto-populated if available" readonly>
+                                    <div class="form-text small text-muted">Optional transporter reference ID.</div>
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label">Transporter GSTIN / TRANSIN</label>
@@ -587,7 +587,7 @@ $(document).ready(function() {
         placeholder: '-- Select Registered Vehicle or Others --',
         allowClear: true,
         width: '100%'
-    }).on('select2:select', function(e) {
+    }).on('select2:select select2:clear', function() {
         onVehicleSelect(this);
     });
 
@@ -595,6 +595,20 @@ $(document).ready(function() {
     const vPicker = document.getElementById('vehicle_picker');
     if (vPicker) {
         onVehicleSelect(vPicker);
+    }
+
+    // Ensure vehicle_number is always synced & validated before form submit
+    const ewbForm = document.getElementById('ewaybillForm');
+    if (ewbForm) {
+        ewbForm.addEventListener('submit', function(e) {
+            if (vPicker) onVehicleSelect(vPicker);
+            const isFull = document.getElementById('action_full')?.checked;
+            const vehVal = (document.getElementById('vehicle_number')?.value || '').trim();
+            if (isFull && !vehVal) {
+                e.preventDefault();
+                alert('Vehicle Number is required for Full e-Way Bill (Part-A + Part-B). Select "Part-A Slip Only" if vehicle is not assigned yet.');
+            }
+        });
     }
 });
 </script>

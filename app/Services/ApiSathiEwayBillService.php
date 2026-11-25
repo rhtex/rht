@@ -328,8 +328,17 @@ class ApiSathiEwayBillService
             $toGstin = 'URP';
         }
 
-        $rawAction = strtolower(trim((string) ($data['action'] ?? 'save_generate')));
-        $isPartA   = ($rawAction === 'generate_part_a') || empty($data['vehicle_number']);
+        $rawAction  = strtolower(trim((string) ($data['action'] ?? 'save_generate')));
+        $vehicleRaw = trim((string) ($data['vehicle_number'] ?? ($data['manual_vehicle_number'] ?? '')));
+        $vehicleNo  = strtoupper(str_replace(' ', '', $vehicleRaw));
+        $isPartA    = ($rawAction === 'generate_part_a');
+
+        if (!$isPartA && $vehicleNo === '') {
+            return [
+                'success' => false,
+                'message' => 'Vehicle Number is required for Full e-Way Bill (Part-A + Part-B). Select "Part-A Slip Only" if vehicle is not assigned yet.',
+            ];
+        }
 
         $transGstin = strtoupper(trim((string) ($data['transporter_gstin'] ?? ($data['transporter_registration_id'] ?? ''))));
         $transName  = trim((string) ($data['transporter_name'] ?? ''));
@@ -452,8 +461,8 @@ class ApiSathiEwayBillService
             $payload['transDocDate'] = $this->formatNicDate((string) $data['transporter_doc_date']);
         }
 
-        if (!$isPartA && !empty($data['vehicle_number'])) {
-            $payload['vehicleNo']   = strtoupper(trim(str_replace(' ', '', (string) $data['vehicle_number'])));
+        if (!$isPartA && $vehicleNo !== '') {
+            $payload['vehicleNo']   = $vehicleNo;
             $payload['vehicleType'] = (stripos((string) ($data['vehicle_type'] ?? ''), 'over') !== false) ? 'O' : 'R';
         }
 

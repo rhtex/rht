@@ -72,11 +72,48 @@ class EwayBillModel extends Model
 
     public function getActiveByDocument(string $docType, int $docId): ?array
     {
-        return $this->where('document_type', $docType)
+        $ewb = $this->where('document_type', $docType)
             ->where('document_id', $docId)
             ->whereIn('status', ['generated', 'part_a_generated', 'draft'])
             ->orderBy('id', 'DESC')
             ->first();
+
+        if ($ewb) {
+            return $ewb;
+        }
+
+        // Fallback: check invoices.ewaybill_number for invoices generated/synced earlier
+        if ($docType === 'invoice' && $docId > 0) {
+            $db  = \Config\Database::connect();
+            $inv = $db->table('invoices')
+                ->select('id, invoice_number, ewaybill_number')
+                ->where('id', $docId)
+                ->get()
+                ->getRowArray();
+
+            if ($inv && !empty(trim((string) ($inv['ewaybill_number'] ?? '')))) {
+                $ewbNo = trim((string) $inv['ewaybill_number']);
+                // Do not treat as active if that exact EWB number was cancelled locally
+                $isCancelled = $this->where('document_type', 'invoice')
+                    ->where('document_id', $docId)
+                    ->where('ewaybill_number', $ewbNo)
+                    ->where('status', 'cancelled')
+                    ->countAllResults() > 0;
+
+                if (!$isCancelled) {
+                    return [
+                        'id'              => null,
+                        'document_type'   => 'invoice',
+                        'document_id'     => $docId,
+                        'document_number' => $inv['invoice_number'] ?? null,
+                        'ewaybill_number' => $ewbNo,
+                        'status'          => 'generated',
+                    ];
+                }
+            }
+        }
+
+        return null;
     }
 }
 

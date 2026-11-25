@@ -291,10 +291,11 @@ class ApiSathiEwayBillService
 
         // Prevent duplicate generation if this document already has an active E-Way Bill
         $existingActive = $this->ewayModel->getActiveByDocument($docType, $docId);
-        if ($existingActive && !empty($existingActive['ewaybill_number']) && in_array($existingActive['status'], ['generated', 'part_a_generated'], true)) {
+        if ($existingActive && in_array($existingActive['status'], ['generated', 'part_a_generated'], true)) {
+            $numLabel = !empty($existingActive['ewaybill_number']) ? '#' . $existingActive['ewaybill_number'] . ' ' : '';
             return [
                 'success' => false,
-                'message' => 'e-Way Bill #' . $existingActive['ewaybill_number'] . ' is already generated for this document (' . strtoupper(str_replace('_', ' ', $existingActive['status'])) . '). Please cancel it first or update Part-B.',
+                'message' => 'e-Way Bill ' . $numLabel . 'is already generated for this document (' . strtoupper(str_replace('_', ' ', $existingActive['status'])) . '). Please cancel it first or update Part-B.',
             ];
         }
 
@@ -511,9 +512,12 @@ class ApiSathiEwayBillService
         }
 
         if ($res['success']) {
+            if ($docType === 'invoice' && $ewbNo !== '') {
+                (new InvoiceModel())->update($docId, ['ewaybill_number' => $ewbNo]);
+            }
             return [
                 'success' => true,
-                'message' => 'e-Way Bill #' . $ewbNo . ' generated successfully via API Sathi.',
+                'message' => 'e-Way Bill ' . ($ewbNo !== '' ? '#' . $ewbNo . ' ' : '') . 'generated successfully via API Sathi.',
                 'ewb_no'  => $ewbNo,
             ];
         }

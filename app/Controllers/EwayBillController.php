@@ -224,8 +224,11 @@ class EwayBillController extends BaseController
                         'to_pincode'          => $shipAddr['pincode'] ?? '',
                         'to_state_code'       => $shipAddr['gst_state_code'] ?? '33',
                         'existing_ewb'        => ($existing && !empty($existing['ewaybill_number'])) ? $existing['ewaybill_number'] : null,
-                        'existing_ewb_id'     => ($existing && !empty($existing['ewaybill_number'])) ? (int) $existing['id'] : null,
-                        'existing_ewb_status' => ($existing && !empty($existing['ewaybill_number'])) ? ($existing['status'] ?? null) : null,
+                        'existing_ewb_id'     => $existing ? ($existing['id'] ? (int) $existing['id'] : null) : null,
+                        'existing_ewb_status' => $existing ? ($existing['status'] ?? null) : null,
+                        'existing_ewb_url'    => $existing
+                            ? (!empty($existing['id']) ? site_url('eway_bills/view/' . $existing['id']) : site_url('invoices/view/' . $doc['id']))
+                            : null,
                     ],
                 ]);
             }
@@ -282,8 +285,11 @@ class EwayBillController extends BaseController
                         'to_pincode'          => $shipAddr['pincode'] ?? '',
                         'to_state_code'       => $shipAddr['gst_state_code'] ?? '33',
                         'existing_ewb'        => ($existing && !empty($existing['ewaybill_number'])) ? $existing['ewaybill_number'] : null,
-                        'existing_ewb_id'     => ($existing && !empty($existing['ewaybill_number'])) ? (int) $existing['id'] : null,
-                        'existing_ewb_status' => ($existing && !empty($existing['ewaybill_number'])) ? ($existing['status'] ?? null) : null,
+                        'existing_ewb_id'     => $existing ? ($existing['id'] ? (int) $existing['id'] : null) : null,
+                        'existing_ewb_status' => $existing ? ($existing['status'] ?? null) : null,
+                        'existing_ewb_url'    => $existing
+                            ? (!empty($existing['id']) ? site_url('eway_bills/view/' . $existing['id']) : site_url('invoices/view/' . $doc['id']))
+                            : null,
                     ],
                 ]);
             }

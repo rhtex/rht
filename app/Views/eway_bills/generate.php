@@ -30,15 +30,20 @@
             </div>
         <?php endif; ?>
 
-        <?php $hasExistingEwb = !empty($existingEwb) && !empty($existingEwb['ewaybill_number']) && in_array($existingEwb['status'], ['generated', 'part_a_generated'], true); ?>
+        <?php
+        $hasExistingEwb = !empty($existingEwb) && in_array($existingEwb['status'] ?? '', ['generated', 'part_a_generated'], true);
+        $existingEwbUrl = $hasExistingEwb
+            ? (!empty($existingEwb['id']) ? site_url('eway_bills/view/' . $existingEwb['id']) : site_url('invoices/view/' . ($docId ?: ($existingEwb['document_id'] ?? 0))))
+            : '#';
+        ?>
         <div id="existingEwbAlert" class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2 shadow-sm <?= $hasExistingEwb ? '' : 'd-none' ?>" role="alert">
             <div>
                 <i class="fas fa-info-circle me-1"></i>
                 <strong>Already Generated:</strong> e-Way Bill
-                <strong id="existingEwbNo">#<?= $hasExistingEwb ? esc($existingEwb['ewaybill_number']) : '' ?></strong>
+                <strong id="existingEwbNo"><?= $hasExistingEwb && !empty($existingEwb['ewaybill_number']) ? '#' . esc($existingEwb['ewaybill_number']) : '' ?></strong>
                 (<span id="existingEwbStatus"><?= $hasExistingEwb ? esc(strtoupper(str_replace('_', ' ', $existingEwb['status']))) : '' ?></span>) already exists for this document.
             </div>
-            <a id="existingEwbLink" href="<?= $hasExistingEwb ? site_url('eway_bills/view/' . $existingEwb['id']) : '#' ?>" class="btn btn-sm btn-dark fw-semibold">
+            <a id="existingEwbLink" href="<?= $existingEwbUrl ?>" class="btn btn-sm btn-dark fw-semibold">
                 <i class="fas fa-eye me-1"></i> View Existing e-Way Bill
             </a>
         </div>
@@ -518,8 +523,8 @@ function performDocLookup() {
                 const ewbBadge = document.getElementById('lbl_existing_ewb');
                 const ewbAlert = document.getElementById('existingEwbAlert');
                 const btnSubmit = document.getElementById('btnGenerateEwb');
-                if (doc.existing_ewb && doc.existing_ewb_id) {
-                    const viewUrl = '<?= site_url('eway_bills/view') ?>/' + doc.existing_ewb_id;
+                if (doc.existing_ewb) {
+                    const viewUrl = doc.existing_ewb_url || (doc.existing_ewb_id ? ('<?= site_url('eway_bills/view') ?>/' + doc.existing_ewb_id) : ('<?= site_url('invoices/view') ?>/' + doc.id));
                     ewbBadge.className = 'badge bg-warning text-dark';
                     ewbBadge.innerHTML = '<a href="' + viewUrl + '" class="text-dark text-decoration-underline">Active EWB: #' + doc.existing_ewb + ' <i class="fas fa-external-link-alt ms-1"></i></a>';
                     document.getElementById('existingEwbNo').innerText = '#' + doc.existing_ewb;

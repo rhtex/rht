@@ -419,7 +419,7 @@
         </div>
 
         <!-- Zoho e-Way Bill Portal (GSP) Settings Card -->
-        <div class="card card-outline card-primary shadow-sm mb-3">
+        <div class="card card-outline card-success shadow-sm mb-3">
             <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
                 <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-file-invoice text-primary me-2"></i>Zoho e-Way Bill Portal (GSP)</h3>
                 <?php if (!empty($ewbSettings['is_ewaybill_enabled']) && !empty($ewbSettings['is_active'])): ?>
@@ -519,7 +519,7 @@
         <?php endif; ?>
 
         <!-- cPanel Cron Command Reference -->
-        <div class="card card-outline card-secondary shadow-sm mb-3">
+        <div class="card card-outline card-dark shadow-sm mb-3">
             <div class="card-header bg-white py-2">
                 <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-terminal text-secondary me-2"></i>Shared cPanel Cron Job</h3>
             </div>

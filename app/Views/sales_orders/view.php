@@ -230,13 +230,13 @@
     <!-- Notes & Terms -->
     <div class="row">
         <div class="col-md-6">
-            <div class="card card-outline card-info">
+            <div class="card card-outline card-success">
                 <div class="card-header"><h3 class="card-title">Notes</h3></div>
                 <div class="card-body"><?= nl2br(esc($order['notes'])) ?: 'No notes provided.' ?></div>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card card-outline card-info">
+            <div class="card card-outline card-warning">
                 <div class="card-header"><h3 class="card-title">Terms & Conditions</h3></div>
                 <div class="card-body"><?= nl2br(esc($order['terms'])) ?: 'Standard terms apply.' ?></div>
             </div>

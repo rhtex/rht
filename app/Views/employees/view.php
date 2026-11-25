@@ -75,7 +75,7 @@
     </div>
 
     <div class="col-md-9">
-        <div class="card card-outline card-primary">
+        <div class="card card-outline card-info">
             <div class="card-header p-2">
                 <ul class="nav nav-pills" id="employeeTabs" role="tablist">
                     <li class="nav-item" role="presentation">

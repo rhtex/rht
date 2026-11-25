@@ -94,7 +94,7 @@
     </div>
 </div>
 
-<div class="card card-outline card-primary shadow-sm">
+<div class="card card-outline card-info shadow-sm">
     <div class="card-header py-2">
         <h3 class="card-title fw-bold"><i class="fas fa-list me-1"></i> List of Vendors</h3>
     </div>

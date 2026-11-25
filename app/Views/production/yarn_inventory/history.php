@@ -66,7 +66,7 @@
 
     <!-- Transaction History -->
     <div class="col-md-8">
-        <div class="card card-outline card-primary">
+        <div class="card card-outline card-info">
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-list"></i> Transaction History</h3>
             </div>

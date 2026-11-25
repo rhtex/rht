@@ -82,7 +82,7 @@
     </div>
 
     <div class="col-md-8">
-        <div class="card card-outline card-info mb-3">
+        <div class="card card-outline card-success mb-3">
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-filter me-1"></i> Filters</h3>
             </div>
@@ -111,7 +111,7 @@
             </div>
         </div>
 
-        <div class="card card-outline card-info">
+        <div class="card card-outline card-secondary">
             <div class="card-header">
                 <h3 class="card-title">Transaction History</h3>
             </div>

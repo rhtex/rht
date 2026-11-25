@@ -335,7 +335,7 @@ $buildPageUrl = function (string $param, int $targetPage) {
 ?>
 
 <!-- Analytics & History Filters -->
-<div class="card card-outline card-info mt-3 mb-3 shadow-sm">
+<div class="card card-outline card-secondary mt-3 mb-3 shadow-sm">
     <div class="card-header py-2 d-flex flex-wrap justify-content-between align-items-center gap-2">
         <h3 class="card-title mb-0 fw-bold"><i class="fas fa-chart-bar me-2 text-info"></i>Sales &amp; Returns Analytics</h3>
         <?php if (!empty($analyticsFilters['customer_id']) || !empty($analyticsFilters['date_from']) || !empty($analyticsFilters['date_to'])): ?>
@@ -461,7 +461,7 @@ $buildPageUrl = function (string $param, int $targetPage) {
 </div>
 
 <!-- Billed / Sales History -->
-<div class="card card-outline card-primary mt-2 shadow-sm">
+<div class="card card-outline card-warning mt-2 shadow-sm">
     <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
         <h3 class="card-title mb-0"><i class="fas fa-file-invoice me-2 text-primary"></i>Billed History (<?= number_format($bp['total']) ?>)</h3>
         <div class="d-flex flex-wrap gap-2 ms-auto">
@@ -574,7 +574,7 @@ $buildPageUrl = function (string $param, int $targetPage) {
 </div>
 
 <!-- Customer Returns / Credit Notes History -->
-<div class="card card-outline card-warning mt-3 mb-3 shadow-sm">
+<div class="card card-outline card-dark mt-3 mb-3 shadow-sm">
     <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
         <h3 class="card-title mb-0"><i class="fas fa-undo me-2 text-warning"></i>Customer Returns (<?= number_format($rp['total']) ?>)</h3>
         <div class="d-flex flex-wrap gap-2 ms-auto">

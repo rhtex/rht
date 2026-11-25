@@ -234,7 +234,7 @@
 
     <!-- Right Side Order View Column (hidden on mobile) -->
     <div class="col-lg-7 col-xl-7 transition-col d-none d-lg-block" id="orderDetailCol">
-        <div class="card card-outline card-primary shadow-sm mb-3" id="orderDetailCard">
+        <div class="card card-outline card-info shadow-sm mb-3" id="orderDetailCard">
             <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center" id="orderDetailCardHeader">
                 <h5 class="card-title fw-bold text-dark m-0" id="detailPaneTitle">
                     <i class="fas fa-eye text-primary me-2"></i>Sales Order Details

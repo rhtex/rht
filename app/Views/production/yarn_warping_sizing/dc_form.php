@@ -231,7 +231,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <div class="card card-outline card-info">
+                    <div class="card card-outline card-primary">
                         <div class="card-header">
                             <h5 class="card-title"><i class="fas fa-ring"></i> Issue Empty Beams</h5>
                         </div>

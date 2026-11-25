@@ -223,7 +223,9 @@ class EwayBillController extends BaseController
                         'to_place'            => $shipAddr['city'] ?? '',
                         'to_pincode'          => $shipAddr['pincode'] ?? '',
                         'to_state_code'       => $shipAddr['gst_state_code'] ?? '33',
-                        'existing_ewb'        => $existing ? $existing['ewaybill_number'] : null,
+                        'existing_ewb'        => ($existing && !empty($existing['ewaybill_number'])) ? $existing['ewaybill_number'] : null,
+                        'existing_ewb_id'     => ($existing && !empty($existing['ewaybill_number'])) ? (int) $existing['id'] : null,
+                        'existing_ewb_status' => ($existing && !empty($existing['ewaybill_number'])) ? ($existing['status'] ?? null) : null,
                     ],
                 ]);
             }
@@ -279,7 +281,9 @@ class EwayBillController extends BaseController
                         'to_place'            => $shipAddr['city'] ?? '',
                         'to_pincode'          => $shipAddr['pincode'] ?? '',
                         'to_state_code'       => $shipAddr['gst_state_code'] ?? '33',
-                        'existing_ewb'        => $existing ? $existing['ewaybill_number'] : null,
+                        'existing_ewb'        => ($existing && !empty($existing['ewaybill_number'])) ? $existing['ewaybill_number'] : null,
+                        'existing_ewb_id'     => ($existing && !empty($existing['ewaybill_number'])) ? (int) $existing['id'] : null,
+                        'existing_ewb_status' => ($existing && !empty($existing['ewaybill_number'])) ? ($existing['status'] ?? null) : null,
                     ],
                 ]);
             }

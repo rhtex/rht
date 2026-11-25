@@ -30,18 +30,18 @@
             </div>
         <?php endif; ?>
 
-        <?php if (!empty($existingEwb) && !empty($existingEwb['ewaybill_number']) && in_array($existingEwb['status'], ['generated', 'part_a_generated'], true)): ?>
-            <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2 shadow-sm" role="alert">
-                <div>
-                    <i class="fas fa-info-circle me-1"></i>
-                    <strong>Already Generated:</strong> e-Way Bill <strong>#<?= esc($existingEwb['ewaybill_number']) ?></strong>
-                    (<?= esc(strtoupper(str_replace('_', ' ', $existingEwb['status']))) ?>) already exists for this document.
-                </div>
-                <a href="<?= site_url('eway_bills/view/' . $existingEwb['id']) ?>" class="btn btn-sm btn-dark fw-semibold">
-                    <i class="fas fa-eye me-1"></i> View Existing e-Way Bill
-                </a>
+        <?php $hasExistingEwb = !empty($existingEwb) && !empty($existingEwb['ewaybill_number']) && in_array($existingEwb['status'], ['generated', 'part_a_generated'], true); ?>
+        <div id="existingEwbAlert" class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2 shadow-sm <?= $hasExistingEwb ? '' : 'd-none' ?>" role="alert">
+            <div>
+                <i class="fas fa-info-circle me-1"></i>
+                <strong>Already Generated:</strong> e-Way Bill
+                <strong id="existingEwbNo">#<?= $hasExistingEwb ? esc($existingEwb['ewaybill_number']) : '' ?></strong>
+                (<span id="existingEwbStatus"><?= $hasExistingEwb ? esc(strtoupper(str_replace('_', ' ', $existingEwb['status']))) : '' ?></span>) already exists for this document.
             </div>
-        <?php endif; ?>
+            <a id="existingEwbLink" href="<?= $hasExistingEwb ? site_url('eway_bills/view/' . $existingEwb['id']) : '#' ?>" class="btn btn-sm btn-dark fw-semibold">
+                <i class="fas fa-eye me-1"></i> View Existing e-Way Bill
+            </a>
+        </div>
 
         <form method="post" action="<?= site_url('eway_bills/store') ?>" id="ewaybillForm">
             <?= csrf_field() ?>
@@ -396,7 +396,7 @@
                         </div>
 
                         <div class="card-footer bg-light p-3">
-                            <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm fw-bold">
+                            <button type="submit" id="btnGenerateEwb" class="btn btn-success btn-lg w-100 shadow-sm fw-bold" <?= $hasExistingEwb ? 'disabled' : '' ?>>
                                 <i class="fas fa-paper-plane me-2"></i> Submit & Generate via API Sathi
                             </button>
                         </div>
@@ -516,12 +516,22 @@ function performDocLookup() {
                 }
 
                 const ewbBadge = document.getElementById('lbl_existing_ewb');
-                if (doc.existing_ewb) {
+                const ewbAlert = document.getElementById('existingEwbAlert');
+                const btnSubmit = document.getElementById('btnGenerateEwb');
+                if (doc.existing_ewb && doc.existing_ewb_id) {
+                    const viewUrl = '<?= site_url('eway_bills/view') ?>/' + doc.existing_ewb_id;
                     ewbBadge.className = 'badge bg-warning text-dark';
-                    ewbBadge.innerText = 'Active EWB: #' + doc.existing_ewb;
+                    ewbBadge.innerHTML = '<a href="' + viewUrl + '" class="text-dark text-decoration-underline">Active EWB: #' + doc.existing_ewb + ' <i class="fas fa-external-link-alt ms-1"></i></a>';
+                    document.getElementById('existingEwbNo').innerText = '#' + doc.existing_ewb;
+                    document.getElementById('existingEwbStatus').innerText = (doc.existing_ewb_status || 'GENERATED').toUpperCase().replace(/_/g, ' ');
+                    document.getElementById('existingEwbLink').href = viewUrl;
+                    ewbAlert.classList.remove('d-none');
+                    if (btnSubmit) btnSubmit.disabled = true;
                 } else {
                     ewbBadge.className = 'badge bg-info text-white';
                     ewbBadge.innerText = 'No e-Way Bill Yet';
+                    ewbAlert.classList.add('d-none');
+                    if (btnSubmit) btnSubmit.disabled = false;
                 }
             } else {
                 alert(data.message || 'No matching document found.');

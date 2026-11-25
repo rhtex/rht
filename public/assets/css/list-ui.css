@@ -587,6 +587,9 @@ body.is-mobile-device .lu-toolbar .lu-right { width: 100%; }
     body:not(.is-mobile-device) .erp-desktop-wrap { display: block !important; }
     body:not(.is-mobile-device) .erp-mobile-list  { display: none !important; }
 }
+body:not(.is-mobile-device) .erp-desktop-wrap.d-none,
+.erp-desktop-wrap.d-none,
+.erp-mobile-list.d-none { display: none !important; }
 .erp-mobile-card {
     display: block;
     text-decoration: none !important;

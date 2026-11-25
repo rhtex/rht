@@ -55,6 +55,11 @@ class TaxController extends BaseController
 
     public function update($id)
     {
+        $tax = $this->taxModel->find($id);
+        if (!$tax) {
+            return redirect()->to('settings/taxes')->with('error', 'Tax not found.');
+        }
+
         $data = [
             'id'         => $id,
             'name'       => $this->request->getPost('name'),
@@ -71,9 +76,19 @@ class TaxController extends BaseController
 
     public function delete($id)
     {
-        if ($this->taxModel->delete($id)) {
-            return redirect()->to('settings/taxes')->with('success', 'Tax deleted successfully.');
+        $tax = $this->taxModel->find($id);
+        if (!$tax) {
+            return redirect()->to('settings/taxes')->with('error', 'Tax not found.');
         }
+
+        try {
+            if ($this->taxModel->delete($id)) {
+                return redirect()->to('settings/taxes')->with('success', 'Tax deleted successfully.');
+            }
+        } catch (\Throwable $e) {
+            return redirect()->to('settings/taxes')->with('error', 'Cannot delete tax as it is in use.');
+        }
+
         return redirect()->to('settings/taxes')->with('error', 'Failed to delete tax.');
     }
 }

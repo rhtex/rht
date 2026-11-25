@@ -131,9 +131,15 @@ class ApiSathiEwayBillService
             && (!isset($decoded['status']) || (string) $decoded['status'] === '1' || $decoded['status'] === true);
 
         $data = $decoded['data'] ?? $decoded;
-        $errMsg = $decoded['message']
+        $rawErr = $decoded['message']
             ?? $decoded['error']
             ?? ($decoded['error_message'] ?? ($data['errorDesc'] ?? ($data['message'] ?? null)));
+
+        if (is_array($rawErr)) {
+            $errMsg = (string) ($rawErr['message'] ?? ($rawErr['detail'] ?? json_encode($rawErr)));
+        } else {
+            $errMsg = $rawErr !== null ? (string) $rawErr : null;
+        }
 
         return [
             'success'   => $isOk,

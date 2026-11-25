@@ -64,15 +64,15 @@
             <!-- Main content -->
             <div class="app-content">
                 <div class="container-fluid">
-                    <?php if (session()->getFlashdata('success')) : ?>
+                    <?php if ($flashSuccess = session()->getFlashdata('success')) : ?>
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <?= session()->getFlashdata('success') ?>
+                            <?= is_array($flashSuccess) ? implode('<br>', array_map(fn($v) => is_scalar($v) ? (string) $v : json_encode($v), $flashSuccess)) : $flashSuccess ?>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     <?php endif; ?>
-                    <?php if (session()->getFlashdata('error')) : ?>
+                    <?php if ($flashError = session()->getFlashdata('error')) : ?>
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <?= session()->getFlashdata('error') ?>
+                            <?= is_array($flashError) ? implode('<br>', array_map(fn($v) => is_scalar($v) ? (string) $v : json_encode($v), $flashError)) : $flashError ?>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     <?php endif; ?>

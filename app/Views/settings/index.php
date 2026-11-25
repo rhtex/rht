@@ -300,16 +300,6 @@
                             <input type="text" class="form-control text-uppercase" name="settings[apisathi_ewb_gstin]" value="<?= esc($settings['apisathi_ewb_gstin'] ?? ($settings['company_print_gstin'] ?? ($settings['company_gstin'] ?? ''))) ?>" placeholder="33FOPPS7926B1ZK">
                             <small class="text-muted">Taxpayer GSTIN registered on ewaybillgst.gov.in.</small>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">NIC / GSP Portal API Username</label>
-                            <input type="text" class="form-control" name="settings[apisathi_ewb_username]" value="<?= esc($settings['apisathi_ewb_username'] ?? '') ?>" placeholder="API username from ewaybillgst.gov.in">
-                            <small class="text-muted">Created under ewaybillgst.gov.in &rarr; Registration &rarr; For GSP.</small>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">NIC / GSP Portal API Password</label>
-                            <input type="password" class="form-control" name="settings[apisathi_ewb_password]" value="" placeholder="<?= !empty($settings['apisathi_ewb_password']) ? '•••••••• (Saved - leave blank to keep)' : 'Enter portal API password' ?>">
-                            <small class="text-muted">Leave blank to keep the existing saved password.</small>
-                        </div>
                     </div>
                 </div>
                 <div class="card-footer">

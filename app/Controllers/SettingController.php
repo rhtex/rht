@@ -75,19 +75,12 @@ class SettingController extends BaseController
         'print_default_terms',
         'apisathi_api_key',
         'apisathi_ewb_gstin',
-        'apisathi_ewb_username',
-        'apisathi_ewb_password',
     ];
 
     public function update()
     {
         $rawSettings = $this->request->getPost('settings');
         $settings = is_array($rawSettings) ? array_intersect_key($rawSettings, array_flip(self::ALLOWED_KEYS)) : [];
-
-        // Preserve stored API Sathi portal password if left blank on settings save
-        if (array_key_exists('apisathi_ewb_password', $settings) && trim((string) $settings['apisathi_ewb_password']) === '') {
-            unset($settings['apisathi_ewb_password']);
-        }
 
         // Handle logo file upload from local with strict image validation
         $logoFile = $this->request->getFile('company_logo_file');

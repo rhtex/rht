@@ -62,9 +62,6 @@ class ApiSathiEwayBillService
         if ($creds['gstin'] === '') {
             return 'Company GSTIN is not configured for API Sathi E-Way Bill.';
         }
-        if ($creds['username'] === '' || $creds['password'] === '') {
-            return 'NIC / GSP Portal API Username and Password are not configured in Settings.';
-        }
         return null;
     }
 
@@ -76,11 +73,15 @@ class ApiSathiEwayBillService
         $url = self::BASE_URL . trim($slug, '/') . '/';
 
         $body = [
-            'gstin'    => $creds['gstin'],
-            'username' => $creds['username'],
-            'password' => $creds['password'],
-            'payload'  => $payload,
+            'gstin'   => $creds['gstin'],
+            'payload' => $payload,
         ];
+        if ($creds['username'] !== '') {
+            $body['username'] = $creds['username'];
+        }
+        if ($creds['password'] !== '') {
+            $body['password'] = $creds['password'];
+        }
 
         $headers = [
             'X-API-Key: ' . $creds['api_key'],

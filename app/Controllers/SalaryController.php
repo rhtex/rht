@@ -61,85 +61,106 @@ class SalaryController extends BaseController
         return view('salaries/index', $data);
     }
 
-    public function calculate()
+    /**
+     * Compute monthly salary breakdown for a single employee.
+     */
+    private function computeEmployeeSalary(array $emp, string $start, string $end, int $daysInMonth, bool $isLoanExempt = false): array
     {
-        $month = $this->request->getGet('month') ?? date('Y-m');
-        
-        // 1. Get Active Employees
-        $employees = $this->employeeModel->where('status', 'active')->findAll();
-        
-        // 2. Prepare Calculation Data
-        $calculations = [];
+        $empId = (int) $emp['id'];
+        $basic = (float) ($emp['basic_salary'] ?? 0);
 
-        foreach ($employees as $emp) {
-            // Basic
-            $basic = $emp['basic_salary'];
-            
-            // Attendance
-            // Count absences in that month
-            $start = $month . '-01';
-            $end = date('Y-m-t', strtotime($start));
-            
-            $absentCount = $this->attendanceModel
-                ->where('employee_id', $emp['id'])
-                ->where('attendance_date >=', $start)
-                ->where('attendance_date <=', $end)
-                ->where('status', 'Absent')
-                ->countAllResults();
+        $absentCount = $this->attendanceModel
+            ->where('employee_id', $empId)
+            ->where('attendance_date >=', $start)
+            ->where('attendance_date <=', $end)
+            ->where('status', 'Absent')
+            ->countAllResults();
 
-            $halfDayCount = $this->attendanceModel
-                ->where('employee_id', $emp['id'])
-                ->where('attendance_date >=', $start)
-                ->where('attendance_date <=', $end)
-                ->where('status', 'Half Day')
-                ->countAllResults();
-            
-            $totalAbsentDays = $absentCount + ($halfDayCount * 0.5);
-            
-            // Simple logic: 30 days fixed or actual days? Let's use 30 for simplicity or actual days.
-            // Let's use Days in Month
-            $daysInMonth = date('t', strtotime($start));
-            $perDay = $basic > 0 ? $basic / $daysInMonth : 0;
-            $absentDeduction = $totalAbsentDays * $perDay;
+        $halfDayCount = $this->attendanceModel
+            ->where('employee_id', $empId)
+            ->where('attendance_date >=', $start)
+            ->where('attendance_date <=', $end)
+            ->where('status', 'Half Day')
+            ->countAllResults();
 
-            // Double Pay Days (multiplier > 1.0 and status = Present)
-            $doublePayRecords = $this->attendanceModel
-                ->where('employee_id', $emp['id'])
-                ->where('attendance_date >=', $start)
-                ->where('attendance_date <=', $end)
-                ->where('status', 'Present')
-                ->where('multiplier >', 1.0)
-                ->findAll();
-            
-            $extraPay = 0;
-            foreach ($doublePayRecords as $record) {
-                $extraPay += ($record['multiplier'] - 1.0) * $perDay;
-            }
+        $totalAbsentDays = $absentCount + ($halfDayCount * 0.5);
+        $perDay = $basic > 0 ? ($basic / $daysInMonth) : 0.0;
+        $absentDeduction = round($totalAbsentDays * $perDay, 2);
 
-            // Loans
+        // Double Pay Days (multiplier > 1.0 and status = Present)
+        $doublePayRecords = $this->attendanceModel
+            ->where('employee_id', $empId)
+            ->where('attendance_date >=', $start)
+            ->where('attendance_date <=', $end)
+            ->where('status', 'Present')
+            ->where('multiplier >', 1.0)
+            ->findAll();
+
+        $extraPayRaw = 0.0;
+        foreach ($doublePayRecords as $record) {
+            $extraPayRaw += ((float) $record['multiplier'] - 1.0) * $perDay;
+        }
+        $extraPay = round($extraPayRaw, 2);
+
+        // Cap loan deductions so net salary never goes negative
+        $maxDeductibleForLoans = max(0.0, round($basic + $extraPay - $absentDeduction, 2));
+        $loanDeduction = 0.0;
+        $loanDetails = [];
+
+        if (!$isLoanExempt && $maxDeductibleForLoans > 0) {
             $loans = $this->loanModel
-                ->where('employee_id', $emp['id'])
+                ->where('employee_id', $empId)
                 ->where('status', 'Approved')
                 ->where('credit_status', 'Credited')
                 ->where('remaining_amount >', 0)
                 ->findAll();
-            
-            $loanDeduction = 0;
-            $loanDetails = [];
 
             foreach ($loans as $loan) {
-                $deduct = min($loan['monthly_deduction'], $loan['remaining_amount']);
-                $loanDeduction += $deduct;
+                $availableCap = round($maxDeductibleForLoans - $loanDeduction, 2);
+                if ($availableCap <= 0) {
+                    break;
+                }
+                $deduct = round(min((float) $loan['monthly_deduction'], (float) $loan['remaining_amount'], $availableCap), 2);
+                if ($deduct <= 0) {
+                    continue;
+                }
+                $loanDeduction = round($loanDeduction + $deduct, 2);
                 $loanDetails[] = [
+                    'loan' => $loan,
                     'id' => $loan['id'],
-                    'amount' => $deduct
+                    'amount' => $deduct,
                 ];
             }
+        }
 
-            $totalDeduction = $absentDeduction + $loanDeduction;
-            $net = $basic - $totalDeduction + $extraPay;
+        $totalDeductions = round($absentDeduction + $loanDeduction, 2);
+        $net = max(0.0, round($basic + $extraPay - $totalDeductions, 2));
 
-            // Check if already generated
+        return [
+            'basic' => round($basic, 2),
+            'absent_count' => $totalAbsentDays,
+            'absent_deduction' => $absentDeduction,
+            'extra_pay' => $extraPay,
+            'loan_deduction' => $loanDeduction,
+            'loan_details' => $loanDetails,
+            'total_deductions' => $totalDeductions,
+            'net' => $net,
+        ];
+    }
+
+    public function calculate()
+    {
+        $month = $this->request->getGet('month') ?? date('Y-m');
+        $start = $month . '-01';
+        $end = date('Y-m-t', strtotime($start));
+        $daysInMonth = (int) date('t', strtotime($start));
+
+        $employees = $this->employeeModel->where('status', 'active')->findAll();
+        $calculations = [];
+
+        foreach ($employees as $emp) {
+            $calc = $this->computeEmployeeSalary($emp, $start, $end, $daysInMonth, false);
+
             $isGenerated = $this->salaryModel
                 ->where('employee_id', $emp['id'])
                 ->where('salary_month', $start)
@@ -147,179 +168,126 @@ class SalaryController extends BaseController
 
             $calculations[] = [
                 'employee' => $emp,
-                'basic' => $basic,
-                'absent_count' => $totalAbsentDays,
-                'absent_deduction' => $absentDeduction,
-                'extra_pay' => $extraPay,
-                'loan_deduction' => $loanDeduction,
-                'loan_details' => $loanDetails, // Need to pass this to store
-                'net' => $net,
-                'is_generated' => $isGenerated
+                'basic' => $calc['basic'],
+                'absent_count' => $calc['absent_count'],
+                'absent_deduction' => $calc['absent_deduction'],
+                'extra_pay' => $calc['extra_pay'],
+                'loan_deduction' => $calc['loan_deduction'],
+                'loan_details' => $calc['loan_details'],
+                'net' => $calc['net'],
+                'is_generated' => $isGenerated,
             ];
         }
 
-        $data = [
+        return view('salaries/calculate', [
             'month' => $month,
-            'calculations' => $calculations
-        ];
-
-        return view('salaries/calculate', $data);
+            'calculations' => $calculations,
+        ]);
     }
 
     public function process()
     {
         $month = $this->request->getPost('month');
-        $selectedEmpIds = $this->request->getPost('employee_ids'); // Array of IDs to process
-        $exemptLoan = $this->request->getPost('exempt_loan') ?? []; // Array of employee IDs to exempt from loan deduction
-        
+        $selectedEmpIds = $this->request->getPost('employee_ids');
+        $exemptLoan = $this->request->getPost('exempt_loan') ?? [];
+
         if (empty($month) || empty($selectedEmpIds)) {
             return redirect()->back()->with('error', 'No employees selected.');
         }
 
         $start = $month . '-01';
         $end = date('Y-m-t', strtotime($start));
-        $daysInMonth = date('t', strtotime($start));
+        $daysInMonth = (int) date('t', strtotime($start));
 
         $this->db->transStart();
 
         foreach ($selectedEmpIds as $empId) {
-            // Re-calculate to be safe (or trust hidden fields? Secure way is re-calculate)
-            // For MVP speed, let's re-calculate logic briefly or fetch necessary parts.
-            
             $emp = $this->employeeModel->find($empId);
-            if (!$emp) continue;
+            if (!$emp) {
+                continue;
+            }
 
-            // Check if already exists
             $existing = $this->salaryModel
                 ->where('employee_id', $empId)
                 ->where('salary_month', $start)
                 ->first();
-            
-            if ($existing) continue; // Skip if already done
-
-            // --- Calc Logic (Same as above) ---
-            $basic = $emp['basic_salary'];
-            $absentCount = $this->attendanceModel
-                ->where('employee_id', $empId)
-                ->where('attendance_date >=', $start)
-                ->where('attendance_date <=', $end)
-                ->where('status', 'Absent')
-                ->countAllResults();
-            
-            $halfDayCount = $this->attendanceModel
-                ->where('employee_id', $empId)
-                ->where('attendance_date >=', $start)
-                ->where('attendance_date <=', $end)
-                ->where('status', 'Half Day')
-                ->countAllResults();
-            
-            $totalAbsentDays = $absentCount + ($halfDayCount * 0.5);
-            
-            $perDay = $basic > 0 ? $basic / $daysInMonth : 0;
-            $absentDeduction = $totalAbsentDays * $perDay;
-
-            // Double Pay Days
-            $doublePayRecords = $this->attendanceModel
-                ->where('employee_id', $empId)
-                ->where('attendance_date >=', $start)
-                ->where('attendance_date <=', $end)
-                ->where('status', 'Present')
-                ->where('multiplier >', 1.0)
-                ->findAll();
-            
-            $extraPay = 0;
-            foreach ($doublePayRecords as $record) {
-                $extraPay += ($record['multiplier'] - 1.0) * $perDay;
+            if ($existing) {
+                continue;
             }
 
-            // Loan - Check if exempted
-            $loanDeduction = 0;
             $isLoanExempt = isset($exemptLoan[$empId]) && $exemptLoan[$empId] == 1;
-            
-            if (!$isLoanExempt) {
-                $loans = $this->loanModel
-                    ->where('employee_id', $empId)
-                    ->where('status', 'Approved')
-                    ->where('credit_status', 'Credited')
-                    ->where('remaining_amount >', 0)
-                    ->findAll();
+            $calc = $this->computeEmployeeSalary($emp, $start, $end, $daysInMonth, $isLoanExempt);
 
-                foreach ($loans as $loan) {
-                    $deduct = min($loan['monthly_deduction'], $loan['remaining_amount']);
-                    $loanDeduction += $deduct;
-                    
-                    // Update Loan Remaining
-                    $newRemaining = $loan['remaining_amount'] - $deduct;
+            // Insert salary first so loan_payments links to the generated salary_id
+            $salaryId = $this->salaryModel->insert([
+                'employee_id'  => $empId,
+                'salary_month' => $start,
+                'basic_salary' => $calc['basic'],
+                'allowances'   => $calc['extra_pay'],
+                'deductions'   => $calc['total_deductions'],
+                'net_salary'   => $calc['net'],
+                'exempt_loan_deduction' => $isLoanExempt ? 1 : 0,
+            ]);
+
+            if (!$isLoanExempt && $salaryId) {
+                foreach ($calc['loan_details'] as $item) {
+                    $loan = $item['loan'];
+                    $deduct = $item['amount'];
+                    $newRemaining = max(0.0, round((float) $loan['remaining_amount'] - $deduct, 2));
                     $status = $newRemaining <= 0 ? 'Completed' : 'Approved';
-                    
+
                     $this->loanModel->save([
                         'id' => $loan['id'],
                         'remaining_amount' => $newRemaining,
-                        'status' => $status
+                        'status' => $status,
                     ]);
-                    
-                    // Log payment in loan_payments table
+
                     $this->loanPaymentModel->insert([
                         'loan_id' => $loan['id'],
-                        'salary_id' => null, // Will update after salary insert
+                        'salary_id' => $salaryId,
                         'payment_date' => date('Y-m-d'),
                         'amount_paid' => $deduct,
                         'remaining_after_payment' => $newRemaining,
-                        'payment_month' => $month
+                        'payment_month' => $month,
                     ]);
                 }
             }
-
-            $totalDeductions = $absentDeduction + $loanDeduction;
-            $net = $basic - $totalDeductions + $extraPay;
-
-            // Save Salary
-            $this->salaryModel->insert([
-                'employee_id'  => $empId,
-                'salary_month' => $start,
-                'basic_salary' => $basic,
-                'allowances'   => $extraPay, // Store extra pay as allowances
-                'deductions'   => $totalDeductions,
-                'net_salary'   => $net,
-                'exempt_loan_deduction' => $isLoanExempt ? 1 : 0
-            ]);
         }
 
         $this->db->transComplete();
 
-        return redirect()->to('salaries?month='.$month)->with('success', 'Salaries processed successfully.');
+        return redirect()->to('salaries?month=' . $month)->with('success', 'Salaries processed successfully.');
     }
 
     public function payslip($id)
     {
-        $salary = $this->salaryModel->select('salaries.*, employees.*') // Join ample data
+        $salary = $this->salaryModel
+            ->select('salaries.*, employees.first_name, employees.last_name, employees.mobile_number')
             ->join('employees', 'employees.id = salaries.employee_id')
             ->where('salaries.id', $id)
             ->first();
-        
+
         if (!$salary) {
             return redirect()->back()->with('error', 'Salary record not found.');
         }
 
-        // Calculate attendance breakdown for this month
         $month = date('Y-m', strtotime($salary['salary_month']));
         $start = $month . '-01';
         $end = date('Y-m-t', strtotime($start));
-        $daysInMonth = date('t', strtotime($start));
-        
-        // Get all attendance records for this employee in this month
+        $daysInMonth = (int) date('t', strtotime($start));
+
         $attendanceRecords = $this->attendanceModel
             ->where('employee_id', $salary['employee_id'])
             ->where('attendance_date >=', $start)
             ->where('attendance_date <=', $end)
             ->findAll();
-        
-        // Count attendance statistics
+
         $presentDays = 0;
-        $absentDays = 0;
+        $absentDays = 0.0;
+        $halfDays = 0;
         $leaveDays = 0;
         $doublePayDays = 0;
-        
+
         foreach ($attendanceRecords as $record) {
             if ($record['status'] == 'Present') {
                 $presentDays++;
@@ -327,40 +295,54 @@ class SalaryController extends BaseController
                     $doublePayDays++;
                 }
             } elseif ($record['status'] == 'Absent') {
-                $absentDays++;
+                $absentDays += 1.0;
+            } elseif ($record['status'] == 'Half Day') {
+                $halfDays++;
+                $absentDays += 0.5;
             } elseif ($record['status'] == 'Leave') {
                 $leaveDays++;
             }
         }
-        
-        // Calculate per-day rate
-        $perDayRate = $salary['basic_salary'] > 0 ? $salary['basic_salary'] / $daysInMonth : 0;
-        
-        // Calculate individual deductions
-        $absentDeduction = $absentDays * $perDayRate;
-        $loanDeduction = $salary['deductions'] - $absentDeduction;
-        
-        // Get loan details for this month
-        $loans = $this->loanModel
-            ->where('employee_id', $salary['employee_id'])
-            ->where('status', 'Approved')
+
+        $perDayRate = $salary['basic_salary'] > 0 ? ((float) $salary['basic_salary'] / $daysInMonth) : 0.0;
+        $absentDeduction = round($absentDays * $perDayRate, 2);
+
+        // Fetch actual loan payments linked to this salary (with month fallback for legacy rows)
+        $loans = $this->loanPaymentModel
+            ->select('loan_payments.loan_id as id, loans.loan_amount, loan_payments.amount_paid as monthly_deduction, loan_payments.remaining_after_payment as remaining_amount')
+            ->join('loans', 'loans.id = loan_payments.loan_id')
+            ->where('loan_payments.salary_id', $id)
             ->findAll();
-        
-        $data = [
+
+        if (empty($loans) && empty($salary['exempt_loan_deduction'])) {
+            $loans = $this->loanPaymentModel
+                ->select('loan_payments.loan_id as id, loans.loan_amount, loan_payments.amount_paid as monthly_deduction, loan_payments.remaining_after_payment as remaining_amount')
+                ->join('loans', 'loans.id = loan_payments.loan_id')
+                ->where('loans.employee_id', $salary['employee_id'])
+                ->where('loan_payments.payment_month', $month)
+                ->findAll();
+        }
+
+        if (!empty($loans)) {
+            $loanDeduction = round(array_sum(array_map(fn($l) => (float) $l['monthly_deduction'], $loans)), 2);
+        } else {
+            $loanDeduction = max(0.0, round((float) $salary['deductions'] - $absentDeduction, 2));
+        }
+
+        return view('salaries/payslip', [
             'salary' => $salary,
             'daysInMonth' => $daysInMonth,
             'presentDays' => $presentDays,
             'absentDays' => $absentDays,
+            'halfDays' => $halfDays,
             'leaveDays' => $leaveDays,
             'doublePayDays' => $doublePayDays,
-            'perDayRate' => $perDayRate,
+            'perDayRate' => round($perDayRate, 2),
             'absentDeduction' => $absentDeduction,
             'loanDeduction' => $loanDeduction,
-            'extraPay' => $salary['allowances'], // Double pay stored in allowances
-            'loans' => $loans
-        ];
-
-        return view('salaries/payslip', $data);
+            'extraPay' => $salary['allowances'],
+            'loans' => $loans,
+        ]);
     }
     
     public function delete($id)

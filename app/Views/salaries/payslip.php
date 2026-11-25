@@ -76,7 +76,7 @@
         <div class="col-3 text-center">
             <div class="border p-3">
                 <h5 class="text-danger"><?= $absentDays ?></h5>
-                <small>Absent Days</small>
+                <small>Absent Days<?= !empty($halfDays) ? ' (incl. ' . $halfDays . ' Half)' : '' ?></small>
             </div>
         </div>
         <div class="col-3 text-center">

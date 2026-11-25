@@ -286,6 +286,31 @@
                             <small class="text-muted">Numbered or bulleted list of terms shown in the footer box. (General notes are omitted per your preference so Terms & Conditions remains the sole footer message).</small>
                         </div>
                     </div>
+
+                    <hr class="my-4">
+                    <h5 class="text-primary mb-3"><i class="fas fa-truck me-2"></i>API Sathi E-Way Bill Configuration</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">API Sathi API Key (<code>X-API-Key</code>)</label>
+                            <input type="text" class="form-control" name="settings[apisathi_api_key]" value="<?= esc($settings['apisathi_api_key'] ?? '') ?>" placeholder="test_... or live_...">
+                            <small class="text-muted">Use your <code>test_</code> key for sandbox or <code>live_</code> key for production from apisathi.in.</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">E-Way Bill GSTIN</label>
+                            <input type="text" class="form-control text-uppercase" name="settings[apisathi_ewb_gstin]" value="<?= esc($settings['apisathi_ewb_gstin'] ?? ($settings['company_print_gstin'] ?? ($settings['company_gstin'] ?? ''))) ?>" placeholder="33FOPPS7926B1ZK">
+                            <small class="text-muted">Taxpayer GSTIN registered on ewaybillgst.gov.in.</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">NIC / GSP Portal API Username</label>
+                            <input type="text" class="form-control" name="settings[apisathi_ewb_username]" value="<?= esc($settings['apisathi_ewb_username'] ?? '') ?>" placeholder="API username from ewaybillgst.gov.in">
+                            <small class="text-muted">Created under ewaybillgst.gov.in &rarr; Registration &rarr; For GSP.</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">NIC / GSP Portal API Password</label>
+                            <input type="password" class="form-control" name="settings[apisathi_ewb_password]" value="" placeholder="<?= !empty($settings['apisathi_ewb_password']) ? '•••••••• (Saved - leave blank to keep)' : 'Enter portal API password' ?>">
+                            <small class="text-muted">Leave blank to keep the existing saved password.</small>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-footer">
                     <button type="submit" class="btn btn-primary"><?= lang("App.save") ?> Changes</button>

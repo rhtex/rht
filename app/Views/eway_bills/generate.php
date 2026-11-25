@@ -10,7 +10,7 @@
                 <h1 class="m-0 text-dark fw-bold">
                     <i class="fas fa-file-invoice text-primary me-2"></i> Generate e-Way Bill
                 </h1>
-                <p class="text-muted small mb-0">Create government e-Way Bill (Part-A / Part-B) directly via Zoho Books API</p>
+                <p class="text-muted small mb-0">Create government e-Way Bill (Part-A / Part-B) directly via API Sathi (NIC Gateway)</p>
             </div>
             <div class="col-sm-6 text-end">
                 <a href="<?= site_url('eway_bills') ?>" class="btn btn-outline-secondary">
@@ -384,7 +384,7 @@
 
                         <div class="card-footer bg-light p-3">
                             <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm fw-bold">
-                                <i class="fas fa-paper-plane me-2"></i> Submit & Generate via Zoho Books API
+                                <i class="fas fa-paper-plane me-2"></i> Submit & Generate via API Sathi
                             </button>
                         </div>
                     </div>

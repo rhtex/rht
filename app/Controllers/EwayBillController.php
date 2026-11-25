@@ -10,12 +10,12 @@ use App\Models\ReturnShipmentModel;
 use App\Models\StateModel;
 use App\Models\TransportModel;
 use App\Models\VehicleModel;
-use App\Services\Zoho\ZohoEwayBillService;
+use App\Services\ApiSathiEwayBillService;
 
 class EwayBillController extends BaseController
 {
     protected EwayBillModel $ewayModel;
-    protected ZohoEwayBillService $ewayService;
+    protected ApiSathiEwayBillService $ewayService;
     protected InvoiceModel $invoiceModel;
     protected SalesReturnModel $returnModel;
     protected CustomerModel $customerModel;
@@ -26,7 +26,7 @@ class EwayBillController extends BaseController
     public function __construct()
     {
         $this->ewayModel      = new EwayBillModel();
-        $this->ewayService    = new ZohoEwayBillService();
+        $this->ewayService    = new ApiSathiEwayBillService();
         $this->invoiceModel   = new InvoiceModel();
         $this->returnModel    = new SalesReturnModel();
         $this->customerModel  = new CustomerModel();
@@ -495,14 +495,14 @@ class EwayBillController extends BaseController
     }
 
     /**
-     * Sync Status with Zoho Books
+     * Sync Status with API Sathi / NIC
      */
     public function sync($id)
     {
         $res = $this->ewayService->syncStatus((int) $id);
 
         if (!empty($res['success'])) {
-            return redirect()->to(site_url('eway_bills'))->with('success', 'Status synced successfully with Zoho Books. Current Status: ' . strtoupper($res['status']));
+            return redirect()->to(site_url('eway_bills'))->with('success', 'Status synced successfully with API Sathi / NIC. Current Status: ' . strtoupper($res['status']));
         }
 
         return redirect()->back()->with('error', $res['message'] ?? 'Sync failed.');

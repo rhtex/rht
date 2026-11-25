@@ -10,7 +10,7 @@
                 <h1 class="m-0 text-dark fw-bold">
                     <i class="fas fa-truck text-primary me-2"></i> e-Way Bill Management Console
                 </h1>
-                <p class="text-muted small mb-0">Generate Part A, Part B, Conveyance updates, Cancellations & Re-generation via Zoho Books API</p>
+                <p class="text-muted small mb-0">Generate Part A, Part B, Conveyance updates, Cancellations & Re-generation via API Sathi (NIC Gateway)</p>
             </div>
             <div class="col-sm-6 text-end">
                 <?php if (can('eway_bill.create')): ?>
@@ -274,9 +274,9 @@
                                                 </a>
                                             <?php endif; ?>
 
-                                            <!-- Sync status with Zoho Books -->
-                                            <?php if (!empty($row['zoho_ewaybill_id']) && can('eway_bill.view')): ?>
-                                                <a href="<?= site_url('eway_bills/sync/' . $row['id']) ?>" class="btn btn-outline-secondary" title="Sync Status from Zoho Books">
+                                            <!-- Sync status with API Sathi / NIC -->
+                                            <?php if (!empty($row['ewaybill_number']) && can('eway_bill.view')): ?>
+                                                <a href="<?= site_url('eway_bills/sync/' . $row['id']) ?>" class="btn btn-outline-secondary" title="Sync Status from API Sathi / NIC">
                                                     <i class="fas fa-sync-alt"></i>
                                                 </a>
                                             <?php endif; ?>
@@ -359,7 +359,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Update Conveyance in Zoho</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Update Conveyance via API Sathi</button>
                 </div>
             </div>
         </form>

@@ -381,7 +381,6 @@ class VendorSyncService extends AbstractModuleSyncService
 
         if ($billing) {
             $payload['billing_address'] = [
-                'attention'  => (string) ($vendor['contact_person'] ?? $vendor['name']),
                 'address'    => (string) ($billing['address_line1'] ?? ''),
                 'street2'    => (string) ($billing['address_line2'] ?? ''),
                 'city'       => (string) ($billing['city'] ?? ''),
@@ -395,7 +394,6 @@ class VendorSyncService extends AbstractModuleSyncService
         if ($shipping) {
             $shipStateCode = $this->taxMapper->resolveStateCode($shipping['state_id'] ?? null, $gstin, $shipping['state_name'] ?? null);
             $payload['shipping_address'] = [
-                'attention'  => (string) ($vendor['contact_person'] ?? $vendor['name']),
                 'address'    => (string) ($shipping['address_line1'] ?? ''),
                 'street2'    => (string) ($shipping['address_line2'] ?? ''),
                 'city'       => (string) ($shipping['city'] ?? ''),

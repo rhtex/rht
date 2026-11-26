@@ -133,7 +133,11 @@ class BankAccountController extends BaseController
         $oldBalance = round((float) ($existing['current_balance'] ?? 0), 2);
         $diff = round($newBalance - $oldBalance, 2);
 
-        $this->bankAccountModel->update($id, $data);
+        // Include id so Model's is_unique[...,id,{id}] rule resolves {id} during update()
+        $data['id'] = $id;
+        if (!$this->bankAccountModel->update($id, $data)) {
+            return redirect()->back()->withInput()->with('errors', $this->bankAccountModel->errors() ?: ['Failed to update bank account.']);
+        }
 
         if ($diff != 0.0) {
             (new \App\Models\BankTransactionModel())->save([

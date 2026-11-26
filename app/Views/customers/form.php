@@ -271,23 +271,27 @@
         // Event listener for Billing Country
         $('#billing_country_id').change(function() {
             var countryId = $(this).val();
-            var selectedStateId = '<?= old('billing_state_id', $billing_address['state_id'] ?? '') ?>';
+            var selectedStateId = $(this).data('initial-state') || '';
+            $(this).data('initial-state', '');
             loadStates(countryId, 'billing_state_id', selectedStateId);
         });
 
         // Event listener for Shipping Country
         $('#shipping_country_id').change(function() {
             var countryId = $(this).val();
-            var selectedStateId = '<?= old('shipping_state_id', $shipping_address['state_id'] ?? '') ?>';
+            var pendingState = $(this).data('pending-state');
+            var selectedStateId = pendingState !== undefined ? pendingState : ($(this).data('initial-state') || '');
+            $(this).removeData('pending-state');
+            $(this).data('initial-state', '');
             loadStates(countryId, 'shipping_state_id', selectedStateId);
         });
 
         // Initial load for states if countries are pre-selected (e.g., on edit or old data)
         if ($('#billing_country_id').val()) {
-            $('#billing_country_id').trigger('change');
+            $('#billing_country_id').data('initial-state', '<?= old('billing_state_id', $billing_address['state_id'] ?? '') ?>').trigger('change');
         }
         if ($('#shipping_country_id').val()) {
-            $('#shipping_country_id').trigger('change');
+            $('#shipping_country_id').data('initial-state', '<?= old('shipping_state_id', $shipping_address['state_id'] ?? '') ?>').trigger('change');
         }
 
 
@@ -299,18 +303,17 @@
                 $('input[name="shipping_city"]').val($('input[name="billing_city"]').val());
                 $('input[name="shipping_pincode"]').val($('input[name="billing_pincode"]').val());
                 
-                // Copy Country first
                 var billingCountry = $('#billing_country_id').val();
                 var billingState = $('#billing_state_id').val();
                 
-                // Set shipping country
-                $('#shipping_country_id').val(billingCountry).trigger('change');
-
-                // Copy the options from billing state to shipping state directly
-                var billingStateOptions = $('#billing_state_id').html();
-                $('#shipping_state_id').html(billingStateOptions);
-                $('#shipping_state_id').val(billingState).trigger('change');
-
+                if ($('#shipping_country_id').val() != billingCountry) {
+                    // Country changed: pass billingState so async loadStates selects it after loading
+                    $('#shipping_country_id').data('pending-state', billingState).val(billingCountry).trigger('change');
+                } else {
+                    // Same country: copy billing state options & value without re-fetching via AJAX
+                    var billingStateOptions = $('#billing_state_id').html();
+                    $('#shipping_state_id').html(billingStateOptions).val(billingState).trigger('change');
+                }
             } 
         });
 

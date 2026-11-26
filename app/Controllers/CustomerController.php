@@ -89,7 +89,11 @@ class CustomerController extends BaseController
         $customerId = $this->customerModel->getInsertID();
 
         // 2. Save Addresses
-        $this->saveAddresses('customer', $customerId);
+        $addressErrors = $this->saveAddresses('customer', $customerId);
+        if (!empty($addressErrors)) {
+            $db->transRollback();
+            return redirect()->back()->withInput()->with('errors', $addressErrors);
+        }
 
         $db->transComplete();
 
@@ -190,7 +194,11 @@ class CustomerController extends BaseController
         }
 
         // 2. Update Addresses
-        $this->saveAddresses('customer', $id);
+        $addressErrors = $this->saveAddresses('customer', $id);
+        if (!empty($addressErrors)) {
+            $db->transRollback();
+            return redirect()->back()->withInput()->with('errors', $addressErrors);
+        }
 
         $db->transComplete();
 
@@ -462,10 +470,13 @@ class CustomerController extends BaseController
     }
 
     /**
-     * Save addresses from form data
+     * Save addresses from form data.
+     *
+     * @return array<int, string> Validation error messages, empty on success.
      */
-    private function saveAddresses($ownerType, $ownerId)
+    private function saveAddresses($ownerType, $ownerId): array
     {
+        $errors = [];
         $addressesToProcess = [
             'billing' => [
                 'address_line1' => $this->request->getPost('billing_address_line1'),
@@ -517,13 +528,19 @@ class CustomerController extends BaseController
 
                 // Validate before proceeding
                 if (!$this->addressModel->validate($data)) {
-                    log_message('error', "Address Update - Validation failed for $type: " . json_encode($this->addressModel->errors()));
-                    continue; // Or throw an exception if we want to roll back the whole transaction
+                    $modelErrors = $this->addressModel->errors();
+                    log_message('error', "Address Update - Validation failed for $type: " . json_encode($modelErrors));
+                    foreach ($modelErrors as $msg) {
+                        $errors[] = ucfirst($type) . ' Address: ' . $msg;
+                    }
+                    continue;
                 }
 
                 $this->addressModel->deactivateOthers($ownerType, $ownerId, $type);
                 $this->addressModel->insert($data);
             }
         }
+
+        return $errors;
     }
 }

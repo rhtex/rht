@@ -435,9 +435,13 @@ body.is-mobile-device .lu-table.lu-stack tbody tr td {
 }
 body.is-mobile-device .lu-table.lu-stack tbody tr td:last-child { border-bottom: 0 !important; }
 body.is-mobile-device .lu-table.lu-stack tbody tr td::before { display: none !important; }
-body.is-mobile-device .lu-table.lu-stack tbody tr td:last-child .btn:not([title*="View"]):not([href*="/view/"]),
-body.is-mobile-device .lu-table.lu-stack tbody tr td:last-child a.btn:not([title*="View"]):not([href*="/view/"]) {
+body.is-mobile-device .lu-table.lu-stack:not(.lu-keep-actions) tbody tr td:last-child .btn:not([title*="View"]):not([href*="/view/"]),
+body.is-mobile-device .lu-table.lu-stack:not(.lu-keep-actions) tbody tr td:last-child a.btn:not([title*="View"]):not([href*="/view/"]) {
     display: none !important;
+}
+body.is-mobile-device .lu-table.lu-stack.lu-keep-actions tbody tr td:last-child .btn-group {
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
 }
 body.is-mobile-device .lu-table.lu-stack tbody tr.lu-empty td,
 body.is-mobile-device .lu-table.lu-stack tbody tr.lu-nomatch td { display: block !important; text-align: center !important; }

@@ -147,8 +147,14 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Waybill Image / Photo</label>
-                        <input type="file" name="waybill_image" class="form-control" accept="image/*">
-                        <small class="text-muted">Accepted formats: JPG, PNG. Max size: 2MB</small>
+                        <div class="input-group">
+                            <input type="file" name="waybill_image" id="modalWaybillImage" class="form-control" accept="image/*">
+                            <button type="button" class="btn btn-outline-primary" id="btnWaybillCamera" title="Take Photo with Camera">
+                                <i class="fas fa-camera me-1"></i> Camera
+                            </button>
+                        </div>
+                        <input type="file" id="modalWaybillCameraInput" accept="image/*" capture="environment" class="d-none">
+                        <small class="text-muted" id="waybillImageHelp">Accepted formats: JPG, PNG. Max size: 2MB</small>
                     </div>
                     <div id="waybillAutoSentNotice" class="alert alert-info py-2 px-3 small mb-0" style="display: none;">
                         <i class="fas fa-info-circle me-1"></i> This invoice is currently <strong>Draft</strong>. Updating waybill will set delivery status to <strong>Booked</strong> and automatically mark the invoice as <strong>Sent (Open)</strong>.
@@ -337,6 +343,26 @@ $(document).ready(function() {
             console.error('Failed to parse tracking data', err);
         }
     });
+
+    // Camera button for mobile waybill photo capture
+    $('#btnWaybillCamera').on('click', function() {
+        document.getElementById('modalWaybillCameraInput').click();
+    });
+    $('#modalWaybillCameraInput').on('change', function() {
+        const file = this.files && this.files[0];
+        if (!file) return;
+        const mainInput = document.getElementById('modalWaybillImage');
+        try {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            mainInput.files = dt.files;
+            document.getElementById('waybillImageHelp').textContent = 'Captured: ' + file.name;
+        } catch (err) {
+            mainInput.removeAttribute('name');
+            this.setAttribute('name', 'waybill_image');
+            document.getElementById('waybillImageHelp').textContent = 'Captured: ' + file.name;
+        }
+    });
 });
 
 function escTrackingHtml(str) {
@@ -442,6 +468,18 @@ function openWaybillModal(data) {
     document.getElementById('modalTransportAmount').value = data.transport_amount || '';
     document.getElementById('modalTransportPayType').value = data.transport_pay_type || 'To Pay';
     document.getElementById('modalWaybillShippingCharge').value = data.waybill_shipping_charge || '';
+    const mainImgInput = document.getElementById('modalWaybillImage');
+    const camImgInput = document.getElementById('modalWaybillCameraInput');
+    if (mainImgInput) {
+        mainImgInput.value = '';
+        mainImgInput.setAttribute('name', 'waybill_image');
+    }
+    if (camImgInput) {
+        camImgInput.value = '';
+        camImgInput.removeAttribute('name');
+    }
+    const imgHelp = document.getElementById('waybillImageHelp');
+    if (imgHelp) imgHelp.textContent = 'Accepted formats: JPG, PNG. Max size: 2MB';
     
     const waybillNotice = document.getElementById('waybillAutoSentNotice');
     if (waybillNotice) {

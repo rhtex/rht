@@ -394,9 +394,13 @@ code {
     }
     .lu-table.lu-stack tbody tr td:last-child { border-bottom: 0 !important; }
     .lu-table.lu-stack tbody tr td::before { display: none !important; }
-    .lu-table.lu-stack tbody tr td:last-child .btn:not([title*="View"]):not([href*="/view/"]),
-    .lu-table.lu-stack tbody tr td:last-child a.btn:not([title*="View"]):not([href*="/view/"]) {
+    .lu-table.lu-stack:not(.lu-keep-actions) tbody tr td:last-child .btn:not([title*="View"]):not([href*="/view/"]),
+    .lu-table.lu-stack:not(.lu-keep-actions) tbody tr td:last-child a.btn:not([title*="View"]):not([href*="/view/"]) {
         display: none !important;
+    }
+    .lu-table.lu-stack.lu-keep-actions tbody tr td:last-child .btn-group {
+        flex-wrap: wrap !important;
+        justify-content: flex-start !important;
     }
     .lu-table.lu-stack tbody tr.lu-empty td,
     .lu-table.lu-stack tbody tr.lu-nomatch td { display: block !important; text-align: center !important; }

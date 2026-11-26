@@ -1,5 +1,30 @@
 <?php foreach ($invoices as $inv): ?>
-    <tr>
+    <?php
+    $trackingPayload = [
+        'id' => $inv['id'],
+        'invoice_number' => $inv['invoice_number'],
+        'invoice_date' => $inv['invoice_date'] ?? '',
+        'status' => $inv['status'] ?? '',
+        'customer_name' => $inv['customer_name'] ?? 'N/A',
+        'transport_name' => $inv['transport_name'] ?? '',
+        'waybill_number' => $inv['waybill_number'] ?? '',
+        'waybill_date' => $inv['waybill_date'] ?? '',
+        'waybill_image' => $inv['waybill_image'] ?? '',
+        'transport_amount' => $inv['transport_amount'] ?? 0,
+        'transport_pay_type' => $inv['transport_pay_type'] ?? 'To Pay',
+        'waybill_shipping_charge' => $inv['waybill_shipping_charge'] ?? 0,
+        'delivery_status' => $inv['delivery_status'] ?? 'Pending',
+        'delivered_date' => $inv['delivered_date'] ?? '',
+        'ewaybill_number' => $inv['ewaybill_number'] ?? '',
+        'bales_count' => $inv['bales_count'] ?? ($inv['packages_count'] ?? ''),
+        'doc_courier_name' => $inv['doc_courier_name'] ?? '',
+        'doc_tracking_number' => $inv['doc_tracking_number'] ?? '',
+        'doc_dispatched_date' => $inv['doc_dispatched_date'] ?? '',
+        'doc_status' => $inv['doc_status'] ?? '',
+        'doc_received_date' => $inv['doc_received_date'] ?? '',
+    ];
+    ?>
+    <tr class="tracking-row" style="cursor: pointer;" data-tracking="<?= htmlspecialchars(json_encode($trackingPayload), ENT_QUOTES, 'UTF-8') ?>">
         <td>
             <div class="fw-bold"><?= esc($inv['invoice_number']) ?></div>
             <?php

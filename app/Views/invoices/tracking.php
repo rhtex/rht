@@ -201,6 +201,28 @@
     </div>
 </div>
 
+<!-- Tracking Details Modal -->
+<div class="modal fade" id="trackingDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-shipping-fast text-primary me-2"></i>Tracking Details: <span id="tdInvoiceNumber"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="trackingDetailBody"></div>
+            <div class="modal-footer d-flex flex-wrap justify-content-between gap-2">
+                <a id="tdViewInvoiceLink" href="#" class="btn btn-outline-dark btn-sm"><i class="fas fa-external-link-alt me-1"></i> View Invoice</a>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-primary btn-sm" id="tdOpenWaybillBtn"><i class="fas fa-truck me-1"></i> Waybill</button>
+                    <button type="button" class="btn btn-success btn-sm" id="tdOpenDeliveryBtn"><i class="fas fa-check-circle me-1"></i> Delivery</button>
+                    <button type="button" class="btn btn-info btn-sm text-white" id="tdOpenHistoryBtn"><i class="fas fa-history me-1"></i> History</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- History Modal -->
 <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -303,7 +325,110 @@ $(document).ready(function() {
             }
         });
     });
+
+    // Click row to view all tracking details
+    $('#tracking-tbody').on('click', 'tr.tracking-row', function(e) {
+        if ($(e.target).closest('a, button, input, select, textarea, label, form, .btn').length) return;
+        const raw = $(this).attr('data-tracking');
+        if (!raw) return;
+        try {
+            openTrackingDetailModal(JSON.parse(raw));
+        } catch (err) {
+            console.error('Failed to parse tracking data', err);
+        }
+    });
 });
+
+function escTrackingHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+
+function fmtTrackingDate(val) {
+    if (!val) return '-';
+    const parts = String(val).split('-');
+    return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : val;
+}
+
+function openTrackingDetailModal(data) {
+    const modalEl = document.getElementById('trackingDetailModal');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    document.getElementById('tdInvoiceNumber').textContent = data.invoice_number || '';
+    document.getElementById('tdViewInvoiceLink').href = '<?= site_url('invoices/view') ?>/' + data.id + '?mode=single';
+
+    const waybillImgHtml = data.waybill_image
+        ? `<div class="mt-2"><a href="<?= base_url('uploads/waybills') ?>/${encodeURIComponent(data.waybill_image)}" target="_blank"><img src="<?= base_url('uploads/waybills') ?>/${encodeURIComponent(data.waybill_image)}" alt="Waybill" class="img-fluid rounded border" style="max-height: 220px;"></a></div>`
+        : '<span class="text-muted">Not Uploaded</span>';
+
+    document.getElementById('trackingDetailBody').innerHTML = `
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card h-100 border">
+                    <div class="card-header py-2 bg-light fw-bold">Invoice & Transport</div>
+                    <div class="card-body p-2">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr><th class="text-muted" width="44%">Invoice #</th><td class="fw-bold">${escTrackingHtml(data.invoice_number)} (${escTrackingHtml(data.status || '-')})</td></tr>
+                            <tr><th class="text-muted">Invoice Date</th><td>${fmtTrackingDate(data.invoice_date)}</td></tr>
+                            <tr><th class="text-muted">Customer</th><td>${escTrackingHtml(data.customer_name || 'N/A')}</td></tr>
+                            <tr><th class="text-muted">Transport</th><td>${escTrackingHtml(data.transport_name || 'Not Selected')}</td></tr>
+                            <tr><th class="text-muted">Bales / Pkgs</th><td>${escTrackingHtml(data.bales_count || '-')}</td></tr>
+                            <tr><th class="text-muted">E-Way Bill #</th><td>${escTrackingHtml(data.ewaybill_number || '-')}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border">
+                    <div class="card-header py-2 bg-light fw-bold">Waybill & Delivery</div>
+                    <div class="card-body p-2">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr><th class="text-muted" width="44%">Waybill / LR #</th><td class="fw-bold">${escTrackingHtml(data.waybill_number || '-')}</td></tr>
+                            <tr><th class="text-muted">Waybill Date</th><td>${fmtTrackingDate(data.waybill_date)}</td></tr>
+                            <tr><th class="text-muted">Transport Amt</th><td>₹${parseFloat(data.transport_amount || 0).toFixed(2)} (${escTrackingHtml(data.transport_pay_type || 'To Pay')})</td></tr>
+                            <tr><th class="text-muted">Shipping Charge</th><td>₹${parseFloat(data.waybill_shipping_charge || 0).toFixed(2)}</td></tr>
+                            <tr><th class="text-muted">Delivery Status</th><td><span class="badge bg-info text-dark">${escTrackingHtml(data.delivery_status || 'Pending')}</span></td></tr>
+                            <tr><th class="text-muted">Delivered Date</th><td>${fmtTrackingDate(data.delivered_date)}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border">
+                    <div class="card-header py-2 bg-light fw-bold">Document Tracking</div>
+                    <div class="card-body p-2">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr><th class="text-muted" width="44%">Courier</th><td>${escTrackingHtml(data.doc_courier_name || '-')}</td></tr>
+                            <tr><th class="text-muted">Doc Tracking #</th><td>${escTrackingHtml(data.doc_tracking_number || '-')}</td></tr>
+                            <tr><th class="text-muted">Dispatched</th><td>${fmtTrackingDate(data.doc_dispatched_date)}</td></tr>
+                            <tr><th class="text-muted">Doc Status</th><td>${escTrackingHtml(data.doc_status || '-')}</td></tr>
+                            <tr><th class="text-muted">Received</th><td>${fmtTrackingDate(data.doc_received_date)}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border">
+                    <div class="card-header py-2 bg-light fw-bold">Waybill Image</div>
+                    <div class="card-body p-2 text-center">${waybillImgHtml}</div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('tdOpenWaybillBtn').onclick = function() {
+        modal.hide();
+        openWaybillModal(data);
+    };
+    document.getElementById('tdOpenDeliveryBtn').onclick = function() {
+        modal.hide();
+        openDeliveryModal(data);
+    };
+    document.getElementById('tdOpenHistoryBtn').onclick = function() {
+        modal.hide();
+        openHistoryModal(data);
+    };
+
+    modal.show();
+}
 
 function openWaybillModal(data) {
     const modal = new bootstrap.Modal(document.getElementById('updateWaybillModal'));

@@ -1,6 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($state) ? '<?= lang("App.edit") ?> State' : '<?= lang("App.add_new") ?> State' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($state) ? lang("App.edit") . ' State' : lang("App.add_new") . ' State' ?><?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <div class="content-header">

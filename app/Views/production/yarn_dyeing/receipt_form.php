@@ -1,5 +1,5 @@
 <?= $this->extend('layouts/master') ?>
-<?= $this->section('title') ?><?= isset($isEdit) ? '<?= lang("App.edit") ?> Dyeing Receipt' : 'Receive Dyed Yarn Stock' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($isEdit) ? lang("App.edit") . ' Dyeing Receipt' : 'Receive Dyed Yarn Stock' ?><?= $this->endSection() ?>
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6"><h1><?= isset($isEdit) ? '<?= lang("App.edit") ?> Dyeing Receipt' : 'Receive Dyed Yarn' ?> (Against DC: <?= esc($dc['dc_number']) ?>)</h1></div>

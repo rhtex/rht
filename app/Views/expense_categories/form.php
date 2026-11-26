@@ -1,6 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($category) ? '<?= lang("App.edit") ?> Category' : '<?= lang("App.add_new") ?> Category' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($category) ? lang("App.edit") . ' Category' : lang("App.add_new") . ' Category' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">

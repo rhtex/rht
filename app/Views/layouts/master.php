@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= get_setting('app_name', 'RasiDev HR') ?> | <?= $this->renderSection('title') ?></title>
+    <?php $sectionTitle = trim((string) $this->renderSection('title')); ?>
+    <title><?= esc(get_setting('app_name', 'RasiDev HR')) ?><?= $sectionTitle !== '' ? ' | ' . $sectionTitle : (!empty($title) ? ' | ' . esc($title) : '') ?></title>
 
     <!-- Google Font: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

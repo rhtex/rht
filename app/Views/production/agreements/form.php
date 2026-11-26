@@ -1,6 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($agreement) ? '<?= lang("App.edit") ?> Agreement' : '<?= lang("App.add_new") ?> Agreement' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($agreement) ? lang("App.edit") . ' Agreement' : lang("App.add_new") . ' Agreement' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">

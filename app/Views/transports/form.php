@@ -1,6 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($transport) ? '<?= lang("App.edit") ?> Transport' : '<?= lang("App.add_new") ?> Transport' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($transport) ? lang("App.edit") . ' Transport' : lang("App.add_new") . ' Transport' ?><?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <div class="content-header">

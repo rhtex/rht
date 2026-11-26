@@ -1,6 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($yarn) ? '<?= lang("App.edit") ?> Predefined Yarn' : 'Add Predefined Yarn' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($yarn) ? lang("App.edit") . ' Predefined Yarn' : 'Add Predefined Yarn' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">

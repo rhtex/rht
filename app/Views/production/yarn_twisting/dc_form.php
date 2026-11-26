@@ -1,5 +1,5 @@
 <?= $this->extend('layouts/master') ?>
-<?= $this->section('title') ?><?= isset($dc) ? '<?= lang("App.edit") ?> Twisting DC' : 'Create Twisting DC' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($dc) ? lang("App.edit") . ' Twisting DC' : 'Create Twisting DC' ?><?= $this->endSection() ?>
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6"><h1><?= isset($dc) ? '<?= lang("App.edit") ?> Twisting DC' : 'New Twisting DC' ?></h1></div>

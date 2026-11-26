@@ -1,5 +1,7 @@
 <?= $this->extend('layouts/master') ?>
 
+<?= $this->section('title') ?>Add Module<?= $this->endSection() ?>
+
 <?= $this->section('header') ?>
 <div class="row mb-2">
     <div class="col-sm-6">

@@ -1,6 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?><?= isset($purchase) ? '<?= lang("App.edit") ?> Yarn Purchase' : 'Add Yarn Purchase' ?><?= $this->endSection() ?>
+<?= $this->section('title') ?><?= isset($purchase) ? lang("App.edit") . ' Yarn Purchase' : 'Add Yarn Purchase' ?><?= $this->endSection() ?>
 
 <?= $this->section('header') ?>
 <div class="row mb-2">

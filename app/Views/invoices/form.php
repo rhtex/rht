@@ -363,7 +363,7 @@
                                             <?php endforeach; ?>
                                         </select>
                                         <div class="d-flex gap-1 mt-1 design-wrap">
-                                            <select name="items[<?= $index ?>][customer_order_id]" class="form-select form-select-sm design-order-select d-none" data-selected="<?= esc($item['customer_order_id'] ?? '') ?>">
+                                            <select name="items[<?= $index ?>][customer_order_id]" class="form-select form-select-sm design-order-select no-select2 d-none" data-selected="<?= esc($item['customer_order_id'] ?? '') ?>">
                                                 <option value="">-- Select Order Design No --</option>
                                             </select>
                                             <input type="text" name="items[<?= $index ?>][design_no]" class="form-control form-control-sm design-no-input"
@@ -404,7 +404,7 @@
                                         <?php endforeach; ?>
                                     </select>
                                     <div class="d-flex gap-1 mt-1 design-wrap">
-                                        <select name="items[0][customer_order_id]" class="form-select form-select-sm design-order-select d-none">
+                                        <select name="items[0][customer_order_id]" class="form-select form-select-sm design-order-select no-select2 d-none">
                                             <option value="">-- Select Order Design No --</option>
                                         </select>
                                         <input type="text" name="items[0][design_no]" class="form-control form-control-sm design-no-input" placeholder="Design No...">
@@ -624,7 +624,7 @@
                     ${productOptions}
                 </select>
                 <div class="d-flex gap-1 mt-1 design-wrap">
-                    <select name="items[${rowIndex}][customer_order_id]" class="form-select form-select-sm design-order-select ${_customerOrders.length ? '' : 'd-none'}">
+                    <select name="items[${rowIndex}][customer_order_id]" class="form-select form-select-sm design-order-select no-select2 ${_customerOrders.length ? '' : 'd-none'}">
                         ${buildDesignOrderOptionsHtml()}
                     </select>
                     <input type="text" name="items[${rowIndex}][design_no]" class="form-control form-control-sm design-no-input" placeholder="Design No...">

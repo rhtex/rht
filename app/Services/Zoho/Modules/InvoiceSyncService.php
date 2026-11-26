@@ -628,16 +628,37 @@ class InvoiceSyncService extends AbstractModuleSyncService
 
     public function normalizeLocalInvoice(array $inv, array $items): array
     {
+        $normalizedItems = [];
+        foreach ($items as $item) {
+            $normalizedItems[] = [
+                'product_id'     => (int) ($item['product_id'] ?? 0),
+                'description'    => trim((string) ($item['description'] ?? '')),
+                'hsn_code'       => trim((string) ($item['hsn_code'] ?? '')),
+                'quantity'       => round((float) ($item['quantity'] ?? 0), 2),
+                'rate'           => round((float) ($item['rate'] ?? 0), 2),
+                'tax_percentage' => round((float) ($item['tax_percentage'] ?? 0), 2),
+            ];
+        }
+
         return [
-            'invoice_number'  => trim((string) ($inv['invoice_number'] ?? '')),
-            'date'            => (string) ($inv['invoice_date'] ?? ''),
-            'due_date'        => (string) ($inv['due_date'] ?? ''),
-            'subtotal'        => round((float) ($inv['subtotal'] ?? 0), 2),
-            'discount_amount' => round((float) ($inv['discount_amount'] ?? 0), 2),
-            'tax_amount'      => round((float) ($inv['tax_amount'] ?? 0), 2),
-            'total_amount'    => round((float) ($inv['total_amount'] ?? 0), 2),
-            'items_count'     => count($items),
-            'is_draft'        => (($inv['status'] ?? '') === 'Draft') ? 1 : 0,
+            'customer_id'      => (int) ($inv['customer_id'] ?? 0),
+            'invoice_number'   => trim((string) ($inv['invoice_number'] ?? '')),
+            'date'             => (string) ($inv['invoice_date'] ?? ''),
+            'due_date'         => (string) ($inv['due_date'] ?? ''),
+            'reference_number' => (string) ($inv['reference_number'] ?? ''),
+            'is_inter_state'   => !empty($inv['is_inter_state']) ? 1 : 0,
+            'subtotal'         => round((float) ($inv['subtotal'] ?? 0), 2),
+            'discount_amount'  => round((float) ($inv['discount_amount'] ?? 0), 2),
+            'discount_type'    => (string) ($inv['discount_type'] ?? 'Fixed'),
+            'shipping_charge'  => round((float) ($inv['shipping_charge'] ?? 0), 2),
+            'roundoff_amount'  => round((float) ($inv['roundoff_amount'] ?? 0), 2),
+            'tax_amount'       => round((float) ($inv['tax_amount'] ?? 0), 2),
+            'total_amount'     => round((float) ($inv['total_amount'] ?? 0), 2),
+            'bales_count'      => (int) ($inv['bales_count'] ?? $inv['packages_count'] ?? 0),
+            'notes'            => (string) ($inv['notes'] ?? ''),
+            'terms'            => (string) ($inv['terms'] ?? ''),
+            'items'            => $normalizedItems,
+            'is_draft'         => (($inv['status'] ?? '') === 'Draft') ? 1 : 0,
         ];
     }
 

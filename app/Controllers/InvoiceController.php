@@ -786,6 +786,7 @@ class InvoiceController extends BaseController
 
     public function tracking()
     {
+        $this->ensureBookedDeliveryStatusEnum();
         $limit = 25;
         $offset = intval($this->request->getGet('offset') ?? 0);
 
@@ -854,6 +855,7 @@ class InvoiceController extends BaseController
 
     public function updateWaybill($id)
     {
+        $this->ensureBookedDeliveryStatusEnum();
         $invoice = $this->invoiceModel->find($id);
         if (!$invoice) {
             return redirect()->back()->with('error', 'Invoice not found.');
@@ -973,6 +975,7 @@ class InvoiceController extends BaseController
 
     public function updateDeliveryStatus($id)
     {
+        $this->ensureBookedDeliveryStatusEnum();
         $invoice = $this->invoiceModel->find($id);
         if (!$invoice) {
             return redirect()->back()->with('error', 'Invoice not found.');
@@ -1024,6 +1027,20 @@ class InvoiceController extends BaseController
         }
 
         return redirect()->back()->with('error', 'Failed to update delivery status.');
+    }
+
+    /**
+     * Ensure invoices.delivery_status ENUM includes 'Booked' and repair any rows
+     * truncated to '' before the migration ran (e.g. on cPanel deployments).
+     */
+    private function ensureBookedDeliveryStatusEnum(): void
+    {
+        $db = \Config\Database::connect();
+        $col = $db->query("SHOW COLUMNS FROM `invoices` LIKE 'delivery_status'")->getRowArray();
+        if ($col && stripos((string) ($col['Type'] ?? ''), "'Booked'") === false) {
+            $db->query("ALTER TABLE `invoices` MODIFY COLUMN `delivery_status` ENUM('Pending','Booked','In Transit','Delivered','Cancelled') NULL DEFAULT 'Pending'");
+            $db->query("UPDATE `invoices` SET `delivery_status` = 'Booked' WHERE `delivery_status` = ''");
+        }
     }
 
     public function getHistory($id)

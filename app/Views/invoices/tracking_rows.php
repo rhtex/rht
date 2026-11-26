@@ -49,7 +49,7 @@
             <?php endif; ?>
         </td>
         <td>
-            <div class="btn-group w-100 d-flex justify-content-end gap-2">
+            <div class="d-flex flex-wrap justify-content-start justify-content-md-end gap-1 w-100">
                 <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2 rounded" 
                         onclick="openWaybillModal(<?= htmlspecialchars(json_encode([
                             'id' => $inv['id'],

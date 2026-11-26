@@ -18,10 +18,17 @@
     </div>
 
     <!-- Filters -->
+    <?php $hasActiveFilters = !empty($filters['customer_id']) || !empty($filters['doc_status']) || !empty($filters['search']); ?>
     <div class="card card-outline card-info mb-4">
-        <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-filter me-2"></i>Filters</h3>
+        <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#docTrackingFilterCollapse" aria-expanded="<?= $hasActiveFilters ? 'true' : 'false' ?>">
+            <h3 class="card-title mb-0"><i class="fas fa-filter me-2"></i>Filters</h3>
+            <div class="card-tools ms-auto">
+                <button type="button" class="btn btn-tool" aria-label="Toggle Filters">
+                    <i class="fas <?= $hasActiveFilters ? 'fa-minus' : 'fa-plus' ?> filter-toggle-icon"></i>
+                </button>
+            </div>
         </div>
+        <div id="docTrackingFilterCollapse" class="collapse <?= $hasActiveFilters ? 'show' : '' ?>">
         <div class="card-body">
             <form action="" method="get" class="row g-3">
                 <div class="col-md-3">
@@ -52,6 +59,7 @@
                     <a href="<?= site_url('invoices/doc-tracking') ?>" class="btn btn-secondary w-100">Reset</a>
                 </div>
             </form>
+        </div>
         </div>
     </div>
 

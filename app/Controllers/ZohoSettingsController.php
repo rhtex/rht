@@ -6,7 +6,6 @@ use App\Models\Zoho\ZohoSettingModel;
 use App\Models\Zoho\ZohoSyncConflictModel;
 use App\Services\Zoho\ZohoApiClient;
 use App\Services\Zoho\ZohoDataCenterRegistry;
-use App\Services\Zoho\ZohoEwayBillService;
 use App\Services\Zoho\ZohoOAuthService;
 use App\Services\Zoho\ZohoRateLimiterService;
 use App\Services\Zoho\ZohoTaxMapperService;
@@ -32,16 +31,6 @@ class ZohoSettingsController extends BaseController
         $planPresets   = ZohoRateLimiterService::getPlanPresets();
         $rateUsage     = $this->apiClient->getRateLimitUsage();
 
-        try {
-            $ewbSettings = (new ZohoEwayBillService($this->apiClient))->getEwayBillSettings();
-        } catch (\Throwable $e) {
-            $ewbSettings = [
-                'success'             => false,
-                'is_ewaybill_enabled' => false,
-                'message'             => $e->getMessage(),
-            ];
-        }
-
         return view('zoho/settings', [
             'title'         => 'Zoho Books Configuration',
             'config'        => $config,
@@ -49,7 +38,6 @@ class ZohoSettingsController extends BaseController
             'openConflicts' => $openConflicts,
             'planPresets'   => $planPresets,
             'rateUsage'     => $rateUsage,
-            'ewbSettings'   => $ewbSettings,
         ]);
     }
 
@@ -249,40 +237,6 @@ class ZohoSettingsController extends BaseController
 
         return redirect()->to('settings/integrations/zoho')
             ->with('success', 'Selected Zoho Organization: ' . ($orgName ?: $orgId));
-    }
-
-    public function saveEwayBillCredentials()
-    {
-        $username      = trim((string) $this->request->getPost('ewaybill_username'));
-        $password      = (string) $this->request->getPost('ewaybill_password');
-        $taxSettingsId = trim((string) $this->request->getPost('tax_settings_id'));
-
-        $ewbService = new ZohoEwayBillService($this->apiClient);
-        $res        = $ewbService->updateEwayBillCredentials($username, $password, $taxSettingsId ?: null);
-
-        if ($this->request->isAJAX()) {
-            return $this->response->setJSON($res);
-        }
-
-        if (!empty($res['success'])) {
-            return redirect()->to('settings/integrations/zoho')->with('success', $res['message']);
-        }
-        return redirect()->to('settings/integrations/zoho')->with('error', $res['message'] ?? 'Failed to update e-Way Bill GST portal credentials.');
-    }
-
-    public function testEwayBillApi()
-    {
-        $ewbService = new ZohoEwayBillService($this->apiClient);
-        $res        = $ewbService->testEwayBillApi();
-
-        if ($this->request->isAJAX()) {
-            return $this->response->setJSON($res);
-        }
-
-        if (!empty($res['success'])) {
-            return redirect()->to('settings/integrations/zoho')->with('success', $res['message']);
-        }
-        return redirect()->to('settings/integrations/zoho')->with('error', $res['message'] ?? 'e-Way Bill API test failed.');
     }
 }
 

@@ -10,12 +10,10 @@ use App\Models\ReturnShipmentModel;
 use App\Models\StateModel;
 use App\Models\TransportModel;
 use App\Models\VehicleModel;
-use App\Services\ApiSathiEwayBillService;
 
 class EwayBillController extends BaseController
 {
     protected EwayBillModel $ewayModel;
-    protected ApiSathiEwayBillService $ewayService;
     protected InvoiceModel $invoiceModel;
     protected SalesReturnModel $returnModel;
     protected CustomerModel $customerModel;
@@ -26,7 +24,6 @@ class EwayBillController extends BaseController
     public function __construct()
     {
         $this->ewayModel      = new EwayBillModel();
-        $this->ewayService    = new ApiSathiEwayBillService();
         $this->invoiceModel   = new InvoiceModel();
         $this->returnModel    = new SalesReturnModel();
         $this->customerModel  = new CustomerModel();
@@ -340,14 +337,7 @@ class EwayBillController extends BaseController
             return redirect()->back()->withInput()->with('error', implode('<br>', $this->validator->getErrors()));
         }
 
-        $userId = session('user_id') ? (int) session('user_id') : 1;
-        $result = $this->ewayService->generate($input, $userId);
-
-        if (!empty($result['success'])) {
-            return redirect()->to(site_url('eway_bills'))->with('success', $result['message']);
-        }
-
-        return redirect()->back()->withInput()->with('error', $result['message'] ?? 'Failed to generate e-Way Bill');
+        return redirect()->back()->withInput()->with('error', 'E-Way Bill API integration has been removed. Please enter the E-Way Bill number manually on the invoice.');
     }
 
     /**
@@ -355,24 +345,7 @@ class EwayBillController extends BaseController
      */
     public function updatePartB($id)
     {
-        $input  = $this->request->getPost();
-        $userId = session('user_id') ? (int) session('user_id') : 1;
-
-        $rules = [
-            'vehicle_number' => 'required',
-        ];
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->with('error', 'Vehicle Number is mandatory to update Part-B.');
-        }
-
-        $res = $this->ewayService->updatePartB((int) $id, $input, $userId);
-
-        if (!empty($res['success'])) {
-            return redirect()->to(site_url('eway_bills'))->with('success', $res['message']);
-        }
-
-        return redirect()->back()->with('error', $res['message'] ?? 'Failed to update Part-B conveyance.');
+        return redirect()->back()->with('error', 'E-Way Bill API integration has been removed.');
     }
 
     /**
@@ -380,21 +353,7 @@ class EwayBillController extends BaseController
      */
     public function cancel($id)
     {
-        $reason  = $this->request->getPost('cancel_reason_code') ?? '1';
-        $remarks = trim((string) $this->request->getPost('cancel_remarks'));
-        $userId  = session('user_id') ? (int) session('user_id') : 1;
-
-        if (empty($remarks)) {
-            return redirect()->back()->with('error', 'Cancellation remarks are mandatory.');
-        }
-
-        $res = $this->ewayService->cancel((int) $id, $reason, $remarks, $userId);
-
-        if (!empty($res['success'])) {
-            return redirect()->to(site_url('eway_bills'))->with('success', $res['message']);
-        }
-
-        return redirect()->back()->with('error', $res['message'] ?? 'Failed to cancel e-Way Bill.');
+        return redirect()->back()->with('error', 'E-Way Bill API integration has been removed.');
     }
 
     /**
@@ -515,20 +474,11 @@ class EwayBillController extends BaseController
      */
     public function regenerate($id)
     {
-        $input  = $this->request->getPost();
-        $userId = session('user_id') ? (int) session('user_id') : 1;
-
-        $res = $this->ewayService->regenerate((int) $id, $input, $userId);
-
-        if (!empty($res['success'])) {
-            return redirect()->to(site_url('eway_bills'))->with('success', $res['message']);
-        }
-
-        return redirect()->back()->withInput()->with('error', $res['message'] ?? 'Failed to regenerate e-Way Bill.');
+        return redirect()->back()->withInput()->with('error', 'E-Way Bill API integration has been removed.');
     }
 
     /**
-     * View Generated e-Way Bill Details (Part-A, Part-B status, stored API Sathi response)
+     * View Generated e-Way Bill Details
      */
     public function view($id)
     {
@@ -552,39 +502,15 @@ class EwayBillController extends BaseController
      */
     public function extendValidity($id)
     {
-        $input  = $this->request->getPost();
-        $userId = session('user_id') ? (int) session('user_id') : 1;
-
-        $rules = [
-            'remaining_distance' => 'required|is_natural_no_zero',
-            'extn_reason_code'   => 'required',
-            'extn_remarks'       => 'required',
-        ];
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->with('error', implode('<br>', $this->validator->getErrors()));
-        }
-
-        $res = $this->ewayService->extendValidity((int) $id, $input, $userId);
-        if (!empty($res['success'])) {
-            return redirect()->to(site_url('eway_bills'))->with('success', $res['message']);
-        }
-
-        return redirect()->back()->with('error', $res['message'] ?? 'Failed to extend e-Way Bill validity.');
+        return redirect()->back()->with('error', 'E-Way Bill API integration has been removed.');
     }
 
     /**
-     * Sync Status with API Sathi / NIC
+     * Sync Status
      */
     public function sync($id)
     {
-        $res = $this->ewayService->syncStatus((int) $id);
-
-        if (!empty($res['success'])) {
-            return redirect()->to(site_url('eway_bills'))->with('success', 'Status synced successfully with API Sathi / NIC. Current Status: ' . strtoupper($res['status']));
-        }
-
-        return redirect()->back()->with('error', $res['message'] ?? 'Sync failed.');
+        return redirect()->back()->with('error', 'E-Way Bill API integration has been removed.');
     }
 }
 

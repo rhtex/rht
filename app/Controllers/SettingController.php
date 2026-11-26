@@ -73,8 +73,6 @@ class SettingController extends BaseController
         'print_font_size',
         'print_selected_bank_ids',
         'print_default_terms',
-        'apisathi_api_key',
-        'apisathi_ewb_gstin',
     ];
 
     public function update()

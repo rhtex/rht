@@ -780,8 +780,6 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
         $routes->post('refresh-token', 'ZohoSettingsController::refreshToken', ['filter' => 'permission:setting.edit']);
         $routes->post('disconnect', 'ZohoSettingsController::disconnect', ['filter' => 'permission:setting.edit']);
         $routes->post('select-organization', 'ZohoSettingsController::selectOrganization', ['filter' => 'permission:setting.edit']);
-        $routes->post('ewaybill-credentials', 'ZohoSettingsController::saveEwayBillCredentials', ['filter' => 'permission:setting.edit']);
-        $routes->post('test-ewaybill', 'ZohoSettingsController::testEwayBillApi', ['filter' => 'permission:setting.edit']);
 
         // Synchronization Dashboard & Manual Actions
         $routes->get('sync', 'ZohoSyncController::dashboard');

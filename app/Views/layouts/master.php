@@ -139,6 +139,7 @@
                     const opts = {
                         theme: 'bootstrap-5',
                         width: $el.data('width') ? $el.data('width') : (inCompactHeaderOrGroup || hasExplicitWidth ? 'resolve' : '100%'),
+                        width: $el.data('width') ? $el.data('width') : (inCompactHeaderOrGroup || hasExplicitWidth ? 'resolve' : '100%'),
                         dropdownAutoWidth: inCompactHeaderOrGroup,
                         placeholder: $el.data('placeholder'),
                         minimumResultsForSearch: $el.hasClass('select2') ? 0 : 7

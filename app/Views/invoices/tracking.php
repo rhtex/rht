@@ -132,7 +132,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Payment Type</label>
-                            <select name="transport_pay_type" id="modalTransportPayType" class="form-select">
+                            <select name="transport_pay_type" id="modalTransportPayType" class="form-select no-select2">
                                 <option value="To Pay">To Pay</option>
                                 <option value="Paid">Paid</option>
                             </select>
@@ -176,7 +176,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Update Status <span class="text-danger">*</span></label>
-                        <select name="delivery_status" id="modalDeliveryStatus" class="form-select" required>
+                        <select name="delivery_status" id="modalDeliveryStatus" class="form-select no-select2" required>
                             <option value="Pending">Pending</option>
                             <option value="Booked">Booked</option>
                             <option value="In Transit">In Transit</option>
@@ -309,7 +309,11 @@ function openWaybillModal(data) {
     const modal = new bootstrap.Modal(document.getElementById('updateWaybillModal'));
     document.getElementById('waybillInvoiceNumber').textContent = data.invoice_number;
     document.getElementById('modalWaybillNumber').value = data.waybill_number || '';
-    document.getElementById('modalWaybillDate').value = data.waybill_date || '';
+    const waybillDateEl = document.getElementById('modalWaybillDate');
+    waybillDateEl.value = data.waybill_date || '';
+    if (waybillDateEl._flatpickr) {
+        waybillDateEl._flatpickr.setDate(data.waybill_date || '', false);
+    }
     document.getElementById('modalTransportAmount').value = data.transport_amount || '';
     document.getElementById('modalTransportPayType').value = data.transport_pay_type || 'To Pay';
     document.getElementById('modalWaybillShippingCharge').value = data.waybill_shipping_charge || '';

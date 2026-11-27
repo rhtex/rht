@@ -69,6 +69,9 @@
                 <div class="card-body p-2">
                     <table class="table table-sm table-borderless mb-0">
                         <tr><th class="text-muted" width="40%">Return Date:</th><td class="fw-semibold"><?= date('d/m/Y', strtotime($return['return_date'])) ?></td></tr>
+                        <?php if (!empty($return['customer_debit_note_no'])): ?>
+                            <tr><th class="text-muted">Customer Debit Note No.:</th><td class="fw-semibold"><?= esc($return['customer_debit_note_no']) ?></td></tr>
+                        <?php endif; ?>
                         <tr><th class="text-muted">Status:</th><td><span class="badge bg-<?= $return['status'] == 'Open' ? 'warning' : 'success' ?>"><?= esc($return['status']) ?></span></td></tr>
                         <tr>
                             <th class="text-muted">Tax Mode:</th>

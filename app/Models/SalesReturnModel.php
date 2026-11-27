@@ -15,6 +15,7 @@ class SalesReturnModel extends Model
     protected $allowedFields = [
         'customer_id',
         'invoice_id',
+        'customer_debit_note_no',
         'return_number',
         'return_date',
         'subtotal',
@@ -109,22 +110,36 @@ class SalesReturnModel extends Model
     }
 
     /**
-     * Generate next return number
+     * Generate next return number (Zoho Credit Note format: CN-00001)
      */
     public function generateReturnNumber()
     {
-        $prefix = 'SRTN-' . date('Ym') . '-';
-        $lastReturn = $this->like('return_number', $prefix, 'after')
-            ->orderBy('id', 'DESC')
-            ->first();
+        $settingModel  = new \App\Models\SettingModel();
+        $prefix        = $settingModel->getSetting('credit_note_prefix', 'CN-');
+        $paddingDigits = max(5, (int) $settingModel->getSetting('credit_note_padding_digits', 5));
 
-        if ($lastReturn) {
-            $lastNumber = (int) substr($lastReturn['return_number'], -4);
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
+        $rows = $this->select('return_number')
+            ->like('return_number', $prefix, 'after')
+            ->findAll();
+
+        $maxNum    = 0;
+        $prefixLen = strlen($prefix);
+        foreach ($rows as $row) {
+            $numStr = trim((string) ($row['return_number'] ?? ''));
+            if (str_starts_with($numStr, $prefix)) {
+                $suffix = substr($numStr, $prefixLen);
+                if ($suffix !== '' && ctype_digit($suffix)) {
+                    $val = (int) $suffix;
+                    if ($val > $maxNum) {
+                        $maxNum = $val;
+                    }
+                }
+            }
         }
 
-        return $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+        $configuredNext = (int) $settingModel->getSetting('credit_note_next_number', '0');
+        $nextNum = max($maxNum + 1, $configuredNext, 1);
+
+        return $prefix . str_pad((string) $nextNum, $paddingDigits, '0', STR_PAD_LEFT);
     }
 }

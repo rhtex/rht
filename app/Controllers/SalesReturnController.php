@@ -101,6 +101,9 @@ class SalesReturnController extends BaseController
         if (!$db->fieldExists('adjustment', 'sales_returns')) {
             $db->query("ALTER TABLE `sales_returns` ADD COLUMN `adjustment` DECIMAL(15,2) NOT NULL DEFAULT 0.00 AFTER `tax_amount`");
         }
+        if (!$db->fieldExists('customer_debit_note_no', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `customer_debit_note_no` VARCHAR(100) NULL AFTER `invoice_id`");
+        }
     }
 
     public function create()
@@ -108,6 +111,7 @@ class SalesReturnController extends BaseController
         $this->ensureDiscountAndAdjustmentColumns();
         $data['customers'] = $this->customerModel->where('status', 'active')->orderBy('name', 'ASC')->findAll();
         $data['products'] = $this->productModel->getProductsWithCategory();
+        $data['taxes'] = (new \App\Models\TaxModel())->where('status', 'Active')->orderBy('percentage', 'ASC')->findAll();
         $data['title'] = 'Record Sales Return';
         $data['return_number'] = $this->returnModel->generateReturnNumber();
         $data['preselected_invoice_id'] = (int) ($this->request->getGet('invoice_id') ?? 0);
@@ -195,6 +199,7 @@ class SalesReturnController extends BaseController
         $returnId = $this->returnModel->insert([
             'customer_id' => $customerId,
             'invoice_id' => $invoiceId,
+            'customer_debit_note_no' => trim((string) $this->request->getPost('customer_debit_note_no')) ?: null,
             'return_number' => $customReturnNo !== '' ? $customReturnNo : $this->returnModel->generateReturnNumber(),
             'return_date' => $returnDate,
             'reason' => $this->request->getPost('reason'),

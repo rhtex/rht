@@ -120,6 +120,12 @@
                                 <th class="text-muted text-uppercase small">Return Date:</th>
                                 <td class="fw-bold"><?= date('d/m/Y', strtotime($return['return_date'])) ?></td>
                             </tr>
+                            <?php if (!empty($return['customer_debit_note_no'])): ?>
+                                <tr>
+                                    <th class="text-muted text-uppercase small">Customer Debit Note No.:</th>
+                                    <td class="fw-semibold"><?= esc($return['customer_debit_note_no']) ?></td>
+                                </tr>
+                            <?php endif; ?>
                             <tr>
                                 <th class="text-muted text-uppercase small">Against Invoice:</th>
                                 <td>

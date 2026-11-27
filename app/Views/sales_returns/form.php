@@ -80,17 +80,22 @@
                 <div class="col-lg-7">
                     <div class="border rounded p-3 h-100">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="return_number" class="form-label fw-semibold">Return # (Credit Note)</label>
                                 <input type="text" name="return_number" id="return_number" class="form-control fw-bold"
                                     value="<?= esc($return_number) ?>">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="return_date" class="form-label fw-semibold">Return Date <span class="text-danger">*</span></label>
                                 <input type="date" name="return_date" id="return_date" class="form-control"
                                     value="<?= date('Y-m-d') ?>" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label for="customer_debit_note_no" class="form-label fw-semibold">Customer Debit Note No.</label>
+                                <input type="text" name="customer_debit_note_no" id="customer_debit_note_no" class="form-control"
+                                    placeholder="e.g. DN-00123">
+                            </div>
+                            <div class="col-md-3">
                                 <label for="invoice_id" class="form-label fw-semibold">
                                     Reference Invoice
                                     <span class="badge bg-primary-subtle text-primary ms-1">Auto-Fill</span>
@@ -203,7 +208,15 @@
                             </td>
                             <td><input type="number" name="items[0][quantity]" class="form-control qty text-end" step="0.01" min="0.01" value="1" required></td>
                             <td><input type="number" name="items[0][rate]" class="form-control rate text-end" step="0.01" min="0" value="0" required></td>
-                            <td><input type="number" name="items[0][tax_percentage]" class="form-control tax text-end" step="0.01" min="0" value="0"></td>
+                            <td>
+                                <select name="items[0][tax_percentage]" class="form-select text-end tax no-select2">
+                                    <option value="0">0%</option>
+                                    <?php foreach ($taxes ?? [] as $tax): ?>
+                                        <?php $pctStr = rtrim(rtrim(number_format((float) $tax['percentage'], 2, '.', ''), '0'), '.'); ?>
+                                        <option value="<?= esc($pctStr) ?>"><?= esc($pctStr) ?>%</option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </td>
                             <td><input type="text" class="form-control total text-end fw-semibold" readonly value="0.00"></td>
                             <td class="text-center text-nowrap">
                                 <button type="button" class="btn btn-sm btn-outline-success add-row-below me-1" title="Add Line Item Below">
@@ -393,6 +406,24 @@
         });
     }
 
+    function setRowTaxValue($row, rawTax) {
+        const $sel = $row.find('.tax');
+        const num = parseFloat(rawTax || 0);
+        const normalized = Number.isFinite(num) ? String(Number(num.toFixed(2))) : '0';
+        let matched = false;
+        $sel.find('option').each(function () {
+            if (Math.abs((parseFloat($(this).val()) || 0) - num) < 0.001) {
+                $sel.val($(this).val());
+                matched = true;
+                return false;
+            }
+        });
+        if (!matched) {
+            $sel.append(`<option value="${normalized}">${normalized}%</option>`);
+            $sel.val(normalized);
+        }
+    }
+
     function appendItemRow(prefill = null, afterRow = null) {
         const $newRow = $(_rowTemplateHtml);
         $newRow.find('input, select').each(function () {
@@ -417,7 +448,7 @@
             $newRow.find('.product-description').val(prefill.description || '');
             $newRow.find('.qty').val(prefill.quantity ?? 1);
             $newRow.find('.rate').val(parseFloat(prefill.rate || 0).toFixed(2));
-            $newRow.find('.tax').val(parseFloat(prefill.tax_percentage || 0));
+            setRowTaxValue($newRow, prefill.tax_percentage || 0);
             if (prefill.inv_qty) {
                 $newRow.find('.inv-qty-hint')
                     .text('Invoice Qty: ' + prefill.inv_qty)
@@ -511,7 +542,7 @@
         const $initialRow = $('.item-row').first();
         const $template = $initialRow.clone();
         $template.find('.select2-container').remove();
-        $template.find('select').attr('class', 'form-select product-select select2');
+        $template.find('select.product-select').attr('class', 'form-select product-select select2');
         $template.find('input').val('');
         $template.find('.tax').val('0');
         $template.find('.qty').val('1');
@@ -538,7 +569,7 @@
             const $option = $(this).find(':selected');
             if ($option.val()) {
                 $row.find('.rate').val($option.data('rate'));
-                $row.find('.tax').val($option.data('gst'));
+                setRowTaxValue($row, $option.data('gst'));
                 $row.find('.product-description').val($option.text().trim());
             }
             calculateRow($row);
@@ -571,7 +602,7 @@
             }
         });
 
-        $(document).on('input', '.qty, .rate, .tax', function () {
+        $(document).on('input change', '.qty, .rate, .tax', function () {
             calculateRow($(this).closest('tr'));
         });
 
@@ -680,7 +711,7 @@
                         $first.find('.product-description').val(prod.product_name || '');
                         $first.find('.qty').val(1);
                         $first.find('.rate').val(parseFloat(prod.selling_price || 0).toFixed(2));
-                        $first.find('.tax').val(parseFloat(prod.tax_percentage || 0));
+                        setRowTaxValue($first, prod.tax_percentage || 0);
                         calculateRow($first);
                     } else {
                         appendItemRow({

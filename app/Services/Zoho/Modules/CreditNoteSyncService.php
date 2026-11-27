@@ -404,7 +404,7 @@ class CreditNoteSyncService extends AbstractModuleSyncService
             ? $discountVal . '%'
             : round($discountVal, 2);
 
-        return [
+        $payload = [
             'customer_id'            => $zohoCustomerId,
             'creditnote_number'      => $return['return_number'],
             'date'                   => $return['return_date'],
@@ -417,6 +417,10 @@ class CreditNoteSyncService extends AbstractModuleSyncService
             'adjustment_description' => 'Adjustment',
             'notes'                  => (string) ($return['reason'] ?? ''),
         ];
+        if (!empty($return['customer_debit_note_no'])) {
+            $payload['reference_number'] = (string) $return['customer_debit_note_no'];
+        }
+        return $payload;
     }
 
     public function normalizeLocalReturn(array $r, array $items): array

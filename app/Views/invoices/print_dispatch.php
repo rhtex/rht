@@ -55,9 +55,14 @@ $custContacts = array_unique(array_filter([
 ]));
 $custContactStr = implode(' / ', $custContacts);
 
-$subtotal    = (float) ($invoice['subtotal'] ?? 0);
-$gstAmount   = (float) ($invoice['tax_amount'] ?? 0);
-$grandTotal  = (float) ($invoice['total_amount'] ?? 0);
+$subtotal       = (float) ($invoice['subtotal'] ?? 0);
+$rawDiscount    = (float) ($invoice['discount_amount'] ?? 0);
+$discountType   = (string) ($invoice['discount_type'] ?? 'Fixed');
+$discountValue  = $discountType === 'Percentage' ? round(($subtotal * $rawDiscount) / 100, 2) : $rawDiscount;
+$gstAmount      = (float) ($invoice['tax_amount'] ?? 0);
+$shippingCharge = (float) ($invoice['shipping_charge'] ?? 0);
+$roundoffAmount = (float) ($invoice['roundoff_amount'] ?? 0);
+$grandTotal     = (float) ($invoice['total_amount'] ?? 0);
 $amountWords = function_exists('number_to_indian_currency_words')
     ? number_to_indian_currency_words($grandTotal)
     : number_format($grandTotal, 2);
@@ -282,7 +287,19 @@ $amountWords = function_exists('number_to_indian_currency_words')
                         <tr><th>Total Quantity:</th><td><?= esc($qtyDisplay) ?> Pieces</td></tr>
                         <tr><th>Rate per Piece:</th><td><?= esc($rateDisplay) ?></td></tr>
                         <tr><th>Total Amount:</th><td>₹<?= number_format($subtotal, 2) ?></td></tr>
+                        <?php if (abs($discountValue) > 0.001): ?>
+                            <tr>
+                                <th>Discount<?= $discountType === 'Percentage' ? ' (' . rtrim(rtrim(number_format($rawDiscount, 2, '.', ''), '0'), '.') . '%)' : '' ?>:</th>
+                                <td>-₹<?= number_format($discountValue, 2) ?></td>
+                            </tr>
+                        <?php endif; ?>
                         <tr><th>GST Amount:</th><td>₹<?= number_format($gstAmount, 2) ?></td></tr>
+                        <?php if (abs($shippingCharge) > 0.001): ?>
+                            <tr><th>Shipping Charge:</th><td>₹<?= number_format($shippingCharge, 2) ?></td></tr>
+                        <?php endif; ?>
+                        <?php if (abs($roundoffAmount) > 0.001): ?>
+                            <tr><th>Round Off:</th><td><?= ($roundoffAmount >= 0 ? '+' : '-') ?>₹<?= number_format(abs($roundoffAmount), 2) ?></td></tr>
+                        <?php endif; ?>
                         <tr><th><strong>Grand Total:</strong></th><td><strong>₹<?= number_format($grandTotal, 2) ?></strong></td></tr>
                     </table>
 

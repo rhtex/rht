@@ -89,8 +89,23 @@ class SalesReturnController extends BaseController
         return view('sales_returns/index', $data);
     }
 
+    private function ensureDiscountAndAdjustmentColumns(): void
+    {
+        $db = \Config\Database::connect();
+        if (!$db->fieldExists('discount_amount', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `discount_amount` DECIMAL(15,2) NOT NULL DEFAULT 0.00 AFTER `subtotal`");
+        }
+        if (!$db->fieldExists('discount_type', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `discount_type` VARCHAR(20) NOT NULL DEFAULT 'Fixed' AFTER `discount_amount`");
+        }
+        if (!$db->fieldExists('adjustment', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `adjustment` DECIMAL(15,2) NOT NULL DEFAULT 0.00 AFTER `tax_amount`");
+        }
+    }
+
     public function create()
     {
+        $this->ensureDiscountAndAdjustmentColumns();
         $data['customers'] = $this->customerModel->where('status', 'active')->orderBy('name', 'ASC')->findAll();
         $data['products'] = $this->productModel->getProductsWithCategory();
         $data['title'] = 'Record Sales Return';
@@ -135,14 +150,18 @@ class SalesReturnController extends BaseController
         return $this->response->setJSON([
             'status'  => 'success',
             'invoice' => [
-                'id'             => $invoice['id'],
-                'invoice_number' => $invoice['invoice_number'],
-                'invoice_date'   => $invoice['invoice_date'],
-                'status'         => $invoice['status'],
-                'total_amount'   => $invoice['total_amount'],
-                'paid_amount'    => $invoice['paid_amount'],
-                'balance'        => $invoice['balance'],
-                'is_inter_state' => !empty($invoice['is_inter_state']) ? 1 : 0,
+                'id'              => $invoice['id'],
+                'invoice_number'  => $invoice['invoice_number'],
+                'invoice_date'    => $invoice['invoice_date'],
+                'status'          => $invoice['status'],
+                'subtotal'        => (float) ($invoice['subtotal'] ?? 0),
+                'discount_amount' => (float) ($invoice['discount_amount'] ?? 0),
+                'discount_type'   => (string) ($invoice['discount_type'] ?? 'Fixed'),
+                'roundoff_amount' => (float) ($invoice['roundoff_amount'] ?? 0),
+                'total_amount'    => $invoice['total_amount'],
+                'paid_amount'     => $invoice['paid_amount'],
+                'balance'         => $invoice['balance'],
+                'is_inter_state'  => !empty($invoice['is_inter_state']) ? 1 : 0,
             ],
             'items'   => $invoice['items'] ?? [],
         ]);
@@ -150,6 +169,7 @@ class SalesReturnController extends BaseController
 
     public function store()
     {
+        $this->ensureDiscountAndAdjustmentColumns();
         $items = $this->request->getPost('items') ?? [];
         $validItems = [];
         foreach ($items as $item) {
@@ -213,11 +233,28 @@ class SalesReturnController extends BaseController
             $taxAmount += $lineTax;
         }
 
-        $totalAmount = $subtotal + $taxAmount;
+        $includeDiscount = !empty($this->request->getPost('include_discount'));
+        $rawDiscount     = $includeDiscount ? max(0.0, (float) ($this->request->getPost('discount_amount') ?? 0)) : 0.0;
+        $discountType    = ($this->request->getPost('discount_type') === 'Percentage') ? 'Percentage' : 'Fixed';
+        $adjustment      = (float) ($this->request->getPost('adjustment') ?? 0);
+
+        $discountValue = ($discountType === 'Percentage')
+            ? round(($subtotal * $rawDiscount) / 100, 2)
+            : min($subtotal, $rawDiscount);
+
+        $taxFactor = ($subtotal > 0 && $discountValue > 0)
+            ? max(0.0, ($subtotal - $discountValue) / $subtotal)
+            : 1.0;
+        $effectiveTax = round($taxAmount * $taxFactor, 2);
+        $totalAmount  = round(max(0.0, $subtotal - $discountValue) + $effectiveTax + $adjustment, 2);
+
         $this->returnModel->update($returnId, [
-            'subtotal' => $subtotal,
-            'tax_amount' => $taxAmount,
-            'total_amount' => $totalAmount
+            'subtotal'        => $subtotal,
+            'discount_amount' => $rawDiscount,
+            'discount_type'   => $discountType,
+            'tax_amount'      => $effectiveTax,
+            'adjustment'      => $adjustment,
+            'total_amount'    => $totalAmount,
         ]);
 
         $db->transComplete();

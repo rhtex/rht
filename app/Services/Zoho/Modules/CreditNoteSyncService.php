@@ -399,13 +399,23 @@ class CreditNoteSyncService extends AbstractModuleSyncService
             $lineItems[] = $li;
         }
 
+        $discountVal = (float) ($return['discount_amount'] ?? 0);
+        $discountStr = ($return['discount_type'] ?? 'Fixed') === 'Percentage'
+            ? $discountVal . '%'
+            : round($discountVal, 2);
+
         return [
-            'customer_id'       => $zohoCustomerId,
-            'creditnote_number' => $return['return_number'],
-            'date'              => $return['return_date'],
-            'place_of_supply'   => $placeOfSupply,
-            'line_items'        => $lineItems,
-            'notes'             => (string) ($return['reason'] ?? ''),
+            'customer_id'            => $zohoCustomerId,
+            'creditnote_number'      => $return['return_number'],
+            'date'                   => $return['return_date'],
+            'place_of_supply'        => $placeOfSupply,
+            'line_items'             => $lineItems,
+            'discount'               => $discountStr,
+            'is_discount_before_tax' => true,
+            'discount_type'          => 'entity_level',
+            'adjustment'             => round((float) ($return['adjustment'] ?? 0), 2),
+            'adjustment_description' => 'Adjustment',
+            'notes'                  => (string) ($return['reason'] ?? ''),
         ];
     }
 

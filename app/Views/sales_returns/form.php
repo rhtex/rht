@@ -110,6 +110,7 @@
                                     <span class="badge bg-secondary ms-2" id="invSumStatus"></span>
                                 </div>
                                 <div class="d-flex flex-wrap gap-3">
+                                    <span id="invSumDiscountWrap" class="text-success" style="display: none;">Inv Discount: <strong id="invSumDiscount"></strong></span>
                                     <span>Total: <strong id="invSumTotal"></strong></span>
                                     <span>Paid: <strong id="invSumPaid"></strong></span>
                                     <span>Balance: <strong class="text-danger" id="invSumBalance"></strong></span>
@@ -217,10 +218,39 @@
                             <td><input type="text" id="subtotal" class="form-control fw-bold text-end" readonly value="0.00"></td>
                             <td></td>
                         </tr>
+                        <tr>
+                            <td colspan="5" class="text-end align-middle">
+                                <div class="d-inline-flex flex-wrap align-items-center justify-content-end gap-2">
+                                    <div class="form-check form-check-inline mb-0">
+                                        <input class="form-check-input" type="checkbox" name="include_discount" id="includeDiscountChk" value="1">
+                                        <label class="form-check-label fw-semibold" for="includeDiscountChk">Include Discount</label>
+                                    </div>
+                                    <div class="input-group input-group-sm" style="width: 210px;" id="discountInputGroup">
+                                        <input type="number" step="0.01" min="0" name="discount_amount" id="discountAmountInput" class="form-control text-end" value="0">
+                                        <select name="discount_type" id="discountTypeSelect" class="form-select no-select2" style="max-width: 72px;">
+                                            <option value="Fixed">₹</option>
+                                            <option value="Percentage">%</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><input type="text" id="discountCalculatedDisplay" class="form-control text-end text-danger" readonly value="-0.00"></td>
+                            <td></td>
+                        </tr>
                         <tbody id="taxBreakdownBody"></tbody>
                         <tr>
                             <td colspan="5" class="text-end">Total Tax:</td>
                             <td><input type="text" id="taxAmount" class="form-control text-end" readonly value="0.00"></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" class="text-end align-middle">
+                                <div class="d-inline-flex align-items-center justify-content-end gap-2">
+                                    <span>Adjustment / Round Off:</span>
+                                    <button type="button" class="btn btn-outline-secondary btn-xs py-0 px-2 small" id="btnAutoRound" title="Auto round Grand Total to nearest rupee">Round</button>
+                                </div>
+                            </td>
+                            <td><input type="number" step="0.01" name="adjustment" id="adjustmentInput" class="form-control text-end" value="0.00"></td>
                             <td></td>
                         </tr>
                         <tr class="table-primary">
@@ -284,11 +314,25 @@
             itemData.push({ amount, taxPercentage });
         });
 
+        const includeDisc = $('#includeDiscountChk').is(':checked');
+        const rawDisc = includeDisc ? Math.max(0, parseFloat($('#discountAmountInput').val()) || 0) : 0;
+        const discType = $('#discountTypeSelect').val() || 'Fixed';
+        const discountValue = (discType === 'Percentage')
+            ? Math.round((grossSubtotal * rawDisc) / 100 * 100) / 100
+            : Math.min(grossSubtotal, rawDisc);
+
+        $('#discountAmountInput, #discountTypeSelect').prop('disabled', !includeDisc);
+        $('#discountCalculatedDisplay').val('-' + discountValue.toFixed(2));
+
+        const taxFactor = (grossSubtotal > 0 && discountValue > 0)
+            ? Math.max(0, (grossSubtotal - discountValue) / grossSubtotal)
+            : 1;
+
         let taxBreakdown = {};
         let totalTax = 0;
 
         itemData.forEach(item => {
-            const taxAmount = (item.amount * item.taxPercentage) / 100;
+            const taxAmount = ((item.amount * item.taxPercentage) / 100) * taxFactor;
             if (item.taxPercentage > 0) {
                 taxBreakdown[item.taxPercentage] = (taxBreakdown[item.taxPercentage] || 0) + taxAmount;
                 totalTax += taxAmount;
@@ -328,7 +372,8 @@
             }
         });
 
-        const netTotal = grossSubtotal + totalTax;
+        const adjustment = parseFloat($('#adjustmentInput').val()) || 0;
+        const netTotal = Math.max(0, grossSubtotal - discountValue) + totalTax + adjustment;
         $('#subtotal').val(grossSubtotal.toFixed(2));
         $('#taxAmount').val(totalTax.toFixed(2));
         $('#totalAmount').val(netTotal.toFixed(2));
@@ -518,6 +563,19 @@
             calculateRow($(this).closest('tr'));
         });
 
+        $('#includeDiscountChk, #discountTypeSelect').on('change', calculateTotals);
+        $('#discountAmountInput, #adjustmentInput').on('input change', calculateTotals);
+
+        $('#btnAutoRound').on('click', function () {
+            const sub = parseFloat($('#subtotal').val()) || 0;
+            const discText = parseFloat(($('#discountCalculatedDisplay').val() || '0').replace('-', '')) || 0;
+            const tax = parseFloat($('#taxAmount').val()) || 0;
+            const beforeAdj = Math.max(0, sub - discText) + tax;
+            const rounded = Math.round(beforeAdj);
+            $('#adjustmentInput').val((rounded - beforeAdj).toFixed(2));
+            calculateTotals();
+        });
+
         $('#customer_id').on('change', function () {
             updateTaxMode($(this).val());
         });
@@ -539,6 +597,21 @@
                 $('#invSumTotal').text('₹' + parseFloat(inv.total_amount || 0).toFixed(2));
                 $('#invSumPaid').text('₹' + parseFloat(inv.paid_amount || 0).toFixed(2));
                 $('#invSumBalance').text('₹' + parseFloat(inv.balance || 0).toFixed(2));
+
+                const invDisc = parseFloat(inv.discount_amount || 0);
+                const invDiscType = inv.discount_type || 'Fixed';
+                if (invDisc > 0) {
+                    $('#invSumDiscount').text(invDiscType === 'Percentage' ? `${invDisc}%` : `₹${invDisc.toFixed(2)}`);
+                    $('#invSumDiscountWrap').show();
+                    $('#includeDiscountChk').prop('checked', true);
+                    $('#discountAmountInput').val(invDisc);
+                    $('#discountTypeSelect').val(invDiscType === 'Percentage' ? 'Percentage' : 'Fixed');
+                } else {
+                    $('#invSumDiscountWrap').hide();
+                    $('#includeDiscountChk').prop('checked', false);
+                    $('#discountAmountInput').val(0);
+                }
+                $('#adjustmentInput').val(parseFloat(inv.roundoff_amount || 0).toFixed(2));
                 $('#invoiceSummaryBox').show();
 
                 if (Array.isArray(res.items) && res.items.length > 0) {

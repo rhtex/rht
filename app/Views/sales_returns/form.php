@@ -174,16 +174,16 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <label for="bales_count" class="form-label fw-semibold">No. of Bales</label>
-                        <input type="number" name="bales_count" id="bales_count" class="form-control" min="0" step="1" placeholder="e.g. 2">
+                        <input type="number" name="bales_count" id="bales_count" class="form-control" min="0" step="1" placeholder="0">
                     </div>
                     <div class="col-md-2">
                         <label for="lr_number" class="form-label fw-semibold">LR No.</label>
                         <input type="text" name="lr_number" id="lr_number" class="form-control" placeholder="LR No.">
                     </div>
-                    <div class="col-md-3">
-                        <label for="transport_paid_by" class="form-label fw-semibold">Transport Amount Paid By</label>
+                    <div class="col-md-2">
+                        <label for="transport_paid_by" class="form-label fw-semibold">Transport Paid By</label>
                         <select name="transport_paid_by" id="transport_paid_by" class="form-select no-select2">
                             <option value="">-- Select --</option>
                             <option value="Customer">Customer</option>
@@ -191,8 +191,27 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label for="agent_amount_adjustment" class="form-label fw-semibold">Agent Amount Adjustment (₹)</label>
-                        <input type="number" step="0.01" name="agent_amount_adjustment" id="agent_amount_adjustment" class="form-control text-end" value="0.00" placeholder="0.00">
+                        <label for="agentSelect" class="form-label fw-semibold">Agent</label>
+                        <select name="agent_id" id="agentSelect" class="form-select select2">
+                            <option value="" data-commission="0">-- No Agent --</option>
+                            <?php foreach ($agents ?? [] as $agent): ?>
+                                <option value="<?= $agent['id'] ?>" data-commission="<?= esc($agent['commission_percentage'] ?? 0) ?>">
+                                    <?= esc($agent['agent_name']) ?> (<?= rtrim(rtrim(number_format((float) ($agent['commission_percentage'] ?? 0), 2, '.', ''), '0'), '.') ?>%)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="agent_amount_adjustment" class="form-label fw-semibold">
+                            Agent Amt Adj. (₹)
+                            <span class="badge bg-info-subtle text-info border ms-1" id="agentPctBadge" style="display: none;">0%</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="number" step="0.01" min="0" name="agent_commission_percent" id="agentCommissionPercent" class="form-control text-end" style="max-width: 68px;" value="0" title="Agent Commission %">
+                            <span class="input-group-text px-1">%</span>
+                            <input type="number" step="0.01" name="agent_amount_adjustment" id="agent_amount_adjustment" class="form-control text-end" value="0.00" placeholder="0.00">
+                        </div>
+                        <input type="hidden" name="agent_adj_manual" id="agentAdjManual" value="0">
                     </div>
                 </div>
             </div>
@@ -426,10 +445,23 @@
         });
 
         const adjustment = parseFloat($('#adjustmentInput').val()) || 0;
-        const netTotal = Math.max(0, grossSubtotal - discountValue) + totalTax + adjustment;
+        const taxableAfterDisc = Math.max(0, grossSubtotal - discountValue);
+        const netTotal = taxableAfterDisc + totalTax + adjustment;
         $('#subtotal').val(grossSubtotal.toFixed(2));
         $('#taxAmount').val(totalTax.toFixed(2));
         $('#totalAmount').val(netTotal.toFixed(2));
+
+        // Auto-adjust Agent Amount based on selected agent commission %
+        const agentPct = Math.max(0, parseFloat($('#agentCommissionPercent').val()) || 0);
+        if (agentPct > 0) {
+            $('#agentPctBadge').text(agentPct + '%').show();
+        } else {
+            $('#agentPctBadge').hide();
+        }
+        if ($('#agentAdjManual').val() !== '1') {
+            const autoAgentAdj = Math.round(((taxableAfterDisc * agentPct) / 100) * 100) / 100;
+            $('#agent_amount_adjustment').val(autoAgentAdj.toFixed(2));
+        }
 
         $('#sumItemCount').text(activeRows || $('.item-row').length);
         $('#sumTotalQty').text(Number.isInteger(totalQty) ? totalQty : totalQty.toFixed(2));
@@ -560,6 +592,12 @@
                     $('#taxModeIndicator').addClass('alert-success');
                     $('#taxModeText').text('INTRA-STATE TRANSACTION (CGST + SGST)');
                 }
+
+                // Auto-select customer's assigned agent & commission %
+                $('#agentSelect').val(data.agent_id ? String(data.agent_id) : '').trigger('change.select2');
+                $('#agentCommissionPercent').val(parseFloat(data.agent_commission || 0));
+                $('#agentAdjManual').val('0');
+
                 calculateTotals();
             }
         });
@@ -660,6 +698,22 @@
             updateTaxMode($(this).val());
         });
 
+        $('#agentSelect').on('change', function () {
+            const pct = parseFloat($(this).find(':selected').data('commission') || 0);
+            $('#agentCommissionPercent').val(pct);
+            $('#agentAdjManual').val('0');
+            calculateTotals();
+        });
+
+        $('#agentCommissionPercent').on('input change', function () {
+            $('#agentAdjManual').val('0');
+            calculateTotals();
+        });
+
+        $('#agent_amount_adjustment').on('input', function () {
+            $('#agentAdjManual').val('1');
+        });
+
         // Invoice selection -> auto-fill items & summary
         $('#invoice_id').on('change', function () {
             const invId = $(this).val();
@@ -692,6 +746,16 @@
                     $('#discountAmountInput').val(0);
                 }
                 $('#adjustmentInput').val(parseFloat(inv.roundoff_amount || 0).toFixed(2));
+                if (inv.agent_id) {
+                    $('#agentSelect').val(String(inv.agent_id)).trigger('change.select2');
+                    if (parseFloat(inv.agent_commission_percent || 0) > 0) {
+                        $('#agentCommissionPercent').val(parseFloat(inv.agent_commission_percent));
+                    } else {
+                        const selPct = parseFloat($('#agentSelect').find(':selected').data('commission') || 0);
+                        $('#agentCommissionPercent').val(selPct);
+                    }
+                    $('#agentAdjManual').val('0');
+                }
                 $('#invoiceSummaryBox').show();
 
                 if (Array.isArray(res.items) && res.items.length > 0) {

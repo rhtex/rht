@@ -22,6 +22,8 @@ class SalesReturnModel extends Model
         'bales_count',
         'lr_number',
         'transport_paid_by',
+        'agent_id',
+        'agent_commission_percent',
         'agent_amount_adjustment',
         'subtotal',
         'discount_amount',
@@ -99,11 +101,12 @@ class SalesReturnModel extends Model
      */
     public function getReturnById($id)
     {
-        $return = $this->select('sales_returns.*, customers.name as customer_name, customers.contact_person as customer_contact_person, customers.phone as customer_phone, customers.email as customer_email, customers.gstin as customer_gstin, customers.gst_type as customer_gst_type, addresses.address_line1 as customer_address1, addresses.address_line2 as customer_address2, addresses.city as customer_city, addresses.pincode as customer_pincode, states.id as customer_state_id, states.name as customer_state, invoices.invoice_number, invoices.invoice_date, invoices.total_amount as invoice_total_amount')
+        $return = $this->select('sales_returns.*, customers.name as customer_name, customers.contact_person as customer_contact_person, customers.phone as customer_phone, customers.email as customer_email, customers.gstin as customer_gstin, customers.gst_type as customer_gst_type, addresses.address_line1 as customer_address1, addresses.address_line2 as customer_address2, addresses.city as customer_city, addresses.pincode as customer_pincode, states.id as customer_state_id, states.name as customer_state, invoices.invoice_number, invoices.invoice_date, invoices.total_amount as invoice_total_amount, agents.agent_name as agent_name')
             ->join('customers', 'customers.id = sales_returns.customer_id', 'left')
             ->join('addresses', 'addresses.owner_id = customers.id AND addresses.owner_type = "customer" AND addresses.address_type = "billing" AND addresses.is_active = 1', 'left')
             ->join('states', 'states.id = addresses.state_id', 'left')
             ->join('invoices', 'invoices.id = sales_returns.invoice_id', 'left')
+            ->join('agents', 'agents.id = sales_returns.agent_id', 'left')
             ->find($id);
 
         if ($return) {

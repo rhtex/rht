@@ -116,6 +116,12 @@ class SalesReturnController extends BaseController
         if (!$db->fieldExists('transport_paid_by', 'sales_returns')) {
             $db->query("ALTER TABLE `sales_returns` ADD COLUMN `transport_paid_by` VARCHAR(20) NULL AFTER `lr_number`");
         }
+        if (!$db->fieldExists('agent_id', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `agent_id` INT NULL AFTER `transport_paid_by`");
+        }
+        if (!$db->fieldExists('agent_commission_percent', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `agent_commission_percent` DECIMAL(5,2) NOT NULL DEFAULT 0.00 AFTER `agent_id`");
+        }
         if (!$db->fieldExists('agent_amount_adjustment', 'sales_returns')) {
             $db->query("ALTER TABLE `sales_returns` ADD COLUMN `agent_amount_adjustment` DECIMAL(15,2) NOT NULL DEFAULT 0.00 AFTER `adjustment`");
         }
@@ -128,6 +134,7 @@ class SalesReturnController extends BaseController
         $data['products'] = $this->productModel->getProductsWithCategory();
         $data['taxes'] = (new \App\Models\TaxModel())->where('status', 'Active')->orderBy('percentage', 'ASC')->findAll();
         $data['transports'] = (new \App\Models\TransportModel())->orderBy('transport_name', 'ASC')->findAll();
+        $data['agents'] = (new \App\Models\AgentModel())->orderBy('agent_name', 'ASC')->findAll();
         $data['title'] = 'Record Sales Return';
         $data['return_number'] = $this->returnModel->generateReturnNumber();
         $data['preselected_invoice_id'] = (int) ($this->request->getGet('invoice_id') ?? 0);
@@ -180,8 +187,10 @@ class SalesReturnController extends BaseController
                 'roundoff_amount' => (float) ($invoice['roundoff_amount'] ?? 0),
                 'total_amount'    => $invoice['total_amount'],
                 'paid_amount'     => $invoice['paid_amount'],
-                'balance'         => $invoice['balance'],
-                'is_inter_state'  => !empty($invoice['is_inter_state']) ? 1 : 0,
+                'balance'                  => $invoice['balance'],
+                'is_inter_state'           => !empty($invoice['is_inter_state']) ? 1 : 0,
+                'agent_id'                 => !empty($invoice['agent_id']) ? (int) $invoice['agent_id'] : null,
+                'agent_commission_percent' => (float) ($invoice['agent_commission_percent'] ?? 0),
             ],
             'items'   => $invoice['items'] ?? [],
         ]);
@@ -214,6 +223,12 @@ class SalesReturnController extends BaseController
 
         $balesPost = trim((string) $this->request->getPost('bales_count'));
         $paidByPost = trim((string) $this->request->getPost('transport_paid_by'));
+        $agentId = $this->request->getPost('agent_id') ? (int) $this->request->getPost('agent_id') : null;
+        $agentPct = (float) ($this->request->getPost('agent_commission_percent') ?? 0);
+        if ($agentId && $agentPct <= 0) {
+            $agentRow = (new \App\Models\AgentModel())->find($agentId);
+            $agentPct = (float) ($agentRow['commission_percentage'] ?? 0);
+        }
 
         $returnId = $this->returnModel->insert([
             'customer_id' => $customerId,
@@ -225,6 +240,8 @@ class SalesReturnController extends BaseController
             'bales_count' => $balesPost !== '' ? (int) $balesPost : null,
             'lr_number' => trim((string) $this->request->getPost('lr_number')) ?: null,
             'transport_paid_by' => in_array($paidByPost, ['Customer', 'Company'], true) ? $paidByPost : null,
+            'agent_id' => $agentId,
+            'agent_commission_percent' => $agentPct,
             'agent_amount_adjustment' => (float) ($this->request->getPost('agent_amount_adjustment') ?? 0),
             'reason' => $this->request->getPost('reason'),
             'status' => 'Open',
@@ -277,13 +294,22 @@ class SalesReturnController extends BaseController
         $effectiveTax = round($taxAmount * $taxFactor, 2);
         $totalAmount  = round(max(0.0, $subtotal - $discountValue) + $effectiveTax + $adjustment, 2);
 
+        $isManualAgentAdj = ($this->request->getPost('agent_adj_manual') === '1');
+        $postedAgentAdj   = $this->request->getPost('agent_amount_adjustment');
+        if (!$isManualAgentAdj && $agentId && $agentPct > 0) {
+            $agentAmountAdjustment = round((max(0.0, $subtotal - $discountValue) * $agentPct) / 100, 2);
+        } else {
+            $agentAmountAdjustment = (float) ($postedAgentAdj ?? 0);
+        }
+
         $this->returnModel->update($returnId, [
-            'subtotal'        => $subtotal,
-            'discount_amount' => $rawDiscount,
-            'discount_type'   => $discountType,
-            'tax_amount'      => $effectiveTax,
-            'adjustment'      => $adjustment,
-            'total_amount'    => $totalAmount,
+            'subtotal'                => $subtotal,
+            'discount_amount'         => $rawDiscount,
+            'discount_type'           => $discountType,
+            'tax_amount'              => $effectiveTax,
+            'adjustment'              => $adjustment,
+            'agent_amount_adjustment' => $agentAmountAdjustment,
+            'total_amount'            => $totalAmount,
         ]);
 
         $db->transComplete();

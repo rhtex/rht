@@ -177,6 +177,17 @@
                                     <td><span class="badge bg-light text-dark border"><?= esc($return['transport_paid_by']) ?></span></td>
                                 </tr>
                             <?php endif; ?>
+                            <?php if (!empty($return['agent_name'])): ?>
+                                <tr>
+                                    <th class="text-muted text-uppercase small">Agent:</th>
+                                    <td>
+                                        <?= esc($return['agent_name']) ?>
+                                        <?php if (!empty($return['agent_commission_percent']) && (float) $return['agent_commission_percent'] > 0): ?>
+                                            <span class="badge bg-light text-dark border ms-1"><?= number_format((float) $return['agent_commission_percent'], 2) ?>%</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
                             <?php if (isset($return['agent_amount_adjustment']) && (float) $return['agent_amount_adjustment'] != 0.0): ?>
                                 <tr>
                                     <th class="text-muted text-uppercase small">Agent Amount Adjustment:</th>

@@ -154,9 +154,9 @@ class ZohoSettingModel extends Model
         if (!empty($activeProfile['token_expires_at'])) {
             $row['token_expires_at'] = $activeProfile['token_expires_at'];
         }
-        if (!empty($activeProfile['oauth_redirect_url'])) {
-            $row['oauth_redirect_url'] = $activeProfile['oauth_redirect_url'];
-        }
+        $row['oauth_redirect_url'] = !empty($activeProfile['oauth_redirect_url'])
+            ? $activeProfile['oauth_redirect_url']
+            : $this->buildDefaultCallbackUrl($activeEnv, $activeProfile, $activeEnv);
 
         if ($decryptSecrets) {
             $row['client_id']     = $this->decryptSecret($effClientIdEnc);
@@ -175,7 +175,7 @@ class ZohoSettingModel extends Model
         $row['has_access_token']     = !empty($effAccessTokenEnc);
         $row['active_env']           = $activeEnv;
         $row['active_host']          = $currentHost;
-        $row['env_profiles']         = $this->buildUiEnvProfiles($profiles);
+        $row['env_profiles']         = $this->buildUiEnvProfiles($profiles, $activeEnv);
         $row['organizations']        = !empty($row['organizations_cache_json'])
             ? (json_decode($row['organizations_cache_json'], true) ?: [])
             : [];
@@ -496,17 +496,41 @@ class ZohoSettingModel extends Model
         return (ENVIRONMENT === 'development') ? 'dev' : 'prod';
     }
 
-    protected function buildUiEnvProfiles(array $profiles): array
+    protected function buildDefaultCallbackUrl(string $envKey, array $profile, string $activeEnv): string
+    {
+        if ($envKey === $activeEnv && !is_cli() && !empty($_SERVER['HTTP_HOST'])) {
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['SERVER_PORT'] ?? '') == 443)
+                ? 'https'
+                : 'http';
+            return $scheme . '://' . $_SERVER['HTTP_HOST'] . '/settings/integrations/zoho/callback';
+        }
+
+        $hosts     = array_values(array_filter(array_map('trim', explode(',', (string) ($profile['hostnames'] ?? '')))));
+        $firstHost = $hosts[0] ?? '';
+        if ($firstHost !== '' && strpos($firstHost, '*') === false) {
+            $isLocal = in_array(strtolower($firstHost), ['localhost', '127.0.0.1', '::1'], true)
+                || str_ends_with(strtolower($firstHost), '.local');
+            $scheme  = $isLocal ? 'http' : 'https';
+            return $scheme . '://' . $firstHost . '/settings/integrations/zoho/callback';
+        }
+
+        return ($envKey === $activeEnv) ? site_url('settings/integrations/zoho/callback') : '';
+    }
+
+    protected function buildUiEnvProfiles(array $profiles, string $activeEnv = 'prod'): array
     {
         $labels = ['localhost' => 'Localhost', 'dev' => 'Dev', 'test' => 'Test', 'prod' => 'Prod'];
         $ui     = [];
         foreach ($labels as $key => $label) {
             $p        = $profiles[$key] ?? [];
             $ui[$key] = [
-                'label'                => $label,
-                'hostnames'            => $p['hostnames'] ?? '',
-                'oauth_redirect_url'   => $p['oauth_redirect_url'] ?? '',
-                'has_client_id'        => !empty($p['client_id_enc']),
+                'label'                  => $label,
+                'hostnames'              => $p['hostnames'] ?? '',
+                'oauth_redirect_url'     => $p['oauth_redirect_url'] ?? '',
+                'effective_redirect_url' => !empty($p['oauth_redirect_url'])
+                    ? $p['oauth_redirect_url']
+                    : $this->buildDefaultCallbackUrl($key, $p, $activeEnv),
+                'has_client_id'          => !empty($p['client_id_enc']),
                 'has_client_secret'    => !empty($p['client_secret_enc']),
                 'has_refresh_token'    => !empty($p['refresh_token_enc']),
                 'has_access_token'     => !empty($p['access_token_enc']),

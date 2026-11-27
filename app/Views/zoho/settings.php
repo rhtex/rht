@@ -163,18 +163,6 @@
                         <small class="text-muted">Must include both <code>ZohoBooks.fullaccess.all</code> and <code>ZohoInventory.fullaccess.all</code>. Re-authorize after changing scopes.</small>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">OAuth Redirect URL (Authorized Redirect URI in Zoho API Console)</label>
-                        <div class="input-group">
-                            <input type="url" name="oauth_redirect_url" id="oauthRedirectInput" class="form-control bg-light"
-                                   value="<?= esc($config['oauth_redirect_url'] ?? site_url('settings/integrations/zoho/callback')) ?>">
-                            <button type="button" class="btn btn-outline-secondary" id="copyRedirectBtn" title="Copy Redirect URL">
-                                <i class="fas fa-copy me-1"></i> Copy
-                            </button>
-                        </div>
-                        <small class="text-muted">Add this exact URL in <a href="https://api-console.zoho.in/" target="_blank" rel="noopener">Zoho API Console</a> (Server-based Applications).</small>
-                    </div>
-
                     <hr class="my-4">
                     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
                         <h6 class="fw-bold text-primary mb-0"><i class="fas fa-lock me-2"></i>OAuth 2.0 Credentials per Environment (Encrypted at Rest)</h6>
@@ -228,10 +216,25 @@
                                         <small class="text-muted">Comma-separated hostnames (e.g. <code><?= esc($meta['placeholder_host']) ?></code>). Matched automatically against request host.</small>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold"><?= esc($meta['label']) ?> OAuth Redirect URL <span class="text-muted fw-normal">(Optional)</span></label>
-                                        <input type="url" name="env_profiles[<?= $envKey ?>][oauth_redirect_url]" class="form-control small"
-                                               value="<?= esc($prof['oauth_redirect_url'] ?? '') ?>"
-                                               placeholder="Leave blank to use current host callback URL">
+                                        <label class="form-label fw-semibold"><?= esc($meta['label']) ?> OAuth Redirect / Callback URL</label>
+                                        <div class="input-group">
+                                            <input type="url" name="env_profiles[<?= $envKey ?>][oauth_redirect_url]"
+                                                   id="oauthRedirectInput_<?= $envKey ?>"
+                                                   class="form-control small"
+                                                   value="<?= esc($prof['oauth_redirect_url'] ?? '') ?>"
+                                                   placeholder="<?= esc($prof['effective_redirect_url'] ?: ('https://' . $meta['placeholder_host'] . '/settings/integrations/zoho/callback')) ?>">
+                                            <button type="button" class="btn btn-outline-secondary copy-env-redirect-btn"
+                                                    data-target="oauthRedirectInput_<?= $envKey ?>"
+                                                    data-fallback="<?= esc($prof['effective_redirect_url'] ?? '') ?>"
+                                                    title="Copy Callback URL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <?php if (!empty($prof['effective_redirect_url'])): ?>
+                                            <small class="text-muted">Active URL: <code><?= esc($prof['effective_redirect_url']) ?></code></small>
+                                        <?php else: ?>
+                                            <small class="text-muted">Enter hostname above or paste the exact Zoho Callback URL for <?= esc($meta['label']) ?>.</small>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
 
@@ -516,8 +519,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const dcSelect    = document.getElementById('dataCenterSelect');
     const apiInput    = document.getElementById('apiBaseUrlInput');
     const invApiInput = document.getElementById('inventoryApiBaseUrlInput');
-    const copyBtn     = document.getElementById('copyRedirectBtn');
-    const redirInp    = document.getElementById('oauthRedirectInput');
 
     if (dcSelect && apiInput) {
         dcSelect.addEventListener('change', function() {
@@ -533,16 +534,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    if (copyBtn && redirInp) {
-        copyBtn.addEventListener('click', function() {
-            navigator.clipboard.writeText(redirInp.value).then(function() {
-                copyBtn.innerHTML = '<i class="fas fa-check text-success me-1"></i> Copied';
+    document.querySelectorAll('.copy-env-redirect-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const targetInp = document.getElementById(btn.getAttribute('data-target'));
+            const val = (targetInp && targetInp.value.trim()) ? targetInp.value.trim() : (btn.getAttribute('data-fallback') || '');
+            if (!val) return;
+            navigator.clipboard.writeText(val).then(function() {
+                btn.innerHTML = '<i class="fas fa-check text-success"></i>';
                 setTimeout(function() {
-                    copyBtn.innerHTML = '<i class="fas fa-copy me-1"></i> Copy';
+                    btn.innerHTML = '<i class="fas fa-copy"></i>';
                 }, 2000);
             });
         });
-    }
+    });
 
     const planSelect = document.getElementById('zohoPlanSelect');
     const dailyInp   = document.getElementById('dailyApiLimitInput');

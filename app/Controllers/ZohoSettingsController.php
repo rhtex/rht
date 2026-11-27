@@ -90,7 +90,6 @@ class ZohoSettingsController extends BaseController
             'refresh_token'              => $post['refresh_token'] ?? '',
             'organization_id'            => $post['organization_id'] ?? '',
             'organization_name'          => $post['organization_name'] ?? '',
-            'oauth_redirect_url'         => $post['oauth_redirect_url'] ?: site_url('settings/integrations/zoho/callback'),
             'api_base_url'               => $apiBaseUrl,
             'ewaybill_api_service'       => $ewbApiService,
             'inventory_api_base_url'     => $invApiBaseUrl,

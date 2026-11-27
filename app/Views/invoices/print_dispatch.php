@@ -225,8 +225,8 @@ $amountWords = function_exists('number_to_indian_currency_words')
                 <label class="form-check-label small fw-semibold" for="chkCopyInvoice">Copy of Invoice</label>
             </div>
             <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input enclosure-opt" type="checkbox" id="chkCopyEwaybill" value="Copy of E-Way Bill" <?= $ewayBillNo !== '' ? 'checked' : '' ?>>
-                <label class="form-check-label small fw-semibold" for="chkCopyEwaybill">Copy of E-Way Bill</label>
+                <input class="form-check-input enclosure-opt" type="checkbox" id="chkCopyWaybill" value="Copy of Waybill (LR)" <?= !empty($invoice['waybill_number']) ? 'checked' : '' ?>>
+                <label class="form-check-label small fw-semibold" for="chkCopyWaybill">Copy of Waybill (LR)</label>
             </div>
         </div>
         <div>

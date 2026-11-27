@@ -178,9 +178,9 @@
                 
                 <div class="row g-2">
                     <div class="col-sm-6">
-                        <label class="form-label">Bill Number</label>
+                        <label class="form-label">Bill Number <span class="text-danger">*</span></label>
                         <input type="text" name="bill_number" id="billNumberInput" class="form-control fw-bold"
-                            value="<?= esc($bill['bill_number'] ?? '') ?>" placeholder="e.g. BILL-001 or Supplier Bill #">
+                            value="<?= esc(old('bill_number', $bill['bill_number'] ?? '')) ?>" placeholder="e.g. BILL-001 or Supplier Bill #" required>
                         <div id="billNumberDuplicateAlert" class="mt-1 d-none">
                             <span class="text-danger small fw-semibold">
                                 <i class="fas fa-exclamation-triangle me-1"></i>This Bill # already exists for this vendor!

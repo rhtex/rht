@@ -167,14 +167,15 @@ class BillController extends BaseController
 
     public function store()
     {
+        $customNumber = trim((string) $this->request->getPost('bill_number'));
+        if ($customNumber === '' || $customNumber === 'Auto-Generated') {
+            return redirect()->back()->withInput()->with('error', 'Bill Number is required.');
+        }
+
         $db = \Config\Database::connect();
         $db->transStart();
 
-        // Use custom bill number if provided by user; otherwise auto-generate
-        $customNumber = trim((string) $this->request->getPost('bill_number'));
-        $billNumber   = ($customNumber !== '' && $customNumber !== 'Auto-Generated')
-            ? $customNumber
-            : $this->billModel->generateBillNumber();
+        $billNumber = $customNumber;
 
         // Create bill
         $billData = [

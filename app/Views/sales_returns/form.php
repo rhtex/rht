@@ -127,7 +127,7 @@
                             <div class="d-flex flex-wrap justify-content-between align-items-center mb-1 gap-2">
                                 <label for="reason" class="form-label fw-semibold mb-0">Reason for Return</label>
                                 <div class="d-flex flex-wrap gap-1">
-                                    <?php foreach (['Damaged Goods', 'Quality Issue', 'Wrong Item Sent', 'Excess Quantity', 'Color / Design Mismatch', 'Customer Cancelled'] as $preset): ?>
+                                    <?php foreach (['Customer Rejection', 'Transport Damaged', 'Damaged Goods', 'Quality Issue', 'Wrong Item Sent', 'Excess Quantity', 'Color / Design Mismatch', 'Customer Cancelled'] as $preset): ?>
                                         <button type="button" class="btn btn-outline-secondary btn-xs py-0 px-2 small reason-chip" data-reason="<?= esc($preset) ?>">
                                             <?= esc($preset) ?>
                                         </button>

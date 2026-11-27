@@ -175,9 +175,10 @@
                 <table class="table table-bordered align-middle" id="itemsTable">
                     <thead class="table-light">
                         <tr>
-                            <th width="42%">Product &amp; Description</th>
-                            <th width="14%">Return Qty</th>
-                            <th width="14%">Rate (₹)</th>
+                            <th width="4%" class="text-center">#</th>
+                            <th width="40%">Product &amp; Description</th>
+                            <th width="13%">Return Qty</th>
+                            <th width="13%">Rate (₹)</th>
                             <th width="12%">Tax (%)</th>
                             <th width="14%">Line Total</th>
                             <th width="4%"></th>
@@ -185,6 +186,7 @@
                     </thead>
                     <tbody id="itemsBody">
                         <tr class="item-row">
+                            <td class="text-center fw-bold row-sno text-muted">1</td>
                             <td>
                                 <select name="items[0][product_id]" class="form-select product-select select2">
                                     <option value="">-- Select Product --</option>
@@ -211,18 +213,18 @@
                     </tbody>
                     <tfoot class="table-secondary">
                         <tr>
-                            <td colspan="4" class="text-end fw-bold">Subtotal:</td>
+                            <td colspan="5" class="text-end fw-bold">Subtotal:</td>
                             <td><input type="text" id="subtotal" class="form-control fw-bold text-end" readonly value="0.00"></td>
                             <td></td>
                         </tr>
                         <tbody id="taxBreakdownBody"></tbody>
                         <tr>
-                            <td colspan="4" class="text-end">Total Tax:</td>
+                            <td colspan="5" class="text-end">Total Tax:</td>
                             <td><input type="text" id="taxAmount" class="form-control text-end" readonly value="0.00"></td>
                             <td></td>
                         </tr>
                         <tr class="table-primary">
-                            <td colspan="4" class="text-end fw-bold fs-5">Grand Total:</td>
+                            <td colspan="5" class="text-end fw-bold fs-5">Grand Total:</td>
                             <td><input type="text" id="totalAmount" class="form-control fw-bold fs-5 text-end" readonly value="0.00"></td>
                             <td></td>
                         </tr>
@@ -303,7 +305,7 @@
             if (isInterState) {
                 $taxBody.append(`
                     <tr>
-                        <td colspan="4" class="text-end">IGST (${rate}%):</td>
+                        <td colspan="5" class="text-end">IGST (${rate}%):</td>
                         <td><input type="text" class="form-control text-end" readonly value="${amount.toFixed(2)}"></td>
                         <td></td>
                     </tr>
@@ -313,12 +315,12 @@
                 const halfRate = rate / 2;
                 $taxBody.append(`
                     <tr>
-                        <td colspan="4" class="text-end">CGST (${halfRate}%):</td>
+                        <td colspan="5" class="text-end">CGST (${halfRate}%):</td>
                         <td><input type="text" class="form-control text-end" readonly value="${halfAmount.toFixed(2)}"></td>
                         <td></td>
                     </tr>
                     <tr>
-                        <td colspan="4" class="text-end">SGST (${halfRate}%):</td>
+                        <td colspan="5" class="text-end">SGST (${halfRate}%):</td>
                         <td><input type="text" class="form-control text-end" readonly value="${halfAmount.toFixed(2)}"></td>
                         <td></td>
                     </tr>
@@ -335,6 +337,12 @@
         $('#sumTotalQty').text(Number.isInteger(totalQty) ? totalQty : totalQty.toFixed(2));
         $('#sumTaxBadge').text('₹' + totalTax.toFixed(2));
         $('#sumGrandBadge').text('₹' + netTotal.toFixed(2));
+    }
+
+    function updateRowSerialNumbers() {
+        $('#itemsBody .item-row').each(function (idx) {
+            $(this).find('.row-sno').text(idx + 1);
+        });
     }
 
     function appendItemRow(prefill = null) {
@@ -367,6 +375,7 @@
         }
 
         rowIndex++;
+        updateRowSerialNumbers();
         return $newRow;
     }
 
@@ -491,6 +500,7 @@
         $(document).on('click', '.remove-row', function () {
             if ($('.item-row').length > 1) {
                 $(this).closest('tr').remove();
+                updateRowSerialNumbers();
                 calculateTotals();
             } else {
                 const $row = $(this).closest('tr');

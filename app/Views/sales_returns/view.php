@@ -278,7 +278,10 @@
                                 $taxSlabs = [];
                                 foreach ($items as $it) {
                                     $rate = (float) $it['tax_percentage'];
-                                    $lineAmt = (float) $it['amount'];
+                                    $lineAmt = (float) ($it['quantity'] ?? 0) * (float) ($it['rate'] ?? 0);
+                                    if ($lineAmt <= 0) {
+                                        $lineAmt = (float) $it['amount'];
+                                    }
                                     if (!isset($taxSlabs["$rate"])) {
                                         $taxSlabs["$rate"] = ['taxable' => 0, 'tax' => 0];
                                     }

@@ -189,6 +189,22 @@ class SalesReturnController extends BaseController
             }
         }
 
+        $items = $invoice['items'] ?? [];
+        foreach ($items as &$it) {
+            $pct = (float) ($it['tax_percentage'] ?? 0);
+            if ($pct <= 0) {
+                $pct = (float) ($it['cgst_rate'] ?? 0) + (float) ($it['sgst_rate'] ?? 0) + (float) ($it['igst_rate'] ?? 0);
+            }
+            if ($pct <= 0 && !empty($it['product_id'])) {
+                $prod = $this->productModel->select('taxes.percentage as tax_percentage')
+                    ->join('taxes', 'taxes.id = products.tax_id', 'left')
+                    ->find((int) $it['product_id']);
+                $pct = (float) ($prod['tax_percentage'] ?? 0);
+            }
+            $it['tax_percentage'] = $pct;
+        }
+        unset($it);
+
         return $this->response->setJSON([
             'status'  => 'success',
             'invoice' => [
@@ -208,7 +224,7 @@ class SalesReturnController extends BaseController
                 'agent_name'               => $invAgentName,
                 'agent_commission_percent' => $invAgentPct,
             ],
-            'items'   => $invoice['items'] ?? [],
+            'items'   => $items,
         ]);
     }
 
@@ -299,7 +315,7 @@ class SalesReturnController extends BaseController
                 'quantity' => $qty,
                 'rate' => $rate,
                 'tax_percentage' => $taxPct,
-                'amount' => $lineAmount + $lineTax
+                'amount' => $lineAmount
             ]);
 
             $subtotal += $lineAmount;

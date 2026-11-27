@@ -276,12 +276,12 @@
                         </tr>
                     </tbody>
                     <tfoot class="table-secondary">
-                        <tr>
+                        <tr id="subtotalRow">
                             <td colspan="5" class="text-end fw-bold">Subtotal:</td>
                             <td><input type="text" id="subtotal" class="form-control fw-bold text-end" readonly value="0.00"></td>
                             <td></td>
                         </tr>
-                        <tr>
+                        <tr id="discountRow">
                             <td colspan="5" class="text-end align-middle">
                                 <div class="d-inline-flex flex-wrap align-items-center justify-content-end gap-2">
                                     <div class="form-check form-check-inline mb-0">
@@ -300,8 +300,7 @@
                             <td><input type="text" id="discountCalculatedDisplay" class="form-control text-end text-danger" readonly value="-0.00"></td>
                             <td></td>
                         </tr>
-                        <tbody id="taxBreakdownBody"></tbody>
-                        <tr>
+                        <tr id="totalTaxRow">
                             <td colspan="5" class="text-end">Total Tax:</td>
                             <td><input type="text" id="taxAmount" class="form-control text-end" readonly value="0.00"></td>
                             <td></td>
@@ -402,38 +401,41 @@
             }
         });
 
-        const $taxBody = $('#taxBreakdownBody');
-        $taxBody.empty();
+        $('#itemsTable tfoot tr.tax-breakdown-row').remove();
 
+        let breakdownHtml = '';
         Object.keys(taxBreakdown).sort((a, b) => a - b).forEach(percentage => {
             const amount = taxBreakdown[percentage];
             const rate = parseFloat(percentage);
 
             if (isInterState) {
-                $taxBody.append(`
-                    <tr>
+                breakdownHtml += `
+                    <tr class="tax-breakdown-row">
                         <td colspan="5" class="text-end">IGST (${rate}%):</td>
                         <td><input type="text" class="form-control text-end" readonly value="${amount.toFixed(2)}"></td>
                         <td></td>
                     </tr>
-                `);
+                `;
             } else {
                 const halfAmount = amount / 2;
                 const halfRate = rate / 2;
-                $taxBody.append(`
-                    <tr>
+                breakdownHtml += `
+                    <tr class="tax-breakdown-row">
                         <td colspan="5" class="text-end">CGST (${halfRate}%):</td>
                         <td><input type="text" class="form-control text-end" readonly value="${halfAmount.toFixed(2)}"></td>
                         <td></td>
                     </tr>
-                    <tr>
+                    <tr class="tax-breakdown-row">
                         <td colspan="5" class="text-end">SGST (${halfRate}%):</td>
                         <td><input type="text" class="form-control text-end" readonly value="${halfAmount.toFixed(2)}"></td>
                         <td></td>
                     </tr>
-                `);
+                `;
             }
         });
+        if (breakdownHtml) {
+            $('#discountRow').after(breakdownHtml);
+        }
 
         const adjustment = parseFloat($('#adjustmentInput').val()) || 0;
         const taxableAfterDisc = Math.max(0, grossSubtotal - discountValue);
@@ -647,8 +649,10 @@
             const $row = $(this).closest('tr');
             const $option = $(this).find(':selected');
             if ($option.val()) {
-                $row.find('.rate').val($option.data('rate'));
-                setRowTaxValue($row, $option.data('gst'));
+                const rateVal = $option.attr('data-rate') ?? $option.data('rate') ?? 0;
+                const gstVal = $option.attr('data-gst') ?? $option.data('gst') ?? 0;
+                $row.find('.rate').val(parseFloat(rateVal || 0).toFixed(2));
+                setRowTaxValue($row, gstVal);
                 $row.find('.product-description').val($option.text().trim());
             }
             calculateRow($row);
@@ -734,6 +738,18 @@
                     $('#invSumDiscountWrap').hide();
                     $('#includeDiscountChk').prop('checked', false);
                     $('#discountAmountInput').val(0);
+                }
+                if (typeof inv.is_inter_state !== 'undefined') {
+                    isInterState = Boolean(Number(inv.is_inter_state || 0));
+                    $('#is_inter_state').val(isInterState ? 1 : 0);
+                    $('#taxModeIndicator').removeClass('alert-info alert-success alert-warning');
+                    if (isInterState) {
+                        $('#taxModeIndicator').addClass('alert-warning');
+                        $('#taxModeText').text('INTER-STATE TRANSACTION (IGST)');
+                    } else {
+                        $('#taxModeIndicator').addClass('alert-success');
+                        $('#taxModeText').text('INTRA-STATE TRANSACTION (CGST + SGST)');
+                    }
                 }
                 $('#adjustmentInput').val(parseFloat(inv.roundoff_amount || 0).toFixed(2));
                 if (inv.agent_id) {

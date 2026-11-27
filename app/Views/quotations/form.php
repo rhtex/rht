@@ -320,7 +320,8 @@
                                         <span class="item-amount-display fw-bold">0.00</span>
                                         <input type="hidden" name="items[<?= $index ?>][amount]" class="item-amount" value="<?= $item['amount'] ?? 0 ?>">
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center text-nowrap">
+                                        <button type="button" class="btn btn-sm btn-link text-success add-row-below-btn p-0 me-2" title="Add Line Item Below"><i class="fas fa-plus-circle fs-6"></i></button>
                                         <button type="button" class="btn btn-sm btn-link text-danger remove-row-btn p-0" title="Delete Row"><i class="fas fa-times-circle fs-6"></i></button>
                                     </td>
                                 </tr>
@@ -366,7 +367,8 @@
                                     <span class="item-amount-display fw-bold">0.00</span>
                                     <input type="hidden" name="items[0][amount]" class="item-amount" value="0">
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center text-nowrap">
+                                    <button type="button" class="btn btn-sm btn-link text-success add-row-below-btn p-0 me-2" title="Add Line Item Below"><i class="fas fa-plus-circle fs-6"></i></button>
                                     <button type="button" class="btn btn-sm btn-link text-danger remove-row-btn p-0" title="Delete Row"><i class="fas fa-times-circle fs-6"></i></button>
                                 </td>
                             </tr>
@@ -509,7 +511,8 @@
             <span class="item-amount-display fw-bold">0.00</span>
             <input type="hidden" class="item-amount" value="0">
         </td>
-        <td class="text-center">
+        <td class="text-center text-nowrap">
+            <button type="button" class="btn btn-sm btn-link text-success add-row-below-btn p-0 me-2" title="Add Line Item Below"><i class="fas fa-plus-circle fs-6"></i></button>
             <button type="button" class="btn btn-sm btn-link text-danger remove-row-btn p-0" title="Delete Row"><i class="fas fa-times-circle fs-6"></i></button>
         </td>
     </tr>
@@ -621,13 +624,21 @@ document.addEventListener('DOMContentLoaded', function() {
         addNewRow();
     });
 
-    function addNewRow(productData = null) {
+    $(document).on('click', '.add-row-below-btn', function() {
+        addNewRow(null, this.closest('tr'));
+    });
+
+    function addNewRow(productData = null, afterRow = null) {
         const tbody = document.getElementById('itemsBody');
         const template = document.getElementById('rowTemplate');
         const clone = template.content.cloneNode(true);
         const tr = clone.querySelector('tr');
         
-        tbody.appendChild(tr);
+        if (afterRow && afterRow.parentNode === tbody) {
+            afterRow.insertAdjacentElement('afterend', tr);
+        } else {
+            tbody.appendChild(tr);
+        }
         reindexRows();
 
         const newSelect = $(tr).find('.product-select');

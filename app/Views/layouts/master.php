@@ -203,6 +203,8 @@
         });
     </script>
     <?= $this->renderSection('scripts') ?>
+    <!-- Line Item Drag & Drop Reordering -->
+    <script src="<?= base_url('assets/js/line-item-dnd.js') ?>?v=<?= filemtime(FCPATH . 'assets/js/line-item-dnd.js') ?>"></script>
     <!-- List UI Enhancements -->
     <script src="<?= base_url('assets/js/list-ui.js') ?>"></script>
 </body>

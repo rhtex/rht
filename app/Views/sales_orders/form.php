@@ -324,7 +324,10 @@
                                         </select>
                                     </td>
                                     <td><input type="text" class="form-control text-end fw-bold amount bg-light" readonly value="<?= number_format($item['amount'] ?? ($item['quantity'] * $item['rate']), 2, '.', '') ?>"></td>
-                                    <td class="text-center"><button type="button" class="btn btn-sm text-danger p-0" onclick="removeRow(this)" title="Delete Row"><i class="fas fa-trash"></i></button></td>
+                                    <td class="text-center text-nowrap">
+                                        <button type="button" class="btn btn-sm text-success p-0 me-2" onclick="addLineItem(this.closest('tr'))" title="Add Line Item Below"><i class="fas fa-plus-circle"></i></button>
+                                        <button type="button" class="btn btn-sm text-danger p-0" onclick="removeRow(this)" title="Delete Row"><i class="fas fa-trash"></i></button>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -357,7 +360,10 @@
                                     </select>
                                 </td>
                                 <td><input type="text" class="form-control text-end fw-bold amount bg-light" readonly value="0.00"></td>
-                                <td class="text-center"><button type="button" class="btn btn-sm text-danger p-0" onclick="removeRow(this)" title="Delete Row"><i class="fas fa-trash"></i></button></td>
+                                <td class="text-center text-nowrap">
+                                    <button type="button" class="btn btn-sm text-success p-0 me-2" onclick="addLineItem(this.closest('tr'))" title="Add Line Item Below"><i class="fas fa-plus-circle"></i></button>
+                                    <button type="button" class="btn btn-sm text-danger p-0" onclick="removeRow(this)" title="Delete Row"><i class="fas fa-trash"></i></button>
+                                </td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -445,7 +451,7 @@
     let _productOptionsHtml = '';
     let _taxOptionsHtml = '';
 
-    function addLineItem() {
+    function addLineItem(afterRow = null) {
         const customerId = $('#customerSelect').val();
         if (!customerId) {
             alert('Please select a customer first.');
@@ -477,9 +483,16 @@
                 </select>
             </td>
             <td><input type="text" class="form-control text-end fw-bold amount bg-light" readonly value="0.00"></td>
-            <td class="text-center"><button type="button" class="btn btn-sm text-danger p-0" onclick="removeRow(this)" title="Delete Row"><i class="fas fa-trash"></i></button></td>
+            <td class="text-center text-nowrap">
+                <button type="button" class="btn btn-sm text-success p-0 me-2" onclick="addLineItem(this.closest('tr'))" title="Add Line Item Below"><i class="fas fa-plus-circle"></i></button>
+                <button type="button" class="btn btn-sm text-danger p-0" onclick="removeRow(this)" title="Delete Row"><i class="fas fa-trash"></i></button>
+            </td>
         `;
-        tbody.appendChild(row);
+        if (afterRow && afterRow.parentNode === tbody) {
+            afterRow.insertAdjacentElement('afterend', row);
+        } else {
+            tbody.appendChild(row);
+        }
 
         const newSelect = row.querySelector('.product-select');
         initSelect2(newSelect);

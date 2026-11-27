@@ -1381,3 +1381,30 @@ span.flatpickr-weekday {
     font-weight: 700 !important;
     box-shadow: 0 3px 8px rgba(30, 58, 138, 0.28) !important;
 }
+
+/* Line Item Drag & Drop Reordering */
+.dnd-drag-cell {
+    cursor: grab;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.dnd-drag-cell:active {
+    cursor: grabbing;
+}
+
+.dnd-drag-handle {
+    color: #94a3b8;
+    font-size: 0.78rem;
+    transition: color 0.15s ease;
+}
+
+.dnd-drag-cell:hover .dnd-drag-handle {
+    color: #334155;
+}
+
+tr.dnd-dragging {
+    opacity: 0.45;
+    background-color: #eff6ff !important;
+    outline: 2px dashed #3b82f6;
+}

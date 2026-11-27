@@ -77,6 +77,7 @@
                     <table class="table table-bordered table-hover" id="scannedItemsTable">
                         <thead class="table-light">
                             <tr>
+                                <th width="5%" class="text-center">#</th>
                                 <th width="15%">Barcode</th>
                                 <th>Product Name</th>
                                 <th>Rejection Reason</th>
@@ -86,7 +87,7 @@
                         </thead>
                         <tbody id="scannedItems">
                             <tr id="emptyRow">
-                                <td colspan="5" class="text-center text-muted py-4">
+                                <td colspan="6" class="text-center text-muted py-4">
                                     <i class="fas fa-inbox fa-2x mb-2"></i>
                                     <p>No items scanned yet. Select a vendor and start scanning barcodes.</p>
                                 </td>
@@ -94,7 +95,7 @@
                         </tbody>
                         <tfoot id="totalRow" style="display:none;">
                             <tr>
-                                <td colspan="3" class="text-end fw-bold">Subtotal:</td>
+                                <td colspan="4" class="text-end fw-bold">Subtotal:</td>
                                 <td>₹<span id="subtotal">0.00</span></td>
                                 <td></td>
                             </tr>
@@ -102,12 +103,12 @@
                                 <!-- Dynamic tax rows will be inserted here -->
                             </tbody>
                             <tr>
-                                <td colspan="3" class="text-end">Total Tax:</td>
+                                <td colspan="4" class="text-end">Total Tax:</td>
                                 <td>₹<span id="taxAmount">0.00</span></td>
                                 <td></td>
                             </tr>
                             <tr class="table-secondary fw-bold">
-                                <td colspan="3" class="text-end">Total Amount:</td>
+                                <td colspan="4" class="text-end">Total Amount:</td>
                                 <td>₹<span id="totalAmount">0.00</span></td>
                                 <td></td>
                             </tr>
@@ -258,8 +259,10 @@
             emptyRow.style.display = 'none';
 
             const row = document.createElement('tr');
+            row.dataset.barcode = item.barcode;
             row.innerHTML = `
-            <td><code>${item.barcode}</code></td>
+            <td class="text-center fw-bold row-sno text-muted"></td>
+            <td><code>${item.barcode}</code><input type="hidden" name="item_ids[]" value="${item.id}"></td>
             <td>${item.product_name}</td>
             <td><small class="text-danger">${item.rejection_reason || 'N/A'}</small></td>
             <td>₹${parseFloat(item.purchase_price).toFixed(2)}</td>
@@ -270,27 +273,16 @@
             </td>
         `;
             scannedItems.appendChild(row);
-
-            // Add hidden input
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'item_ids[]';
-            input.value = item.id;
-            input.id = 'item_' + item.id;
-            hiddenInputs.appendChild(input);
         }
 
         window.removeItem = function (barcode) {
             const index = items.findIndex(item => item.barcode === barcode);
             if (index > -1) {
-                const item = items[index];
                 items.splice(index, 1);
 
                 // Remove row
-                scannedItems.children[index].remove();
-
-                // Remove hidden input
-                document.getElementById('item_' + item.id).remove();
+                const row = Array.from(scannedItems.querySelectorAll('tr[data-barcode]')).find(tr => tr.dataset.barcode === barcode);
+                if (row) row.remove();
 
                 updateTotals();
 
@@ -332,7 +324,7 @@
                 if (isInterState) {
                     taxBody.innerHTML += `
                     <tr>
-                        <td colspan="3" class="text-end">IGST (${rate}%):</td>
+                        <td colspan="4" class="text-end">IGST (${rate}%):</td>
                         <td>₹${amount.toFixed(2)}</td>
                         <td></td>
                     </tr>
@@ -342,12 +334,12 @@
                     const halfRate = rate / 2;
                     taxBody.innerHTML += `
                     <tr>
-                        <td colspan="3" class="text-end">CGST (${halfRate}%):</td>
+                        <td colspan="4" class="text-end">CGST (${halfRate}%):</td>
                         <td>₹${halfAmount.toFixed(2)}</td>
                         <td></td>
                     </tr>
                     <tr>
-                        <td colspan="3" class="text-end">SGST (${halfRate}%):</td>
+                        <td colspan="4" class="text-end">SGST (${halfRate}%):</td>
                         <td>₹${halfAmount.toFixed(2)}</td>
                         <td></td>
                     </tr>

@@ -136,6 +136,7 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-success btn-add-design-below" title="Add Design Below"><i class="fas fa-plus"></i></button>
                                         <button type="button" class="btn btn-outline-secondary btn-clone-design" title="Clone Design"><i class="fas fa-copy"></i></button>
                                         <button type="button" class="btn btn-outline-primary btn-edit-design" title="Edit Design"><i class="fas fa-edit"></i></button>
                                         <button type="button" class="btn btn-outline-danger btn-delete-design" title="Delete Design"><i class="fas fa-trash"></i></button>
@@ -219,6 +220,7 @@ $(function() {
                 </td>
                 <td class="text-center">
                     <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-success btn-add-design-below" title="Add Design Below"><i class="fas fa-plus"></i></button>
                         <button type="button" class="btn btn-outline-secondary btn-clone-design" title="Clone Design"><i class="fas fa-copy"></i></button>
                         <button type="button" class="btn btn-outline-primary btn-edit-design" title="Edit Design"><i class="fas fa-edit"></i></button>
                         <button type="button" class="btn btn-outline-danger btn-delete-design" title="Delete Design"><i class="fas fa-trash"></i></button>
@@ -302,6 +304,14 @@ $(function() {
     });
 
     // Clone Design (insert before trailing empty row so empty row stays at bottom)
+    $('#designsBody').on('click', '.btn-add-design-below', function() {
+        const row = $(this).closest('.design-row');
+        const tr = buildDesignRow();
+        row.after(tr);
+        tr.find('.co-product-select').select2({ theme: 'bootstrap-5', width: '100%' });
+        resequenceDesigns();
+    });
+
     $('#designsBody').on('click', '.btn-clone-design', function() {
         const row = $(this).closest('.design-row');
         if (!row.find('.co-product-select').val() && !row.find('.co-product-name').val().trim()) return;

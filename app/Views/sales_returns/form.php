@@ -205,7 +205,10 @@
                             <td><input type="number" name="items[0][rate]" class="form-control rate text-end" step="0.01" min="0" value="0" required></td>
                             <td><input type="number" name="items[0][tax_percentage]" class="form-control tax text-end" step="0.01" min="0" value="0"></td>
                             <td><input type="text" class="form-control total text-end fw-semibold" readonly value="0.00"></td>
-                            <td class="text-center">
+                            <td class="text-center text-nowrap">
+                                <button type="button" class="btn btn-sm btn-outline-success add-row-below me-1" title="Add Line Item Below">
+                                    <i class="fas fa-plus"></i>
+                                </button>
                                 <button type="button" class="btn btn-sm btn-outline-danger remove-row" title="Remove Row">
                                     <i class="fas fa-trash"></i>
                                 </button>
@@ -390,7 +393,7 @@
         });
     }
 
-    function appendItemRow(prefill = null) {
+    function appendItemRow(prefill = null, afterRow = null) {
         const $newRow = $(_rowTemplateHtml);
         $newRow.find('input, select').each(function () {
             const name = $(this).attr('name');
@@ -399,7 +402,11 @@
             }
         });
 
-        $('#itemsBody').append($newRow);
+        if (afterRow && $(afterRow).length) {
+            $(afterRow).after($newRow);
+        } else {
+            $('#itemsBody').append($newRow);
+        }
         const $select = $newRow.find('.product-select');
         initRowSelect2($select);
 
@@ -539,6 +546,11 @@
 
         $('#addItem').on('click', function () {
             appendItemRow();
+            calculateTotals();
+        });
+
+        $(document).on('click', '.add-row-below', function () {
+            appendItemRow(null, $(this).closest('tr'));
             calculateTotals();
         });
 

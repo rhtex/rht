@@ -37,6 +37,7 @@ class InvoiceModel extends Model
         'doc_courier_name',
         'doc_tracking_number',
         'doc_dispatched_date',
+        'doc_image',
         'doc_status',
         'doc_received_date',
         'delivery_status',

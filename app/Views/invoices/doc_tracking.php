@@ -301,8 +301,8 @@ function openDocDetailsModal(data) {
 
     const existingWrap = document.getElementById('docExistingImageWrap');
     const existingLink = document.getElementById('docExistingImageLink');
-    if (data.waybill_image) {
-        existingLink.href = '<?= base_url('uploads/waybills') ?>/' + encodeURIComponent(data.waybill_image);
+    if (data.doc_image) {
+        existingLink.href = '<?= base_url('uploads/doc_tracking') ?>/' + encodeURIComponent(data.doc_image);
         existingWrap.style.display = 'block';
     } else {
         existingWrap.style.display = 'none';

@@ -1049,8 +1049,20 @@ class InvoiceController extends BaseController
         return $this->response->setJSON($history);
     }
 
+    /**
+     * Ensure invoices.doc_image exists for Doc Tracking LR image uploads.
+     */
+    private function ensureDocImageColumn(): void
+    {
+        $db = \Config\Database::connect();
+        if (!$db->fieldExists('doc_image', 'invoices')) {
+            $db->query("ALTER TABLE `invoices` ADD COLUMN `doc_image` VARCHAR(255) NULL AFTER `doc_dispatched_date`");
+        }
+    }
+
     public function docTracking()
     {
+        $this->ensureDocImageColumn();
         $limit = 25;
         $offset = intval($this->request->getGet('offset') ?? 0);
 
@@ -1141,6 +1153,7 @@ class InvoiceController extends BaseController
 
     public function updateDocDetails($id)
     {
+        $this->ensureDocImageColumn();
         $invoice = $this->invoiceModel->find($id);
         if (!$invoice) {
             return redirect()->back()->with('error', 'Invoice not found.');
@@ -1166,9 +1179,13 @@ class InvoiceController extends BaseController
 
         $img = $this->request->getFile('doc_image');
         if ($img && $img->isValid() && !$img->hasMoved()) {
+            $uploadDir = ROOTPATH . 'public/uploads/doc_tracking';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
             $newName = $img->getRandomName();
-            $img->move(ROOTPATH . 'public/uploads/waybills', $newName);
-            $updateData['waybill_image'] = $newName;
+            $img->move($uploadDir, $newName);
+            $updateData['doc_image'] = $newName;
         }
 
         if ($this->invoiceModel->update($id, $updateData)) {

@@ -8,8 +8,8 @@
                 <strong><?= esc($inv['doc_courier_name']) ?></strong><br>
                 <small class="text-muted">Tracking: <?= esc($inv['doc_tracking_number']) ?></small><br>
                 <small class="text-muted">Date: <?= date('d/m/Y', strtotime($inv['doc_dispatched_date'])) ?></small>
-                <?php if (!empty($inv['waybill_image'])): ?>
-                    <br><a href="<?= base_url('uploads/waybills/' . rawurlencode($inv['waybill_image'])) ?>" target="_blank" class="badge bg-light text-primary border mt-1 text-decoration-none"><i class="fas fa-image me-1"></i>LR Image</a>
+                <?php if (!empty($inv['doc_image'])): ?>
+                    <br><a href="<?= base_url('uploads/doc_tracking/' . rawurlencode($inv['doc_image'])) ?>" target="_blank" class="badge bg-light text-primary border mt-1 text-decoration-none"><i class="fas fa-image me-1"></i>LR Image</a>
                 <?php endif; ?>
             <?php else: ?>
                 <span class="text-muted italic">Not Dispatched</span>
@@ -39,7 +39,7 @@
                             'doc_courier_name' => $inv['doc_courier_name'],
                             'doc_tracking_number' => $inv['doc_tracking_number'],
                             'doc_dispatched_date' => $inv['doc_dispatched_date'],
-                            'waybill_image' => $inv['waybill_image'] ?? ''
+                            'doc_image' => $inv['doc_image'] ?? ''
                         ])) ?>)">
                     <i class="fas fa-paper-plane"></i><span> Dispatch</span>
                 </button>

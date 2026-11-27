@@ -39,6 +39,7 @@ class ZohoSettingModel extends Model
         'per_minute_limit',
         'max_concurrent_connections',
         'finance_default_account_map_json',
+        'env_profiles_json',
         'last_connected_at',
         'last_sync_at',
         'last_error',
@@ -82,6 +83,9 @@ class ZohoSettingModel extends Model
                 $cols = array_map('strtolower', $this->db->getFieldNames('zoho_settings'));
                 if (!in_array('subscription_plan', $cols, true) || !in_array('ewaybill_api_service', $cols, true)) {
                     $loadMigration()->up();
+                }
+                if (!in_array('env_profiles_json', $cols, true)) {
+                    $this->db->query("ALTER TABLE `zoho_settings` ADD COLUMN `env_profiles_json` LONGTEXT NULL AFTER `finance_default_account_map_json`");
                 }
             }
         } catch (\Throwable $e) {
@@ -135,21 +139,43 @@ class ZohoSettingModel extends Model
             $row['oauth_scopes'] = 'ZohoBooks.fullaccess.all,ZohoInventory.fullaccess.all';
         }
 
-        if ($decryptSecrets) {
-            $row['client_id']     = $this->decryptSecret($row['client_id_enc'] ?? null);
-            $row['client_secret'] = $this->decryptSecret($row['client_secret_enc'] ?? null);
-            $row['refresh_token'] = $this->decryptSecret($row['refresh_token_enc'] ?? null);
-            $row['access_token']  = $this->decryptSecret($row['access_token_enc'] ?? null);
+        $rawProfiles   = !empty($row['env_profiles_json']) ? (json_decode($row['env_profiles_json'], true) ?: []) : [];
+        $profiles      = $this->normalizeEnvProfiles($rawProfiles);
+        $currentHost   = $this->detectCurrentHost();
+        $activeEnv     = $this->resolveActiveEnvironment($profiles, $currentHost);
+        $activeProfile = $profiles[$activeEnv] ?? [];
+
+        // Use active environment profile credentials when present, falling back to legacy columns
+        $effClientIdEnc     = !empty($activeProfile['client_id_enc']) ? $activeProfile['client_id_enc'] : ($row['client_id_enc'] ?? null);
+        $effClientSecretEnc = !empty($activeProfile['client_secret_enc']) ? $activeProfile['client_secret_enc'] : ($row['client_secret_enc'] ?? null);
+        $effRefreshTokenEnc = !empty($activeProfile['refresh_token_enc']) ? $activeProfile['refresh_token_enc'] : ($row['refresh_token_enc'] ?? null);
+        $effAccessTokenEnc  = !empty($activeProfile['access_token_enc']) ? $activeProfile['access_token_enc'] : ($row['access_token_enc'] ?? null);
+
+        if (!empty($activeProfile['token_expires_at'])) {
+            $row['token_expires_at'] = $activeProfile['token_expires_at'];
+        }
+        if (!empty($activeProfile['oauth_redirect_url'])) {
+            $row['oauth_redirect_url'] = $activeProfile['oauth_redirect_url'];
         }
 
-        // Masked versions safe for UI rendering
-        $row['client_id_masked']     = $this->maskSecret($this->decryptSecret($row['client_id_enc'] ?? null), 6);
-        $row['client_secret_masked'] = $this->maskSecret($this->decryptSecret($row['client_secret_enc'] ?? null), 4);
-        $row['refresh_token_masked'] = $this->maskSecret($this->decryptSecret($row['refresh_token_enc'] ?? null), 4);
-        $row['has_client_id']        = !empty($row['client_id_enc']);
-        $row['has_client_secret']    = !empty($row['client_secret_enc']);
-        $row['has_refresh_token']    = !empty($row['refresh_token_enc']);
-        $row['has_access_token']     = !empty($row['access_token_enc']);
+        if ($decryptSecrets) {
+            $row['client_id']     = $this->decryptSecret($effClientIdEnc);
+            $row['client_secret'] = $this->decryptSecret($effClientSecretEnc);
+            $row['refresh_token'] = $this->decryptSecret($effRefreshTokenEnc);
+            $row['access_token']  = $this->decryptSecret($effAccessTokenEnc);
+        }
+
+        // Masked versions safe for UI rendering (active profile)
+        $row['client_id_masked']     = $this->maskSecret($this->decryptSecret($effClientIdEnc), 6);
+        $row['client_secret_masked'] = $this->maskSecret($this->decryptSecret($effClientSecretEnc), 4);
+        $row['refresh_token_masked'] = $this->maskSecret($this->decryptSecret($effRefreshTokenEnc), 4);
+        $row['has_client_id']        = !empty($effClientIdEnc);
+        $row['has_client_secret']    = !empty($effClientSecretEnc);
+        $row['has_refresh_token']    = !empty($effRefreshTokenEnc);
+        $row['has_access_token']     = !empty($effAccessTokenEnc);
+        $row['active_env']           = $activeEnv;
+        $row['active_host']          = $currentHost;
+        $row['env_profiles']         = $this->buildUiEnvProfiles($profiles);
         $row['organizations']        = !empty($row['organizations_cache_json'])
             ? (json_decode($row['organizations_cache_json'], true) ?: [])
             : [];
@@ -235,20 +261,64 @@ class ZohoSettingModel extends Model
             $update['max_concurrent_connections'] = min($maxAllowedConcurrent, max(1, (int) $input['max_concurrent_connections']));
         }
 
-        // Only update secrets if non-empty and not containing mask bullets
+        // Update 4-environment credential profiles when submitted from settings UI,
+        // or update the active environment profile when OAuth refreshes/exchanges tokens.
+        $rawProfiles = !empty($current['env_profiles_json']) ? (json_decode($current['env_profiles_json'], true) ?: []) : [];
+        $profiles    = $this->normalizeEnvProfiles($rawProfiles);
+        $activeEnv   = $current['active_env'] ?? $this->resolveActiveEnvironment($profiles, $this->detectCurrentHost());
+        $profilesChanged = false;
+
+        if (!empty($input['env_profiles']) && is_array($input['env_profiles'])) {
+            foreach (['localhost', 'dev', 'test', 'prod'] as $envKey) {
+                if (!isset($input['env_profiles'][$envKey]) || !is_array($input['env_profiles'][$envKey])) {
+                    continue;
+                }
+                $envInput = $input['env_profiles'][$envKey];
+                if (array_key_exists('hostnames', $envInput)) {
+                    $profiles[$envKey]['hostnames'] = trim((string) $envInput['hostnames']);
+                }
+                if (array_key_exists('oauth_redirect_url', $envInput)) {
+                    $profiles[$envKey]['oauth_redirect_url'] = trim((string) $envInput['oauth_redirect_url']);
+                }
+                foreach (['client_id', 'client_secret', 'refresh_token', 'access_token'] as $secretKey) {
+                    if (isset($envInput[$secretKey])) {
+                        $val = trim((string) $envInput[$secretKey]);
+                        if ($val !== '' && strpos($val, '••••') === false && strpos($val, '****') === false) {
+                            $profiles[$envKey][$secretKey . '_enc'] = $this->encryptSecret($val);
+                        } elseif (!empty($envInput['clear_' . $secretKey])) {
+                            $profiles[$envKey][$secretKey . '_enc'] = null;
+                        }
+                    }
+                }
+            }
+            $profilesChanged = true;
+        }
+
+        // Only update active/legacy secrets if non-empty and not containing mask bullets
         foreach (['client_id', 'client_secret', 'refresh_token', 'access_token'] as $secretKey) {
             if (isset($input[$secretKey])) {
                 $val = trim((string) $input[$secretKey]);
                 if ($val !== '' && strpos($val, '••••') === false && strpos($val, '****') === false) {
-                    $update[$secretKey . '_enc'] = $this->encryptSecret($val);
+                    $encVal = $this->encryptSecret($val);
+                    $update[$secretKey . '_enc'] = $encVal;
+                    $profiles[$activeEnv][$secretKey . '_enc'] = $encVal;
+                    $profilesChanged = true;
                 } elseif (!empty($input['clear_' . $secretKey])) {
                     $update[$secretKey . '_enc'] = null;
+                    $profiles[$activeEnv][$secretKey . '_enc'] = null;
+                    $profilesChanged = true;
                 }
             }
         }
 
         if (array_key_exists('token_expires_at', $input)) {
             $update['token_expires_at'] = $input['token_expires_at'];
+            $profiles[$activeEnv]['token_expires_at'] = $input['token_expires_at'];
+            $profilesChanged = true;
+        }
+
+        if ($profilesChanged) {
+            $update['env_profiles_json'] = json_encode($profiles);
         }
         if (array_key_exists('organizations_cache_json', $input)) {
             $update['organizations_cache_json'] = is_array($input['organizations_cache_json'])
@@ -320,14 +390,17 @@ class ZohoSettingModel extends Model
         $iv         = substr($raw, 0, $ivLen);
         $hmac       = substr($raw, $ivLen, 32);
         $cipherText = substr($raw, $ivLen + 32);
-        $calcHmac   = hash_hmac('sha256', $iv . $cipherText, $key, true);
 
-        if (!hash_equals($hmac, $calcHmac)) {
-            return '';
+        $keysToTry = [$this->getEncryptionKey(), $this->getLegacyEncryptionKey()];
+        foreach ($keysToTry as $key) {
+            $calcHmac = hash_hmac('sha256', $iv . $cipherText, $key, true);
+            if (hash_equals($hmac, $calcHmac)) {
+                $plain = openssl_decrypt($cipherText, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+                return $plain !== false ? $plain : '';
+            }
         }
 
-        $plain = openssl_decrypt($cipherText, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
-        return $plain !== false ? $plain : '';
+        return '';
     }
 
     protected function getEncryptionKey(): string
@@ -336,8 +409,113 @@ class ZohoSettingModel extends Model
         if (!empty($envKey)) {
             return hash('sha256', (string) $envKey, true);
         }
+        return hash('sha256', 'RHT_ZOHO_VAULT_v2_SHARED', true);
+    }
+
+    protected function getLegacyEncryptionKey(): string
+    {
         $dbName = env('database.default.database', 'rasidev_hr');
         return hash('sha256', ROOTPATH . '|RHT_ZOHO_VAULT_v1|' . $dbName, true);
+    }
+
+    public function detectCurrentHost(): string
+    {
+        if (!is_cli()) {
+            $rawHost = (string) ($_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? '');
+        } else {
+            $rawHost = (string) (parse_url((string) (config('App')->baseURL ?? ''), PHP_URL_HOST) ?: 'localhost');
+        }
+        $host = strtolower(trim($rawHost));
+        // Strip port if present (e.g. localhost:8080 -> localhost)
+        if (strpos($host, ':') !== false && substr($host, 0, 1) !== '[') {
+            $host = explode(':', $host)[0];
+        }
+        return $host;
+    }
+
+    protected function normalizeEnvProfiles(array $raw): array
+    {
+        $defaults = [
+            'localhost' => ['label' => 'Localhost', 'hostnames' => 'localhost,127.0.0.1'],
+            'dev'       => ['label' => 'Dev',       'hostnames' => ''],
+            'test'      => ['label' => 'Test',      'hostnames' => ''],
+            'prod'      => ['label' => 'Prod',      'hostnames' => ''],
+        ];
+
+        $out = [];
+        foreach ($defaults as $key => $def) {
+            $existing  = is_array($raw[$key] ?? null) ? $raw[$key] : [];
+            $out[$key] = [
+                'hostnames'          => (string) ($existing['hostnames'] ?? $def['hostnames']),
+                'oauth_redirect_url' => (string) ($existing['oauth_redirect_url'] ?? ''),
+                'client_id_enc'      => $existing['client_id_enc'] ?? null,
+                'client_secret_enc'  => $existing['client_secret_enc'] ?? null,
+                'refresh_token_enc'  => $existing['refresh_token_enc'] ?? null,
+                'access_token_enc'   => $existing['access_token_enc'] ?? null,
+                'token_expires_at'   => $existing['token_expires_at'] ?? null,
+            ];
+        }
+        return $out;
+    }
+
+    public function resolveActiveEnvironment(array $profiles, ?string $host = null): string
+    {
+        if (is_cli()) {
+            $cliEnv = strtolower(trim((string) env('ZOHO_ENV', '')));
+            if (in_array($cliEnv, ['localhost', 'dev', 'test', 'prod'], true)) {
+                return $cliEnv;
+            }
+        }
+
+        $host = strtolower(trim((string) ($host ?? $this->detectCurrentHost())));
+        if ($host !== '') {
+            foreach (['localhost', 'dev', 'test', 'prod'] as $envKey) {
+                $list = array_filter(array_map('trim', explode(',', strtolower((string) ($profiles[$envKey]['hostnames'] ?? '')))));
+                foreach ($list as $pattern) {
+                    if ($pattern === $host) {
+                        return $envKey;
+                    }
+                    if (strpos($pattern, '*.') === 0 && str_ends_with($host, substr($pattern, 1))) {
+                        return $envKey;
+                    }
+                }
+            }
+
+            if (in_array($host, ['localhost', '127.0.0.1', '::1'], true) || str_ends_with($host, '.local') || str_ends_with($host, '.test')) {
+                return 'localhost';
+            }
+            if (str_starts_with($host, 'dev.') || str_contains($host, '.dev.')) {
+                return 'dev';
+            }
+            if (str_starts_with($host, 'test.') || str_starts_with($host, 'staging.') || str_starts_with($host, 'uat.')) {
+                return 'test';
+            }
+            return 'prod';
+        }
+
+        return (ENVIRONMENT === 'development') ? 'dev' : 'prod';
+    }
+
+    protected function buildUiEnvProfiles(array $profiles): array
+    {
+        $labels = ['localhost' => 'Localhost', 'dev' => 'Dev', 'test' => 'Test', 'prod' => 'Prod'];
+        $ui     = [];
+        foreach ($labels as $key => $label) {
+            $p        = $profiles[$key] ?? [];
+            $ui[$key] = [
+                'label'                => $label,
+                'hostnames'            => $p['hostnames'] ?? '',
+                'oauth_redirect_url'   => $p['oauth_redirect_url'] ?? '',
+                'has_client_id'        => !empty($p['client_id_enc']),
+                'has_client_secret'    => !empty($p['client_secret_enc']),
+                'has_refresh_token'    => !empty($p['refresh_token_enc']),
+                'has_access_token'     => !empty($p['access_token_enc']),
+                'client_id_masked'     => $this->maskSecret($this->decryptSecret($p['client_id_enc'] ?? null), 6),
+                'client_secret_masked' => $this->maskSecret($this->decryptSecret($p['client_secret_enc'] ?? null), 4),
+                'refresh_token_masked' => $this->maskSecret($this->decryptSecret($p['refresh_token_enc'] ?? null), 4),
+            ];
+        }
+        return $ui;
     }
 
     public function maskSecret(string $secret, int $visibleChars = 4): string

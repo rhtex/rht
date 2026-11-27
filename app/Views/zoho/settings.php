@@ -176,51 +176,111 @@
                     </div>
 
                     <hr class="my-4">
-                    <h6 class="fw-bold text-primary mb-3"><i class="fas fa-lock me-2"></i>OAuth 2.0 Credentials (Encrypted at Rest)</h6>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                        <h6 class="fw-bold text-primary mb-0"><i class="fas fa-lock me-2"></i>OAuth 2.0 Credentials per Environment (Encrypted at Rest)</h6>
+                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
+                            Active Host: <code><?= esc($config['active_host'] ?? ($_SERVER['HTTP_HOST'] ?? 'cli')) ?></code> &rarr; <strong><?= strtoupper(esc($config['active_env'] ?? 'prod')) ?></strong>
+                        </span>
+                    </div>
 
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Zoho Client ID
-                                <?php if (!empty($config['has_client_id'])): ?>
-                                    <span class="badge bg-success-subtle text-success ms-1">Saved (<?= esc($config['client_id_masked']) ?>)</span>
-                                <?php endif; ?>
-                            </label>
-                            <input type="password" name="client_id" class="form-control"
-                                   placeholder="<?= !empty($config['has_client_id']) ? 'Leave blank to keep existing Client ID' : '1000.XXXXXXXXXXXXXXXXXXXXXXXX' ?>"
-                                   autocomplete="new-password">
-                        </div>
+                    <?php
+                    $activeEnvKey = $config['active_env'] ?? 'localhost';
+                    $envProfiles  = $config['env_profiles'] ?? [];
+                    $envMeta = [
+                        'localhost' => ['label' => 'Localhost', 'icon' => 'fa-laptop-code', 'placeholder_host' => 'localhost,127.0.0.1'],
+                        'dev'       => ['label' => 'Dev',       'icon' => 'fa-code-branch', 'placeholder_host' => 'dev.yourdomain.com'],
+                        'test'      => ['label' => 'Test',      'icon' => 'fa-flask',       'placeholder_host' => 'test.yourdomain.com'],
+                        'prod'      => ['label' => 'Prod',      'icon' => 'fa-globe',       'placeholder_host' => 'yourdomain.com,www.yourdomain.com'],
+                    ];
+                    ?>
+                    <ul class="nav nav-tabs mb-3" id="zohoEnvTabs" role="tablist">
+                        <?php foreach ($envMeta as $envKey => $meta):
+                            $prof = $envProfiles[$envKey] ?? [];
+                            $isConfigured = !empty($prof['has_client_id']) && !empty($prof['has_client_secret']);
+                            $isActiveTab  = ($activeEnvKey === $envKey);
+                        ?>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link <?= $isActiveTab ? 'active fw-bold' : '' ?>" id="tab-<?= $envKey ?>"
+                                        data-bs-toggle="tab" data-bs-target="#pane-<?= $envKey ?>" type="button" role="tab">
+                                    <i class="fas <?= $meta['icon'] ?> me-1"></i><?= esc($meta['label']) ?>
+                                    <?php if ($isActiveTab): ?>
+                                        <span class="badge bg-primary ms-1">Active</span>
+                                    <?php elseif ($isConfigured): ?>
+                                        <span class="badge bg-success-subtle text-success ms-1"><i class="fas fa-check"></i></span>
+                                    <?php endif; ?>
+                                </button>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
 
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Zoho Client Secret
-                                <?php if (!empty($config['has_client_secret'])): ?>
-                                    <span class="badge bg-success-subtle text-success ms-1">Saved (<?= esc($config['client_secret_masked']) ?>)</span>
-                                <?php endif; ?>
-                            </label>
-                            <input type="password" name="client_secret" class="form-control"
-                                   placeholder="<?= !empty($config['has_client_secret']) ? 'Leave blank to keep existing Client Secret' : 'Enter Zoho Client Secret' ?>"
-                                   autocomplete="new-password">
-                        </div>
+                    <div class="tab-content border rounded p-3 mb-3 bg-light-subtle" id="zohoEnvTabContent">
+                        <?php foreach ($envMeta as $envKey => $meta):
+                            $prof = $envProfiles[$envKey] ?? [];
+                            $isActiveTab = ($activeEnvKey === $envKey);
+                        ?>
+                            <div class="tab-pane fade <?= $isActiveTab ? 'show active' : '' ?>" id="pane-<?= $envKey ?>" role="tabpanel">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold"><?= esc($meta['label']) ?> Hostname(s)</label>
+                                        <input type="text" name="env_profiles[<?= $envKey ?>][hostnames]" class="form-control font-monospace small"
+                                               value="<?= esc($prof['hostnames'] ?? '') ?>"
+                                               placeholder="<?= esc($meta['placeholder_host']) ?>">
+                                        <small class="text-muted">Comma-separated hostnames (e.g. <code><?= esc($meta['placeholder_host']) ?></code>). Matched automatically against request host.</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold"><?= esc($meta['label']) ?> OAuth Redirect URL <span class="text-muted fw-normal">(Optional)</span></label>
+                                        <input type="url" name="env_profiles[<?= $envKey ?>][oauth_redirect_url]" class="form-control small"
+                                               value="<?= esc($prof['oauth_redirect_url'] ?? '') ?>"
+                                               placeholder="Leave blank to use current host callback URL">
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">
+                                            Client ID (<?= esc($meta['label']) ?>)
+                                            <?php if (!empty($prof['has_client_id'])): ?>
+                                                <span class="badge bg-success-subtle text-success ms-1">Saved (<?= esc($prof['client_id_masked']) ?>)</span>
+                                            <?php endif; ?>
+                                        </label>
+                                        <input type="password" name="env_profiles[<?= $envKey ?>][client_id]" class="form-control"
+                                               placeholder="<?= !empty($prof['has_client_id']) ? 'Leave blank to keep existing Client ID' : '1000.XXXXXXXXXXXXXXXXXXXXXXXX' ?>"
+                                               autocomplete="new-password">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">
+                                            Client Secret (<?= esc($meta['label']) ?>)
+                                            <?php if (!empty($prof['has_client_secret'])): ?>
+                                                <span class="badge bg-success-subtle text-success ms-1">Saved (<?= esc($prof['client_secret_masked']) ?>)</span>
+                                            <?php endif; ?>
+                                        </label>
+                                        <input type="password" name="env_profiles[<?= $envKey ?>][client_secret]" class="form-control"
+                                               placeholder="<?= !empty($prof['has_client_secret']) ? 'Leave blank to keep existing Client Secret' : 'Enter Zoho Client Secret' ?>"
+                                               autocomplete="new-password">
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-semibold">
+                                            Refresh Token (<?= esc($meta['label']) ?>)
+                                            <?php if (!empty($prof['has_refresh_token'])): ?>
+                                                <span class="badge bg-success-subtle text-success ms-1">Connected (<?= esc($prof['refresh_token_masked']) ?>)</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary-subtle text-muted ms-1">Not Connected</span>
+                                            <?php endif; ?>
+                                        </label>
+                                        <input type="password" name="env_profiles[<?= $envKey ?>][refresh_token]" class="form-control"
+                                               placeholder="<?= !empty($prof['has_refresh_token']) ? 'Leave blank to keep existing Refresh Token (or paste new one)' : 'Paste Refresh Token or click Connect to Zoho Books while on this host' ?>"
+                                               autocomplete="new-password">
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
 
                     <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Zoho Refresh Token
-                                <span class="badge bg-secondary-subtle text-muted ms-1">Auto-Generated</span>
-                                <?php if (!empty($config['has_refresh_token'])): ?>
-                                    <span class="badge bg-success-subtle text-success ms-1">Connected (<?= esc($config['refresh_token_masked']) ?>)</span>
-                                <?php endif; ?>
-                            </label>
-                            <input type="password" name="refresh_token" class="form-control"
-                                   placeholder="<?= !empty($config['has_refresh_token']) ? 'Auto-managed by OAuth 2.0 (Connected)' : 'Automatically generated when you click Connect to Zoho Books' ?>"
-                                   autocomplete="new-password">
-                            <small class="text-muted d-block mt-1">
-                                <i class="fas fa-magic text-primary me-1"></i><strong>You do not need to generate or type this manually.</strong> Just save your Client ID &amp; Secret, then click <strong>Connect to Zoho Books</strong>.
-                            </small>
-                        </div>
-
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Zoho Organization ID</label>
                             <input type="text" name="organization_id" class="form-control"

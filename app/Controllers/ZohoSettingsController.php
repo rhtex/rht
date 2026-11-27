@@ -95,6 +95,7 @@ class ZohoSettingsController extends BaseController
             'ewaybill_api_service'       => $ewbApiService,
             'inventory_api_base_url'     => $invApiBaseUrl,
             'oauth_scopes'               => $oauthScopes,
+            'env_profiles'               => is_array($post['env_profiles'] ?? null) ? $post['env_profiles'] : [],
             'conflict_strategy'          => $post['conflict_strategy'] ?? 'manual_review',
             'preserve_document_numbers'  => !empty($post['preserve_document_numbers']) ? 1 : 0,
             'subscription_plan'          => $plan,

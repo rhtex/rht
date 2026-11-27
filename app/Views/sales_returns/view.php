@@ -153,6 +153,36 @@
                                     </span>
                                 </td>
                             </tr>
+                            <?php if (!empty($return['transport_name'])): ?>
+                                <tr>
+                                    <th class="text-muted text-uppercase small">Transport:</th>
+                                    <td><?= esc($return['transport_name']) ?></td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php if (!empty($return['lr_number'])): ?>
+                                <tr>
+                                    <th class="text-muted text-uppercase small">LR No.:</th>
+                                    <td><?= esc($return['lr_number']) ?></td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php if (isset($return['bales_count']) && $return['bales_count'] !== null && $return['bales_count'] !== ''): ?>
+                                <tr>
+                                    <th class="text-muted text-uppercase small">No. of Bales:</th>
+                                    <td><?= esc($return['bales_count']) ?></td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php if (!empty($return['transport_paid_by'])): ?>
+                                <tr>
+                                    <th class="text-muted text-uppercase small">Transport Paid By:</th>
+                                    <td><span class="badge bg-light text-dark border"><?= esc($return['transport_paid_by']) ?></span></td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php if (isset($return['agent_amount_adjustment']) && (float) $return['agent_amount_adjustment'] != 0.0): ?>
+                                <tr>
+                                    <th class="text-muted text-uppercase small">Agent Amount Adjustment:</th>
+                                    <td class="fw-semibold">₹<?= number_format((float) $return['agent_amount_adjustment'], 2) ?></td>
+                                </tr>
+                            <?php endif; ?>
                         </table>
                     </div>
                 </div>

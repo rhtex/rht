@@ -160,6 +160,43 @@
                 </div>
             </div>
 
+            <!-- Transport, Logistics & Agent Adjustment -->
+            <div class="border rounded p-3 bg-light-subtle mt-3">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="transport_name" class="form-label fw-semibold">Transport</label>
+                        <select name="transport_name" id="transport_name" class="form-select select2">
+                            <option value="">-- Select Transport --</option>
+                            <?php foreach ($transports ?? [] as $transport): ?>
+                                <option value="<?= esc($transport['transport_name']) ?>">
+                                    <?= esc($transport['transport_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="bales_count" class="form-label fw-semibold">No. of Bales</label>
+                        <input type="number" name="bales_count" id="bales_count" class="form-control" min="0" step="1" placeholder="e.g. 2">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="lr_number" class="form-label fw-semibold">LR No.</label>
+                        <input type="text" name="lr_number" id="lr_number" class="form-control" placeholder="LR No.">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="transport_paid_by" class="form-label fw-semibold">Transport Amount Paid By</label>
+                        <select name="transport_paid_by" id="transport_paid_by" class="form-select no-select2">
+                            <option value="">-- Select --</option>
+                            <option value="Customer">Customer</option>
+                            <option value="Company">Company</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="agent_amount_adjustment" class="form-label fw-semibold">Agent Amount Adjustment (₹)</label>
+                        <input type="number" step="0.01" name="agent_amount_adjustment" id="agent_amount_adjustment" class="form-control text-end" value="0.00" placeholder="0.00">
+                    </div>
+                </div>
+            </div>
+
             <hr class="my-3">
 
             <!-- Item Details Header + Barcode Scanner -->

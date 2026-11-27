@@ -104,6 +104,21 @@ class SalesReturnController extends BaseController
         if (!$db->fieldExists('customer_debit_note_no', 'sales_returns')) {
             $db->query("ALTER TABLE `sales_returns` ADD COLUMN `customer_debit_note_no` VARCHAR(100) NULL AFTER `invoice_id`");
         }
+        if (!$db->fieldExists('transport_name', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `transport_name` VARCHAR(150) NULL AFTER `return_date`");
+        }
+        if (!$db->fieldExists('bales_count', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `bales_count` INT NULL AFTER `transport_name`");
+        }
+        if (!$db->fieldExists('lr_number', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `lr_number` VARCHAR(100) NULL AFTER `bales_count`");
+        }
+        if (!$db->fieldExists('transport_paid_by', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `transport_paid_by` VARCHAR(20) NULL AFTER `lr_number`");
+        }
+        if (!$db->fieldExists('agent_amount_adjustment', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `agent_amount_adjustment` DECIMAL(15,2) NOT NULL DEFAULT 0.00 AFTER `adjustment`");
+        }
     }
 
     public function create()
@@ -112,6 +127,7 @@ class SalesReturnController extends BaseController
         $data['customers'] = $this->customerModel->where('status', 'active')->orderBy('name', 'ASC')->findAll();
         $data['products'] = $this->productModel->getProductsWithCategory();
         $data['taxes'] = (new \App\Models\TaxModel())->where('status', 'Active')->orderBy('percentage', 'ASC')->findAll();
+        $data['transports'] = (new \App\Models\TransportModel())->orderBy('transport_name', 'ASC')->findAll();
         $data['title'] = 'Record Sales Return';
         $data['return_number'] = $this->returnModel->generateReturnNumber();
         $data['preselected_invoice_id'] = (int) ($this->request->getGet('invoice_id') ?? 0);
@@ -196,12 +212,20 @@ class SalesReturnController extends BaseController
         $invoiceId = $this->request->getPost('invoice_id') ?: null;
         $customReturnNo = trim((string) $this->request->getPost('return_number'));
 
+        $balesPost = trim((string) $this->request->getPost('bales_count'));
+        $paidByPost = trim((string) $this->request->getPost('transport_paid_by'));
+
         $returnId = $this->returnModel->insert([
             'customer_id' => $customerId,
             'invoice_id' => $invoiceId,
             'customer_debit_note_no' => trim((string) $this->request->getPost('customer_debit_note_no')) ?: null,
             'return_number' => $customReturnNo !== '' ? $customReturnNo : $this->returnModel->generateReturnNumber(),
             'return_date' => $returnDate,
+            'transport_name' => trim((string) $this->request->getPost('transport_name')) ?: null,
+            'bales_count' => $balesPost !== '' ? (int) $balesPost : null,
+            'lr_number' => trim((string) $this->request->getPost('lr_number')) ?: null,
+            'transport_paid_by' => in_array($paidByPost, ['Customer', 'Company'], true) ? $paidByPost : null,
+            'agent_amount_adjustment' => (float) ($this->request->getPost('agent_amount_adjustment') ?? 0),
             'reason' => $this->request->getPost('reason'),
             'status' => 'Open',
             'is_inter_state' => $this->request->getPost('is_inter_state') ?? 0,

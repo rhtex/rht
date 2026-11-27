@@ -111,7 +111,7 @@
 <div class="modal fade" id="updateDocDetailsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="updateDocDetailsForm" action="" method="post">
+            <form id="updateDocDetailsForm" action="" method="post" enctype="multipart/form-data">
                 <?= csrf_field() ?>
                 <div class="modal-header">
                     <h5 class="modal-title">Doc Dispatch Details: <span id="docInvoiceNumber"></span></h5>
@@ -129,6 +129,22 @@
                     <div class="mb-3">
                         <label class="form-label">Dispatch Date <span class="text-danger">*</span></label>
                         <input type="date" name="doc_dispatched_date" id="modalDocDispatchedDate" class="form-control" value="<?= date('Y-m-d') ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">LR / Document Image</label>
+                        <div class="input-group">
+                            <input type="file" name="doc_image" id="modalDocImage" class="form-control" accept="image/*">
+                            <button type="button" class="btn btn-outline-primary" id="btnDocCamera" title="Take Photo with Camera">
+                                <i class="fas fa-camera me-1"></i> Camera
+                            </button>
+                        </div>
+                        <input type="file" id="modalDocCameraInput" accept="image/*" capture="environment" class="d-none">
+                        <small class="text-muted d-block" id="docImageHelp">Accepted formats: JPG, PNG. Max size: 4MB</small>
+                        <div id="docExistingImageWrap" class="mt-2" style="display: none;">
+                            <a id="docExistingImageLink" href="#" target="_blank" class="small text-decoration-none">
+                                <i class="fas fa-image me-1"></i> View Uploaded LR Image
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -153,7 +169,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Update Status <span class="text-danger">*</span></label>
-                        <select name="doc_status" id="modalDocStatus" class="form-select" required>
+                        <select name="doc_status" id="modalDocStatus" class="form-select no-select2" required>
                             <option value="Pending">Pending</option>
                             <option value="Dispatched">Dispatched</option>
                             <option value="Delivered">Delivered</option>
@@ -237,6 +253,26 @@ $(document).ready(function() {
             }
         });
     });
+
+    // Camera capture for LR / Document image upload
+    $('#btnDocCamera').on('click', function() {
+        document.getElementById('modalDocCameraInput').click();
+    });
+    $('#modalDocCameraInput').on('change', function() {
+        const file = this.files && this.files[0];
+        if (!file) return;
+        const mainInput = document.getElementById('modalDocImage');
+        try {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            mainInput.files = dt.files;
+            document.getElementById('docImageHelp').textContent = 'Captured: ' + file.name;
+        } catch (err) {
+            mainInput.removeAttribute('name');
+            this.setAttribute('name', 'doc_image');
+            document.getElementById('docImageHelp').textContent = 'Captured: ' + file.name;
+        }
+    });
 });
 
 function openDocDetailsModal(data) {
@@ -244,8 +280,34 @@ function openDocDetailsModal(data) {
     document.getElementById('docInvoiceNumber').textContent = data.invoice_number;
     document.getElementById('modalDocCourierName').value = data.doc_courier_name || '';
     document.getElementById('modalDocTrackingNumber').value = data.doc_tracking_number || '';
-    document.getElementById('modalDocDispatchedDate').value = data.doc_dispatched_date || '<?= date('Y-m-d') ?>';
-    
+    const dispatchDateVal = data.doc_dispatched_date || '<?= date('Y-m-d') ?>';
+    const dispatchDateEl = document.getElementById('modalDocDispatchedDate');
+    dispatchDateEl.value = dispatchDateVal;
+    if (dispatchDateEl._flatpickr) {
+        dispatchDateEl._flatpickr.setDate(dispatchDateVal, false);
+    }
+
+    const mainImgInput = document.getElementById('modalDocImage');
+    const camImgInput = document.getElementById('modalDocCameraInput');
+    if (mainImgInput) {
+        mainImgInput.value = '';
+        mainImgInput.setAttribute('name', 'doc_image');
+    }
+    if (camImgInput) {
+        camImgInput.value = '';
+        camImgInput.removeAttribute('name');
+    }
+    document.getElementById('docImageHelp').textContent = 'Accepted formats: JPG, PNG. Max size: 4MB';
+
+    const existingWrap = document.getElementById('docExistingImageWrap');
+    const existingLink = document.getElementById('docExistingImageLink');
+    if (data.waybill_image) {
+        existingLink.href = '<?= base_url('uploads/waybills') ?>/' + encodeURIComponent(data.waybill_image);
+        existingWrap.style.display = 'block';
+    } else {
+        existingWrap.style.display = 'none';
+    }
+
     document.getElementById('updateDocDetailsForm').action = '<?= site_url('invoices/update-doc-details') ?>/' + data.id;
     modal.show();
 }

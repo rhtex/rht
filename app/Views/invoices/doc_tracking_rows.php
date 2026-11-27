@@ -35,7 +35,8 @@
                             'invoice_number' => $inv['invoice_number'],
                             'doc_courier_name' => $inv['doc_courier_name'],
                             'doc_tracking_number' => $inv['doc_tracking_number'],
-                            'doc_dispatched_date' => $inv['doc_dispatched_date']
+                            'doc_dispatched_date' => $inv['doc_dispatched_date'],
+                            'waybill_image' => $inv['waybill_image'] ?? ''
                         ])) ?>)">
                     <i class="fas fa-paper-plane"></i><span> Dispatch</span>
                 </button>

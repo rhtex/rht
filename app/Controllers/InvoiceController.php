@@ -1149,7 +1149,8 @@ class InvoiceController extends BaseController
         $validationRules = [
             'doc_courier_name' => 'required',
             'doc_tracking_number' => 'required',
-            'doc_dispatched_date' => 'required|valid_date'
+            'doc_dispatched_date' => 'required|valid_date',
+            'doc_image' => 'permit_empty|max_size[doc_image,4096]|is_image[doc_image]'
         ];
 
         if (!$this->validate($validationRules)) {
@@ -1162,6 +1163,13 @@ class InvoiceController extends BaseController
             'doc_dispatched_date' => $this->request->getPost('doc_dispatched_date'),
             'doc_status' => 'Dispatched'
         ];
+
+        $img = $this->request->getFile('doc_image');
+        if ($img && $img->isValid() && !$img->hasMoved()) {
+            $newName = $img->getRandomName();
+            $img->move(ROOTPATH . 'public/uploads/waybills', $newName);
+            $updateData['waybill_image'] = $newName;
+        }
 
         if ($this->invoiceModel->update($id, $updateData)) {
             // Log history

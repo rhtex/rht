@@ -383,6 +383,9 @@ class ZohoSyncOrchestrator
 
                 $service = $this->getModuleService($modKey);
                 $builder = $db->table($modMeta['table'])->select($modMeta['table'] . '.id')->orderBy($modMeta['table'] . '.id', 'ASC');
+                if ($modKey === 'customer_payments') {
+                    $builder->where(CustomerPaymentSyncService::splitChildWhereSql($modMeta['table']), null, false);
+                }
 
                 if ($onlyUnsynced) {
                     $builder->join('zoho_sync_mapping', "zoho_sync_mapping.module = '{$modKey}' AND zoho_sync_mapping.local_record_id = {$modMeta['table']}.id", 'left')
@@ -721,9 +724,15 @@ class ZohoSyncOrchestrator
         $stats = [];
 
         foreach (self::ORDERED_MODULES as $modKey => $meta) {
-            $localCount = $db->tableExists($meta['table'])
-                ? (int) $db->table($meta['table'])->countAllResults()
-                : 0;
+            if ($db->tableExists($meta['table'])) {
+                $countBuilder = $db->table($meta['table']);
+                if ($modKey === 'customer_payments') {
+                    $countBuilder->where(CustomerPaymentSyncService::splitChildWhereSql($meta['table']), null, false);
+                }
+                $localCount = (int) $countBuilder->countAllResults();
+            } else {
+                $localCount = 0;
+            }
 
             $syncedCount = (int) $db->table('zoho_sync_mapping')
                 ->where('module', $modKey)

@@ -414,12 +414,14 @@ class ZohoSyncController extends BaseController
             default                => 'id',
         };
 
-        $rows = $db->table($meta['table'])
+        $recBuilder = $db->table($meta['table'])
             ->select("id, {$labelCol} as display_label")
             ->orderBy('id', 'DESC')
-            ->limit(200)
-            ->get()
-            ->getResultArray();
+            ->limit(200);
+        if ($module === 'customer_payments') {
+            $recBuilder->where(\App\Services\Zoho\Modules\CustomerPaymentSyncService::splitChildWhereSql($meta['table']), null, false);
+        }
+        $rows = $recBuilder->get()->getResultArray();
 
         $ids = array_column($rows, 'id');
         $map = $this->mappingModel->getMapByLocalIds($module, $ids);

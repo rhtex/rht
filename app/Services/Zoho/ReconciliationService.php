@@ -67,9 +67,17 @@ class ReconciliationService
             ->select('COUNT(*) as cnt, COALESCE(SUM(amount),0) as total')
             ->get()->getRowArray();
 
-        $localCustPayRow = $db->table('invoice_payments')
-            ->select('COUNT(*) as cnt, COALESCE(SUM(amount),0) as total')
+        $localCustPayCntRow = $db->table('invoice_payments')
+            ->select('COUNT(*) as cnt')
+            ->where(\App\Services\Zoho\Modules\CustomerPaymentSyncService::splitChildWhereSql('invoice_payments'), null, false)
             ->get()->getRowArray();
+        $localCustPaySumRow = $db->table('invoice_payments')
+            ->select('COALESCE(SUM(amount),0) as total')
+            ->get()->getRowArray();
+        $localCustPayRow = [
+            'cnt'   => (int) ($localCustPayCntRow['cnt'] ?? 0),
+            'total' => (float) ($localCustPaySumRow['total'] ?? 0),
+        ];
 
         $localVendPayRow = $db->table('payments')
             ->select('COUNT(*) as cnt, COALESCE(SUM(amount),0) as total')

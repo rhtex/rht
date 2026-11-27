@@ -24,10 +24,44 @@ class CustomerPaymentSyncService extends AbstractModuleSyncService
         return 'customer_payments';
     }
 
+    public static function splitChildWhereSql(string $alias = 'invoice_payments'): string
+    {
+        return "NOT ({$alias}.invoice_id IS NOT NULL AND {$alias}.payment_number LIKE CONCAT('%-', {$alias}.invoice_id) AND EXISTS (SELECT 1 FROM invoice_payments sp_parent WHERE sp_parent.customer_id = {$alias}.customer_id AND sp_parent.payment_number = SUBSTRING({$alias}.payment_number, 1, CHAR_LENGTH({$alias}.payment_number) - CHAR_LENGTH(CONCAT('-', {$alias}.invoice_id)))))";
+    }
+
+    protected function getParentPaymentIfSplitChild(array $payment): ?array
+    {
+        $invId = (int) ($payment['invoice_id'] ?? 0);
+        $num   = trim((string) ($payment['payment_number'] ?? ''));
+        if ($invId <= 0 || $num === '') {
+            return null;
+        }
+        $suffix = '-' . $invId;
+        if (!str_ends_with($num, $suffix)) {
+            return null;
+        }
+        $parentNum = substr($num, 0, -strlen($suffix));
+        if ($parentNum === '') {
+            return null;
+        }
+        return $this->paymentModel
+            ->where('customer_id', (int) ($payment['customer_id'] ?? 0))
+            ->where('payment_number', $parentNum)
+            ->first() ?: null;
+    }
+
     public function pushToZoho(int $localId, string $operation = 'UPDATE'): array
     {
         $mapping = $this->mappingModel->findByLocal('customer_payments', $localId);
         $payment = $this->paymentModel->find($localId);
+
+        if ($payment && !$mapping && ($parent = $this->getParentPaymentIfSplitChild($payment))) {
+            return [
+                'success' => true,
+                'skipped' => true,
+                'message' => 'Split invoice allocation belongs to parent receipt #' . $parent['payment_number'] . '.',
+            ];
+        }
 
         if ($operation === 'DELETE' || !$payment) {
             if (!$mapping || empty($mapping['zoho_record_id'])) {

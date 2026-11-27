@@ -113,6 +113,9 @@ class SalesReturnController extends BaseController
         if (!$db->fieldExists('lr_number', 'sales_returns')) {
             $db->query("ALTER TABLE `sales_returns` ADD COLUMN `lr_number` VARCHAR(100) NULL AFTER `bales_count`");
         }
+        if (!$db->fieldExists('transport_amount', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `transport_amount` DECIMAL(15,2) NOT NULL DEFAULT 0.00 AFTER `lr_number`");
+        }
         if (!$db->fieldExists('transport_paid_by', 'sales_returns')) {
             $db->query("ALTER TABLE `sales_returns` ADD COLUMN `transport_paid_by` VARCHAR(20) NULL AFTER `lr_number`");
         }
@@ -262,6 +265,7 @@ class SalesReturnController extends BaseController
             'transport_name' => trim((string) $this->request->getPost('transport_name')) ?: null,
             'bales_count' => $balesPost !== '' ? (int) $balesPost : null,
             'lr_number' => trim((string) $this->request->getPost('lr_number')) ?: null,
+            'transport_amount' => (float) ($this->request->getPost('transport_amount') ?? 0),
             'transport_paid_by' => in_array($paidByPost, ['Customer', 'Company'], true) ? $paidByPost : null,
             'agent_id' => $agentId,
             'agent_commission_percent' => $agentPct,

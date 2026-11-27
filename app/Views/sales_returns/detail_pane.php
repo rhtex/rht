@@ -91,6 +91,9 @@
                         <?php if (isset($return['bales_count']) && $return['bales_count'] !== null && $return['bales_count'] !== ''): ?>
                             <tr><th class="text-muted">No. of Bales:</th><td><?= esc($return['bales_count']) ?></td></tr>
                         <?php endif; ?>
+                        <?php if (isset($return['transport_amount']) && (float) $return['transport_amount'] > 0): ?>
+                            <tr><th class="text-muted">Transport Amount:</th><td class="fw-semibold">₹<?= number_format((float) $return['transport_amount'], 2) ?></td></tr>
+                        <?php endif; ?>
                         <?php if (!empty($return['transport_paid_by'])): ?>
                             <tr><th class="text-muted">Transport Paid By:</th><td><span class="badge bg-light text-dark border"><?= esc($return['transport_paid_by']) ?></span></td></tr>
                         <?php endif; ?>

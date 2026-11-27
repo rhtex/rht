@@ -21,6 +21,7 @@ class SalesReturnModel extends Model
         'transport_name',
         'bales_count',
         'lr_number',
+        'transport_amount',
         'transport_paid_by',
         'agent_id',
         'agent_commission_percent',

@@ -171,6 +171,12 @@
                                     <td><?= esc($return['bales_count']) ?></td>
                                 </tr>
                             <?php endif; ?>
+                            <?php if (isset($return['transport_amount']) && (float) $return['transport_amount'] > 0): ?>
+                                <tr>
+                                    <th class="text-muted text-uppercase small">Transport Amount:</th>
+                                    <td class="fw-semibold">₹<?= number_format((float) $return['transport_amount'], 2) ?></td>
+                                </tr>
+                            <?php endif; ?>
                             <?php if (!empty($return['transport_paid_by'])): ?>
                                 <tr>
                                     <th class="text-muted text-uppercase small">Transport Paid By:</th>

@@ -406,13 +406,14 @@ class CustomerPaymentSyncService extends AbstractModuleSyncService
         }
 
         if ($zohoInvoiceId) {
-            $payload['invoices'] = [
-                [
-                    'invoice_id'      => $zohoInvoiceId,
-                    'amount_applied'  => $amount,
-                    'discount_amount' => $deductions,
-                ],
+            $invEntry = [
+                'invoice_id'     => $zohoInvoiceId,
+                'amount_applied' => $amount,
             ];
+            if ($deductions > 0) {
+                $invEntry['discount_amount'] = $deductions;
+            }
+            $payload['invoices'] = [$invEntry];
         }
 
         return $payload;
@@ -462,10 +463,21 @@ class CustomerPaymentSyncService extends AbstractModuleSyncService
 
     public function normalizeLocalPayment(array $p): array
     {
+        $totalAmount = (float) ($p['amount'] ?? 0);
+        $payNum = trim((string) ($p['payment_number'] ?? ''));
+        if ($payNum !== '' && !str_contains($payNum, '-')) {
+            $splits = $this->paymentModel
+                ->selectSum('amount')
+                ->where('customer_id', (int) ($p['customer_id'] ?? 0))
+                ->like('payment_number', $payNum . '-', 'after')
+                ->first();
+            $totalAmount += (float) ($splits['amount'] ?? 0);
+        }
+
         return [
             'payment_date'     => (string) ($p['payment_date'] ?? ''),
             'payment_mode'     => strtolower(trim((string) ($p['payment_mode'] ?? ''))),
-            'amount'           => round((float) ($p['amount'] ?? 0), 2),
+            'amount'           => round($totalAmount, 2),
             'reference_number' => trim((string) ($p['reference_number'] ?? '')),
         ];
     }

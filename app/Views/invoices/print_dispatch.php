@@ -217,13 +217,26 @@ $amountWords = function_exists('number_to_indian_currency_words')
     </style>
 </head>
 <body>
-    <div class="container py-2 no-print text-center">
-        <button type="button" class="btn btn-primary btn-sm px-3" onclick="window.print()">
-            <i class="fas fa-print me-1"></i> Print Goods Dispatch Details
-        </button>
-        <button type="button" class="btn btn-secondary btn-sm px-3 ms-2" onclick="window.close()">
-            Close
-        </button>
+    <div class="container py-2 no-print d-flex flex-wrap justify-content-center align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3 bg-white border rounded px-3 py-1 shadow-sm">
+            <span class="small fw-semibold text-muted">Enclosures:</span>
+            <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input enclosure-opt" type="checkbox" id="chkCopyInvoice" value="Copy of Invoice" checked>
+                <label class="form-check-label small fw-semibold" for="chkCopyInvoice">Copy of Invoice</label>
+            </div>
+            <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input enclosure-opt" type="checkbox" id="chkCopyEwaybill" value="Copy of E-Way Bill" <?= $ewayBillNo !== '' ? 'checked' : '' ?>>
+                <label class="form-check-label small fw-semibold" for="chkCopyEwaybill">Copy of E-Way Bill</label>
+            </div>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary btn-sm px-3" onclick="window.print()">
+                <i class="fas fa-print me-1"></i> Print Goods Dispatch Details
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm px-3 ms-1" onclick="window.close()">
+                Close
+            </button>
+        </div>
     </div>
 
     <div class="dispatch-sheet">
@@ -311,6 +324,10 @@ $amountWords = function_exists('number_to_indian_currency_words')
             </div>
         </div>
 
+        <div id="enclosuresRow" class="mt-2 small" style="font-size: 11px;">
+            <strong>Documents Enclosed:</strong> <span id="enclosuresList"></span>
+        </div>
+
         <div class="footer-row">
             <div class="ack-text">
                 The above goods have been dispatched against the mentioned invoice. Kindly acknowledge receipt of the goods.
@@ -322,5 +339,22 @@ $amountWords = function_exists('number_to_indian_currency_words')
             </div>
         </div>
     </div>
+
+    <script>
+        function updateEnclosuresDisplay() {
+            const selected = [];
+            document.querySelectorAll('.enclosure-opt:checked').forEach(cb => selected.push(cb.value));
+            const row = document.getElementById('enclosuresRow');
+            const list = document.getElementById('enclosuresList');
+            if (selected.length > 0) {
+                list.textContent = selected.join('  |  ');
+                row.style.display = 'block';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+        document.querySelectorAll('.enclosure-opt').forEach(cb => cb.addEventListener('change', updateEnclosuresDisplay));
+        updateEnclosuresDisplay();
+    </script>
 </body>
 </html>

@@ -27,9 +27,19 @@ class ZohoTaxMapperService
         '11' => 'SK', '12' => 'AR', '13' => 'NL', '14' => 'MN', '15' => 'MZ',
         '16' => 'TR', '17' => 'ML', '18' => 'AS', '19' => 'WB', '20' => 'JH',
         '21' => 'OD', '22' => 'CG', '23' => 'MP', '24' => 'GJ', '26' => 'DN',
-        '27' => 'MH', '29' => 'KA', '30' => 'GA', '31' => 'LD', '32' => 'KL',
-        '33' => 'TN', '34' => 'PY', '35' => 'AN', '36' => 'TS', '37' => 'AP',
-        '38' => 'LA',
+        '27' => 'MH', '28' => 'AP', '29' => 'KA', '30' => 'GA', '31' => 'LD',
+        '32' => 'KL', '33' => 'TN', '34' => 'PY', '35' => 'AN', '36' => 'TS',
+        '37' => 'AP', '38' => 'LA',
+    ];
+
+    /**
+     * Map non-Zoho / legacy 2-letter state codes to Zoho Books India GST codes.
+     */
+    protected array $zohoStateCodeAliases = [
+        'TG' => 'TS',
+        'UT' => 'UK',
+        'OR' => 'OD',
+        'CT' => 'CG',
     ];
 
     public function __construct(?ZohoApiClient $client = null)
@@ -108,8 +118,15 @@ class ZohoTaxMapperService
 
         if (!empty($stateId)) {
             foreach ($states as $st) {
-                if ((int) $st['id'] === (int) $stateId && !empty($st['state_code'])) {
-                    return strtoupper(trim($st['state_code']));
+                if ((int) $st['id'] === (int) $stateId) {
+                    $code = strtoupper(trim((string) ($st['state_code'] ?? '')));
+                    if ($code !== '') {
+                        return $this->zohoStateCodeAliases[$code] ?? $code;
+                    }
+                    $gstCode = trim((string) ($st['gst_state_code'] ?? ''));
+                    if ($gstCode !== '' && isset($this->gstNumberToStateCode[$gstCode])) {
+                        return $this->gstNumberToStateCode[$gstCode];
+                    }
                 }
             }
         }
@@ -126,7 +143,8 @@ class ZohoTaxMapperService
             $norm = strtolower(trim($stateName));
             foreach ($states as $st) {
                 if (strtolower(trim($st['name'])) === $norm || strtolower(trim((string) $st['state_code'])) === $norm) {
-                    return strtoupper(trim($st['state_code']));
+                    $code = strtoupper(trim((string) ($st['state_code'] ?? '')));
+                    return $this->zohoStateCodeAliases[$code] ?? $code;
                 }
             }
         }
@@ -140,8 +158,11 @@ class ZohoTaxMapperService
 
         if (!empty($stateCode)) {
             $code = strtoupper(trim($stateCode));
+            $reverseAliases = array_flip($this->zohoStateCodeAliases);
+            $altCode = $reverseAliases[$code] ?? ($this->zohoStateCodeAliases[$code] ?? null);
             foreach ($states as $st) {
-                if (strtoupper(trim((string) $st['state_code'])) === $code) {
+                $stCode = strtoupper(trim((string) ($st['state_code'] ?? '')));
+                if ($stCode === $code || ($altCode !== null && $stCode === $altCode)) {
                     return (int) $st['id'];
                 }
             }

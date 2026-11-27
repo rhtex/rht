@@ -310,17 +310,28 @@ class CreditNoteSyncService extends AbstractModuleSyncService
                 }
             }
 
+            $zohoStatus = strtolower((string) ($zohoCn['status'] ?? 'open'));
+            $localStatus = match ($zohoStatus) {
+                'void'   => 'Void',
+                'closed' => 'Closed',
+                default  => 'Open',
+            };
+
             $returnData = [
-                'customer_id'    => $localCustomerId,
-                'invoice_id'     => $localInvoiceId,
-                'return_number'  => trim((string) ($zohoCn['creditnote_number'] ?? ($localReturn['return_number'] ?? $this->returnModel->generateReturnNumber()))),
-                'return_date'    => $zohoCn['date'] ?? date('Y-m-d'),
-                'subtotal'       => (float) ($zohoCn['sub_total'] ?? 0),
-                'tax_amount'     => (float) ($zohoCn['tax_total'] ?? 0),
-                'total_amount'   => (float) ($zohoCn['total'] ?? 0),
-                'reason'         => $zohoCn['notes'] ?? ($localReturn['reason'] ?? 'Zoho Books Credit Note'),
-                'status'         => 'Open',
-                'is_inter_state' => $isInterState,
+                'customer_id'            => $localCustomerId,
+                'invoice_id'             => $localInvoiceId,
+                'customer_debit_note_no' => !empty($zohoCn['reference_number']) ? trim((string) $zohoCn['reference_number']) : ($localReturn['customer_debit_note_no'] ?? null),
+                'return_number'          => trim((string) ($zohoCn['creditnote_number'] ?? ($localReturn['return_number'] ?? $this->returnModel->generateReturnNumber()))),
+                'return_date'            => $zohoCn['date'] ?? date('Y-m-d'),
+                'subtotal'               => (float) ($zohoCn['sub_total'] ?? 0),
+                'discount_amount'        => (float) ($zohoCn['discount_total'] ?? $zohoCn['discount'] ?? 0),
+                'discount_type'          => 'Fixed',
+                'tax_amount'             => (float) ($zohoCn['tax_total'] ?? 0),
+                'adjustment'             => (float) ($zohoCn['adjustment'] ?? 0),
+                'total_amount'           => (float) ($zohoCn['total'] ?? 0),
+                'reason'                 => !empty($zohoCn['notes']) ? (string) $zohoCn['notes'] : ($localReturn['reason'] ?? 'Zoho Books Credit Note'),
+                'status'                 => $localStatus,
+                'is_inter_state'         => $isInterState,
             ];
 
             if ($localReturn) {
@@ -341,7 +352,7 @@ class CreditNoteSyncService extends AbstractModuleSyncService
 
                 $this->itemModel->insert([
                     'sales_return_id' => $localId,
-                    'product_id'      => $prodId ?: 1,
+                    'product_id'      => $prodId ?: null,
                     'description'     => $li['description'] ?? ($li['name'] ?? ''),
                     'quantity'        => $qty,
                     'rate'            => $rate,

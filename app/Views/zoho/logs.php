@@ -171,9 +171,12 @@
                         <tr><td colspan="10" class="text-center text-muted py-4">No audit log entries match your filter.</td></tr>
                     <?php else: ?>
                         <?php foreach ($logs as $log): ?>
-                            <tr>
+                            <tr class="zoho-log-row" style="cursor: pointer;"
+                                data-id="<?= (int) $log['id'] ?>"
+                                data-endpoint="<?= esc($log['endpoint'] ?? '') ?>"
+                                title="Click to inspect request &amp; response">
                                 <td class="ps-3">#<?= (int) $log['id'] ?></td>
-                                <td class="small text-muted"><?= esc($log['created_at']) ?></td>
+                                <td class="small text-muted text-nowrap"><?= esc($log['created_at']) ?></td>
                                 <td>
                                     <code><?= esc($log['module']) ?></code>
                                     <?php if (!empty($log['local_record_id'])): ?>
@@ -182,8 +185,8 @@
                                 </td>
                                 <td><span class="badge bg-light text-dark border"><?= esc($log['direction']) ?></span></td>
                                 <td class="small fw-semibold"><?= esc($log['operation']) ?></td>
-                                <td><code><?= esc($log['http_method']) ?> <?= (int) $log['response_code'] ?></code></td>
-                                <td class="small text-muted"><?= (int) ($log['duration_ms'] ?? 0) ?> ms</td>
+                                <td class="text-nowrap"><code><?= esc($log['http_method']) ?> <?= (int) $log['response_code'] ?></code></td>
+                                <td class="small text-muted text-nowrap"><?= (int) ($log['duration_ms'] ?? 0) ?> ms</td>
                                 <td>
                                     <?php if ($log['status'] === 'SUCCESS'): ?>
                                         <span class="badge bg-success-subtle text-success">SUCCESS</span>
@@ -197,9 +200,7 @@
                                 <td class="text-end pe-3">
                                     <button type="button" class="btn btn-xs btn-outline-secondary view-log-btn"
                                             data-id="<?= (int) $log['id'] ?>"
-                                            data-endpoint="<?= esc($log['endpoint'] ?? '') ?>"
-                                            data-req="<?= esc($log['request_payload'] ?? '') ?>"
-                                            data-res="<?= esc($log['response_payload'] ?? '') ?>">
+                                            data-endpoint="<?= esc($log['endpoint'] ?? '') ?>">
                                         <i class="fas fa-code"></i> Inspect
                                     </button>
                                 </td>
@@ -243,34 +244,57 @@
 <?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.view-log-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            const logId = btn.getAttribute('data-id');
-            const ep = btn.getAttribute('data-endpoint') || '';
-            let req = btn.getAttribute('data-req') || '(empty)';
-            let res = btn.getAttribute('data-res') || '(empty)';
+    function formatPayload(raw) {
+        if (raw === null || raw === undefined || String(raw).trim() === '') {
+            return '(empty)';
+        }
+        const str = String(raw);
+        try {
+            return JSON.stringify(JSON.parse(str), null, 2);
+        } catch (e) {
+            return str;
+        }
+    }
 
-            document.getElementById('modalLogEndpoint').textContent = ep;
-            document.getElementById('modalLogReq').textContent      = req;
-            document.getElementById('modalLogRes').textContent      = res;
-            const modal = new bootstrap.Modal(document.getElementById('logPayloadModal'));
-            modal.show();
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('a, input, select, textarea')) return;
+        const trigger = e.target.closest('.view-log-btn, tr.zoho-log-row');
+        if (!trigger) return;
 
-            // If response points to disk file storage, asynchronously fetch the full content
-            if (logId && (res.includes('"_storage":"file"') || req.includes('"_storage":"file"'))) {
-                document.getElementById('modalLogRes').textContent = 'Loading full payload from disk file...';
-                fetch('<?= site_url('settings/integrations/zoho/logs/payload') ?>/' + logId)
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data) {
-                            if (data.request) document.getElementById('modalLogReq').textContent = data.request;
-                            if (data.response) document.getElementById('modalLogRes').textContent = data.response;
-                        }
-                    })
-                    .catch(err => {
-                        document.getElementById('modalLogRes').textContent = res;
-                    });
+        const row = trigger.closest('tr.zoho-log-row') || trigger;
+        const logId = trigger.getAttribute('data-id') || row.getAttribute('data-id');
+        if (!logId) return;
+
+        const ep = trigger.getAttribute('data-endpoint') || row.getAttribute('data-endpoint') || '';
+        const epEl = document.getElementById('modalLogEndpoint');
+        const reqEl = document.getElementById('modalLogReq');
+        const resEl = document.getElementById('modalLogRes');
+        const modalEl = document.getElementById('logPayloadModal');
+
+        epEl.textContent = ep || '(loading...)';
+        reqEl.textContent = 'Loading request payload...';
+        resEl.textContent = 'Loading response payload...';
+
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+
+        fetch('<?= site_url('settings/integrations/zoho/logs/payload') ?>/' + encodeURIComponent(logId), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
+        .then(data => {
+            if (data.endpoint && !ep) {
+                epEl.textContent = data.endpoint;
             }
+            reqEl.textContent = formatPayload(data.request);
+            resEl.textContent = formatPayload(data.response);
+        })
+        .catch(() => {
+            reqEl.textContent = '(failed to load request payload)';
+            resEl.textContent = '(failed to load response payload)';
         });
     });
 });

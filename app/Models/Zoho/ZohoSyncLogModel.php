@@ -128,15 +128,26 @@ class ZohoSyncLogModel extends Model
         $res = $log['response_payload'] ?? '';
         $req = $log['request_payload'] ?? '';
 
-        // Check if response points to disk file
-        if ($res && str_contains($res, '"_storage":"file"')) {
-            $parsed = json_decode($res, true);
-            if (!empty($parsed['file'])) {
-                $filePath = WRITEPATH . 'logs' . DIRECTORY_SEPARATOR . 'zoho_payloads' . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $parsed['file']);
-                if (file_exists($filePath)) {
-                    $fileJson = json_decode(@file_get_contents($filePath), true);
-                    if ($fileJson) {
+        $fileMarker = null;
+        foreach ([$res, $req] as $candidate) {
+            if ($candidate && str_contains($candidate, '"_storage":"file"')) {
+                $parsed = json_decode($candidate, true);
+                if (!empty($parsed['file'])) {
+                    $fileMarker = $parsed['file'];
+                    break;
+                }
+            }
+        }
+
+        if ($fileMarker) {
+            $filePath = WRITEPATH . 'logs' . DIRECTORY_SEPARATOR . 'zoho_payloads' . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $fileMarker);
+            if (file_exists($filePath)) {
+                $fileJson = json_decode(@file_get_contents($filePath), true);
+                if ($fileJson) {
+                    if (array_key_exists('response', $fileJson) && $fileJson['response'] !== null) {
                         $res = is_string($fileJson['response']) ? $fileJson['response'] : json_encode($fileJson['response'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                    }
+                    if (array_key_exists('request', $fileJson) && $fileJson['request'] !== null) {
                         $req = is_string($fileJson['request']) ? $fileJson['request'] : json_encode($fileJson['request'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
                     }
                 }

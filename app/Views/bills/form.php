@@ -10,13 +10,13 @@
             <ol class="breadcrumb float-sm-end">
                 <li class="breadcrumb-item"><a href="<?= base_url('dashboard') ?>">Home</a></li>
                 <li class="breadcrumb-item"><a href="<?= base_url('bills') ?>">Purchase Bills</a></li>
-                <li class="breadcrumb-item active"><?= $bill ? 'Edit' : 'Create' ?></li>
+                <li class="breadcrumb-item active"><?= ($bill && empty($is_clone)) ? 'Edit' : (!empty($is_clone) ? 'Clone' : 'Create') ?></li>
             </ol>
         </div>
     </div>
 
     <form id="billForm"
-        action="<?= $bill ? site_url('bills/update/' . $bill['id']) : site_url('bills/store') ?>"
+        action="<?= ($bill && empty($is_clone)) ? site_url('bills/update/' . $bill['id']) : site_url('bills/store') ?>"
         method="post">
         <?= csrf_field() ?>
         <input type="hidden" name="is_inter_state" id="isInterStateField"

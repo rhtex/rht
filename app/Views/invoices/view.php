@@ -93,6 +93,11 @@
                 <a href="<?= site_url('invoices/print/' . $invoice['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white">
                     <i class="fas fa-print me-1"></i> Print
                 </a>
+                <?php if (can('invoice.create')): ?>
+                    <a href="<?= site_url('invoices/clone/' . $invoice['id']) ?>" class="btn btn-sm btn-outline-secondary" title="Clone Invoice">
+                        <i class="fas fa-copy me-1"></i> Clone
+                    </a>
+                <?php endif; ?>
                 <?php
                 $ewbAction = $ewbState['action'] ?? 'generate';
                 $ewbRecord = $ewbState['eway_bill'] ?? null;

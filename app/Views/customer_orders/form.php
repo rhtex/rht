@@ -36,7 +36,7 @@
                     <select name="customer_id" class="form-select select2" required>
                         <option value="">-- Select Customer --</option>
                         <?php foreach ($customers as $c): ?>
-                            <option value="<?= $c['id'] ?>" <?= ((int) old('customer_id', $order['customer_id'] ?? 0) === (int) $c['id']) ? 'selected' : '' ?>>
+                            <option value="<?= $c['id'] ?>" <?= ((int) old('customer_id', $order['customer_id'] ?? ($preselected_customer_id ?? 0)) === (int) $c['id']) ? 'selected' : '' ?>>
                                 <?= esc($c['name']) ?>
                             </option>
                         <?php endforeach; ?>

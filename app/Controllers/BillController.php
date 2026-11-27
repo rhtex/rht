@@ -161,8 +161,31 @@ class BillController extends BaseController
         $data['taxes'] = $this->taxModel->where('status', 'Active')->findAll();
         $data['title'] = 'Create Purchase Bill';
         $data['bill'] = null;
+        $data['is_clone'] = false;
 
         return view('bills/form', $data);
+    }
+
+    public function clone($id)
+    {
+        $src = $this->billModel->getBillById($id);
+        if (!$src) {
+            return redirect()->to('bills')->with('error', 'Bill not found.');
+        }
+
+        $src['bill_number']      = '';
+        $src['reference_number'] = '';
+        $src['bill_date']        = date('Y-m-d');
+        $src['due_date']         = date('Y-m-d', strtotime('+30 days'));
+
+        return view('bills/form', [
+            'vendors'  => $this->vendorModel->findAll(),
+            'products' => $this->productModel->getProductsWithCategory(),
+            'taxes'    => $this->taxModel->where('status', 'Active')->findAll(),
+            'title'    => 'Clone Purchase Bill',
+            'bill'     => $src,
+            'is_clone' => true,
+        ]);
     }
 
     public function store()

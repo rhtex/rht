@@ -120,6 +120,7 @@ class SalesOrderController extends BaseController
         $data['title'] = 'Create Sales Order';
         $data['order'] = null;
         $data['quotation'] = $quotation;
+        $data['preselected_customer_id'] = (int) ($this->request->getGet('customer_id') ?? 0);
 
         return view('sales_orders/form', $data);
     }

@@ -164,8 +164,42 @@ class InvoiceController extends BaseController
         $data['invoice_number'] = $this->invoiceModel->generateInvoiceNumber();
         $data['title'] = 'Create New Invoice';
         $data['invoice'] = null;
+        $data['preselected_customer_id'] = (int) ($this->request->getGet('customer_id') ?? 0);
+        $data['is_clone'] = false;
 
         return view('invoices/form', $data);
+    }
+
+    public function clone($id)
+    {
+        $src = $this->invoiceModel->getInvoiceById($id);
+        if (!$src) {
+            return redirect()->to('invoices')->with('error', 'Invoice not found.');
+        }
+
+        $src['invoice_number']  = $this->invoiceModel->generateInvoiceNumber();
+        $src['invoice_date']    = date('Y-m-d');
+        $src['due_date']        = date('Y-m-d', strtotime('+30 days'));
+        $src['waybill_number']  = '';
+        $src['waybill_date']    = '';
+        $src['ewaybill_number'] = '';
+        $src['so_number']       = '';
+        $src['so_date']         = '';
+
+        return view('invoices/form', [
+            'sales_order'             => null,
+            'quotation'               => null,
+            'customers'               => $this->customerModel->getActiveCustomersWithCity(),
+            'agents'                  => $this->agentModel->findAll(),
+            'transports'              => $this->transportModel->orderBy('transport_name', 'ASC')->findAll(),
+            'products'                => $this->productModel->getProductsWithCategory(),
+            'taxes'                   => $this->taxModel->where('status', 'Active')->findAll(),
+            'invoice_number'          => $src['invoice_number'],
+            'title'                   => 'Clone Invoice',
+            'invoice'                 => $src,
+            'preselected_customer_id' => 0,
+            'is_clone'                => true,
+        ]);
     }
 
     public function store()

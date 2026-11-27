@@ -40,6 +40,11 @@
             <a href="<?= site_url('bills/print/' . $bill['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white">
                 <i class="fas fa-print me-1"></i> Print
             </a>
+            <?php if (can('bill.create')): ?>
+                <a href="<?= site_url('bills/clone/' . $bill['id']) ?>" class="btn btn-sm btn-outline-secondary" title="Clone Purchase Bill">
+                    <i class="fas fa-copy me-1"></i> Clone
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 

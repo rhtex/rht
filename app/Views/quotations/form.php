@@ -134,8 +134,9 @@
                     <label class="form-label">Select Customer <span class="text-danger">*</span></label>
                     <select name="customer_id" id="customerSelect" class="form-select select2" required>
                         <option value="">-- Search Customer --</option>
+                        <?php $selectedQuotationCustId = (int) ($quotation['customer_id'] ?? ($preselected_customer_id ?? 0)); ?>
                         <?php foreach ($customers as $customer): ?>
-                            <option value="<?= $customer['id'] ?>" <?= ($quotation && $quotation['customer_id'] == $customer['id']) ? 'selected' : '' ?>>
+                            <option value="<?= $customer['id'] ?>" <?= ($selectedQuotationCustId === (int) $customer['id']) ? 'selected' : '' ?>>
                                 <?= esc($customer['name']) ?>
                             </option>
                         <?php endforeach; ?>

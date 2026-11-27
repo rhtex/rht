@@ -60,6 +60,7 @@ class CustomerOrderController extends BaseController
             'customers'       => (new CustomerModel())->where('status', 'active')->orderBy('name', 'ASC')->findAll(),
             'products'        => (new ProductModel())->where('status', 'active')->orderBy('product_name', 'ASC')->findAll(),
             'statuses'        => CustomerOrderModel::STATUSES,
+            'preselected_customer_id' => (int) ($this->request->getGet('customer_id') ?? 0),
         ]);
     }
 
@@ -127,6 +128,7 @@ class CustomerOrderController extends BaseController
             'customers'       => (new CustomerModel())->where('status', 'active')->orderBy('name', 'ASC')->findAll(),
             'products'        => (new ProductModel())->where('status', 'active')->orderBy('product_name', 'ASC')->findAll(),
             'statuses'        => CustomerOrderModel::STATUSES,
+            'preselected_customer_id' => (int) ($this->request->getGet('customer_id') ?? 0),
         ]);
     }
 

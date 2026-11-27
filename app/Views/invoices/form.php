@@ -10,17 +10,17 @@
             <ol class="breadcrumb float-sm-end">
                 <li class="breadcrumb-item"><a href="<?= base_url('dashboard') ?>">Home</a></li>
                 <li class="breadcrumb-item"><a href="<?= base_url('invoices') ?>">Invoices</a></li>
-                <li class="breadcrumb-item active"><?= $invoice ? 'Edit' : 'Create' ?></li>
+                <li class="breadcrumb-item active"><?= ($invoice && empty($is_clone)) ? 'Edit' : (!empty($is_clone) ? 'Clone' : 'Create') ?></li>
             </ol>
         </div>
     </div>
 
     <?php
-    $selectedCustId = $invoice['customer_id'] ?? ($sales_order['customer_id'] ?? ($quotation['customer_id'] ?? null));
+    $selectedCustId = $invoice['customer_id'] ?? ($sales_order['customer_id'] ?? ($quotation['customer_id'] ?? ($preselected_customer_id ?? null)));
     $activeInvoiceItems = !empty($invoice['items']) ? $invoice['items'] : (!empty($sales_order['items']) ? $sales_order['items'] : (!empty($quotation['items']) ? $quotation['items'] : []));
     ?>
     <form id="invoiceForm"
-        action="<?= $invoice ? site_url('invoices/update/' . $invoice['id']) : site_url('invoices/store') ?>"
+        action="<?= ($invoice && empty($is_clone)) ? site_url('invoices/update/' . $invoice['id']) : site_url('invoices/store') ?>"
         method="post">
         <?= csrf_field() ?>
         <input type="hidden" name="is_inter_state" id="isInterStateField"

@@ -12,18 +12,57 @@
         </p>
     </div>
     <div class="col-sm-6 text-end">
-        <div class="btn-group">
-            <a href="<?= site_url('customers/statement/'.$customer['id']) ?>" class="btn btn-info shadow-sm text-white">
-                <i class="fas fa-file-invoice me-1"></i> Statement
-            </a>
-            <?php if (can('customer.edit')): ?>
-            <a href="<?= site_url('customers/edit/'.$customer['id']) ?>" class="btn btn-warning shadow-sm">
-                <i class="fas fa-edit me-1"></i> Edit Profile
-            </a>
-            <?php endif; ?>
-            <a href="<?= site_url('customers') ?>" class="btn btn-secondary shadow-sm">
-                <i class="fas fa-list me-1"></i> Back to List
-            </a>
+        <?php
+        $firstUnpaidInvoice = null;
+        foreach (($invoices ?? []) as $custInv) {
+            if ((float) ($custInv['balance'] ?? 0) > 0 && ($custInv['status'] ?? '') !== 'Void') {
+                $firstUnpaidInvoice = $custInv;
+                break;
+            }
+        }
+        ?>
+        <div class="d-inline-flex flex-wrap gap-2 justify-content-end">
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle shadow-sm" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-plus-circle me-1"></i> New Transaction
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <?php if (can('invoice.create')): ?>
+                        <li><a class="dropdown-item" href="<?= site_url('invoices/create?customer_id=' . $customer['id']) ?>"><i class="fas fa-file-invoice-dollar text-primary me-2"></i>New Invoice</a></li>
+                    <?php endif; ?>
+                    <?php if (can('invoice.edit')): ?>
+                        <?php if ($firstUnpaidInvoice): ?>
+                            <li><a class="dropdown-item" href="<?= site_url('invoices/payment/' . $firstUnpaidInvoice['id']) ?>"><i class="fas fa-money-bill-wave text-success me-2"></i>Record Payment (<?= esc($firstUnpaidInvoice['invoice_number']) ?>)</a></li>
+                        <?php else: ?>
+                            <li><a class="dropdown-item" href="<?= site_url('invoices?customer_id=' . $customer['id']) ?>"><i class="fas fa-money-bill-wave text-success me-2"></i>Customer Invoices / Payments</a></li>
+                        <?php endif; ?>
+                        <li><a class="dropdown-item" href="<?= site_url('sales_returns/create?customer_id=' . $customer['id']) ?>"><i class="fas fa-undo-alt text-warning me-2"></i>New Sales Return</a></li>
+                    <?php endif; ?>
+                    <li><hr class="dropdown-divider"></li>
+                    <?php if (can('quotation.create')): ?>
+                        <li><a class="dropdown-item" href="<?= site_url('quotations/create?customer_id=' . $customer['id']) ?>"><i class="fas fa-file-alt text-info me-2"></i>New Quotation</a></li>
+                    <?php endif; ?>
+                    <?php if (can('sales_order.create')): ?>
+                        <li><a class="dropdown-item" href="<?= site_url('sales_orders/create?customer_id=' . $customer['id']) ?>"><i class="fas fa-shopping-cart text-secondary me-2"></i>New Sales Order</a></li>
+                    <?php endif; ?>
+                    <?php if (can('customer_order.create')): ?>
+                        <li><a class="dropdown-item" href="<?= site_url('customer_orders/create?customer_id=' . $customer['id']) ?>"><i class="fas fa-swatchbook text-dark me-2"></i>New Customer Order</a></li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+            <div class="btn-group">
+                <a href="<?= site_url('customers/statement/'.$customer['id']) ?>" class="btn btn-info shadow-sm text-white">
+                    <i class="fas fa-file-invoice me-1"></i> Statement
+                </a>
+                <?php if (can('customer.edit')): ?>
+                <a href="<?= site_url('customers/edit/'.$customer['id']) ?>" class="btn btn-warning shadow-sm">
+                    <i class="fas fa-edit me-1"></i> Edit Profile
+                </a>
+                <?php endif; ?>
+                <a href="<?= site_url('customers') ?>" class="btn btn-secondary shadow-sm">
+                    <i class="fas fa-list me-1"></i> Back to List
+                </a>
+            </div>
         </div>
     </div>
 </div>

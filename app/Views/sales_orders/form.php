@@ -16,7 +16,7 @@
     </div>
 
     <?php
-    $selectedCustId = $order['customer_id'] ?? ($quotation['customer_id'] ?? null);
+    $selectedCustId = $order['customer_id'] ?? ($quotation['customer_id'] ?? ($preselected_customer_id ?? null));
     $activeItems = !empty($order['items']) ? $order['items'] : (!empty($quotation['items']) ? $quotation['items'] : []);
     ?>
     <form id="orderForm"

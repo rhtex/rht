@@ -113,6 +113,7 @@ class QuotationController extends BaseController
         $data['quotation_number'] = $this->quotationModel->generateQuotationNumber();
         $data['title']            = 'Create Quotation / Estimate';
         $data['quotation']        = null;
+        $data['preselected_customer_id'] = (int) ($this->request->getGet('customer_id') ?? 0);
 
         return view('quotations/form', $data);
     }

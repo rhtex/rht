@@ -110,8 +110,21 @@ class BillSyncService extends AbstractModuleSyncService
                 'bill_number' => $bill['bill_number'],
                 'vendor_id'   => $zohoVendorId,
             ], ['module' => 'bills', 'operation' => 'LOOKUP_BY_NUMBER']);
-            if (!empty($lookup['data']['bills'][0]['bill_id'])) {
-                $zohoId = (string) $lookup['data']['bills'][0]['bill_id'];
+            if (!empty($lookup['data']['bills'])) {
+                foreach ($lookup['data']['bills'] as $candidate) {
+                    $candId   = (string) ($candidate['bill_id'] ?? '');
+                    $candDate = (string) ($candidate['date'] ?? '');
+                    // Only reuse an existing Zoho bill if its date matches and it isn't mapped to another local bill
+                    if ($candId === '' || $candDate !== (string) ($bill['bill_date'] ?? '')) {
+                        continue;
+                    }
+                    $existingMap = $this->mappingModel->findByZoho('bills', $candId);
+                    if ($existingMap && (int) $existingMap['local_record_id'] !== $localId) {
+                        continue;
+                    }
+                    $zohoId = $candId;
+                    break;
+                }
             }
         }
 

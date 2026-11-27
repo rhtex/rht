@@ -54,6 +54,11 @@
                         ])) ?>)">
                     <i class="fas fa-history"></i><span> History</span>
                 </button>
+                <a href="<?= site_url('invoices/print-dispatch/' . $inv['id']) ?>" target="_blank"
+                   class="btn btn-dark btn-sm d-inline-flex align-items-center gap-2 rounded"
+                   title="Print Goods Dispatch Details">
+                    <i class="fas fa-print"></i><span> Print</span>
+                </a>
             </div>
         </td>
     </tr>

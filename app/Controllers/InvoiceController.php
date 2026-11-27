@@ -1107,6 +1107,27 @@ class InvoiceController extends BaseController
         return view('invoices/doc_tracking', $data);
     }
 
+    public function printDispatch($id)
+    {
+        $invoice = $this->invoiceModel->getInvoiceById($id);
+        if (!$invoice) {
+            return redirect()->to('invoices/doc-tracking')->with('error', 'Invoice not found.');
+        }
+
+        $ewbModel  = new \App\Models\EwayBillModel();
+        $activeEwb = $ewbModel->getActiveByDocument('invoice', (int) $id);
+
+        $companyName = get_setting('company_print_name')
+            ?: (get_setting('org_name') ?: get_setting('app_name', 'RasiDev'));
+
+        return view('invoices/print_dispatch', [
+            'title'        => 'Goods Dispatch Details - ' . $invoice['invoice_number'],
+            'invoice'      => $invoice,
+            'ewayBill'     => $activeEwb,
+            'company_name' => $companyName,
+        ]);
+    }
+
     public function updateDocDetails($id)
     {
         $invoice = $this->invoiceModel->find($id);

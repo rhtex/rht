@@ -26,9 +26,7 @@ if (count($rates) > 0) {
     $rateDisplay = '₹0.00';
 }
 
-$ewayBillNo      = trim((string) ($invoice['ewaybill_number'] ?? ($ewayBill['ewaybill_number'] ?? '')));
-$ewayBillDateRaw = $ewayBill['ewaybill_date'] ?? null;
-$ewayBillDate    = !empty($ewayBillDateRaw) ? date('d/m/Y', strtotime((string) $ewayBillDateRaw)) : '—';
+$ewayBillNo = trim((string) ($invoice['ewaybill_number'] ?? ($ewayBill['ewaybill_number'] ?? '')));
 
 $dispatchDateRaw = !empty($invoice['doc_dispatched_date'])
     ? $invoice['doc_dispatched_date']
@@ -70,6 +68,9 @@ $amountWords = function_exists('number_to_indian_currency_words')
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= esc($title ?? ('Goods Dispatch Details - ' . $invoice['invoice_number'])) ?></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
@@ -80,9 +81,13 @@ $amountWords = function_exists('number_to_indian_currency_words')
         body {
             background: #f3f4f6;
             color: #111827;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-variant-numeric: tabular-nums;
             font-size: 11.5px;
-            line-height: 1.35;
+            line-height: 1.38;
+        }
+        .company-name {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
         }
         .dispatch-sheet {
             width: 194mm;
@@ -260,7 +265,6 @@ $amountWords = function_exists('number_to_indian_currency_words')
                             <?php endif; ?>
                         <?php endif; ?>
                         <tr><th>E-Way Bill No.:</th><td><?= $ewayBillNo !== '' ? esc($ewayBillNo) : '—' ?></td></tr>
-                        <tr><th>E-Way Bill Date:</th><td><?= esc($ewayBillDate) ?></td></tr>
                     </table>
 
                     <div class="section-heading">Dispatch Details</div>

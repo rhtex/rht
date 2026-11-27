@@ -158,7 +158,6 @@
         </a>
     </div>
 </div>
-</div>
 
 <!-- Module-by-Module Synchronization Status Matrix -->
 <div class="card card-outline card-secondary shadow-sm mb-3">
@@ -274,15 +273,15 @@
 </div>
 
 <!-- Recent Synchronization Runs & Audit Logs -->
-<div class="row g-4">
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm rounded-4 h-100 card-info">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card card-outline card-info shadow-sm">
+            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
                 <h6 class="card-title mb-0 fw-bold"><i class="fas fa-tasks text-info me-2"></i>Recent Synchronization Runs</h6>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-sm align-middle mb-0">
+                    <table class="table table-sm table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
                                 <th class="ps-3">Batch / Trigger</th>
@@ -291,7 +290,7 @@
                                 <th class="text-center">Updated</th>
                                 <th class="text-center">Failed</th>
                                 <th>Status</th>
-                                <th class="pe-3">Started</th>
+                                <th class="pe-3 text-end">Started</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -301,8 +300,8 @@
                                 <?php foreach ($recentHistory as $h): ?>
                                     <tr>
                                         <td class="ps-3">
-                                            <div class="fw-semibold small"><?= esc($h['trigger_type']) ?></div>
-                                            <code class="small text-muted"><?= esc($h['batch_id']) ?></code>
+                                            <span class="fw-semibold small me-2"><?= esc($h['trigger_type']) ?></span>
+                                            <code class="small text-muted text-break"><?= esc($h['batch_id']) ?></code>
                                         </td>
                                         <td><span class="badge bg-light text-dark border"><?= esc($h['module_filter'] ?: 'ALL') ?></span></td>
                                         <td class="text-center text-success fw-bold"><?= (int) $h['created_count'] ?></td>
@@ -320,7 +319,7 @@
                                             ?>
                                             <span class="badge <?= $cls ?>"><?= esc($st) ?></span>
                                         </td>
-                                        <td class="pe-3 small text-muted"><?= date('d M H:i', strtotime($h['started_at'])) ?></td>
+                                        <td class="pe-3 small text-muted text-end text-nowrap"><?= date('d M H:i', strtotime($h['started_at'])) ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -331,15 +330,15 @@
         </div>
     </div>
 
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm rounded-4 h-100 card-success">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+    <div class="col-12">
+        <div class="card card-outline card-success shadow-sm">
+            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
                 <h6 class="card-title mb-0 fw-bold"><i class="fas fa-satellite-dish text-primary me-2"></i>Recent API Calls</h6>
                 <a href="<?= site_url('settings/integrations/zoho/logs') ?>" class="btn btn-xs btn-outline-primary fw-semibold">View All Logs</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-sm align-middle mb-0">
+                    <table class="table table-sm table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
                                 <th class="ps-3">Time</th>
@@ -347,7 +346,7 @@
                                 <th>Direction</th>
                                 <th>Operation</th>
                                 <th>HTTP</th>
-                                <th class="pe-3">Status</th>
+                                <th class="pe-3 text-end">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -356,12 +355,12 @@
                             <?php else: ?>
                                 <?php foreach ($recentLogs as $log): ?>
                                     <tr>
-                                        <td class="ps-3 small text-muted"><?= date('d M H:i:s', strtotime($log['created_at'])) ?></td>
+                                        <td class="ps-3 small text-muted text-nowrap"><?= date('d M H:i:s', strtotime($log['created_at'])) ?></td>
                                         <td><code><?= esc($log['module']) ?></code></td>
                                         <td><span class="badge bg-light text-dark border"><?= esc($log['direction']) ?></span></td>
-                                        <td class="small"><?= esc($log['operation']) ?></td>
-                                        <td><code><?= esc($log['http_method']) ?> <?= (int) $log['response_code'] ?></code></td>
-                                        <td class="pe-3">
+                                        <td class="small text-break"><?= esc($log['operation']) ?></td>
+                                        <td class="text-nowrap"><code><?= esc($log['http_method']) ?> <?= (int) $log['response_code'] ?></code></td>
+                                        <td class="pe-3 text-end">
                                             <?php if ($log['status'] === 'SUCCESS'): ?>
                                                 <span class="badge bg-success-subtle text-success">SUCCESS</span>
                                             <?php else: ?>

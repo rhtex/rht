@@ -57,8 +57,18 @@ class ZohoSyncOrchestrator
         $this->conflictModel = new ZohoSyncConflictModel();
     }
 
+    protected function normalizeModule(string $module): string
+    {
+        return match ($module) {
+            'sales_returns' => 'credit_notes',
+            default         => $module,
+        };
+    }
+
     public function getModuleService(string $module): AbstractModuleSyncService
     {
+        $module = $this->normalizeModule($module);
+
         return match ($module) {
             'customers'         => new CustomerSyncService($this->client),
             'vendors'           => new VendorSyncService($this->client),
@@ -83,6 +93,7 @@ class ZohoSyncOrchestrator
      */
     public function handleLocalChange(string $module, int $localId, string $operation = 'UPDATE'): array
     {
+        $module = $this->normalizeModule($module);
         // Guard against infinite synchronization loops
         if (ZohoSyncContext::isZohoOrSystem()) {
             return ['success' => true, 'skipped' => true, 'reason' => 'Change originated from Zoho/System'];
@@ -508,6 +519,7 @@ class ZohoSyncOrchestrator
      */
     public function syncSelectedRecords(string $module, array $localIds, ?int $userId = null): array
     {
+        $module = $this->normalizeModule($module);
         $run = $this->historyModel->startRun('RECORD_SYNC', $module, $userId);
         ZohoSyncContext::setBatchId($run['batch_id']);
 
@@ -556,6 +568,7 @@ class ZohoSyncOrchestrator
      */
     public function pullSingleRecordByNumber(string $module, string $numberOrId): array
     {
+        $module  = $this->normalizeModule($module);
         $service = $this->getModuleService($module);
         return $service->pullByNumberFromZoho($numberOrId);
     }

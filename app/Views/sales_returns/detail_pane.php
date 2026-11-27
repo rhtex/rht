@@ -7,7 +7,7 @@
             <span class="badge bg-<?= $return['status'] == 'Open' ? 'warning' : ($return['status'] == 'Void' ? 'danger' : 'success') ?>">
                 <?= esc($return['status']) ?>
             </span>
-            <?= function_exists('zoho_sync_badge') ? zoho_sync_badge('sales_returns', (int) $return['id']) : '' ?>
+            <?= function_exists('zoho_sync_badge') ? zoho_sync_badge('credit_notes', (int) $return['id']) : '' ?>
         </div>
         <div class="d-flex gap-2 align-items-center flex-wrap">
             <a href="<?= site_url('sales_returns/print/' . $return['id']) ?>" target="_blank" class="btn btn-sm btn-info text-white" title="Print Credit Note">

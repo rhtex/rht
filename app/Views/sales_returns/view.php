@@ -48,7 +48,7 @@
                     <span class="badge bg-<?= $return['status'] == 'Open' ? 'warning' : ($return['status'] == 'Void' ? 'danger' : 'success') ?> fs-6">
                         <?= esc($return['status']) ?>
                     </span>
-                    <?= function_exists('zoho_sync_badge') ? zoho_sync_badge('sales_returns', (int) $return['id']) : '' ?>
+                    <?= function_exists('zoho_sync_badge') ? zoho_sync_badge('credit_notes', (int) $return['id']) : '' ?>
                 </div>
             </div>
             <div class="card-body">

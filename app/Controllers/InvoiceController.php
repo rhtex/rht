@@ -1119,12 +1119,23 @@ class InvoiceController extends BaseController
 
         $companyName = get_setting('company_print_name')
             ?: (get_setting('org_name') ?: get_setting('app_name', 'RasiDev'));
+        $companyGstin = get_setting('company_print_gstin') ?: get_setting('company_gstin', '');
+        $companyPhone = get_setting('company_print_phone') ?: (get_setting('company_phone') ?: get_setting('company_mobile', ''));
+        $companyAddress = get_setting('company_print_address') ?: trim(implode(', ', array_filter([
+            get_setting('company_address_1', ''),
+            get_setting('company_address_2', ''),
+            get_setting('company_city', ''),
+            get_setting('company_pincode', ''),
+        ])));
 
         return view('invoices/print_dispatch', [
-            'title'        => 'Goods Dispatch Details - ' . $invoice['invoice_number'],
-            'invoice'      => $invoice,
-            'ewayBill'     => $activeEwb,
-            'company_name' => $companyName,
+            'title'           => 'Goods Dispatch Details - ' . $invoice['invoice_number'],
+            'invoice'         => $invoice,
+            'ewayBill'        => $activeEwb,
+            'company_name'    => $companyName,
+            'company_gstin'   => $companyGstin,
+            'company_phone'   => $companyPhone,
+            'company_address' => $companyAddress,
         ]);
     }
 

@@ -887,6 +887,32 @@ class InvoiceController extends BaseController
         return view('invoices/tracking', $data);
     }
 
+    /**
+     * Pull e-Way Bill details from Zoho Books for an invoice
+     */
+    public function pullEwaybill($id)
+    {
+        try {
+            $syncService = new \App\Services\Zoho\Modules\InvoiceSyncService();
+            $res = $syncService->pullEwayBillForInvoice((int) $id);
+
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON($res);
+            }
+
+            if (!empty($res['success'])) {
+                return redirect()->back()->with('success', $res['message'] ?? 'e-Way Bill pulled from Zoho Books.');
+            }
+            return redirect()->back()->with('error', $res['message'] ?? 'Failed to pull e-Way Bill from Zoho Books.');
+        } catch (\Throwable $e) {
+            $msg = 'Zoho Pull Error: ' . $e->getMessage();
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => $msg]);
+            }
+            return redirect()->back()->with('error', $msg);
+        }
+    }
+
     public function updateWaybill($id)
     {
         $this->ensureBookedDeliveryStatusEnum();

@@ -120,6 +120,14 @@
                         <i class="fas fa-truck me-1"></i> Generate e-Way Bill
                     </a>
                 <?php endif; ?>
+                <?php if (can('invoice.edit')): ?>
+                    <form method="post" action="<?= site_url('invoices/pull-ewaybill/' . $invoice['id']) ?>" class="d-inline">
+                        <?= csrf_field() ?>
+                        <button type="submit" class="btn btn-sm btn-light border fw-semibold text-primary" title="Pull e-Way Bill from Zoho Books">
+                            <i class="fas fa-cloud-download-alt me-1"></i> Pull e-Way Bill from Zoho
+                        </button>
+                    </form>
+                <?php endif; ?>
             </div>
         </div>
         <div class="card-body">

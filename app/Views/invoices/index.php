@@ -661,6 +661,51 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Pull e-Way Bill from Zoho inside Split View Detail Pane
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-pull-zoho-ewb');
+        if (!btn) return;
+
+        const url = btn.dataset.url;
+        const invoiceId = btn.dataset.invoiceId;
+        const csrfName = btn.dataset.csrfName;
+        const csrfHash = btn.dataset.csrfHash;
+        if (!url) return;
+
+        const origHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Pulling...';
+
+        const body = new URLSearchParams();
+        if (csrfName && csrfHash) {
+            body.append(csrfName, csrfHash);
+        }
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: body
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                loadInvoiceDetail(invoiceId);
+            } else {
+                alert(data.message || 'Failed to pull e-Way Bill from Zoho Books.');
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+        })
+        .catch(() => {
+            alert('Network error while pulling e-Way Bill from Zoho Books.');
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+        });
+    });
 });
 </script>
 <?= $this->endSection() ?>

@@ -67,6 +67,17 @@
                     <i class="fas fa-truck me-1"></i> Generate e-Way Bill
                 </a>
             <?php endif; ?>
+            <?php if (can('invoice.edit')): ?>
+                <button type="button"
+                        class="btn btn-sm btn-outline-info text-dark fw-semibold btn-pull-zoho-ewb"
+                        data-invoice-id="<?= (int) $invoice['id'] ?>"
+                        data-url="<?= site_url('invoices/pull-ewaybill/' . $invoice['id']) ?>"
+                        data-csrf-name="<?= csrf_token() ?>"
+                        data-csrf-hash="<?= csrf_hash() ?>"
+                        title="Pull e-Way Bill from Zoho Books">
+                    <i class="fas fa-cloud-download-alt me-1"></i> Pull e-Way Bill from Zoho
+                </button>
+            <?php endif; ?>
         </div>
     </div>
 

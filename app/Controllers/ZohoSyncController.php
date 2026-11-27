@@ -436,6 +436,96 @@ class ZohoSyncController extends BaseController
     }
 
     /**
+     * List Unsynced / Unmapped local ERP records across modules (or filtered by one module)
+     */
+    public function unsynced()
+    {
+        $moduleFilter = trim((string) ($this->request->getGet('module') ?? ''));
+        $modulesList  = ZohoSyncOrchestrator::ORDERED_MODULES;
+        if ($moduleFilter !== '' && !isset($modulesList[$moduleFilter])) {
+            $moduleFilter = '';
+        }
+
+        $moduleStats = $this->orchestrator->getModuleStatistics();
+        $db = \Config\Database::connect();
+
+        $fieldMap = [
+            'customers'         => ['label' => 'name',                  'date' => 'created_at',        'amount' => null,           'status' => 'status', 'url' => 'customers/view/'],
+            'vendors'           => ['label' => 'name',                  'date' => 'created_at',        'amount' => null,           'status' => 'status', 'url' => 'vendors/view/'],
+            'items'             => ['label' => 'product_name',          'date' => 'created_at',        'amount' => 'selling_price','status' => 'status', 'url' => 'products/view/'],
+            'quotations'        => ['label' => 'quotation_number',      'date' => 'quotation_date',    'amount' => 'total_amount', 'status' => 'status', 'url' => 'quotations/view/'],
+            'sales_orders'      => ['label' => 'sales_order_number',    'date' => 'order_date',        'amount' => 'total_amount', 'status' => 'status', 'url' => 'sales_orders/view/'],
+            'invoices'          => ['label' => 'invoice_number',        'date' => 'invoice_date',      'amount' => 'total_amount', 'status' => 'status', 'url' => 'invoices/view/'],
+            'credit_notes'      => ['label' => 'return_number',         'date' => 'return_date',       'amount' => 'total_amount', 'status' => 'status', 'url' => 'sales_returns/view/'],
+            'customer_payments' => ['label' => 'payment_number',        'date' => 'payment_date',      'amount' => 'amount',       'status' => null,     'url' => 'invoice_payments/view/'],
+            'purchase_orders'   => ['label' => 'purchase_order_number', 'date' => 'order_date',        'amount' => 'total_amount', 'status' => 'status', 'url' => null],
+            'bills'             => ['label' => 'bill_number',           'date' => 'bill_date',         'amount' => 'total_amount', 'status' => 'status', 'url' => 'bills/view/'],
+            'vendor_credits'    => ['label' => 'reference_no',          'date' => 'credit_note_date',  'amount' => 'amount',       'status' => 'status', 'url' => 'vendor_credits/view/'],
+            'vendor_payments'   => ['label' => 'payment_number',        'date' => 'payment_date',      'amount' => 'amount',       'status' => null,     'url' => 'payments/view/'],
+            'expenses'          => ['label' => 'description',           'date' => 'expense_date',      'amount' => 'amount',       'status' => null,     'url' => 'expenses/edit/'],
+        ];
+
+        $targetModules = $moduleFilter !== '' ? [$moduleFilter => $modulesList[$moduleFilter]] : $modulesList;
+        $records       = [];
+        $totalUnsynced = 0;
+        $perModLimit   = $moduleFilter !== '' ? 500 : 100;
+
+        foreach ($moduleStats as $ms) {
+            $totalUnsynced += (int) ($ms['unsynced_count'] ?? 0);
+        }
+
+        foreach ($targetModules as $modKey => $meta) {
+            $table = $meta['table'];
+            if (!$db->tableExists($table) || empty($fieldMap[$modKey])) {
+                continue;
+            }
+            $cfg = $fieldMap[$modKey];
+
+            $select = [
+                "{$table}.id",
+                "{$table}.{$cfg['label']} as doc_label",
+                "{$table}.{$cfg['date']} as doc_date",
+                $cfg['amount'] ? "{$table}.{$cfg['amount']} as doc_amount" : "NULL as doc_amount",
+                $cfg['status'] ? "{$table}.{$cfg['status']} as local_status" : "NULL as local_status",
+                "COALESCE(m.sync_status, 'NOT_SYNCED') as sync_status",
+                "m.zoho_record_id",
+                "m.last_error",
+            ];
+
+            $builder = $db->table($table)
+                ->select(implode(', ', $select), false)
+                ->join('zoho_sync_mapping m', "m.module = '{$modKey}' AND m.local_record_id = {$table}.id", 'left')
+                ->groupStart()
+                    ->where('m.id IS NULL')
+                    ->orWhere('m.sync_status !=', 'SYNCED')
+                    ->orWhere('m.zoho_record_id IS NULL')
+                    ->orWhere('m.zoho_record_id', '')
+                ->groupEnd();
+
+            if ($modKey === 'customer_payments') {
+                $builder->where(\App\Services\Zoho\Modules\CustomerPaymentSyncService::splitChildWhereSql($table), null, false);
+            }
+
+            $rows = $builder->orderBy("{$table}.id", 'DESC')->limit($perModLimit)->get()->getResultArray();
+            foreach ($rows as $row) {
+                $row['module']       = $modKey;
+                $row['module_label'] = $meta['label'];
+                $row['view_url']     = $cfg['url'] ? site_url($cfg['url'] . $row['id']) : null;
+                $records[] = $row;
+            }
+        }
+
+        return view('zoho/unsynced', [
+            'title'         => 'Unsynced ERP Records',
+            'moduleFilter'  => $moduleFilter,
+            'modulesList'   => $modulesList,
+            'moduleStats'   => $moduleStats,
+            'totalUnsynced' => $totalUnsynced,
+            'records'       => $records,
+        ]);
+    }
+
+    /**
      * Conflict Management Screen
      */
     public function conflicts()

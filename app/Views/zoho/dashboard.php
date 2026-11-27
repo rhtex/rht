@@ -125,12 +125,21 @@
         </div>
     </div>
     <div class="col-md-3 col-sm-6">
-        <div class="bt-stat bt-g-blue" style="cursor:default;">
-            <i class="fas fa-hourglass-half bt-stat-icon"></i>
-            <div class="bt-stat-num"><?= number_format($totalUnsynced) ?></div>
-            <div class="bt-stat-label">Unsynced (Queue: <?= number_format($pendingQueue) ?>)</div>
-            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
-        </div>
+        <?php if ($totalUnsynced > 0): ?>
+            <a href="<?= site_url('settings/integrations/zoho/unsynced') ?>" class="bt-stat bt-g-blue text-decoration-none" title="Click to view unsynced records">
+                <i class="fas fa-hourglass-half bt-stat-icon"></i>
+                <div class="bt-stat-num"><?= number_format($totalUnsynced) ?></div>
+                <div class="bt-stat-label">Unsynced (Queue: <?= number_format($pendingQueue) ?>)</div>
+                <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
+            </a>
+        <?php else: ?>
+            <div class="bt-stat bt-g-blue" style="cursor:default;">
+                <i class="fas fa-hourglass-half bt-stat-icon"></i>
+                <div class="bt-stat-num"><?= number_format($totalUnsynced) ?></div>
+                <div class="bt-stat-label">Unsynced (Queue: <?= number_format($pendingQueue) ?>)</div>
+                <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
+            </div>
+        <?php endif; ?>
     </div>
     <div class="col-md-3 col-sm-6">
         <a href="<?= site_url('settings/integrations/zoho/conflicts') ?>" class="bt-stat <?= $totalConflicts > 0 ? 'bt-g-amber' : 'bt-g-purple' ?> text-decoration-none">
@@ -194,7 +203,11 @@
                         </td>
                         <td class="text-center">
                             <?php if ($ms['unsynced_count'] > 0): ?>
-                                <span class="badge bg-secondary-subtle text-secondary px-2 py-1"><?= number_format($ms['unsynced_count']) ?></span>
+                                <a href="<?= site_url('settings/integrations/zoho/unsynced?module=' . urlencode($modKey)) ?>"
+                                   class="badge bg-secondary-subtle text-dark border border-secondary-subtle text-decoration-none px-2 py-1"
+                                   title="View unsynced <?= esc($ms['label']) ?> records">
+                                    <?= number_format($ms['unsynced_count']) ?> <i class="fas fa-external-link-alt ms-1" style="font-size: 0.65rem;"></i>
+                                </a>
                             <?php else: ?>
                                 <span class="text-muted">0</span>
                             <?php endif; ?>

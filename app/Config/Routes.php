@@ -808,6 +808,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
         $routes->get('module-records/(:segment)', 'ZohoSyncController::fetchModuleRecords/$1');
 
         // Conflicts, Reconciliation & Logs
+        $routes->get('unsynced', 'ZohoSyncController::unsynced');
         $routes->get('conflicts', 'ZohoSyncController::conflicts');
         $routes->post('conflicts/resolve/(:num)', 'ZohoSyncController::resolveConflict/$1', ['filter' => 'permission:setting.edit']);
         $routes->get('reconciliation', 'ZohoSyncController::reconciliation');

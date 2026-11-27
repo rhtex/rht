@@ -78,7 +78,11 @@
                             <td class="text-center fw-semibold text-primary"><?= number_format($r['zoho_count']) ?></td>
                             <td class="text-center">
                                 <?php if ($r['unmapped_count'] > 0): ?>
-                                    <span class="badge bg-warning-subtle text-warning border px-2 py-1"><?= number_format($r['unmapped_count']) ?></span>
+                                    <a href="<?= site_url('settings/integrations/zoho/unsynced?module=' . urlencode($modKey)) ?>"
+                                       class="badge bg-warning-subtle text-warning border border-warning-subtle text-decoration-none px-2 py-1"
+                                       title="View unmapped / unsynced <?= esc($r['label']) ?> records">
+                                        <?= number_format($r['unmapped_count']) ?> <i class="fas fa-external-link-alt ms-1" style="font-size: 0.65rem;"></i>
+                                    </a>
                                 <?php else: ?>
                                     <span class="text-muted">0</span>
                                 <?php endif; ?>

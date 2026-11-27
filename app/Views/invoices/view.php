@@ -174,10 +174,11 @@
                             <td>
                                 <?php
                                 $delStatusColors = [
-                                    'Pending' => 'secondary',
+                                    'Pending'    => 'secondary',
+                                    'Booked'     => 'info',
                                     'In Transit' => 'primary',
-                                    'Delivered' => 'success',
-                                    'Cancelled' => 'danger'
+                                    'Delivered'  => 'success',
+                                    'Cancelled'  => 'danger'
                                 ];
                                 $delColor = $delStatusColors[$invoice['delivery_status']] ?? 'secondary';
                                 ?>
@@ -188,11 +189,57 @@
                             <tr>
                                 <th>Waybill Image:</th>
                                 <td>
-                                    <a href="<?= base_url('uploads/waybills/' . $invoice['waybill_image']) ?>" target="_blank">
-                                        <img src="<?= base_url('uploads/waybills/' . $invoice['waybill_image']) ?>" alt="Waybill" style="max-width: 150px; cursor: pointer;" class="img-thumbnail">
+                                    <a href="<?= base_url('uploads/waybills/' . rawurlencode($invoice['waybill_image'])) ?>" target="_blank">
+                                        <img src="<?= base_url('uploads/waybills/' . rawurlencode($invoice['waybill_image'])) ?>" alt="Waybill" style="max-width: 150px; cursor: pointer;" class="img-thumbnail">
                                     </a>
                                 </td>
                             </tr>
+                        <?php endif; ?>
+                        <?php
+                        $hasDocDetails = !empty($invoice['doc_courier_name']) || !empty($invoice['doc_tracking_number'])
+                            || !empty($invoice['doc_dispatched_date']) || !empty($invoice['doc_image'])
+                            || (!empty($invoice['doc_status']) && $invoice['doc_status'] !== 'Pending');
+                        ?>
+                        <?php if ($hasDocDetails): ?>
+                            <?php
+                            $docStatusColors = [
+                                'Pending'    => 'secondary',
+                                'Dispatched' => 'primary',
+                                'Delivered'  => 'success',
+                                'Returned'   => 'danger',
+                            ];
+                            $docStatus = $invoice['doc_status'] ?? 'Pending';
+                            $docColor  = $docStatusColors[$docStatus] ?? 'secondary';
+                            ?>
+                            <tr><th colspan="2" class="pt-3 text-primary border-bottom">Invoice Doc Dispatch Details</th></tr>
+                            <?php if (!empty($invoice['doc_courier_name'])): ?>
+                                <tr><th>Doc Courier:</th><td><?= esc($invoice['doc_courier_name']) ?></td></tr>
+                            <?php endif; ?>
+                            <?php if (!empty($invoice['doc_tracking_number'])): ?>
+                                <tr><th>Doc Tracking #:</th><td class="fw-semibold"><?= esc($invoice['doc_tracking_number']) ?></td></tr>
+                            <?php endif; ?>
+                            <?php if (!empty($invoice['doc_dispatched_date'])): ?>
+                                <tr><th>Doc Dispatched:</th><td><?= date('d/m/Y', strtotime($invoice['doc_dispatched_date'])) ?></td></tr>
+                            <?php endif; ?>
+                            <tr>
+                                <th>Doc Status:</th>
+                                <td>
+                                    <span class="badge bg-<?= $docColor ?>"><?= esc($docStatus) ?></span>
+                                    <?php if (!empty($invoice['doc_received_date'])): ?>
+                                        <small class="text-muted ms-1">(Rec'd: <?= date('d/m/Y', strtotime($invoice['doc_received_date'])) ?>)</small>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php if (!empty($invoice['doc_image'])): ?>
+                                <tr>
+                                    <th>Doc LR Image:</th>
+                                    <td>
+                                        <a href="<?= base_url('uploads/doc_tracking/' . rawurlencode($invoice['doc_image'])) ?>" target="_blank">
+                                            <img src="<?= base_url('uploads/doc_tracking/' . rawurlencode($invoice['doc_image'])) ?>" alt="Doc LR Image" style="max-width: 150px; cursor: pointer;" class="img-thumbnail">
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </table>
                 </div>

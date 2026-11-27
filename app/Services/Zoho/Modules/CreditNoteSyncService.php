@@ -83,13 +83,15 @@ class CreditNoteSyncService extends AbstractModuleSyncService
 
         $zohoId = $mapping['zoho_record_id'] ?? null;
         if (empty($zohoId) && !empty($return['return_number'])) {
-            $lookup = $this->client->get('/creditnotes', ['creditnote_number' => $return['return_number']], [
-                'module'    => 'credit_notes',
-                'operation' => 'LOOKUP_BY_NUMBER',
-            ]);
-            if (!empty($lookup['data']['creditnotes'][0]['creditnote_id'])) {
-                $zohoId = (string) $lookup['data']['creditnotes'][0]['creditnote_id'];
-            }
+            $zohoId = $this->resolveUnmappedZohoIdByNumber(
+                'credit_notes',
+                $localId,
+                '/creditnotes',
+                ['creditnote_number' => $return['return_number']],
+                'creditnotes',
+                'creditnote_id',
+                (string) ($return['return_date'] ?? '')
+            );
         }
 
         $payload = $this->buildZohoPayload($return, $items, $zohoCustomerId);

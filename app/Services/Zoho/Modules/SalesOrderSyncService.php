@@ -84,13 +84,15 @@ class SalesOrderSyncService extends AbstractModuleSyncService
 
         $zohoId = $mapping['zoho_record_id'] ?? null;
         if (empty($zohoId) && !empty($order['sales_order_number'])) {
-            $lookup = $this->client->get('/salesorders', ['salesorder_number' => $order['sales_order_number']], [
-                'module'    => 'sales_orders',
-                'operation' => 'LOOKUP_BY_NUMBER',
-            ]);
-            if (!empty($lookup['data']['salesorders'][0]['salesorder_id'])) {
-                $zohoId = (string) $lookup['data']['salesorders'][0]['salesorder_id'];
-            }
+            $zohoId = $this->resolveUnmappedZohoIdByNumber(
+                'sales_orders',
+                $localId,
+                '/salesorders',
+                ['salesorder_number' => $order['sales_order_number']],
+                'salesorders',
+                'salesorder_id',
+                (string) ($order['order_date'] ?? '')
+            );
         }
 
         $payload = $this->buildZohoPayload($order, $items, $zohoCustomerId);

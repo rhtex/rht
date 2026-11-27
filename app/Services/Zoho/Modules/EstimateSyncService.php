@@ -71,13 +71,15 @@ class EstimateSyncService extends AbstractModuleSyncService
 
         $zohoId = $mapping['zoho_record_id'] ?? null;
         if (empty($zohoId) && !empty($quotation['quotation_number'])) {
-            $lookup = $this->client->get('/estimates', ['estimate_number' => $quotation['quotation_number']], [
-                'module'    => 'quotations',
-                'operation' => 'LOOKUP_BY_NUMBER',
-            ]);
-            if (!empty($lookup['data']['estimates'][0]['estimate_id'])) {
-                $zohoId = (string) $lookup['data']['estimates'][0]['estimate_id'];
-            }
+            $zohoId = $this->resolveUnmappedZohoIdByNumber(
+                'quotations',
+                $localId,
+                '/estimates',
+                ['estimate_number' => $quotation['quotation_number']],
+                'estimates',
+                'estimate_id',
+                (string) ($quotation['quotation_date'] ?? '')
+            );
         }
 
         $payload = $this->buildZohoPayload($quotation, $items, $zohoCustomerId);

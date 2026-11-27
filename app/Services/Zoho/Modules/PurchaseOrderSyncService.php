@@ -71,13 +71,15 @@ class PurchaseOrderSyncService extends AbstractModuleSyncService
 
         $zohoId = $mapping['zoho_record_id'] ?? null;
         if (empty($zohoId) && !empty($po['purchase_order_number'])) {
-            $lookup = $this->client->get('/purchaseorders', ['purchaseorder_number' => $po['purchase_order_number']], [
-                'module'    => 'purchase_orders',
-                'operation' => 'LOOKUP_BY_NUMBER',
-            ]);
-            if (!empty($lookup['data']['purchaseorders'][0]['purchaseorder_id'])) {
-                $zohoId = (string) $lookup['data']['purchaseorders'][0]['purchaseorder_id'];
-            }
+            $zohoId = $this->resolveUnmappedZohoIdByNumber(
+                'purchase_orders',
+                $localId,
+                '/purchaseorders',
+                ['purchaseorder_number' => $po['purchase_order_number']],
+                'purchaseorders',
+                'purchaseorder_id',
+                (string) ($po['order_date'] ?? '')
+            );
         }
 
         $payload = $this->buildZohoPayload($po, $items, $zohoVendorId);

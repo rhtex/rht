@@ -108,13 +108,15 @@ class InvoiceSyncService extends AbstractModuleSyncService
 
         $zohoId = $mapping['zoho_record_id'] ?? null;
         if (empty($zohoId) && !empty($invoice['invoice_number'])) {
-            $lookup = $this->client->get('/invoices', ['invoice_number' => $invoice['invoice_number']], [
-                'module'    => 'invoices',
-                'operation' => 'LOOKUP_BY_NUMBER',
-            ]);
-            if (!empty($lookup['data']['invoices'][0]['invoice_id'])) {
-                $zohoId = (string) $lookup['data']['invoices'][0]['invoice_id'];
-            }
+            $zohoId = $this->resolveUnmappedZohoIdByNumber(
+                'invoices',
+                $localId,
+                '/invoices',
+                ['invoice_number' => $invoice['invoice_number']],
+                'invoices',
+                'invoice_id',
+                (string) ($invoice['invoice_date'] ?? '')
+            );
         }
 
         $payload = $this->buildZohoPayload($invoice, $items, $zohoCustomerId);

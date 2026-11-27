@@ -106,26 +106,15 @@ class BillSyncService extends AbstractModuleSyncService
 
         $zohoId = $mapping['zoho_record_id'] ?? null;
         if (empty($zohoId) && !empty($bill['bill_number'])) {
-            $lookup = $this->client->get('/bills', [
-                'bill_number' => $bill['bill_number'],
-                'vendor_id'   => $zohoVendorId,
-            ], ['module' => 'bills', 'operation' => 'LOOKUP_BY_NUMBER']);
-            if (!empty($lookup['data']['bills'])) {
-                foreach ($lookup['data']['bills'] as $candidate) {
-                    $candId   = (string) ($candidate['bill_id'] ?? '');
-                    $candDate = (string) ($candidate['date'] ?? '');
-                    // Only reuse an existing Zoho bill if its date matches and it isn't mapped to another local bill
-                    if ($candId === '' || $candDate !== (string) ($bill['bill_date'] ?? '')) {
-                        continue;
-                    }
-                    $existingMap = $this->mappingModel->findByZoho('bills', $candId);
-                    if ($existingMap && (int) $existingMap['local_record_id'] !== $localId) {
-                        continue;
-                    }
-                    $zohoId = $candId;
-                    break;
-                }
-            }
+            $zohoId = $this->resolveUnmappedZohoIdByNumber(
+                'bills',
+                $localId,
+                '/bills',
+                ['bill_number' => $bill['bill_number'], 'vendor_id' => $zohoVendorId],
+                'bills',
+                'bill_id',
+                (string) ($bill['bill_date'] ?? '')
+            );
         }
 
         $payload = $this->buildZohoPayload($bill, $items, $zohoVendorId);

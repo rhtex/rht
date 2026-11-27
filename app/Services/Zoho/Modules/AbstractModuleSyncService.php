@@ -56,6 +56,40 @@ abstract class AbstractModuleSyncService
     abstract public function applyZohoRecordToLocal(array $zohoRecord, bool $forceOverwrite = false): array;
 
     /**
+     * Safely look up an unmapped Zoho document by number, only reusing a match
+     * when its Zoho date matches the local date and it isn't mapped to another record.
+     */
+    protected function resolveUnmappedZohoIdByNumber(
+        string $module,
+        int $localId,
+        string $endpoint,
+        array $query,
+        string $listKey,
+        string $idKey,
+        string $expectedDate = ''
+    ): ?string {
+        $lookup = $this->client->get($endpoint, $query, [
+            'module'    => $module,
+            'operation' => 'LOOKUP_BY_NUMBER',
+        ]);
+
+        foreach (($lookup['data'][$listKey] ?? []) as $candidate) {
+            $candId   = (string) ($candidate[$idKey] ?? '');
+            $candDate = (string) ($candidate['date'] ?? '');
+            if ($candId === '' || ($expectedDate !== '' && $candDate !== $expectedDate)) {
+                continue;
+            }
+            $existingMap = $this->mappingModel->findByZoho($module, $candId);
+            if ($existingMap && (int) $existingMap['local_record_id'] !== $localId) {
+                continue;
+            }
+            return $candId;
+        }
+
+        return null;
+    }
+
+    /**
      * Pull a single record from Zoho Books by its human document number or record ID.
      * Supports invoices (invoice_number), bills (bill_number), quotations (estimate_number),
      * sales orders (salesorder_number), purchase orders (purchaseorder_number),

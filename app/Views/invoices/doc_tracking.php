@@ -120,7 +120,12 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Courier Name <span class="text-danger">*</span></label>
-                        <input type="text" name="doc_courier_name" id="modalDocCourierName" class="form-control" required>
+                        <select name="doc_courier_name" id="modalDocCourierName" class="form-select no-select2" required>
+                            <option value="">-- Select Courier --</option>
+                            <?php foreach (($couriers ?? []) as $courier): ?>
+                                <option value="<?= esc($courier['transport_name']) ?>"><?= esc($courier['transport_name']) ?><?= !empty($courier['branch']) ? ' (' . esc($courier['branch']) . ')' : '' ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Tracking Number <span class="text-danger">*</span></label>
@@ -278,7 +283,15 @@ $(document).ready(function() {
 function openDocDetailsModal(data) {
     const modal = new bootstrap.Modal(document.getElementById('updateDocDetailsModal'));
     document.getElementById('docInvoiceNumber').textContent = data.invoice_number;
-    document.getElementById('modalDocCourierName').value = data.doc_courier_name || '';
+    const courierSelect = document.getElementById('modalDocCourierName');
+    const savedCourier = (data.doc_courier_name || '').trim();
+    if (savedCourier && !Array.from(courierSelect.options).some(opt => opt.value === savedCourier)) {
+        const opt = document.createElement('option');
+        opt.value = savedCourier;
+        opt.textContent = savedCourier;
+        courierSelect.appendChild(opt);
+    }
+    courierSelect.value = savedCourier;
     document.getElementById('modalDocTrackingNumber').value = data.doc_tracking_number || '';
     const dispatchDateVal = data.doc_dispatched_date || '<?= date('Y-m-d') ?>';
     const dispatchDateEl = document.getElementById('modalDocDispatchedDate');

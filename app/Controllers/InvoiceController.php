@@ -1097,10 +1097,16 @@ class InvoiceController extends BaseController
         $invoices = $this->invoiceModel->orderBy('invoices.invoice_date', 'DESC')
             ->findAll($limit, $offset);
 
+        $transportModel = new \App\Models\TransportModel();
+        $couriers = $transportModel->where('transport_type', 'Courier Service')
+            ->orderBy('transport_name', 'ASC')
+            ->findAll();
+
         $data = [
             'title' => 'Invoice Document Tracking',
             'invoices' => $invoices,
             'customers' => $this->customerModel->where('status', 'active')->findAll(),
+            'couriers' => $couriers,
             'total_count' => $totalResults,
             'filters' => [
                 'customer_id' => $customer_id,

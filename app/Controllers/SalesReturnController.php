@@ -134,7 +134,6 @@ class SalesReturnController extends BaseController
         $data['products'] = $this->productModel->getProductsWithCategory();
         $data['taxes'] = (new \App\Models\TaxModel())->where('status', 'Active')->orderBy('percentage', 'ASC')->findAll();
         $data['transports'] = (new \App\Models\TransportModel())->orderBy('transport_name', 'ASC')->findAll();
-        $data['agents'] = (new \App\Models\AgentModel())->orderBy('agent_name', 'ASC')->findAll();
         $data['title'] = 'Record Sales Return';
         $data['return_number'] = $this->returnModel->generateReturnNumber();
         $data['preselected_invoice_id'] = (int) ($this->request->getGet('invoice_id') ?? 0);
@@ -174,23 +173,37 @@ class SalesReturnController extends BaseController
             return $this->response->setStatusCode(404)->setJSON(['status' => 'error', 'message' => 'Invoice not found.']);
         }
 
+        $invAgentId   = !empty($invoice['agent_id']) ? (int) $invoice['agent_id'] : null;
+        $invAgentPct  = (float) ($invoice['agent_commission_percent'] ?? 0);
+        $invAgentName = '';
+        if ($invAgentId) {
+            $agentRow = (new \App\Models\AgentModel())->find($invAgentId);
+            if ($agentRow) {
+                $invAgentName = (string) ($agentRow['agent_name'] ?? '');
+                if ($invAgentPct <= 0) {
+                    $invAgentPct = (float) ($agentRow['commission_percentage'] ?? 0);
+                }
+            }
+        }
+
         return $this->response->setJSON([
             'status'  => 'success',
             'invoice' => [
-                'id'              => $invoice['id'],
-                'invoice_number'  => $invoice['invoice_number'],
-                'invoice_date'    => $invoice['invoice_date'],
-                'status'          => $invoice['status'],
-                'subtotal'        => (float) ($invoice['subtotal'] ?? 0),
-                'discount_amount' => (float) ($invoice['discount_amount'] ?? 0),
-                'discount_type'   => (string) ($invoice['discount_type'] ?? 'Fixed'),
-                'roundoff_amount' => (float) ($invoice['roundoff_amount'] ?? 0),
-                'total_amount'    => $invoice['total_amount'],
-                'paid_amount'     => $invoice['paid_amount'],
+                'id'                       => $invoice['id'],
+                'invoice_number'           => $invoice['invoice_number'],
+                'invoice_date'             => $invoice['invoice_date'],
+                'status'                   => $invoice['status'],
+                'subtotal'                 => (float) ($invoice['subtotal'] ?? 0),
+                'discount_amount'          => (float) ($invoice['discount_amount'] ?? 0),
+                'discount_type'            => (string) ($invoice['discount_type'] ?? 'Fixed'),
+                'roundoff_amount'          => (float) ($invoice['roundoff_amount'] ?? 0),
+                'total_amount'             => $invoice['total_amount'],
+                'paid_amount'              => $invoice['paid_amount'],
                 'balance'                  => $invoice['balance'],
                 'is_inter_state'           => !empty($invoice['is_inter_state']) ? 1 : 0,
-                'agent_id'                 => !empty($invoice['agent_id']) ? (int) $invoice['agent_id'] : null,
-                'agent_commission_percent' => (float) ($invoice['agent_commission_percent'] ?? 0),
+                'agent_id'                 => $invAgentId,
+                'agent_name'               => $invAgentName,
+                'agent_commission_percent' => $invAgentPct,
             ],
             'items'   => $invoice['items'] ?? [],
         ]);
@@ -223,8 +236,18 @@ class SalesReturnController extends BaseController
 
         $balesPost = trim((string) $this->request->getPost('bales_count'));
         $paidByPost = trim((string) $this->request->getPost('transport_paid_by'));
-        $agentId = $this->request->getPost('agent_id') ? (int) $this->request->getPost('agent_id') : null;
-        $agentPct = (float) ($this->request->getPost('agent_commission_percent') ?? 0);
+
+        // Auto-resolve Agent & Commission % from linked invoice or customer (no manual entry required)
+        $linkedInvoice = $invoiceId ? $this->invoiceModel->find($invoiceId) : null;
+        $agentId = !empty($linkedInvoice['agent_id']) ? (int) $linkedInvoice['agent_id'] : null;
+        $agentPct = $linkedInvoice ? (float) ($linkedInvoice['agent_commission_percent'] ?? 0) : 0.0;
+
+        if (!$agentId && $customerId) {
+            $custRow = $this->customerModel->find($customerId);
+            if (!empty($custRow['agent_id'])) {
+                $agentId = (int) $custRow['agent_id'];
+            }
+        }
         if ($agentId && $agentPct <= 0) {
             $agentRow = (new \App\Models\AgentModel())->find($agentId);
             $agentPct = (float) ($agentRow['commission_percentage'] ?? 0);
@@ -294,13 +317,9 @@ class SalesReturnController extends BaseController
         $effectiveTax = round($taxAmount * $taxFactor, 2);
         $totalAmount  = round(max(0.0, $subtotal - $discountValue) + $effectiveTax + $adjustment, 2);
 
-        $isManualAgentAdj = ($this->request->getPost('agent_adj_manual') === '1');
-        $postedAgentAdj   = $this->request->getPost('agent_amount_adjustment');
-        if (!$isManualAgentAdj && $agentId && $agentPct > 0) {
-            $agentAmountAdjustment = round((max(0.0, $subtotal - $discountValue) * $agentPct) / 100, 2);
-        } else {
-            $agentAmountAdjustment = (float) ($postedAgentAdj ?? 0);
-        }
+        $agentAmountAdjustment = ($agentId && $agentPct > 0)
+            ? round((max(0.0, $subtotal - $discountValue) * $agentPct) / 100, 2)
+            : 0.0;
 
         $this->returnModel->update($returnId, [
             'subtotal'                => $subtotal,
@@ -311,6 +330,17 @@ class SalesReturnController extends BaseController
             'agent_amount_adjustment' => $agentAmountAdjustment,
             'total_amount'            => $totalAmount,
         ]);
+
+        // Automatically reduce unpaid agent commission amount on the linked invoice
+        if ($linkedInvoice && $agentAmountAdjustment > 0 && ($linkedInvoice['agent_commission_status'] ?? '') === 'Unpaid') {
+            $currentInvComm = (float) ($linkedInvoice['agent_commission_amount'] ?? 0);
+            if ($currentInvComm > 0) {
+                $newInvComm = max(0.0, round($currentInvComm - $agentAmountAdjustment, 2));
+                $this->invoiceModel->update((int) $linkedInvoice['id'], [
+                    'agent_commission_amount' => $newInvComm,
+                ]);
+            }
+        }
 
         $db->transComplete();
 

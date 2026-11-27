@@ -443,10 +443,12 @@ class CustomerController extends BaseController
         $stateId = $billingAddress['state_id'] ?? null;
 
         $agentCommission = 0;
+        $agentName = '';
         if ($customer['agent_id']) {
             $agentModel = new \App\Models\AgentModel();
             $agent = $agentModel->find($customer['agent_id']);
             $agentCommission = $agent['commission_percentage'] ?? 0;
+            $agentName = $agent['agent_name'] ?? '';
         }
 
         return $this->response->setJSON([
@@ -456,6 +458,7 @@ class CustomerController extends BaseController
             'billing_address' => $billingText,
             'shipping_address' => $shippingText,
             'agent_id' => $customer['agent_id'] ?? null,
+            'agent_name' => $agentName,
             'agent_commission' => $agentCommission,
             'credit_period_days' => $customer['credit_period_days'] ?? 0,
             'phone' => $customer['phone'] ?? '',

@@ -213,6 +213,8 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     // Sales Returns
     $routes->get('sales_returns', 'SalesReturnController::index', ['filter' => 'permission:invoice.view']);
     $routes->get('sales_returns/create', 'SalesReturnController::create', ['filter' => 'permission:invoice.edit']);
+    $routes->get('sales_returns/customer-invoices/(:num)', 'SalesReturnController::getCustomerInvoices/$1', ['filter' => 'permission:invoice.view']);
+    $routes->get('sales_returns/invoice-items/(:num)', 'SalesReturnController::getInvoiceItems/$1', ['filter' => 'permission:invoice.view']);
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
     $routes->get('sales_returns/view/(:num)', 'SalesReturnController::view/$1', ['filter' => 'permission:invoice.view']);
     $routes->get('sales_returns/print/(:num)', 'SalesReturnController::print/$1', ['filter' => 'permission:invoice.view']);
@@ -430,6 +432,8 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     // Sales Returns
     $routes->get('sales_returns', 'SalesReturnController::index', ['filter' => 'permission:invoice.view']);
     $routes->get('sales_returns/create', 'SalesReturnController::create', ['filter' => 'permission:invoice.edit']);
+    $routes->get('sales_returns/customer-invoices/(:num)', 'SalesReturnController::getCustomerInvoices/$1', ['filter' => 'permission:invoice.view']);
+    $routes->get('sales_returns/invoice-items/(:num)', 'SalesReturnController::getInvoiceItems/$1', ['filter' => 'permission:invoice.view']);
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
     $routes->get('sales_returns/view/(:num)', 'SalesReturnController::view/$1', ['filter' => 'permission:invoice.view']);
     $routes->get('sales_returns/print/(:num)', 'SalesReturnController::print/$1', ['filter' => 'permission:invoice.view']);

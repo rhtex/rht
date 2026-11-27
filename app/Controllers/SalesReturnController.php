@@ -91,26 +91,91 @@ class SalesReturnController extends BaseController
 
     public function create()
     {
-        $data['customers'] = $this->customerModel->where('status', 'active')->findAll();
+        $data['customers'] = $this->customerModel->where('status', 'active')->orderBy('name', 'ASC')->findAll();
         $data['products'] = $this->productModel->getProductsWithCategory();
         $data['title'] = 'Record Sales Return';
         $data['return_number'] = $this->returnModel->generateReturnNumber();
+        $data['preselected_invoice_id'] = (int) ($this->request->getGet('invoice_id') ?? 0);
+        $data['preselected_customer_id'] = (int) ($this->request->getGet('customer_id') ?? 0);
+
+        if ($data['preselected_invoice_id'] > 0 && $data['preselected_customer_id'] === 0) {
+            $inv = $this->invoiceModel->find($data['preselected_invoice_id']);
+            if ($inv) {
+                $data['preselected_customer_id'] = (int) ($inv['customer_id'] ?? 0);
+            }
+        }
+
         return view('sales_returns/form', $data);
+    }
+
+    public function getCustomerInvoices($customerId)
+    {
+        $invoices = $this->invoiceModel
+            ->select('id, invoice_number, invoice_date, total_amount, paid_amount, balance, status, is_inter_state')
+            ->where('customer_id', (int) $customerId)
+            ->where('status !=', 'Void')
+            ->orderBy('invoice_date', 'DESC')
+            ->orderBy('id', 'DESC')
+            ->limit(100)
+            ->findAll();
+
+        return $this->response->setJSON([
+            'status'   => 'success',
+            'invoices' => $invoices,
+        ]);
+    }
+
+    public function getInvoiceItems($invoiceId)
+    {
+        $invoice = $this->invoiceModel->getInvoiceById((int) $invoiceId);
+        if (!$invoice) {
+            return $this->response->setStatusCode(404)->setJSON(['status' => 'error', 'message' => 'Invoice not found.']);
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'invoice' => [
+                'id'             => $invoice['id'],
+                'invoice_number' => $invoice['invoice_number'],
+                'invoice_date'   => $invoice['invoice_date'],
+                'status'         => $invoice['status'],
+                'total_amount'   => $invoice['total_amount'],
+                'paid_amount'    => $invoice['paid_amount'],
+                'balance'        => $invoice['balance'],
+                'is_inter_state' => !empty($invoice['is_inter_state']) ? 1 : 0,
+            ],
+            'items'   => $invoice['items'] ?? [],
+        ]);
     }
 
     public function store()
     {
+        $items = $this->request->getPost('items') ?? [];
+        $validItems = [];
+        foreach ($items as $item) {
+            $qty = (float) ($item['quantity'] ?? 0);
+            $hasProdOrDesc = !empty($item['product_id']) || !empty(trim((string) ($item['description'] ?? '')));
+            if ($hasProdOrDesc && $qty > 0) {
+                $validItems[] = $item;
+            }
+        }
+
+        if (empty($validItems)) {
+            return redirect()->back()->withInput()->with('error', 'Please add at least one item with quantity greater than 0.');
+        }
+
         $db = \Config\Database::connect();
         $db->transStart();
 
         $returnDate = $this->request->getPost('return_date');
         $customerId = $this->request->getPost('customer_id');
         $invoiceId = $this->request->getPost('invoice_id') ?: null;
+        $customReturnNo = trim((string) $this->request->getPost('return_number'));
 
         $returnId = $this->returnModel->insert([
             'customer_id' => $customerId,
             'invoice_id' => $invoiceId,
-            'return_number' => $this->returnModel->generateReturnNumber(),
+            'return_number' => $customReturnNo !== '' ? $customReturnNo : $this->returnModel->generateReturnNumber(),
             'return_date' => $returnDate,
             'reason' => $this->request->getPost('reason'),
             'status' => 'Open',
@@ -118,28 +183,34 @@ class SalesReturnController extends BaseController
             'created_by' => session('user_id'),
         ]);
 
-        $items = $this->request->getPost('items');
         $subtotal = 0;
         $taxAmount = 0;
 
-        if ($items) {
-            foreach ($items as $item) {
-                $lineAmount = $item['quantity'] * $item['rate'];
-                $lineTax = ($lineAmount * ($item['tax_percentage'] ?? 0)) / 100;
+        foreach ($validItems as $item) {
+            $qty  = (float) ($item['quantity'] ?? 0);
+            $rate = (float) ($item['rate'] ?? 0);
+            $taxPct = (float) ($item['tax_percentage'] ?? 0);
+            $lineAmount = $qty * $rate;
+            $lineTax = ($lineAmount * $taxPct) / 100;
 
-                $this->itemModel->insert([
-                    'sales_return_id' => $returnId,
-                    'product_id' => $item['product_id'] ?: null,
-                    'description' => $item['description'],
-                    'quantity' => $item['quantity'],
-                    'rate' => $item['rate'],
-                    'tax_percentage' => $item['tax_percentage'] ?? 0,
-                    'amount' => $lineAmount + $lineTax
-                ]);
-
-                $subtotal += $lineAmount;
-                $taxAmount += $lineTax;
+            $desc = trim((string) ($item['description'] ?? ''));
+            if ($desc === '' && !empty($item['product_id'])) {
+                $prod = $this->productModel->find((int) $item['product_id']);
+                $desc = $prod['product_name'] ?? '';
             }
+
+            $this->itemModel->insert([
+                'sales_return_id' => $returnId,
+                'product_id' => !empty($item['product_id']) ? $item['product_id'] : null,
+                'description' => $desc,
+                'quantity' => $qty,
+                'rate' => $rate,
+                'tax_percentage' => $taxPct,
+                'amount' => $lineAmount + $lineTax
+            ]);
+
+            $subtotal += $lineAmount;
+            $taxAmount += $lineTax;
         }
 
         $totalAmount = $subtotal + $taxAmount;

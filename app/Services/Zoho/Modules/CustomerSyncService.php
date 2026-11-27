@@ -81,9 +81,9 @@ class CustomerSyncService extends AbstractModuleSyncService
 
         $zohoId = $mapping['zoho_record_id'] ?? null;
 
-        // Before creating a new Zoho contact, check if one already exists in Zoho by GSTIN or exact name
+        // Before creating a new Zoho contact, only match an unmapped Zoho contact by exact name (never by GSTIN, as branches/entities may share a GSTIN)
         if (empty($zohoId)) {
-            $zohoId = $this->findExistingZohoContactId($customer['name'], $customer['gstin'] ?? null, 'customer');
+            $zohoId = $this->findExistingZohoContactId($customer['name'], 'customer', $localId);
         }
 
         $payload = $this->buildZohoPayload($customer, $billing, $shipping, $mapping);
@@ -467,25 +467,24 @@ class CustomerSyncService extends AbstractModuleSyncService
         }
     }
 
-    protected function findExistingZohoContactId(string $name, ?string $gstin, string $contactType): ?string
+    protected function findExistingZohoContactId(string $name, string $contactType, int $localId = 0): ?string
     {
-        if (!empty($gstin)) {
-            $res = $this->client->get('/contacts', [
-                'contact_type' => $contactType,
-                'gst_no'       => strtoupper(trim($gstin)),
-            ], ['module' => $this->getModuleName(), 'operation' => 'LOOKUP_BY_GSTIN']);
-            if (!empty($res['data']['contacts'][0]['contact_id'])) {
-                return (string) $res['data']['contacts'][0]['contact_id'];
-            }
-        }
-
         $res = $this->client->get('/contacts', [
             'contact_type' => $contactType,
             'contact_name' => trim($name),
         ], ['module' => $this->getModuleName(), 'operation' => 'LOOKUP_BY_NAME']);
 
-        if (!empty($res['data']['contacts'][0]['contact_id'])) {
-            return (string) $res['data']['contacts'][0]['contact_id'];
+        foreach (($res['data']['contacts'] ?? []) as $contact) {
+            $candId   = (string) ($contact['contact_id'] ?? '');
+            $candName = strtolower(trim((string) ($contact['contact_name'] ?? '')));
+            if ($candId === '' || $candName !== strtolower(trim($name))) {
+                continue;
+            }
+            $existingMap = $this->mappingModel->findByZoho($this->getModuleName(), $candId);
+            if ($existingMap && $localId > 0 && (int) $existingMap['local_record_id'] !== $localId) {
+                continue;
+            }
+            return $candId;
         }
 
         return null;

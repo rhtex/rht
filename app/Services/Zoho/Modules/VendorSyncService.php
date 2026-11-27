@@ -79,7 +79,7 @@ class VendorSyncService extends AbstractModuleSyncService
 
         $zohoId = $mapping['zoho_record_id'] ?? null;
         if (empty($zohoId)) {
-            $zohoId = $this->findExistingZohoVendorId($vendor['name'], $vendor['gstin'] ?? null);
+            $zohoId = $this->findExistingZohoVendorId($vendor['name'], $localId);
         }
 
         $payload = $this->buildZohoPayload($vendor, $billing, $shipping, $mapping);
@@ -464,25 +464,24 @@ class VendorSyncService extends AbstractModuleSyncService
         }
     }
 
-    protected function findExistingZohoVendorId(string $name, ?string $gstin): ?string
+    protected function findExistingZohoVendorId(string $name, int $localId = 0): ?string
     {
-        if (!empty($gstin)) {
-            $res = $this->client->get('/contacts', [
-                'contact_type' => 'vendor',
-                'gst_no'       => strtoupper(trim($gstin)),
-            ], ['module' => 'vendors', 'operation' => 'LOOKUP_BY_GSTIN']);
-            if (!empty($res['data']['contacts'][0]['contact_id'])) {
-                return (string) $res['data']['contacts'][0]['contact_id'];
-            }
-        }
-
         $res = $this->client->get('/contacts', [
             'contact_type' => 'vendor',
             'contact_name' => trim($name),
         ], ['module' => 'vendors', 'operation' => 'LOOKUP_BY_NAME']);
 
-        if (!empty($res['data']['contacts'][0]['contact_id'])) {
-            return (string) $res['data']['contacts'][0]['contact_id'];
+        foreach (($res['data']['contacts'] ?? []) as $contact) {
+            $candId   = (string) ($contact['contact_id'] ?? '');
+            $candName = strtolower(trim((string) ($contact['contact_name'] ?? '')));
+            if ($candId === '' || $candName !== strtolower(trim($name))) {
+                continue;
+            }
+            $existingMap = $this->mappingModel->findByZoho('vendors', $candId);
+            if ($existingMap && $localId > 0 && (int) $existingMap['local_record_id'] !== $localId) {
+                continue;
+            }
+            return $candId;
         }
 
         return null;

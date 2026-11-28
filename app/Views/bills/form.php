@@ -200,12 +200,12 @@
                             value="<?= $bill['due_date'] ?? date('Y-m-d', strtotime('+30 days')) ?>" required>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Vendor Inv # / Ref #</label>
+                        <label class="form-label">Reference # / PO #</label>
                         <input type="text" name="reference_number" id="referenceNumberInput" class="form-control"
-                            value="<?= esc($bill['reference_number'] ?? '') ?>" placeholder="Vendor invoice number">
+                            value="<?= esc($bill['reference_number'] ?? '') ?>" placeholder="Optional PO or reference number">
                         <div id="refNumberDuplicateAlert" class="mt-1 d-none">
                             <span class="text-danger small fw-semibold">
-                                <i class="fas fa-exclamation-triangle me-1"></i>This Ref / Inv # already exists for this vendor!
+                                <i class="fas fa-exclamation-triangle me-1"></i>This Reference # already exists for this vendor!
                                 <a href="javascript:void(0)" id="viewExistingRefBillsLink" class="text-danger text-decoration-underline fw-bold ms-1">View Existing Bills (<span id="existingRefBillsCount">0</span>)</a>
                             </span>
                         </div>
@@ -460,7 +460,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Bill #</th>
-                                <th>Ref / Inv #</th>
+                                <th>Reference #</th>
                                 <th>Date</th>
                                 <th>Due Date</th>
                                 <th class="text-end">Total Amount</th>

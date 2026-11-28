@@ -72,7 +72,7 @@
                         <?php if (!empty($bill['vendor_gstin'])): ?>
                             <tr><th class="text-muted">GSTIN:</th><td><span class="badge bg-light text-dark border"><?= esc($bill['vendor_gstin']) ?></span></td></tr>
                         <?php endif; ?>
-                        <tr><th class="text-muted">Vendor Inv / Ref:</th><td><?= esc($bill['reference_number']) ?: '-' ?></td></tr>
+                        <tr><th class="text-muted">Reference # / PO #:</th><td><?= esc($bill['reference_number']) ?: '-' ?></td></tr>
                         <?php if (!empty($bill['vendor_city'])): ?>
                             <tr><th class="text-muted">City / State:</th><td><?= esc($bill['vendor_city']) ?><?= !empty($bill['vendor_state']) ? ', ' . esc($bill['vendor_state']) : '' ?></td></tr>
                         <?php endif; ?>

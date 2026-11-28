@@ -74,7 +74,7 @@
                         <?php if (!empty($bill['vendor_city'])): ?>
                             <tr><th class="text-muted text-uppercase small">City / State:</th><td><?= esc($bill['vendor_city']) ?><?= !empty($bill['vendor_state']) ? ', ' . esc($bill['vendor_state']) : '' ?></td></tr>
                         <?php endif; ?>
-                        <tr><th class="text-muted text-uppercase small">Vendor Inv / Ref #:</th><td><?= esc($bill['reference_number']) ?: '-' ?></td></tr>
+                        <tr><th class="text-muted text-uppercase small">Reference # / PO #:</th><td><?= esc($bill['reference_number']) ?: '-' ?></td></tr>
                     </table>
                 </div>
                 <div class="col-md-6">

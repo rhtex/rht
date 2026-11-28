@@ -277,7 +277,7 @@
                                                     data-hsn="<?= $prod['hsn_code'] ?? '' ?>" 
                                                     data-tax="<?= $prod['tax_percentage'] ?? 0 ?>"
                                                     <?= ($item['product_id'] == $prod['id']) ? 'selected' : '' ?>>
-                                                    <?= esc($prod['product_name']) ?> (<?= esc($prod['product_code'] ?? $prod['sku'] ?? '') ?>)
+                                                    <?php $pCode = trim((string) ($prod['product_code'] ?? $prod['sku'] ?? '')); ?><?= esc($prod['product_name']) ?><?= $pCode !== '' ? ' (' . esc($pCode) . ')' : '' ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
@@ -324,7 +324,7 @@
                                                 data-rate="<?= $prod['cost_price'] ?? $prod['purchase_price'] ?? $prod['rate'] ?? 0 ?>" 
                                                 data-hsn="<?= $prod['hsn_code'] ?? '' ?>" 
                                                 data-tax="<?= $prod['tax_percentage'] ?? 0 ?>">
-                                                <?= esc($prod['product_name']) ?> (<?= esc($prod['product_code'] ?? $prod['sku'] ?? '') ?>)
+                                                <?php $pCode = trim((string) ($prod['product_code'] ?? $prod['sku'] ?? '')); ?><?= esc($prod['product_name']) ?><?= $pCode !== '' ? ' (' . esc($pCode) . ')' : '' ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -508,7 +508,7 @@
                         data-rate="<?= $prod['cost_price'] ?? $prod['purchase_price'] ?? $prod['rate'] ?? 0 ?>" 
                         data-hsn="<?= $prod['hsn_code'] ?? '' ?>" 
                         data-tax="<?= $prod['tax_percentage'] ?? 0 ?>">
-                        <?= esc($prod['product_name']) ?> (<?= esc($prod['product_code'] ?? $prod['sku'] ?? '') ?>)
+                        <?php $pCode = trim((string) ($prod['product_code'] ?? $prod['sku'] ?? '')); ?><?= esc($prod['product_name']) ?><?= $pCode !== '' ? ' (' . esc($pCode) . ')' : '' ?>
                     </option>
                 <?php endforeach; ?>
             </select>

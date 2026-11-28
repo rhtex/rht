@@ -526,6 +526,7 @@ class ReportController extends BaseController
             'customers'            => $customers,
             'periodOptions'        => self::periodOptions(),
             'maxPdf'               => self::MAX_PDF_INVOICES,
+            'section'              => (string) ($this->request->getGet('section') ?? ''),
         ]);
     }
 

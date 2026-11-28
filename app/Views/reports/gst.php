@@ -25,6 +25,7 @@ $fmt = static fn($n) => '₹' . number_format((float) $n, 2);
 $currentQuery = $_SERVER['QUERY_STRING'] ?? '';
 $pdfAllUrl = site_url('reports/gst/invoices-pdf') . ($currentQuery ? '?' . $currentQuery : '');
 $netGst = ($totals['tax'] - $salesReturnTotals['tax']) - $billTotals['tax'];
+$secPrintUrl = static fn(string $sec) => site_url('reports/gst') . '?' . http_build_query(array_merge($_GET, ['print' => '1', 'section' => $sec]));
 
 ob_start(); ?>
 <div class="col-lg-1 col-md-4">
@@ -143,6 +144,7 @@ ob_start(); ?>
             <div class="d-flex flex-wrap gap-2 ms-auto">
                 <input type="search" class="form-control form-control-sm gst-search" data-target="gstTable" style="width:190px" placeholder="Search invoices...">
                 <button type="button" class="btn btn-sm btn-outline-secondary gst-csv" data-target="gstTable" data-name="gst_invoices"><i class="fas fa-file-csv me-1"></i> CSV</button>
+                <a href="<?= esc($secPrintUrl('invoices')) ?>" target="_blank" class="btn btn-sm btn-outline-dark"><i class="fas fa-print me-1"></i> Print Report</a>
                 <button type="submit" id="btnPrintSelected" class="btn btn-sm btn-primary" disabled>
                     <i class="fas fa-print me-1"></i> Print Selected PDF (<span id="selCount">0</span>)
                 </button>
@@ -214,6 +216,7 @@ ob_start(); ?>
         <div class="d-flex gap-2 ms-auto">
             <input type="search" class="form-control form-control-sm gst-search" data-target="billsTable" style="width:190px" placeholder="Search bills...">
             <button type="button" class="btn btn-sm btn-outline-secondary gst-csv" data-target="billsTable" data-name="gst_bills"><i class="fas fa-file-csv me-1"></i> CSV</button>
+            <a href="<?= esc($secPrintUrl('bills')) ?>" target="_blank" class="btn btn-sm btn-outline-dark"><i class="fas fa-print me-1"></i> Print Report</a>
         </div>
     </div>
     <div class="card-body p-0">
@@ -273,6 +276,7 @@ ob_start(); ?>
         <div class="d-flex gap-2 ms-auto">
             <input type="search" class="form-control form-control-sm gst-search" data-target="srTable" style="width:190px" placeholder="Search sales returns...">
             <button type="button" class="btn btn-sm btn-outline-secondary gst-csv" data-target="srTable" data-name="gst_sales_returns"><i class="fas fa-file-csv me-1"></i> CSV</button>
+            <a href="<?= esc($secPrintUrl('sales_returns')) ?>" target="_blank" class="btn btn-sm btn-outline-dark"><i class="fas fa-print me-1"></i> Print Report</a>
         </div>
     </div>
     <div class="card-body p-0">
@@ -329,6 +333,7 @@ ob_start(); ?>
         <div class="d-flex gap-2 ms-auto">
             <input type="search" class="form-control form-control-sm gst-search" data-target="prTable" style="width:190px" placeholder="Search purchase returns...">
             <button type="button" class="btn btn-sm btn-outline-secondary gst-csv" data-target="prTable" data-name="gst_purchase_returns"><i class="fas fa-file-csv me-1"></i> CSV</button>
+            <a href="<?= esc($secPrintUrl('purchase_returns')) ?>" target="_blank" class="btn btn-sm btn-outline-dark"><i class="fas fa-print me-1"></i> Print Report</a>
         </div>
     </div>
     <div class="card-body p-0">

@@ -9,6 +9,15 @@ $periodLabel = ($filters['date_from'] ? date('d M Y', strtotime($filters['date_f
     . ' to ' . ($filters['date_to'] ? date('d M Y', strtotime($filters['date_to'])) : 'Today');
 $n = static fn($v) => number_format((float) $v, 2);
 $netGst = ($totals['tax'] - $salesReturnTotals['tax']) - $billTotals['tax'];
+$sec = $section ?? '';
+$showAll = !in_array($sec, ['invoices', 'bills', 'sales_returns', 'purchase_returns'], true);
+$secTitles = [
+    'invoices'         => 'GST Report - Invoices',
+    'bills'            => 'GST Report - Bills (Purchases)',
+    'sales_returns'    => 'GST Report - Sales Returns (Credit Notes)',
+    'purchase_returns' => 'GST Report - Purchase Returns (Debit Notes)',
+];
+$reportHeading = $secTitles[$sec] ?? 'GST Report (Invoices, Bills, Sales Returns & Purchase Returns)';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,7 +60,7 @@ $netGst = ($totals['tax'] - $salesReturnTotals['tax']) - $billTotals['tax'];
         <div>
             <div class="company"><?= esc(get_setting('app_name', 'RasiDev')) ?></div>
             <?php if ($g = get_setting('company_gstin', '')): ?><div>GSTIN: <?= esc($g) ?></div><?php endif; ?>
-            <h1>GST Report (Invoices, Bills, Sales Returns &amp; Purchase Returns)</h1>
+            <h1><?= esc($reportHeading) ?></h1>
         </div>
         <div class="meta">
             <div><strong>Period:</strong> <?= esc($periodLabel) ?></div>
@@ -60,6 +69,7 @@ $netGst = ($totals['tax'] - $salesReturnTotals['tax']) - $billTotals['tax'];
         </div>
     </div>
 
+    <?php if ($showAll): ?>
     <div class="kpis">
         <div class="kpi"><div class="l">Invoices (<?= $totals['count'] ?>)</div><div class="v">₹<?= $n($totals['total']) ?> <small>(Tax ₹<?= $n($totals['tax']) ?>)</small></div></div>
         <div class="kpi"><div class="l">Bills (<?= $billTotals['count'] ?>)</div><div class="v">₹<?= $n($billTotals['total']) ?> <small>(Tax ₹<?= $n($billTotals['tax']) ?>)</small></div></div>
@@ -67,8 +77,9 @@ $netGst = ($totals['tax'] - $salesReturnTotals['tax']) - $billTotals['tax'];
         <div class="kpi"><div class="l">Purchase Returns (<?= $purchaseReturnTotals['count'] ?>)</div><div class="v">₹<?= $n($purchaseReturnTotals['amount']) ?></div></div>
         <div class="kpi"><div class="l">Net GST Payable</div><div class="v">₹<?= $n($netGst) ?></div></div>
     </div>
+    <?php endif; ?>
 
-    <?php if (!empty($rateSummary)): ?>
+    <?php if (($showAll || $sec === 'invoices') && !empty($rateSummary)): ?>
     <h2>Invoice Rate-wise Summary</h2>
     <table>
         <thead><tr><th>GST Rate</th><th class="r">Invoices</th><th class="r">Qty Sold</th><th class="r">Subtotal</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">IGST</th><th class="r">Total</th></tr></thead>
@@ -80,6 +91,7 @@ $netGst = ($totals['tax'] - $salesReturnTotals['tax']) - $billTotals['tax'];
     </table>
     <?php endif; ?>
 
+    <?php if ($showAll || $sec === 'invoices'): ?>
     <h2>1. Invoices (<?= count($rows) ?>)</h2>
     <table>
         <thead><tr><th>#</th><th>Date</th><th>Invoice #</th><th>Customer</th><th>GSTIN</th><th class="r">Qty Sold</th><th class="r">Subtotal</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">IGST</th><th class="r">Total</th></tr></thead>
@@ -98,6 +110,9 @@ $netGst = ($totals['tax'] - $salesReturnTotals['tax']) - $billTotals['tax'];
         <?php endif; ?>
     </table>
 
+    <?php endif; ?>
+
+    <?php if ($showAll || $sec === 'bills'): ?>
     <h2>2. Bills / Purchases (<?= count($billRows) ?>)</h2>
     <table>
         <thead><tr><th>#</th><th>Date</th><th>Bill #</th><th>Vendor</th><th>GSTIN</th><th class="r">Qty</th><th class="r">Subtotal</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">IGST</th><th class="r">Total</th></tr></thead>
@@ -116,6 +131,9 @@ $netGst = ($totals['tax'] - $salesReturnTotals['tax']) - $billTotals['tax'];
         <?php endif; ?>
     </table>
 
+    <?php endif; ?>
+
+    <?php if ($showAll || $sec === 'sales_returns'): ?>
     <h2>3. Sales Returns / Credit Notes (<?= count($salesReturnRows) ?>)</h2>
     <table>
         <thead><tr><th>#</th><th>Date</th><th>Return #</th><th>Customer</th><th>GSTIN</th><th>Invoice #</th><th class="r">Qty</th><th class="r">Subtotal</th><th class="r">Tax</th><th class="r">Total</th></tr></thead>
@@ -134,6 +152,9 @@ $netGst = ($totals['tax'] - $salesReturnTotals['tax']) - $billTotals['tax'];
         <?php endif; ?>
     </table>
 
+    <?php endif; ?>
+
+    <?php if ($showAll || $sec === 'purchase_returns'): ?>
     <h2>4. Purchase Returns / Debit Notes (<?= count($purchaseReturnRows) ?>)</h2>
     <table>
         <thead><tr><th>#</th><th>Date</th><th>Reference #</th><th>Vendor</th><th>GSTIN</th><th>Bill #</th><th class="r">Amount</th><th class="r">Used</th><th class="r">Balance</th></tr></thead>
@@ -152,5 +173,6 @@ $netGst = ($totals['tax'] - $salesReturnTotals['tax']) - $billTotals['tax'];
         <tfoot><tr><td colspan="6" class="r">Total (excl. Void)</td><td class="r"><?= $n($purchaseReturnTotals['amount']) ?></td><td class="r"><?= $n($purchaseReturnTotals['used']) ?></td><td class="r"><?= $n($purchaseReturnTotals['balance']) ?></td></tr></tfoot>
         <?php endif; ?>
     </table>
+    <?php endif; ?>
 </body>
 </html>

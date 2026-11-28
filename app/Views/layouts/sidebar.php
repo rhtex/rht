@@ -25,6 +25,7 @@
                 $isFinance = in_array($segment1, ['bank_accounts', 'reconciliation']);
                 $isHR = in_array($segment1, ['employees', 'attendance', 'loans', 'salaries']);
                 $isCalendar = in_array($segment1, ['calendar']);
+                $isReports = ($segment1 === 'reports');
                 $isAdmin = in_array($segment1, ['users', 'roles', 'modules', 'permissions', 'settings', 'countries', 'states']);
 
                 $isUserMgmt = in_array($segment1, ['users', 'roles', 'modules', 'permissions']);
@@ -521,6 +522,35 @@
                             <a href="<?= site_url('salaries') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-file-invoice-dollar text-success"></i>
                                 <p><?= lang('App.salary') ?></p>
+                            </a>
+                        </li>
+                        <?php endif; ?>
+                    </ul>
+                </li>
+                <?php endif; ?>
+
+                <!-- REPORTS -->
+                <?php if(can('invoice.view') || can('bill.view') || can('vendor_credit.view')): ?>
+                <li class="nav-item <?= $isReports ? 'menu-open' : '' ?>">
+                    <a href="#" class="nav-link <?= $isReports ? 'active' : '' ?>">
+                        <i class="nav-icon fas fa-chart-bar text-info"></i>
+                        <p>
+                            Reports
+                            <i class="nav-arrow fas fa-angle-right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="<?= site_url('reports') ?>" class="nav-link <?= ($isReports && $segment2 !== 'gst') ? 'active' : '' ?>">
+                                <i class="fas fa-file-alt nav-icon text-primary"></i>
+                                <p>Document Reports</p>
+                            </a>
+                        </li>
+                        <?php if(can('invoice.view')): ?>
+                        <li class="nav-item">
+                            <a href="<?= site_url('reports/gst') ?>" class="nav-link <?= ($isReports && $segment2 === 'gst') ? 'active' : '' ?>">
+                                <i class="fas fa-percent nav-icon text-success"></i>
+                                <p>GST Report</p>
                             </a>
                         </li>
                         <?php endif; ?>

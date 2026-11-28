@@ -817,6 +817,12 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
         $routes->post('logs/prune', 'ZohoSyncController::pruneOldLogs', ['filter' => 'permission:setting.edit']);
     });
 
+    // Reports (Document reports + GST report with bulk invoice PDF)
+    $routes->get('reports', 'ReportController::index');
+    $routes->get('reports/gst', 'ReportController::gst', ['filter' => 'permission:invoice.view']);
+    $routes->match(['GET', 'POST'], 'reports/gst/invoices-pdf', 'ReportController::gstInvoicesPdf', ['filter' => 'permission:invoice.view']);
+    $routes->get('reports/(:segment)', 'ReportController::documents/$1');
+
     // Database Backup Routes
     $routes->group('settings/backup', ['filter' => 'permission:setting.view'], function ($routes) {
         $routes->get('', 'BackupController::index');

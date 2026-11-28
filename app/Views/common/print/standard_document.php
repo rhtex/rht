@@ -228,6 +228,7 @@ $showBottomBox   = $showBottomLeft || $showBottomRight;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($docTitle . ' - ' . $docNumber) ?></title>
+    <?php if (!empty($auto_print) || !empty($is_preview)): ?><?= view('layouts/_favicon') ?><?php endif; ?>
     <?= view('common/print/print_styles', [
         'printFontSize' => $printConfig['base_font_size'] ?? '10.5px',
         'paperSize'     => $printConfig['paper_size'] ?? 'A4',

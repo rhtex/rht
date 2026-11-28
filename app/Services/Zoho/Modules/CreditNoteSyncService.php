@@ -435,6 +435,7 @@ class CreditNoteSyncService extends AbstractModuleSyncService
             'creditnote_number'      => $return['return_number'],
             'date'                   => $return['return_date'],
             'place_of_supply'        => $placeOfSupply,
+            'gst_reason'             => 'sales_return',
             'line_items'             => $lineItems,
             'discount'               => $discountStr,
             'is_discount_before_tax' => true,
@@ -443,6 +444,23 @@ class CreditNoteSyncService extends AbstractModuleSyncService
             'adjustment_description' => 'Adjustment',
             'notes'                  => (string) ($return['reason'] ?? ''),
         ];
+
+        $zohoInvoiceId = null;
+        if (!empty($return['invoice_id'])) {
+            $invMap = $this->mappingModel->findByLocal('invoices', (int) $return['invoice_id']);
+            if ($invMap && !empty($invMap['zoho_record_id'])) {
+                $zohoInvoiceId = (string) $invMap['zoho_record_id'];
+            } else {
+                $invRes = (new InvoiceSyncService($this->client))->pushToZoho((int) $return['invoice_id'], 'CREATE');
+                $zohoInvoiceId = $invRes['zoho_record_id'] ?? null;
+            }
+        }
+        if (!empty($zohoInvoiceId)) {
+            $payload['invoice_id'] = $zohoInvoiceId;
+        } else {
+            $payload['reference_invoice_type'] = !empty($return['customer_gstin']) ? 'registered' : 'b2c';
+        }
+
         if (!empty($return['customer_debit_note_no'])) {
             $payload['reference_number'] = (string) $return['customer_debit_note_no'];
         }

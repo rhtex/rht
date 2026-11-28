@@ -37,6 +37,7 @@ $reportHeading = $secTitles[$sec] ?? ('GST Report ' . $forPeriod);
 <head>
     <meta charset="UTF-8">
     <title><?= esc($reportHeading) ?></title>
+    <?= view('layouts/_favicon') ?>
     <style>
         @page {
             size: A4 landscape;

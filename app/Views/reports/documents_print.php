@@ -16,6 +16,7 @@ $n = static fn($v) => number_format((float) $v, 2);
 <head>
     <meta charset="UTF-8">
     <title><?= esc($def['title']) ?> - <?= esc($periodLabel) ?></title>
+    <?= view('layouts/_favicon') ?>
     <style>
         @page {
             size: A4 landscape;

@@ -400,7 +400,10 @@ class ReportController extends BaseController
         );
         $customers = $db->table('customers')->select('id, name')->orderBy('name')->get()->getResultArray();
 
-        return view('reports/gst', [
+        // Printable report (standalone page, auto-opens print dialog)
+        $viewName = $this->request->getGet('print') === '1' ? 'reports/gst_print' : 'reports/gst';
+
+        return view($viewName, [
             'title'         => 'GST Report',
             'rows'          => $rows,
             'totals'        => $totals,

@@ -18,6 +18,9 @@
 $fmt = static fn($n) => 'â‚¹' . number_format((float) $n, 2);
 $currentQuery = $_SERVER['QUERY_STRING'] ?? '';
 $pdfAllUrl = site_url('reports/gst/invoices-pdf') . ($currentQuery ? '?' . $currentQuery : '');
+$printQuery = $_GET;
+$printQuery['print'] = '1';
+$printReportUrl = site_url('reports/gst') . '?' . http_build_query($printQuery);
 
 ob_start(); ?>
 <div class="col-lg-1 col-md-4">
@@ -128,6 +131,7 @@ ob_start(); ?>
             <div class="d-flex flex-wrap gap-2 ms-auto">
                 <input type="search" id="gstSearch" class="form-control form-control-sm" style="width:200px" placeholder="Search invoice / customer / GSTIN">
                 <button type="button" id="gstCsv" class="btn btn-sm btn-outline-secondary"><i class="fas fa-file-csv me-1"></i> CSV</button>
+                <a href="<?= esc($printReportUrl) ?>" target="_blank" class="btn btn-sm btn-outline-dark"><i class="fas fa-print me-1"></i> Print Report</a>
                 <button type="submit" id="btnPrintSelected" class="btn btn-sm btn-primary" disabled>
                     <i class="fas fa-print me-1"></i> Print Selected PDF (<span id="selCount">0</span>)
                 </button>

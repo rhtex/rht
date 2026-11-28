@@ -82,7 +82,7 @@
 <?php if (!empty($queueItems)): ?>
 <div class="card card-outline card-warning shadow-sm mb-3">
     <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
-        <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-list-ol text-warning me-2"></i>Pending / Failed Synchronization Queue Items</h3>
+        <h3 class="card-title fw-bold m-0 text-dark"><i class="fas fa-list-ol text-warning me-2"></i>Recent Synchronization Queue Items</h3>
         <form action="<?= site_url('settings/integrations/zoho/retry-failed') ?>" method="post" class="d-inline">
             <?= csrf_field() ?>
             <button type="submit" class="btn btn-xs btn-warning fw-bold">

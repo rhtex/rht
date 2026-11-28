@@ -640,6 +640,7 @@ class ZohoSyncController extends BaseController
         }
 
         $logs       = $builder->findAll(150);
+        $queueItems = $this->queueModel->orderBy('id', 'DESC')->findAll(50);
         $queueItems = $this->queueModel->where('status !=', 'COMPLETED')->orderBy('id', 'DESC')->findAll(50);
 
         return view('zoho/logs', [

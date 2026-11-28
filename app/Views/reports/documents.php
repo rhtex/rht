@@ -5,7 +5,7 @@
 <?= $this->section('header') ?>
 <div class="row mb-3 align-items-center">
     <div class="col-sm-6">
-        <h1 class="m-0"><i class="fas fa-chart-bar text-primary me-2"></i>Reports</h1>
+        <h1 class="m-0"><i class="fas <?= $def['icon'] ?> text-<?= $def['color'] ?> me-2"></i><?= esc($def['title']) ?></h1>
     </div>
     <div class="col-sm-6 text-end d-flex gap-2 justify-content-end">
         <?php
@@ -23,7 +23,7 @@
 
 <?= $this->section('content') ?>
 <?php
-$fmt = static fn($n) => 'â‚¹' . number_format((float) $n, 2);
+$fmt = static fn($n) => '&#8377;' . number_format((float) $n, 2);
 $isDebit  = $type === 'debit-notes';
 $isCredit = $type === 'credit-notes';
 $qs = http_build_query(array_filter([
@@ -59,7 +59,7 @@ $qs = http_build_query(array_filter([
         <div class="bt-stat bt-g-blue">
             <i class="fas fa-hashtag bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totals['count']) ?></div>
-            <div class="bt-stat-label">Documents</div>
+            <div class="bt-stat-label" style="font-size:.72rem;">Documents</div>
         </div>
     </div>
     <?php if (!$isDebit): ?>
@@ -67,14 +67,14 @@ $qs = http_build_query(array_filter([
         <div class="bt-stat bt-g-purple">
             <i class="fas fa-calculator bt-stat-icon"></i>
             <div class="bt-stat-num"><?= $fmt($totals['subtotal']) ?></div>
-            <div class="bt-stat-label">Taxable Value</div>
+            <div class="bt-stat-label" style="font-size:.72rem;">Subtotal</div>
         </div>
     </div>
     <div class="col-xl col-sm-6">
         <div class="bt-stat bt-g-amber">
             <i class="fas fa-percent bt-stat-icon"></i>
             <div class="bt-stat-num"><?= $fmt($totals['tax']) ?></div>
-            <div class="bt-stat-label">GST / Tax</div>
+            <div class="bt-stat-label" style="font-size:.72rem;">GST / Tax</div>
         </div>
     </div>
     <?php endif; ?>
@@ -82,7 +82,7 @@ $qs = http_build_query(array_filter([
         <div class="bt-stat bt-g-green">
             <i class="fas fa-rupee-sign bt-stat-icon"></i>
             <div class="bt-stat-num"><?= $fmt($totals['total']) ?></div>
-            <div class="bt-stat-label">Total Amount</div>
+            <div class="bt-stat-label" style="font-size:.72rem;">Total Amount</div>
         </div>
     </div>
     <?php if (!$isCredit): ?>
@@ -90,7 +90,7 @@ $qs = http_build_query(array_filter([
         <div class="bt-stat bt-g-red">
             <i class="fas fa-hourglass-half bt-stat-icon"></i>
             <div class="bt-stat-num"><?= $fmt($totals['balance']) ?></div>
-            <div class="bt-stat-label"><?= $isDebit ? 'Unused Balance' : 'Balance Due' ?></div>
+            <div class="bt-stat-label" style="font-size:.72rem;"><?= $isDebit ? 'Unused Balance' : 'Balance Due' ?></div>
         </div>
     </div>
     <?php endif; ?>

@@ -51,9 +51,12 @@ $uid      = preg_replace('/[^a-zA-Z0-9_]/', '_', $fieldName . '_' . uniqid());
                 <button type="submit" class="btn btn-sm <?= $hasCopy ? 'btn-outline-primary' : 'btn-primary' ?> text-nowrap">
                     <i class="fas fa-upload me-1"></i> <?= $hasCopy ? 'Replace' : 'Upload' ?>
                 </button>
+                <?php $isMobile = service('request')->getUserAgent()->isMobile(); ?>
+                <?php if ($isMobile): ?>
                 <button type="button" class="btn btn-sm btn-outline-success text-nowrap" onclick="openDocCamera('<?= $uid ?>')">
                     <i class="fas fa-camera me-1"></i> Camera
                 </button>
+                <?php endif; ?>
                 <small class="text-muted">PDF, JPG, PNG, or WEBP (max 10 MB)</small>
             </form>
         <?php elseif (!$hasCopy): ?>
@@ -62,7 +65,7 @@ $uid      = preg_replace('/[^a-zA-Z0-9_]/', '_', $fieldName . '_' . uniqid());
     </div>
 </div>
 
-<?php if ($canEdit && empty($GLOBALS['_doc_camera_modal_rendered'])): $GLOBALS['_doc_camera_modal_rendered'] = true; ?>
+<?php if ($canEdit && !empty($isMobile) && empty($GLOBALS['_doc_camera_modal_rendered'])): $GLOBALS['_doc_camera_modal_rendered'] = true; ?>
 <div class="modal fade" id="docCameraModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">

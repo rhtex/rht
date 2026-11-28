@@ -55,7 +55,7 @@ ob_start(); ?>
         <div class="bt-stat bt-g-blue">
             <i class="fas fa-file-invoice bt-stat-icon"></i>
             <div class="bt-stat-num"><?= number_format($totals['count']) ?></div>
-            <div class="bt-stat-label">Invoices (B2B <?= $totals['b2b'] ?> / B2C <?= $totals['b2c'] ?>)</div>
+            <div class="bt-stat-label">Qty Sold <?= number_format($totals['qty'], 2) ?> &middot; B2B <?= $totals['b2b'] ?> / B2C <?= $totals['b2c'] ?></div>
         </div>
     </div>
     <div class="col-xl col-sm-6">
@@ -95,7 +95,7 @@ ob_start(); ?>
         <table class="table table-sm mb-0 align-middle">
             <thead class="table-light">
                 <tr>
-                    <th>GST Rate</th><th class="text-end">Invoices</th><th class="text-end">Taxable</th>
+                    <th>GST Rate</th><th class="text-end">Invoices</th><th class="text-end">Qty Sold</th><th class="text-end">Taxable</th>
                     <th class="text-end">CGST</th><th class="text-end">SGST</th><th class="text-end">IGST</th><th class="text-end">Total</th>
                 </tr>
             </thead>
@@ -104,6 +104,7 @@ ob_start(); ?>
                 <tr>
                     <td><?= (int) $rate ?>%</td>
                     <td class="text-end"><?= $s['count'] ?></td>
+                    <td class="text-end"><?= number_format($s['qty'], 2) ?></td>
                     <td class="text-end"><?= number_format($s['taxable'], 2) ?></td>
                     <td class="text-end"><?= number_format($s['cgst'], 2) ?></td>
                     <td class="text-end"><?= number_format($s['sgst'], 2) ?></td>
@@ -154,6 +155,7 @@ ob_start(); ?>
                             <th>GSTIN</th>
                             <th>Type</th>
                             <th>Status</th>
+                            <th class="text-end">Qty Sold</th>
                             <th class="text-end">Taxable</th>
                             <th class="text-end">CGST</th>
                             <th class="text-end">SGST</th>
@@ -164,7 +166,7 @@ ob_start(); ?>
                     </thead>
                     <tbody>
                         <?php if (empty($rows)): ?>
-                            <tr><td colspan="13" class="text-center text-muted py-4">No invoices found for the selected period.</td></tr>
+                            <tr><td colspan="14" class="text-center text-muted py-4">No invoices found for the selected period.</td></tr>
                         <?php endif; ?>
                         <?php foreach ($rows as $r): ?>
                         <tr class="<?= $r['is_void'] ? 'text-muted text-decoration-line-through' : '' ?>">
@@ -175,6 +177,7 @@ ob_start(); ?>
                             <td class="small"><?= esc($r['customer_gstin'] ?: '-') ?></td>
                             <td><span class="badge <?= $r['is_b2b'] ? 'bg-primary' : 'bg-secondary' ?>"><?= $r['is_b2b'] ? 'B2B' : 'B2C' ?></span></td>
                             <td><?= esc($r['status']) ?></td>
+                            <td class="text-end"><?= number_format($r['qty'], 2) ?></td>
                             <td class="text-end"><?= number_format($r['taxable'], 2) ?></td>
                             <td class="text-end"><?= number_format($r['cgst'], 2) ?></td>
                             <td class="text-end"><?= number_format($r['sgst'], 2) ?></td>
@@ -188,6 +191,7 @@ ob_start(); ?>
                     <tfoot class="table-light fw-bold">
                         <tr>
                             <td colspan="7" class="text-end">Total (excl. Void)</td>
+                            <td class="text-end"><?= number_format($totals['qty'], 2) ?></td>
                             <td class="text-end"><?= number_format($totals['taxable'], 2) ?></td>
                             <td class="text-end"><?= number_format($totals['cgst'], 2) ?></td>
                             <td class="text-end"><?= number_format($totals['sgst'], 2) ?></td>

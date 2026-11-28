@@ -310,7 +310,8 @@ class ReportController extends BaseController
         $builder = $db->table('invoices i')
             ->select('i.id, i.invoice_number, i.invoice_date, i.status, i.subtotal, i.discount_amount, i.tax_amount,
                       i.cgst_amount, i.sgst_amount, i.igst_amount, i.total_amount, i.balance,
-                      c.name AS customer_name, c.gstin AS customer_gstin, c.gst_type AS customer_gst_type')
+                      c.name AS customer_name, c.gstin AS customer_gstin, c.gst_type AS customer_gst_type,
+                      (SELECT COALESCE(SUM(ii.quantity), 0) FROM invoice_items ii WHERE ii.invoice_id = i.id) AS qty_sold')
             ->join('customers c', 'c.id = i.customer_id', 'left');
 
         if ($db->fieldExists('deleted_at', 'invoices')) {
@@ -352,9 +353,10 @@ class ReportController extends BaseController
 
         $rows = $this->gstInvoiceQuery($filters, $gstType, $includeVoid)->get()->getResultArray();
 
-        $totals = ['count' => 0, 'b2b' => 0, 'b2c' => 0, 'taxable' => 0, 'cgst' => 0, 'sgst' => 0, 'igst' => 0, 'tax' => 0, 'total' => 0];
+        $totals = ['count' => 0, 'b2b' => 0, 'b2c' => 0, 'qty' => 0, 'taxable' => 0, 'cgst' => 0, 'sgst' => 0, 'igst' => 0, 'tax' => 0, 'total' => 0];
         $rateSummary = [];
         foreach ($rows as &$r) {
+            $r['qty']     = (float) ($r['qty_sold'] ?? 0);
             $r['taxable'] = (float) $r['subtotal'] - (float) $r['discount_amount'];
             $r['cgst']    = (float) $r['cgst_amount'];
             $r['sgst']    = (float) $r['sgst_amount'];
@@ -371,6 +373,7 @@ class ReportController extends BaseController
             }
             $totals['count']++;
             $totals[$r['is_b2b'] ? 'b2b' : 'b2c']++;
+            $totals['qty']     += $r['qty'];
             $totals['taxable'] += $r['taxable'];
             $totals['cgst']    += $r['cgst'];
             $totals['sgst']    += $r['sgst'];
@@ -382,9 +385,10 @@ class ReportController extends BaseController
             $rate = $r['taxable'] > 0 ? round($r['tax'] / $r['taxable'] * 100) : 0;
             $key  = (int) $rate;
             if (!isset($rateSummary[$key])) {
-                $rateSummary[$key] = ['count' => 0, 'taxable' => 0, 'cgst' => 0, 'sgst' => 0, 'igst' => 0, 'total' => 0];
+                $rateSummary[$key] = ['count' => 0, 'qty' => 0, 'taxable' => 0, 'cgst' => 0, 'sgst' => 0, 'igst' => 0, 'total' => 0];
             }
             $rateSummary[$key]['count']++;
+            $rateSummary[$key]['qty']     += $r['qty'];
             $rateSummary[$key]['taxable'] += $r['taxable'];
             $rateSummary[$key]['cgst']    += $r['cgst'];
             $rateSummary[$key]['sgst']    += $r['sgst'];

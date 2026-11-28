@@ -61,6 +61,7 @@ $n = static fn($v) => number_format((float) $v, 2);
 
     <div class="kpis">
         <div class="kpi"><div class="l">Invoices</div><div class="v"><?= $totals['count'] ?> <small>(B2B <?= $totals['b2b'] ?> / B2C <?= $totals['b2c'] ?>)</small></div></div>
+        <div class="kpi"><div class="l">Qty Sold</div><div class="v"><?= $n($totals['qty']) ?></div></div>
         <div class="kpi"><div class="l">Taxable Value</div><div class="v">₹<?= $n($totals['taxable']) ?></div></div>
         <div class="kpi"><div class="l">CGST</div><div class="v">₹<?= $n($totals['cgst']) ?></div></div>
         <div class="kpi"><div class="l">SGST</div><div class="v">₹<?= $n($totals['sgst']) ?></div></div>
@@ -72,10 +73,10 @@ $n = static fn($v) => number_format((float) $v, 2);
     <?php if (!empty($rateSummary)): ?>
     <h2>Rate-wise Summary</h2>
     <table>
-        <thead><tr><th>GST Rate</th><th class="r">Invoices</th><th class="r">Taxable</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">IGST</th><th class="r">Total</th></tr></thead>
+        <thead><tr><th>GST Rate</th><th class="r">Invoices</th><th class="r">Qty Sold</th><th class="r">Taxable</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">IGST</th><th class="r">Total</th></tr></thead>
         <tbody>
         <?php foreach ($rateSummary as $rate => $s): ?>
-            <tr><td><?= (int) $rate ?>%</td><td class="r"><?= $s['count'] ?></td><td class="r"><?= $n($s['taxable']) ?></td><td class="r"><?= $n($s['cgst']) ?></td><td class="r"><?= $n($s['sgst']) ?></td><td class="r"><?= $n($s['igst']) ?></td><td class="r"><?= $n($s['total']) ?></td></tr>
+            <tr><td><?= (int) $rate ?>%</td><td class="r"><?= $s['count'] ?></td><td class="r"><?= $n($s['qty']) ?></td><td class="r"><?= $n($s['taxable']) ?></td><td class="r"><?= $n($s['cgst']) ?></td><td class="r"><?= $n($s['sgst']) ?></td><td class="r"><?= $n($s['igst']) ?></td><td class="r"><?= $n($s['total']) ?></td></tr>
         <?php endforeach; ?>
         </tbody>
     </table>
@@ -86,12 +87,12 @@ $n = static fn($v) => number_format((float) $v, 2);
         <thead>
             <tr>
                 <th>#</th><th>Date</th><th>Invoice #</th><th>Customer</th><th>GSTIN</th>
-                <th class="r">Taxable</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">IGST</th><th class="r">Total</th>
+                <th class="r">Qty Sold</th><th class="r">Taxable</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">IGST</th><th class="r">Total</th>
             </tr>
         </thead>
         <tbody>
         <?php if (empty($rows)): ?>
-            <tr><td colspan="10" style="text-align:center;padding:12px;">No invoices found for the selected period.</td></tr>
+            <tr><td colspan="11" style="text-align:center;padding:12px;">No invoices found for the selected period.</td></tr>
         <?php endif; ?>
         <?php foreach ($rows as $i => $r): ?>
             <tr class="<?= $r['is_void'] ? 'void' : '' ?>">
@@ -100,6 +101,7 @@ $n = static fn($v) => number_format((float) $v, 2);
                 <td><?= esc($r['invoice_number']) ?></td>
                 <td><?= esc($r['customer_name'] ?? '-') ?></td>
                 <td><?= esc($r['customer_gstin'] ?: '-') ?></td>
+                <td class="r"><?= $n($r['qty']) ?></td>
                 <td class="r"><?= $n($r['taxable']) ?></td>
                 <td class="r"><?= $n($r['cgst']) ?></td>
                 <td class="r"><?= $n($r['sgst']) ?></td>
@@ -112,6 +114,7 @@ $n = static fn($v) => number_format((float) $v, 2);
         <tfoot>
             <tr>
                 <td colspan="5" class="r">Total (excl. Void)</td>
+                <td class="r"><?= $n($totals['qty']) ?></td>
                 <td class="r"><?= $n($totals['taxable']) ?></td>
                 <td class="r"><?= $n($totals['cgst']) ?></td>
                 <td class="r"><?= $n($totals['sgst']) ?></td>

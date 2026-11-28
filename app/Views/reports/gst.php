@@ -182,7 +182,7 @@ ob_start(); ?>
                     <?php if (!empty($rows)): ?>
                     <tfoot class="table-light fw-bold">
                         <tr>
-                            <td colspan="4" class="text-end">Total (excl. Void)</td>
+                            <td colspan="5" class="text-end">Total (excl. Void)</td>
                             <td class="text-end"><?= number_format($totals['qty'], 2) ?></td>
                             <td class="text-end"><?= number_format($totals['taxable'], 2) ?></td>
                             <td class="text-end"><?= number_format($totals['cgst'], 2) ?></td>

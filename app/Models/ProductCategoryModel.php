@@ -99,7 +99,7 @@ class ProductCategoryModel extends Model
                 array_unshift($path, $idMap[$currentParentId]['category_name']);
                 $currentParentId = $idMap[$currentParentId]['parent_id'];
             }
-            $paths[$cat['id']] = implode(' &gt; ', $path);
+            $paths[$cat['id']] = implode(' > ', $path);
         }
 
         return $paths;

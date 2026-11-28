@@ -19,20 +19,20 @@ $n = static fn($v) => number_format((float) $v, 2);
     <style>
         @page { size: A4 landscape; margin: 10mm; }
         * { box-sizing: border-box; }
-        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #222; margin: 0; padding: 14px; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 12.5px; font-weight: 500; color: #111; margin: 0; padding: 14px; }
         .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
-        .head h1 { font-size: 18px; margin: 0 0 2px; }
-        .head .company { font-size: 13px; font-weight: bold; }
-        .meta { font-size: 11px; color: #555; text-align: right; line-height: 1.5; }
+        .head h1 { font-size: 19px; margin: 0 0 2px; font-weight: 700; }
+        .head .company { font-size: 14px; font-weight: 700; }
+        .meta { font-size: 12px; color: #333; text-align: right; line-height: 1.5; }
         .kpis { display: flex; gap: 8px; margin-bottom: 10px; }
-        .kpi { flex: 1; border: 1px solid #ccc; border-radius: 4px; padding: 6px 8px; }
-        .kpi .l { font-size: 9px; text-transform: uppercase; color: #666; }
-        .kpi .v { font-size: 13px; font-weight: bold; }
+        .kpi { flex: 1; border: 1px solid #999; border-radius: 4px; padding: 6px 8px; }
+        .kpi .l { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #444; }
+        .kpi .v { font-size: 14px; font-weight: 700; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #bbb; padding: 3px 6px; }
-        th { background: #eee; text-align: left; font-size: 10px; }
+        th, td { border: 1px solid #888; padding: 4px 6px; font-size: 12px; }
+        th { background: #eaeaea; text-align: left; font-size: 11.5px; font-weight: 700; color: #000; }
         td.r, th.r { text-align: right; }
-        tfoot td { font-weight: bold; background: #f5f5f5; }
+        .total-row td { font-weight: 700; font-size: 12.5px; background: #f0f0f0; border-top: 2px solid #333; }
         tr { page-break-inside: avoid; }
         thead { display: table-header-group; }
         .void td { color: #999; text-decoration: line-through; }
@@ -114,10 +114,8 @@ $n = static fn($v) => number_format((float) $v, 2);
                     <?php endif; ?>
                 </tr>
             <?php endforeach; ?>
-        </tbody>
-        <?php if (!empty($items)): ?>
-        <tfoot>
-            <tr>
+            <?php if (!empty($items)): ?>
+            <tr class="total-row">
                 <td colspan="<?= ($isCredit || $isDebit) ? 5 : 4 ?>" class="r">Total (excl. Void)</td>
                 <?php if (!$isDebit): ?>
                     <td class="r"><?= $n($totals['subtotal']) ?></td>
@@ -129,8 +127,8 @@ $n = static fn($v) => number_format((float) $v, 2);
                     <td class="r"><?= $n($totals['balance']) ?></td>
                 <?php endif; ?>
             </tr>
-        </tfoot>
-        <?php endif; ?>
+            <?php endif; ?>
+        </tbody>
     </table>
 </body>
 </html>

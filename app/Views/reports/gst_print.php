@@ -27,21 +27,21 @@ $reportHeading = $secTitles[$sec] ?? 'GST Report (Invoices, Bills, Sales Returns
     <style>
         @page { size: A4 landscape; margin: 10mm; }
         * { box-sizing: border-box; }
-        body { font-family: Helvetica, Arial, sans-serif; font-size: 10.5px; color: #222; margin: 0; padding: 14px; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 12.5px; font-weight: 500; color: #111; margin: 0; padding: 14px; }
         .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
-        .head h1 { font-size: 17px; margin: 0 0 2px; }
-        .head .company { font-size: 13px; font-weight: bold; }
-        .meta { font-size: 10.5px; color: #555; text-align: right; line-height: 1.5; }
+        .head h1 { font-size: 19px; margin: 0 0 2px; font-weight: 700; }
+        .head .company { font-size: 14px; font-weight: 700; }
+        .meta { font-size: 12px; color: #333; text-align: right; line-height: 1.5; }
         .kpis { display: flex; gap: 8px; margin-bottom: 10px; }
-        .kpi { flex: 1; border: 1px solid #ccc; border-radius: 4px; padding: 6px 8px; }
-        .kpi .l { font-size: 9px; text-transform: uppercase; color: #666; }
-        .kpi .v { font-size: 12.5px; font-weight: bold; }
-        h2 { font-size: 12px; margin: 14px 0 4px; border-bottom: 1px solid #ddd; padding-bottom: 2px; }
+        .kpi { flex: 1; border: 1px solid #999; border-radius: 4px; padding: 6px 8px; }
+        .kpi .l { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #444; }
+        .kpi .v { font-size: 14px; font-weight: 700; }
+        h2 { font-size: 13.5px; font-weight: 700; margin: 14px 0 4px; border-bottom: 1px solid #bbb; padding-bottom: 2px; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
-        th, td { border: 1px solid #bbb; padding: 3px 5px; }
-        th { background: #eee; text-align: left; font-size: 9.5px; }
+        th, td { border: 1px solid #888; padding: 4px 6px; font-size: 12px; }
+        th { background: #eaeaea; text-align: left; font-size: 11.5px; font-weight: 700; color: #000; }
         td.r, th.r { text-align: right; }
-        tfoot td { font-weight: bold; background: #f5f5f5; }
+        .total-row td { font-weight: 700; font-size: 12.5px; background: #f0f0f0; border-top: 2px solid #333; }
         tr { page-break-inside: avoid; }
         thead { display: table-header-group; }
         .void td { color: #999; text-decoration: line-through; }
@@ -104,10 +104,10 @@ $reportHeading = $secTitles[$sec] ?? 'GST Report (Invoices, Bills, Sales Returns
                 <td class="r"><?= $n($r['qty']) ?></td><td class="r"><?= $n($r['taxable']) ?></td><td class="r"><?= $n($r['cgst']) ?></td><td class="r"><?= $n($r['sgst']) ?></td><td class="r"><?= $n($r['igst']) ?></td><td class="r"><?= $n($r['total_amount']) ?></td>
             </tr>
         <?php endforeach; ?>
-        </tbody>
         <?php if (!empty($rows)): ?>
-        <tfoot><tr><td colspan="5" class="r">Total (excl. Void)</td><td class="r"><?= $n($totals['qty']) ?></td><td class="r"><?= $n($totals['taxable']) ?></td><td class="r"><?= $n($totals['cgst']) ?></td><td class="r"><?= $n($totals['sgst']) ?></td><td class="r"><?= $n($totals['igst']) ?></td><td class="r"><?= $n($totals['total']) ?></td></tr></tfoot>
+        <tr class="total-row"><td colspan="5" class="r">Total (excl. Void)</td><td class="r"><?= $n($totals['qty']) ?></td><td class="r"><?= $n($totals['taxable']) ?></td><td class="r"><?= $n($totals['cgst']) ?></td><td class="r"><?= $n($totals['sgst']) ?></td><td class="r"><?= $n($totals['igst']) ?></td><td class="r"><?= $n($totals['total']) ?></td></tr>
         <?php endif; ?>
+        </tbody>
     </table>
 
     <?php endif; ?>
@@ -125,10 +125,10 @@ $reportHeading = $secTitles[$sec] ?? 'GST Report (Invoices, Bills, Sales Returns
                 <td class="r"><?= $n($r['qty']) ?></td><td class="r"><?= $n($r['taxable']) ?></td><td class="r"><?= $n($r['cgst']) ?></td><td class="r"><?= $n($r['sgst']) ?></td><td class="r"><?= $n($r['igst']) ?></td><td class="r"><?= $n($r['total_amount']) ?></td>
             </tr>
         <?php endforeach; ?>
-        </tbody>
         <?php if (!empty($billRows)): ?>
-        <tfoot><tr><td colspan="5" class="r">Total (excl. Void)</td><td class="r"><?= $n($billTotals['qty']) ?></td><td class="r"><?= $n($billTotals['taxable']) ?></td><td class="r"><?= $n($billTotals['cgst']) ?></td><td class="r"><?= $n($billTotals['sgst']) ?></td><td class="r"><?= $n($billTotals['igst']) ?></td><td class="r"><?= $n($billTotals['total']) ?></td></tr></tfoot>
+        <tr class="total-row"><td colspan="5" class="r">Total (excl. Void)</td><td class="r"><?= $n($billTotals['qty']) ?></td><td class="r"><?= $n($billTotals['taxable']) ?></td><td class="r"><?= $n($billTotals['cgst']) ?></td><td class="r"><?= $n($billTotals['sgst']) ?></td><td class="r"><?= $n($billTotals['igst']) ?></td><td class="r"><?= $n($billTotals['total']) ?></td></tr>
         <?php endif; ?>
+        </tbody>
     </table>
 
     <?php endif; ?>
@@ -146,10 +146,10 @@ $reportHeading = $secTitles[$sec] ?? 'GST Report (Invoices, Bills, Sales Returns
                 <td class="r"><?= $n($r['qty']) ?></td><td class="r"><?= $n($r['taxable']) ?></td><td class="r"><?= $n($r['tax']) ?></td><td class="r"><?= $n($r['total_amount']) ?></td>
             </tr>
         <?php endforeach; ?>
-        </tbody>
         <?php if (!empty($salesReturnRows)): ?>
-        <tfoot><tr><td colspan="6" class="r">Total (excl. Void)</td><td class="r"><?= $n($salesReturnTotals['qty']) ?></td><td class="r"><?= $n($salesReturnTotals['taxable']) ?></td><td class="r"><?= $n($salesReturnTotals['tax']) ?></td><td class="r"><?= $n($salesReturnTotals['total']) ?></td></tr></tfoot>
+        <tr class="total-row"><td colspan="6" class="r">Total (excl. Void)</td><td class="r"><?= $n($salesReturnTotals['qty']) ?></td><td class="r"><?= $n($salesReturnTotals['taxable']) ?></td><td class="r"><?= $n($salesReturnTotals['tax']) ?></td><td class="r"><?= $n($salesReturnTotals['total']) ?></td></tr>
         <?php endif; ?>
+        </tbody>
     </table>
 
     <?php endif; ?>
@@ -168,10 +168,10 @@ $reportHeading = $secTitles[$sec] ?? 'GST Report (Invoices, Bills, Sales Returns
                 <td class="r"><?= $n($r['amount']) ?></td><td class="r"><?= $n($r['used_amount']) ?></td><td class="r"><?= $n($r['balance']) ?></td>
             </tr>
         <?php endforeach; ?>
-        </tbody>
         <?php if (!empty($purchaseReturnRows)): ?>
-        <tfoot><tr><td colspan="6" class="r">Total (excl. Void)</td><td class="r"><?= $n($purchaseReturnTotals['amount']) ?></td><td class="r"><?= $n($purchaseReturnTotals['used']) ?></td><td class="r"><?= $n($purchaseReturnTotals['balance']) ?></td></tr></tfoot>
+        <tr class="total-row"><td colspan="6" class="r">Total (excl. Void)</td><td class="r"><?= $n($purchaseReturnTotals['amount']) ?></td><td class="r"><?= $n($purchaseReturnTotals['used']) ?></td><td class="r"><?= $n($purchaseReturnTotals['balance']) ?></td></tr>
         <?php endif; ?>
+        </tbody>
     </table>
     <?php endif; ?>
 </body>

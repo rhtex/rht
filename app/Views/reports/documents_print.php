@@ -17,7 +17,17 @@ $n = static fn($v) => number_format((float) $v, 2);
     <meta charset="UTF-8">
     <title><?= esc($def['title']) ?> - <?= esc($periodLabel) ?></title>
     <style>
-        @page { size: A4 landscape; margin: 10mm; }
+        @page {
+            size: A4 landscape;
+            margin: 10mm 10mm 14mm 10mm;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: Helvetica, Arial, sans-serif;
+                font-size: 11px;
+                font-weight: 600;
+                color: #333;
+            }
+        }
         * { box-sizing: border-box; }
         body { font-family: Helvetica, Arial, sans-serif; font-size: 12.5px; font-weight: 500; color: #111; margin: 0; padding: 14px; }
         .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 10px; }

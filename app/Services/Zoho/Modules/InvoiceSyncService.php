@@ -20,6 +20,27 @@ class InvoiceSyncService extends AbstractModuleSyncService
         $this->itemModel    = new InvoiceItemModel();
     }
 
+    public static function extractZohoDiscount(array $zohoInv): array
+    {
+        $rawDisc = $zohoInv['discount'] ?? null;
+        $discPct = isset($zohoInv['discount_percent']) ? (float) $zohoInv['discount_percent'] : 0.0;
+
+        if ($discPct > 0) {
+            return ['discount_amount' => $discPct, 'discount_type' => 'Percentage'];
+        }
+        if (is_string($rawDisc) && str_contains($rawDisc, '%')) {
+            $parsedPct = (float) str_replace('%', '', $rawDisc);
+            if ($parsedPct > 0) {
+                return ['discount_amount' => $parsedPct, 'discount_type' => 'Percentage'];
+            }
+        }
+
+        return [
+            'discount_amount' => (float) ($zohoInv['discount_total'] ?? $rawDisc ?? 0),
+            'discount_type'   => 'Fixed',
+        ];
+    }
+
     public function getModuleName(): string
     {
         return 'invoices';
@@ -373,6 +394,8 @@ class InvoiceSyncService extends AbstractModuleSyncService
             $ewbData   = $this->extractEwayBillData($zohoInv);
             $ewbNumber = $ewbData['ewaybill_number'] ?? null;
 
+            $discountInfo = self::extractZohoDiscount($zohoInv);
+
             $invData = [
                 'customer_id'      => $localCustomerId,
                 'invoice_number'   => trim((string) ($zohoInv['invoice_number'] ?? ($localInv['invoice_number'] ?? $this->invoiceModel->generateInvoiceNumber()))),
@@ -385,8 +408,8 @@ class InvoiceSyncService extends AbstractModuleSyncService
                 'status'           => $localStatus,
                 'is_inter_state'   => $isInterState,
                 'subtotal'         => (float) ($zohoInv['sub_total'] ?? 0),
-                'discount_amount'  => (float) ($zohoInv['discount_total'] ?? $zohoInv['discount'] ?? 0),
-                'discount_type'    => 'Fixed',
+                'discount_amount'  => $discountInfo['discount_amount'],
+                'discount_type'    => $discountInfo['discount_type'],
                 'shipping_charge'  => (float) ($zohoInv['shipping_charge'] ?? 0),
                 'cgst_amount'      => $cgstTotal,
                 'sgst_amount'      => $sgstTotal,
@@ -565,6 +588,13 @@ class InvoiceSyncService extends AbstractModuleSyncService
             ];
         }
 
+        $localSubtotal = (float) ($inv['subtotal'] ?? 0);
+        $localDiscVal  = (float) ($inv['discount_amount'] ?? 0);
+        $localDiscType = (string) ($inv['discount_type'] ?? 'Fixed');
+        $effectiveDisc = ($localDiscType === 'Percentage')
+            ? round(($localSubtotal * $localDiscVal) / 100, 2)
+            : round($localDiscVal, 2);
+
         return [
             'customer_id'      => (int) ($inv['customer_id'] ?? 0),
             'invoice_number'   => trim((string) ($inv['invoice_number'] ?? '')),
@@ -572,9 +602,8 @@ class InvoiceSyncService extends AbstractModuleSyncService
             'due_date'         => (string) ($inv['due_date'] ?? ''),
             'reference_number' => (string) ($inv['reference_number'] ?? ''),
             'is_inter_state'   => !empty($inv['is_inter_state']) ? 1 : 0,
-            'subtotal'         => round((float) ($inv['subtotal'] ?? 0), 2),
-            'discount_amount'  => round((float) ($inv['discount_amount'] ?? 0), 2),
-            'discount_type'    => (string) ($inv['discount_type'] ?? 'Fixed'),
+            'subtotal'         => round($localSubtotal, 2),
+            'discount_amount'  => $effectiveDisc,
             'shipping_charge'  => round((float) ($inv['shipping_charge'] ?? 0), 2),
             'roundoff_amount'  => round((float) ($inv['roundoff_amount'] ?? 0), 2),
             'tax_amount'       => round((float) ($inv['tax_amount'] ?? 0), 2),

@@ -98,6 +98,11 @@
                         <i class="fas fa-copy me-1"></i> Clone
                     </a>
                 <?php endif; ?>
+                <?php if (!in_array($invoice['status'], ['Void', 'Draft'], true) && can('invoice.edit')): ?>
+                    <a href="<?= site_url('sales_returns/create?invoice_id=' . $invoice['id'] . '&customer_id=' . $invoice['customer_id']) ?>" class="btn btn-sm btn-light border fw-semibold text-dark" title="Create Credit Note &amp; Apply to Invoice">
+                        <i class="fas fa-undo me-1 text-warning"></i> Credit Note
+                    </a>
+                <?php endif; ?>
                 <?php
                 $ewbAction = $ewbState['action'] ?? 'generate';
                 $ewbRecord = $ewbState['eway_bill'] ?? null;

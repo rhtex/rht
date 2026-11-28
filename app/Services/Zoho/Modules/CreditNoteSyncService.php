@@ -124,19 +124,34 @@ class CreditNoteSyncService extends AbstractModuleSyncService
         if (!empty($return['invoice_id']) && !empty($newZohoId) && empty($zohoId)) {
             $invMap = $this->mappingModel->findByLocal('invoices', (int) $return['invoice_id']);
             if ($invMap && !empty($invMap['zoho_record_id'])) {
-                $this->client->post("/creditnotes/{$newZohoId}/invoices", [
-                    'invoices' => [
-                        [
-                            'invoice_id'     => $invMap['zoho_record_id'],
-                            'amount_applied' => round((float) ($return['total_amount'] ?? 0), 2),
-                        ],
-                    ],
-                ], [], [
-                    'module'          => 'credit_notes',
-                    'local_record_id' => $localId,
-                    'zoho_record_id'  => $newZohoId,
-                    'operation'       => 'APPLY_TO_INVOICE',
+                $zInvId       = (string) $invMap['zoho_record_id'];
+                $amountApply  = round((float) ($return['total_amount'] ?? 0), 2);
+                $zInvDetail   = $this->client->get("/invoices/{$zInvId}", [], [
+                    'module'          => 'invoices',
+                    'local_record_id' => (int) $return['invoice_id'],
+                    'zoho_record_id'  => $zInvId,
+                    'direction'       => 'FROM_ZOHO',
+                    'operation'       => 'CHECK_INVOICE_BALANCE',
                 ]);
+                if (!empty($zInvDetail['success']) && isset($zInvDetail['data']['invoice']['balance'])) {
+                    $zInvBal = (float) $zInvDetail['data']['invoice']['balance'];
+                    $amountApply = min($amountApply, max(0.0, round($zInvBal, 2)));
+                }
+                if ($amountApply > 0) {
+                    $this->client->post("/creditnotes/{$newZohoId}/invoices", [
+                        'invoices' => [
+                            [
+                                'invoice_id'     => $zInvId,
+                                'amount_applied' => $amountApply,
+                            ],
+                        ],
+                    ], [], [
+                        'module'          => 'credit_notes',
+                        'local_record_id' => $localId,
+                        'zoho_record_id'  => $newZohoId,
+                        'operation'       => 'APPLY_TO_INVOICE',
+                    ]);
+                }
             }
         }
 

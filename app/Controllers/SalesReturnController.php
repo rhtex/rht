@@ -341,7 +341,7 @@ class SalesReturnController extends BaseController
             ? round((max(0.0, $subtotal - $discountValue) * $agentPct) / 100, 2)
             : 0.0;
 
-        $this->returnModel->update($returnId, [
+        $returnUpdate = [
             'subtotal'                => $subtotal,
             'discount_amount'         => $rawDiscount,
             'discount_type'           => $discountType,
@@ -349,17 +349,60 @@ class SalesReturnController extends BaseController
             'adjustment'              => $adjustment,
             'agent_amount_adjustment' => $agentAmountAdjustment,
             'total_amount'            => $totalAmount,
-        ]);
+        ];
 
-        // Automatically reduce unpaid agent commission amount on the linked invoice
-        if ($linkedInvoice && $agentAmountAdjustment > 0 && ($linkedInvoice['agent_commission_status'] ?? '') === 'Unpaid') {
-            $currentInvComm = (float) ($linkedInvoice['agent_commission_amount'] ?? 0);
-            if ($currentInvComm > 0) {
-                $newInvComm = max(0.0, round($currentInvComm - $agentAmountAdjustment, 2));
-                $this->invoiceModel->update((int) $linkedInvoice['id'], [
-                    'agent_commission_amount' => $newInvComm,
-                ]);
+        // Apply Credit Note directly to linked Invoice (update invoice paid_amount, balance, status)
+        if ($linkedInvoice && ($linkedInvoice['status'] ?? '') !== 'Void') {
+            $invId = (int) $linkedInvoice['id'];
+            $invBeforeBalance = (float) ($linkedInvoice['balance'] ?? 0);
+
+            if ($invBeforeBalance > 0 && $totalAmount > 0) {
+                $returnUpdate['status'] = 'Closed';
             }
+
+            $this->returnModel->update($returnId, $returnUpdate);
+
+            $payRow = $db->table('invoice_payments')
+                ->select('COALESCE(SUM(amount + COALESCE(discount_amount,0) + COALESCE(mahimai_amount,0) + COALESCE(postal_charges,0)), 0) as total_paid')
+                ->where('invoice_id', $invId)
+                ->get()->getRowArray();
+            $retRow = $db->table('sales_returns')
+                ->select('COALESCE(SUM(total_amount), 0) as total_returns')
+                ->where('invoice_id', $invId)
+                ->where('status !=', 'Void')
+                ->get()->getRowArray();
+
+            $totalDeductions = (float) ($payRow['total_paid'] ?? 0) + (float) ($retRow['total_returns'] ?? 0);
+            $invTotal        = (float) ($linkedInvoice['total_amount'] ?? 0);
+            $newBalance      = max(0.0, round($invTotal - $totalDeductions, 2));
+            $newStatus       = $linkedInvoice['status'];
+            if ($newStatus !== 'Draft') {
+                if ($newBalance <= 0.009) {
+                    $newStatus = 'Paid';
+                } elseif ($totalDeductions > 0) {
+                    $newStatus = 'Partially Paid';
+                } else {
+                    $newStatus = 'Open';
+                }
+            }
+
+            $invUpdate = [
+                'paid_amount' => round($totalDeductions, 2),
+                'balance'     => $newBalance,
+                'status'      => $newStatus,
+            ];
+
+            // Automatically reduce unpaid agent commission amount on the linked invoice
+            if ($agentAmountAdjustment > 0 && ($linkedInvoice['agent_commission_status'] ?? '') === 'Unpaid') {
+                $currentInvComm = (float) ($linkedInvoice['agent_commission_amount'] ?? 0);
+                if ($currentInvComm > 0) {
+                    $invUpdate['agent_commission_amount'] = max(0.0, round($currentInvComm - $agentAmountAdjustment, 2));
+                }
+            }
+
+            $this->invoiceModel->update($invId, $invUpdate);
+        } else {
+            $this->returnModel->update($returnId, $returnUpdate);
         }
 
         $db->transComplete();

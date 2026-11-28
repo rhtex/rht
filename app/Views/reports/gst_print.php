@@ -5,25 +5,38 @@ if (!empty($filters['party_id'])) {
         if ((int) $c['id'] === (int) $filters['party_id']) { $customerName = $c['name']; break; }
     }
 }
-$periodLabel = ($filters['date_from'] ? date('d M Y', strtotime($filters['date_from'])) : 'Beginning')
-    . ' to ' . ($filters['date_to'] ? date('d M Y', strtotime($filters['date_to'])) : 'Today');
+$df = $filters['date_from'] ?? '';
+$dt = $filters['date_to'] ?? '';
+$periodLabel = ($df ? date('d M Y', strtotime($df)) : 'Beginning')
+    . ' to ' . ($dt ? date('d M Y', strtotime($dt)) : 'Today');
+if ($df && $dt && date('Y-m-01', strtotime($df)) === $df && date('Y-m-t', strtotime($df)) === $dt) {
+    $forPeriod = 'for the Month of ' . date('F Y', strtotime($df));
+} elseif ($df && $dt) {
+    $forPeriod = 'from ' . date('d M Y', strtotime($df)) . ' to ' . date('d M Y', strtotime($dt));
+} elseif ($df) {
+    $forPeriod = 'from ' . date('d M Y', strtotime($df));
+} elseif ($dt) {
+    $forPeriod = 'up to ' . date('d M Y', strtotime($dt));
+} else {
+    $forPeriod = '(All Time)';
+}
 $n = static fn($v) => number_format((float) $v, 2);
 $netGst = ($totals['tax'] - $salesReturnTotals['tax']) - $billTotals['tax'];
 $sec = $section ?? '';
 $showAll = !in_array($sec, ['invoices', 'bills', 'sales_returns', 'purchase_returns'], true);
 $secTitles = [
-    'invoices'         => 'GST Report - Invoices',
-    'bills'            => 'GST Report - Bills (Purchases)',
-    'sales_returns'    => 'GST Report - Sales Returns (Credit Notes)',
-    'purchase_returns' => 'GST Report - Purchase Returns (Debit Notes)',
+    'invoices'         => 'Sales Invoices ' . $forPeriod,
+    'bills'            => 'Purchase Bills ' . $forPeriod,
+    'sales_returns'    => 'Sales Returns ' . $forPeriod,
+    'purchase_returns' => 'Purchase Returns ' . $forPeriod,
 ];
-$reportHeading = $secTitles[$sec] ?? 'GST Report (Invoices, Bills, Sales Returns & Purchase Returns)';
+$reportHeading = $secTitles[$sec] ?? ('GST Report ' . $forPeriod);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GST Report - <?= esc($periodLabel) ?></title>
+    <title><?= esc($reportHeading) ?></title>
     <style>
         @page {
             size: A4 landscape;
@@ -103,7 +116,7 @@ $reportHeading = $secTitles[$sec] ?? 'GST Report (Invoices, Bills, Sales Returns
     <?php endif; ?>
 
     <?php if ($showAll || $sec === 'invoices'): ?>
-    <h2>1. Invoices (<?= count($rows) ?>)</h2>
+    <h2>1. <?= esc($secTitles['invoices']) ?> (<?= count($rows) ?>)</h2>
     <table>
         <thead><tr><th>#</th><th>Date</th><th>Invoice #</th><th>Customer / GSTIN</th><th class="r">Qty Sold</th><th class="r">Subtotal</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">IGST</th><th class="r">Total</th></tr></thead>
         <tbody>
@@ -124,7 +137,7 @@ $reportHeading = $secTitles[$sec] ?? 'GST Report (Invoices, Bills, Sales Returns
     <?php endif; ?>
 
     <?php if ($showAll || $sec === 'bills'): ?>
-    <h2>2. Bills / Purchases (<?= count($billRows) ?>)</h2>
+    <h2>2. <?= esc($secTitles['bills']) ?> (<?= count($billRows) ?>)</h2>
     <table>
         <thead><tr><th>#</th><th>Date</th><th>Bill #</th><th>Vendor / GSTIN</th><th class="r">Qty</th><th class="r">Subtotal</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">IGST</th><th class="r">Total</th></tr></thead>
         <tbody>
@@ -145,7 +158,7 @@ $reportHeading = $secTitles[$sec] ?? 'GST Report (Invoices, Bills, Sales Returns
     <?php endif; ?>
 
     <?php if ($showAll || $sec === 'sales_returns'): ?>
-    <h2>3. Sales Returns / Credit Notes (<?= count($salesReturnRows) ?>)</h2>
+    <h2>3. <?= esc($secTitles['sales_returns']) ?> (<?= count($salesReturnRows) ?>)</h2>
     <table>
         <thead><tr><th>#</th><th>Date</th><th>Return #</th><th>Customer / GSTIN</th><th>Invoice #</th><th class="r">Qty</th><th class="r">Subtotal</th><th class="r">Tax</th><th class="r">Total</th></tr></thead>
         <tbody>
@@ -166,7 +179,7 @@ $reportHeading = $secTitles[$sec] ?? 'GST Report (Invoices, Bills, Sales Returns
     <?php endif; ?>
 
     <?php if ($showAll || $sec === 'purchase_returns'): ?>
-    <h2>4. Purchase Returns / Debit Notes (<?= count($purchaseReturnRows) ?>)</h2>
+    <h2>4. <?= esc($secTitles['purchase_returns']) ?> (<?= count($purchaseReturnRows) ?>)</h2>
     <table>
         <thead><tr><th>#</th><th>Date</th><th>Reference #</th><th>Vendor / GSTIN</th><th>Bill #</th><th class="r">Amount</th><th class="r">Used</th><th class="r">Balance</th></tr></thead>
         <tbody>

@@ -16,37 +16,6 @@ class ReportController extends BaseController
     private const MAX_PDF_INVOICES = 300;
 
     /**
-     * Taxable value of a document row, derived from the billed totals so it always
-     * matches the tax actually charged: total - tax - shipping - round-off - adjustment.
-     * Falls back to subtotal - discount when no total is stored.
-     */
-    private static function taxableValue(array $r, float $tax): float
-    {
-        $total = (float) ($r['total_amount'] ?? 0);
-        if ($total > 0) {
-            return round($total - $tax
-                - (float) ($r['shipping_charge'] ?? 0)
-                - (float) ($r['roundoff_amount'] ?? 0)
-                - (float) ($r['adjustment'] ?? 0), 2);
-        }
-        return (float) ($r['subtotal'] ?? 0) - self::discountValue($r);
-    }
-
-    /**
-     * Actual discount amount of a document row.
-     * When discount_type is "Percentage", discount_amount holds the percent value (e.g. 30 = 30%).
-     */
-    private static function discountValue(array $r): float
-    {
-        $subtotal = (float) ($r['subtotal'] ?? 0);
-        $amount   = (float) ($r['discount_amount'] ?? 0);
-        if (strcasecmp((string) ($r['discount_type'] ?? ''), 'Percentage') === 0) {
-            return round($subtotal * $amount / 100, 2);
-        }
-        return $amount;
-    }
-
-    /**
      * Report type definitions (table, party, columns, view links).
      */
     private function definitions(): array
@@ -270,20 +239,17 @@ class ReportController extends BaseController
                 $paid     = (float) ($r['used_amount'] ?? 0);
                 $balance  = (float) ($r['balance'] ?? 0);
             } elseif ($type === 'credit-notes') {
+                $subtotal = (float) ($r['subtotal'] ?? 0);
                 $tax      = (float) ($r['tax_amount'] ?? 0);
-                $subtotal = self::taxableValue($r, $tax);
                 $total    = (float) ($r['total_amount'] ?? 0);
                 $paid     = $total; // credit notes are applied against the invoice
                 $balance  = 0.0;
             } else {
+                $subtotal = (float) ($r['subtotal'] ?? 0);
                 $tax      = (float) ($r['tax_amount'] ?? 0);
-                if ($tax <= 0) {
-                    $tax = (float) ($r['cgst_amount'] ?? 0) + (float) ($r['sgst_amount'] ?? 0) + (float) ($r['igst_amount'] ?? 0);
-                }
-                $subtotal = self::taxableValue($r, $tax);
-                $total   = (float) ($r['total_amount'] ?? 0);
-                $paid    = (float) ($r['paid_amount'] ?? 0);
-                $balance = (float) ($r['balance'] ?? 0);
+                $total    = (float) ($r['total_amount'] ?? 0);
+                $paid     = (float) ($r['paid_amount'] ?? 0);
+                $balance  = (float) ($r['balance'] ?? 0);
             }
 
             $items[] = [
@@ -389,14 +355,11 @@ class ReportController extends BaseController
         $rateSummary = [];
         foreach ($rows as &$r) {
             $r['qty']     = (float) ($r['qty_sold'] ?? 0);
-            $r['cgst']    = (float) $r['cgst_amount'];
-            $r['sgst']    = (float) $r['sgst_amount'];
-            $r['igst']    = (float) $r['igst_amount'];
-            $r['tax']     = $r['cgst'] + $r['sgst'] + $r['igst'];
-            if ($r['tax'] <= 0) {
-                $r['tax'] = (float) $r['tax_amount'];
-            }
-            $r['taxable'] = self::taxableValue($r, $r['tax']);
+            $r['taxable'] = (float) ($r['subtotal'] ?? 0);
+            $r['cgst']    = (float) ($r['cgst_amount'] ?? 0);
+            $r['sgst']    = (float) ($r['sgst_amount'] ?? 0);
+            $r['igst']    = (float) ($r['igst_amount'] ?? 0);
+            $r['tax']     = (float) ($r['tax_amount'] ?? 0);
             $r['is_b2b']  = !empty($r['customer_gstin']);
             $r['is_void'] = strcasecmp((string) $r['status'], 'Void') === 0;
 
@@ -413,11 +376,8 @@ class ReportController extends BaseController
             $totals['tax']     += $r['tax'];
             $totals['total']   += (float) $r['total_amount'];
 
-            // GST rate bucket: use the line-item tax rate; fall back to effective rate
-            $rate = (float) ($r['item_tax_rate'] ?? 0) > 0
-                ? round((float) $r['item_tax_rate'])
-                : ($r['taxable'] > 0 ? round($r['tax'] / $r['taxable'] * 100) : 0);
-            $key  = (int) $rate;
+            // GST rate bucket from stored line-item tax rate
+            $key = (int) round((float) ($r['item_tax_rate'] ?? 0));
             if (!isset($rateSummary[$key])) {
                 $rateSummary[$key] = ['count' => 0, 'qty' => 0, 'taxable' => 0, 'cgst' => 0, 'sgst' => 0, 'igst' => 0, 'total' => 0];
             }

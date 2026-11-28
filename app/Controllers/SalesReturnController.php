@@ -513,6 +513,7 @@ class SalesReturnController extends BaseController
 
         $newName = $file->getRandomName();
         $file->move($uploadDir, $newName);
+        \App\Libraries\ImageCompressor::compress($uploadDir . '/' . $newName);
 
         if (!empty($ret['return_copy'])) {
             $oldPath = FCPATH . ltrim((string) $ret['return_copy'], '/');

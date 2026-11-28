@@ -720,6 +720,7 @@ class BillController extends BaseController
 
         $newName = $file->getRandomName();
         $file->move($uploadDir, $newName);
+        \App\Libraries\ImageCompressor::compress($uploadDir . '/' . $newName);
 
         // Remove previous file if replacing
         if (!empty($bill['bill_copy'])) {

@@ -143,9 +143,15 @@ $uid      = preg_replace('/[^a-zA-Z0-9_]/', '_', $fieldName . '_' . uniqid());
 
     document.getElementById('docCamCaptureBtn')?.addEventListener('click', function() {
         if (!activeUid || !video.videoWidth) return;
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
+        const maxDim = 1600;
+        let w = video.videoWidth, h = video.videoHeight;
+        if (w > maxDim || h > maxDim) {
+            if (w >= h) { h = Math.round(h * maxDim / w); w = maxDim; }
+            else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(video, 0, 0, w, h);
         canvas.toBlob(function(blob) {
             if (!blob) return;
             const file = new File([blob], 'capture_' + Date.now() + '.jpg', { type: 'image/jpeg' });
@@ -155,7 +161,7 @@ $uid      = preg_replace('/[^a-zA-Z0-9_]/', '_', $fieldName . '_' . uniqid());
             stopStream();
             bootstrap.Modal.getOrCreateInstance(modalEl).hide();
             document.getElementById('form_' + activeUid).submit();
-        }, 'image/jpeg', 0.9);
+        }, 'image/jpeg', 0.78);
     });
 })();
 </script>

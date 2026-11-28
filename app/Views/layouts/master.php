@@ -202,6 +202,57 @@
                 window.history.back();
             }
         });
+
+        // Global client-side image compression for all <input type="file"> uploads
+        window.compressImageFile = function(file, maxDim, quality) {
+            maxDim = maxDim || 1600;
+            quality = quality || 0.78;
+            return new Promise(function(resolve) {
+                if (!file || !/^image\/(jpeg|png|webp)$/i.test(file.type) || file.size <= 150 * 1024) {
+                    return resolve(file);
+                }
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                img.onload = function() {
+                    URL.revokeObjectURL(url);
+                    let w = img.naturalWidth || img.width;
+                    let h = img.naturalHeight || img.height;
+                    if (!w || !h) return resolve(file);
+                    if (w > maxDim || h > maxDim) {
+                        if (w >= h) { h = Math.round(h * maxDim / w); w = maxDim; }
+                        else { w = Math.round(w * maxDim / h); h = maxDim; }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const outType = file.type === 'image/webp' ? 'image/webp' : 'image/jpeg';
+                    const outExt  = outType === 'image/webp' ? '.webp' : '.jpg';
+                    canvas.toBlob(function(blob) {
+                        if (!blob || blob.size >= file.size) return resolve(file);
+                        const newName = file.name.replace(/\.[^.]+$/, '') + outExt;
+                        resolve(new File([blob], newName, { type: outType, lastModified: Date.now() }));
+                    }, outType, quality);
+                };
+                img.onerror = function() { URL.revokeObjectURL(url); resolve(file); };
+                img.src = url;
+            });
+        };
+
+        document.addEventListener('change', async function(e) {
+            const inp = e.target;
+            if (!inp || inp.tagName !== 'INPUT' || inp.type !== 'file') return;
+            if (inp.dataset.compressing === '1' || !inp.files || !inp.files.length) return;
+            const hasCompressible = Array.from(inp.files).some(f => /^image\/(jpeg|png|webp)$/i.test(f.type) && f.size > 150 * 1024);
+            if (!hasCompressible) return;
+
+            const dt = new DataTransfer();
+            for (const f of inp.files) {
+                dt.items.add(await window.compressImageFile(f));
+            }
+            inp.dataset.compressing = '1';
+            inp.files = dt.files;
+            delete inp.dataset.compressing;
+        }, true);
     </script>
     <?= $this->renderSection('scripts') ?>
     <!-- Line Item Drag & Drop Reordering -->

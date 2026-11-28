@@ -29,20 +29,20 @@ $n = static fn($v) => number_format((float) $v, 2);
             }
         }
         * { box-sizing: border-box; }
-        body { font-family: Helvetica, Arial, sans-serif; font-size: 12.5px; font-weight: 500; color: #111; margin: 0; padding: 14px; }
-        .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
-        .head h1 { font-size: 19px; margin: 0 0 2px; font-weight: 700; }
-        .head .company { font-size: 14px; font-weight: 700; }
-        .meta { font-size: 12px; color: #333; text-align: right; line-height: 1.5; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #000; margin: 0; padding: 14px; }
+        .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px; }
+        .head h1 { font-size: 20px; margin: 0 0 2px; font-weight: 700; }
+        .head .company { font-size: 15px; font-weight: 700; }
+        .meta { font-size: 13px; color: #111; text-align: right; line-height: 1.5; font-weight: 600; }
         .kpis { display: flex; gap: 8px; margin-bottom: 10px; }
-        .kpi { flex: 1; border: 1px solid #999; border-radius: 4px; padding: 6px 8px; }
-        .kpi .l { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #444; }
-        .kpi .v { font-size: 14px; font-weight: 700; }
+        .kpi { flex: 1; border: 1.5px solid #666; border-radius: 4px; padding: 6px 8px; }
+        .kpi .l { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #222; }
+        .kpi .v { font-size: 15px; font-weight: 700; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #888; padding: 4px 6px; font-size: 12px; }
-        th { background: #eaeaea; text-align: left; font-size: 11.5px; font-weight: 700; color: #000; }
+        th, td { border: 1px solid #666; padding: 5px 7px; font-size: 13.5px; font-weight: 600; }
+        th { background: #e5e5e5; text-align: left; font-size: 13px; font-weight: 700; color: #000; }
         td.r, th.r { text-align: right; }
-        .total-row td { font-weight: 700; font-size: 12.5px; background: #f0f0f0; border-top: 2px solid #333; }
+        .total-row td { font-weight: 700; font-size: 14px; background: #eaeaea; border-top: 2px solid #000; }
         tr { page-break-inside: avoid; }
         thead { display: table-header-group; }
         .void td { color: #999; text-decoration: line-through; }

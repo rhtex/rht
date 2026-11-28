@@ -7,7 +7,13 @@
     <div class="col-sm-6">
         <h1 class="m-0"><i class="fas fa-chart-bar text-primary me-2"></i>Reports</h1>
     </div>
-    <div class="col-sm-6 text-end">
+    <div class="col-sm-6 text-end d-flex gap-2 justify-content-end">
+        <?php
+        $printQuery = $_GET;
+        $printQuery['print'] = '1';
+        $printReportUrl = site_url('reports/' . $type) . '?' . http_build_query($printQuery);
+        ?>
+        <a href="<?= esc($printReportUrl) ?>" target="_blank" class="btn btn-sm btn-outline-dark"><i class="fas fa-print me-1"></i> Print Report</a>
         <?php if (can('invoice.view')): ?>
         <a href="<?= site_url('reports/gst') ?>" class="btn btn-sm btn-outline-success"><i class="fas fa-percent me-1"></i> GST Report</a>
         <?php endif; ?>

@@ -284,7 +284,9 @@ class ReportController extends BaseController
         );
         $parties = $db->table($def['party_table'])->select('id, name')->orderBy('name')->get()->getResultArray();
 
-        return view('reports/documents', [
+        $viewName = $this->request->getGet('print') === '1' ? 'reports/documents_print' : 'reports/documents';
+
+        return view($viewName, [
             'title'         => $def['title'],
             'type'          => $type,
             'def'           => $def,

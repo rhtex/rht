@@ -440,14 +440,16 @@
         </div>
 
         <!-- FORM ACTION BUTTONS -->
-        <div class="card-footer bg-white p-3 d-flex justify-content-between align-items-center">
-            <a href="<?= site_url('bills') ?>" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Back to Bills
-            </a>
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary px-4 shadow-sm">
-                    <i class="fas fa-check-circle me-1"></i> <?= $bill ? 'Update Purchase Bill' : 'Save Purchase Bill' ?>
-                </button>
+        <div class="card-footer bg-white p-3">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <a href="<?= site_url('bills') ?>" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Bills
+                </a>
+                <div class="d-flex gap-2 ms-auto">
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                        <i class="fas fa-check-circle me-1"></i> <?= $bill ? 'Update Purchase Bill' : 'Save Purchase Bill' ?>
+                    </button>
+                </div>
             </div>
         </div>
 

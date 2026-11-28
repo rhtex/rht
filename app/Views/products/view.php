@@ -66,11 +66,11 @@
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label">Purchase Price</label>
-                            <input type="number" step="0.01" name="purchase_price" class="form-control" value="<?= $last_item['purchase_price'] ?? '' ?>" required>
+                            <input type="number" step="any" name="purchase_price" class="form-control" value="<?= $last_item['purchase_price'] ?? '' ?>" required>
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label">Selling Price</label>
-                            <input type="number" step="0.01" name="selling_price" class="form-control" value="<?= $product['selling_price'] ?>" required>
+                            <input type="number" step="any" name="selling_price" class="form-control" value="<?= $product['selling_price'] ?>" required>
                             <small class="text-muted">Defaults to product price.</small>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -286,7 +286,7 @@
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Est. Damage Cost / Loss Price (₹)</label>
-                                                                    <input type="number" name="damage_price" class="form-control" step="0.01" min="0" placeholder="0.00">
+                                                                    <input type="number" name="damage_price" class="form-control" step="any" min="0" placeholder="0.00">
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Damage Photo</label>

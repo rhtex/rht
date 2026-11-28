@@ -90,7 +90,7 @@
 
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Opening Balance</label>
-                    <input type="number" step="0.01" name="opening_balance" class="form-control" value="<?= old('opening_balance', $vendor['opening_balance'] ?? '0.00') ?>">
+                    <input type="number" step="any" name="opening_balance" class="form-control" value="<?= old('opening_balance', $vendor['opening_balance'] ?? '0.00') ?>">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Balance Type</label>

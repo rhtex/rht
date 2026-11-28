@@ -71,14 +71,14 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Gross Settlement Amount <span class="text-danger">*</span></label>
-                                    <input type="number" name="gross_settlement" id="gross_settlement" class="form-control fw-bold" step="0.01" min="0.01" value="<?= $currentSettlement ?>" required oninput="calculateFromGross()">
+                                    <input type="number" name="gross_settlement" id="gross_settlement" class="form-control fw-bold" step="any" min="0.01" value="<?= $currentSettlement ?>" required oninput="calculateFromGross()">
                                     <small class="text-muted">Total amount being settled from the bill</small>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label text-success fw-bold">Amount to Pay (Cash/Bank)</label>
-                                    <input type="number" name="amount" id="net_amount" class="form-control fw-bold bg-light" step="0.01" value="<?= $payment['amount'] ?>" readonly>
+                                    <input type="number" name="amount" id="net_amount" class="form-control fw-bold bg-light" step="any" value="<?= $payment['amount'] ?>" readonly>
                                     <small class="text-muted">Net cash payment after deductions</small>
                                 </div>
                             </div>
@@ -89,8 +89,8 @@
                                 <div class="mb-3">
                                     <label class="form-label">Post-sale Discount</label>
                                     <div class="input-group">
-                                        <input type="number" id="ded_discount_pct" class="form-control" placeholder="%" step="0.01" oninput="calculateFromPct('discount')">
-                                        <input type="number" name="discount_amount" id="ded_discount" class="form-control" step="0.01" value="<?= $payment['discount_amount'] ?? 0 ?>" oninput="calculateNetByAmount()">
+                                        <input type="number" id="ded_discount_pct" class="form-control" placeholder="%" step="any" oninput="calculateFromPct('discount')">
+                                        <input type="number" name="discount_amount" id="ded_discount" class="form-control" step="any" value="<?= $payment['discount_amount'] ?? 0 ?>" oninput="calculateNetByAmount()">
                                     </div>
                                 </div>
                             </div>
@@ -98,15 +98,15 @@
                                 <div class="mb-3">
                                     <label class="form-label">Mahimai Amount</label>
                                     <div class="input-group">
-                                        <input type="number" id="ded_mahimai_pct" class="form-control" placeholder="%" step="0.01" oninput="calculateFromPct('mahimai')">
-                                        <input type="number" name="mahimai_amount" id="ded_mahimai" class="form-control" step="0.01" value="<?= $payment['mahimai_amount'] ?? 0 ?>" oninput="calculateNetByAmount()">
+                                        <input type="number" id="ded_mahimai_pct" class="form-control" placeholder="%" step="any" oninput="calculateFromPct('mahimai')">
+                                        <input type="number" name="mahimai_amount" id="ded_mahimai" class="form-control" step="any" value="<?= $payment['mahimai_amount'] ?? 0 ?>" oninput="calculateNetByAmount()">
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label class="form-label">Postal Charges</label>
-                                    <input type="number" name="postal_charges" id="ded_postal" class="form-control" step="0.01" value="<?= $payment['postal_charges'] ?? 0 ?>" oninput="calculateNetByAmount()">
+                                    <input type="number" name="postal_charges" id="ded_postal" class="form-control" step="any" value="<?= $payment['postal_charges'] ?? 0 ?>" oninput="calculateNetByAmount()">
                                 </div>
                             </div>
                         </div>

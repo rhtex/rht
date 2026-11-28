@@ -63,7 +63,7 @@
                     </div>
                     <div class="mb-2">
                         <label class="form-label">Amount</label>
-                        <input type="number" step="0.01" name="amount" class="form-control" placeholder="0.00" required>
+                        <input type="number" step="any" name="amount" class="form-control" placeholder="0.00" required>
                     </div>
                     <div class="mb-2">
                         <label class="form-label">Reference No</label>

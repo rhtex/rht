@@ -135,7 +135,7 @@
                             <label class="form-label">Transport Amount</label>
                             <div class="input-group">
                                 <span class="input-group-text">₹</span>
-                                <input type="number" step="0.01" name="transport_amount" id="modalTransportAmount" class="form-control" placeholder="0.00">
+                                <input type="number" step="any" name="transport_amount" id="modalTransportAmount" class="form-control" placeholder="0.00">
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -150,7 +150,7 @@
                         <label class="form-label">Shipping Charge (Booking/Extra)</label>
                         <div class="input-group">
                             <span class="input-group-text">₹</span>
-                            <input type="number" step="0.01" name="waybill_shipping_charge" id="modalWaybillShippingCharge" class="form-control" placeholder="0.00">
+                            <input type="number" step="any" name="waybill_shipping_charge" id="modalWaybillShippingCharge" class="form-control" placeholder="0.00">
                         </div>
                     </div>
                     <div class="mb-3">

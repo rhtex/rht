@@ -37,17 +37,17 @@
 
             <div class="mb-3">
                 <label for="loan_amount" class="form-label">Total Loan Amount</label>
-                <input type="number" step="0.01" class="form-control" name="loan_amount" value="<?= old('loan_amount', $loan['loan_amount']) ?>" required>
+                <input type="number" step="any" class="form-control" name="loan_amount" value="<?= old('loan_amount', $loan['loan_amount']) ?>" required>
             </div>
 
             <div class="mb-3">
                 <label for="remaining_amount" class="form-label">Remaining Amount</label>
-                <input type="number" step="0.01" class="form-control" name="remaining_amount" value="<?= old('remaining_amount', $loan['remaining_amount']) ?>" required>
+                <input type="number" step="any" class="form-control" name="remaining_amount" value="<?= old('remaining_amount', $loan['remaining_amount']) ?>" required>
             </div>
 
             <div class="mb-3">
                 <label for="monthly_deduction" class="form-label">Monthly Deduction</label>
-                <input type="number" step="0.01" class="form-control" name="monthly_deduction" value="<?= old('monthly_deduction', $loan['monthly_deduction']) ?>" required>
+                <input type="number" step="any" class="form-control" name="monthly_deduction" value="<?= old('monthly_deduction', $loan['monthly_deduction']) ?>" required>
             </div>
 
             <div class="mb-3">

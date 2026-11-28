@@ -193,7 +193,7 @@
                                     </option>
                                 <?php endforeach; ?>
                             </select>
-                            <input type="number" step="0.01" min="0" max="100" name="agent_commission_percent" id="agentCommissionPercent"
+                            <input type="number" step="any" min="0" max="100" name="agent_commission_percent" id="agentCommissionPercent"
                                 class="form-control text-end" style="max-width: 80px;" placeholder="%" title="Commission %"
                                 value="<?= esc($order['agent_commission_percent'] ?? ($quotation['agent_commission_percent'] ?? 0)) ?>">
                             <span class="input-group-text bg-light text-muted" style="font-size: 0.75rem;">%</span>
@@ -311,8 +311,8 @@
                                             placeholder="Item specifications / notes..." value="<?= esc($item['description'] ?? '') ?>">
                                     </td>
                                     <td><input type="text" name="items[<?= $index ?>][hsn_code]" class="form-control text-center hsn" value="<?= esc($item['hsn_code'] ?? '') ?>"></td>
-                                    <td><input type="number" name="items[<?= $index ?>][quantity]" class="form-control text-end qty" value="<?= esc($item['quantity']) ?>" step="0.01" min="0.01" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
-                                    <td><input type="number" name="items[<?= $index ?>][rate]" class="form-control text-end rate" value="<?= esc($item['rate']) ?>" step="0.01" min="0" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
+                                    <td><input type="number" name="items[<?= $index ?>][quantity]" class="form-control text-end qty" value="<?= esc($item['quantity']) ?>" step="any" min="0.01" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
+                                    <td><input type="number" name="items[<?= $index ?>][rate]" class="form-control text-end rate" value="<?= esc($item['rate']) ?>" step="any" min="0" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
                                     <td>
                                         <select name="items[<?= $index ?>][tax_percentage]" class="form-select text-end gst" onchange="calculateRow(this)">
                                             <option value="0">0%</option>
@@ -347,8 +347,8 @@
                                     <input type="text" name="items[0][description]" class="form-control form-control-sm mt-1 desc-input" placeholder="Item specifications / notes...">
                                 </td>
                                 <td><input type="text" name="items[0][hsn_code]" class="form-control text-center hsn"></td>
-                                <td><input type="number" name="items[0][quantity]" class="form-control text-end qty" value="1" step="0.01" min="0.01" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
-                                <td><input type="number" name="items[0][rate]" class="form-control text-end rate" value="0.00" step="0.01" min="0" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
+                                <td><input type="number" name="items[0][quantity]" class="form-control text-end qty" value="1" step="any" min="0.01" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
+                                <td><input type="number" name="items[0][rate]" class="form-control text-end rate" value="0.00" step="any" min="0" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
                                 <td>
                                     <select name="items[0][tax_percentage]" class="form-select text-end gst" onchange="calculateRow(this)">
                                         <option value="0">0%</option>
@@ -396,7 +396,7 @@
                         <td class="gst-summary-label align-middle">Less: Discount</td>
                         <td>
                             <div class="d-flex gap-1">
-                                <input type="number" step="0.01" name="discount_amount" id="discount_amount" class="form-control text-end"
+                                <input type="number" step="any" name="discount_amount" id="discount_amount" class="form-control text-end"
                                     value="<?= esc($order['discount_amount'] ?? ($quotation['discount_amount'] ?? 0)) ?>" min="0" oninput="calculateTotals()" onchange="calculateTotals()">
                                 <select name="discount_type" id="discount_type" class="form-select flex-shrink-0" style="width: 50px; padding: 2px;" onchange="calculateTotals()">
                                     <option value="Percentage" <?= ((($order['discount_type'] ?? ($quotation['discount_type'] ?? '')) == 'Percentage') || empty($order['discount_type'])) ? 'selected' : '' ?>>%</option>
@@ -418,7 +418,7 @@
                     <tr>
                         <td class="gst-summary-label">Add: Shipping</td>
                         <td><input type="number" name="shipping_charge" id="shipping_charge" class="form-control text-end"
-                            value="<?= esc($order['shipping_charge'] ?? ($quotation['shipping_charge'] ?? 0)) ?>" min="0" step="0.01" oninput="calculateTotals()" onchange="calculateTotals()"></td>
+                            value="<?= esc($order['shipping_charge'] ?? ($quotation['shipping_charge'] ?? 0)) ?>" min="0" step="any" oninput="calculateTotals()" onchange="calculateTotals()"></td>
                     </tr>
                     <tr>
                         <td class="gst-summary-label">Round Off</td>
@@ -475,8 +475,8 @@
                 <input type="text" name="items[${rowIndex}][description]" class="form-control form-control-sm mt-1 desc-input" placeholder="Item specifications / notes...">
             </td>
             <td><input type="text" name="items[${rowIndex}][hsn_code]" class="form-control text-center hsn"></td>
-            <td><input type="number" name="items[${rowIndex}][quantity]" class="form-control text-end qty" value="1" step="0.01" min="0.01" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
-            <td><input type="number" name="items[${rowIndex}][rate]" class="form-control text-end rate" value="0.00" step="0.01" min="0" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
+            <td><input type="number" name="items[${rowIndex}][quantity]" class="form-control text-end qty" value="1" step="any" min="0.01" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
+            <td><input type="number" name="items[${rowIndex}][rate]" class="form-control text-end rate" value="0.00" step="any" min="0" required oninput="calculateRow(this)" onchange="calculateRow(this)"></td>
             <td>
                 <select name="items[${rowIndex}][tax_percentage]" class="form-select text-end gst" onchange="calculateRow(this)">
                     ${taxOptions}

@@ -98,7 +98,7 @@
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Commission Percentage (%)</label>
-                            <input type="number" step="0.01" name="commission_percentage" class="form-control" value="<?= old('commission_percentage', $isEdit ? $agent['commission_percentage'] : '2.00') ?>" required>
+                            <input type="number" step="any" name="commission_percentage" class="form-control" value="<?= old('commission_percentage', $isEdit ? $agent['commission_percentage'] : '2.00') ?>" required>
                             <small class="text-muted">Default commission percentage for this agent.</small>
                         </div>
                     </div>

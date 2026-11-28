@@ -95,7 +95,7 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label"><?= isset($yarn) ? 'Total KGs in Stock' : 'New Stock in KGs' ?> <span class="text-danger">*</span></label>
-                    <input type="number" step="0.01" name="stock_kg" class="form-control" value="<?= old('stock_kg', $yarn['stock_kg'] ?? '0.00') ?>" required>
+                    <input type="number" step="any" name="stock_kg" class="form-control" value="<?= old('stock_kg', $yarn['stock_kg'] ?? '0.00') ?>" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Status</label>

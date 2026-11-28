@@ -30,19 +30,19 @@
             <div class="row mt-2">
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Transport Charges (₹)</label>
-                    <input type="number" step="0.01" name="transport_charges" id="transport_charges" class="form-control expense-input" value="<?= isset($isEdit) ? esc($receipt['transport_charges']) : '0.00' ?>">
+                    <input type="number" step="any" name="transport_charges" id="transport_charges" class="form-control expense-input" value="<?= isset($isEdit) ? esc($receipt['transport_charges']) : '0.00' ?>">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Loading Charges (₹)</label>
-                    <input type="number" step="0.01" name="loading_charges" id="loading_charges" class="form-control expense-input" value="<?= isset($isEdit) ? esc($receipt['loading_charges']) : '0.00' ?>">
+                    <input type="number" step="any" name="loading_charges" id="loading_charges" class="form-control expense-input" value="<?= isset($isEdit) ? esc($receipt['loading_charges']) : '0.00' ?>">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Packing Charges (₹)</label>
-                    <input type="number" step="0.01" name="packing_charges" id="packing_charges" class="form-control expense-input" value="<?= isset($isEdit) ? esc($receipt['packing_charges']) : '0.00' ?>">
+                    <input type="number" step="any" name="packing_charges" id="packing_charges" class="form-control expense-input" value="<?= isset($isEdit) ? esc($receipt['packing_charges']) : '0.00' ?>">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Other Expenses (₹)</label>
-                    <input type="number" step="0.01" name="other_expenses" id="other_expenses" class="form-control expense-input" value="<?= isset($isEdit) ? esc($receipt['other_expenses']) : '0.00' ?>">
+                    <input type="number" step="any" name="other_expenses" id="other_expenses" class="form-control expense-input" value="<?= isset($isEdit) ? esc($receipt['other_expenses']) : '0.00' ?>">
                 </div>
             </div>
 
@@ -137,7 +137,7 @@
                                     </div>
                                     <div class="col-md-4 col-sm-6">
                                         <label class="form-label small mb-1 fw-semibold text-success">Received Qty (Kg) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.01" name="items[<?= $item['id'] ?>][quantity_received_kg]" class="form-control form-control-sm input-recd border-success text-center fw-bold" value="<?= number_format($currentRecd, 2, '.', '') ?>" min="0" required>
+                                        <input type="number" step="any" name="items[<?= $item['id'] ?>][quantity_received_kg]" class="form-control form-control-sm input-recd border-success text-center fw-bold" value="<?= number_format($currentRecd, 2, '.', '') ?>" min="0" required>
                                     </div>
                                     <div class="col-md-4 col-sm-6">
                                         <label class="form-label small mb-1 fw-semibold text-success">Received Cones <span class="text-danger">*</span></label>
@@ -147,12 +147,12 @@
                                     <!-- Row 2 -->
                                     <div class="col-md-4 col-sm-6">
                                         <label class="form-label small mb-1 fw-semibold text-danger">Wastage (Kg) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.01" name="items[<?= $item['id'] ?>][quantity_wastage_kg]" class="form-control form-control-sm input-wastage border-danger text-center fw-bold" value="<?= number_format($currentWastage, 2, '.', '') ?>" min="0" required>
+                                        <input type="number" step="any" name="items[<?= $item['id'] ?>][quantity_wastage_kg]" class="form-control form-control-sm input-wastage border-danger text-center fw-bold" value="<?= number_format($currentWastage, 2, '.', '') ?>" min="0" required>
                                         <input type="hidden" name="items[<?= $item['id'] ?>][cones_wastage]" value="0">
                                     </div>
                                     <div class="col-md-4 col-sm-6">
                                         <label class="form-label small mb-1 fw-semibold text-secondary">Job Charges (₹/Kg) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.01" name="items[<?= $item['id'] ?>][job_work_charges]" class="form-control form-control-sm input-job-charges border-secondary-subtle text-center fw-bold" value="<?= number_format($currentJobCharges, 2, '.', '') ?>" min="0" required>
+                                        <input type="number" step="any" name="items[<?= $item['id'] ?>][job_work_charges]" class="form-control form-control-sm input-job-charges border-secondary-subtle text-center fw-bold" value="<?= number_format($currentJobCharges, 2, '.', '') ?>" min="0" required>
                                     </div>
                                     <div class="col-md-4 col-sm-6 d-flex flex-column justify-content-center align-items-center bg-success-subtle rounded border border-success-subtle py-1 px-2" style="height: 52px; margin-top: 24px;">
                                         <small class="text-success-emphasis fw-bold" style="font-size: 0.75rem; line-height: 1;">Est. Landed Cost</small>

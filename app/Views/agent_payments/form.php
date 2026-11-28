@@ -91,7 +91,7 @@
                     <div class="col-md-3">
                         <div class="mb-3">
                             <label class="form-label">Total Payment Amount</label>
-                            <input type="number" step="0.01" name="amount" id="totalAmount" class="form-control fw-bold bg-light text-success fs-5" readonly required>
+                            <input type="number" step="any" name="amount" id="totalAmount" class="form-control fw-bold bg-light text-success fs-5" readonly required>
                             <small class="text-muted">Calculated from selected invoices</small>
                         </div>
                     </div>

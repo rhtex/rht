@@ -89,24 +89,24 @@
                 </div>
                 <div class="col-md-2 mb-3">
                     <label class="form-label">Weight per Bag (Kg)</label>
-                    <input type="number" step="0.01" id="weight_per_bag" class="form-control" value="<?= isset($purchase) && ($purchase['number_bags'] ?? 0) > 0 ? number_format($purchase['total_weight_kg'] / $purchase['number_bags'], 2, '.', '') : '' ?>" placeholder="Optional helper">
+                    <input type="number" step="any" id="weight_per_bag" class="form-control" value="<?= isset($purchase) && ($purchase['number_bags'] ?? 0) > 0 ? number_format($purchase['total_weight_kg'] / $purchase['number_bags'], 2, '.', '') : '' ?>" placeholder="Optional helper">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Total Weight (Kg) <span class="text-danger">*</span></label>
-                    <input type="number" step="0.01" name="total_weight_kg" id="total_weight_kg" class="form-control" value="<?= old('total_weight_kg', $purchase['total_weight_kg'] ?? '') ?>" required placeholder="0.00">
+                    <input type="number" step="any" name="total_weight_kg" id="total_weight_kg" class="form-control" value="<?= old('total_weight_kg', $purchase['total_weight_kg'] ?? '') ?>" required placeholder="0.00">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Rate per Kg <span class="text-danger">*</span></label>
-                    <input type="number" step="0.01" name="rate_per_kg" id="rate_per_kg" class="form-control" value="<?= old('rate_per_kg', $purchase['rate_per_kg'] ?? '') ?>" required placeholder="₹ 0.00">
+                    <input type="number" step="any" name="rate_per_kg" id="rate_per_kg" class="form-control" value="<?= old('rate_per_kg', $purchase['rate_per_kg'] ?? '') ?>" required placeholder="₹ 0.00">
                 </div>
                 <input type="hidden" name="gst_percent" id="gst_percent" value="0">
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Transport Charges</label>
-                    <input type="number" step="0.01" name="transport_charges" id="transport_charges" class="form-control" value="<?= old('transport_charges', $purchase['transport_charges'] ?? '0.00') ?>">
+                    <input type="number" step="any" name="transport_charges" id="transport_charges" class="form-control" value="<?= old('transport_charges', $purchase['transport_charges'] ?? '0.00') ?>">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Other Charges</label>
-                    <input type="number" step="0.01" name="other_charges" id="other_charges" class="form-control" value="<?= old('other_charges', $purchase['other_charges'] ?? '0.00') ?>">
+                    <input type="number" step="any" name="other_charges" id="other_charges" class="form-control" value="<?= old('other_charges', $purchase['other_charges'] ?? '0.00') ?>">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Warehouse Location</label>

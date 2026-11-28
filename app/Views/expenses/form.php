@@ -45,7 +45,7 @@
                     <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <span class="input-group-text">₹</span>
-                        <input type="number" step="0.01" class="form-control" name="amount" id="amount" value="<?= old('amount', $expense['amount'] ?? '') ?>" required>
+                        <input type="number" step="any" class="form-control" name="amount" id="amount" value="<?= old('amount', $expense['amount'] ?? '') ?>" required>
                     </div>
                 </div>
 

@@ -287,10 +287,10 @@
                                         <input type="text" name="items[<?= $index ?>][hsn_code]" class="form-control form-control-sm item-hsn text-center" value="<?= esc($item['hsn_code']) ?>">
                                     </td>
                                     <td>
-                                        <input type="number" step="0.01" name="items[<?= $index ?>][quantity]" class="form-control form-control-sm item-qty text-center fw-bold" value="<?= $item['quantity'] + 0 ?>" min="0.01" required>
+                                        <input type="number" step="any" name="items[<?= $index ?>][quantity]" class="form-control form-control-sm item-qty text-center fw-bold" value="<?= $item['quantity'] + 0 ?>" min="0.01" required>
                                     </td>
                                     <td>
-                                        <input type="number" step="0.01" name="items[<?= $index ?>][rate]" class="form-control form-control-sm item-rate text-end fw-bold" value="<?= number_format($item['rate'], 2, '.', '') ?>" min="0" required>
+                                        <input type="number" step="any" name="items[<?= $index ?>][rate]" class="form-control form-control-sm item-rate text-end fw-bold" value="<?= number_format($item['rate'], 2, '.', '') ?>" min="0" required>
                                     </td>
                                     <td>
                                         <select name="items[<?= $index ?>][tax_percentage]" class="form-select form-select-sm item-tax">
@@ -334,10 +334,10 @@
                                     <input type="text" name="items[0][hsn_code]" class="form-control form-control-sm item-hsn text-center">
                                 </td>
                                 <td>
-                                    <input type="number" step="0.01" name="items[0][quantity]" class="form-control form-control-sm item-qty text-center fw-bold" value="1" min="0.01" required>
+                                    <input type="number" step="any" name="items[0][quantity]" class="form-control form-control-sm item-qty text-center fw-bold" value="1" min="0.01" required>
                                 </td>
                                 <td>
-                                    <input type="number" step="0.01" name="items[0][rate]" class="form-control form-control-sm item-rate text-end fw-bold" value="0.00" min="0" required>
+                                    <input type="number" step="any" name="items[0][rate]" class="form-control form-control-sm item-rate text-end fw-bold" value="0.00" min="0" required>
                                 </td>
                                 <td>
                                     <select name="items[0][tax_percentage]" class="form-select form-select-sm item-tax">
@@ -397,7 +397,7 @@
                         </td>
                         <td class="text-end">
                             <div class="input-group input-group-sm justify-content-end">
-                                <input type="number" step="0.01" name="discount_amount" id="discountAmountInput" class="form-control form-control-sm text-end" style="max-width: 110px;" value="<?= $bill['discount_amount'] ?? 0 ?>">
+                                <input type="number" step="any" name="discount_amount" id="discountAmountInput" class="form-control form-control-sm text-end" style="max-width: 110px;" value="<?= $bill['discount_amount'] ?? 0 ?>">
                             </div>
                             <span id="discountCalculatedDisplay" class="text-danger small" style="display: none;">(-₹0.00)</span>
                         </td>
@@ -420,14 +420,14 @@
                     <tr>
                         <td class="gst-summary-label">Shipping / Freight:</td>
                         <td class="text-end">
-                            <input type="number" step="0.01" name="shipping_charge" id="shippingChargeInput" class="form-control form-control-sm text-end float-end" style="max-width: 110px;" value="<?= $bill['shipping_charge'] ?? 0 ?>">
+                            <input type="number" step="any" name="shipping_charge" id="shippingChargeInput" class="form-control form-control-sm text-end float-end" style="max-width: 110px;" value="<?= $bill['shipping_charge'] ?? 0 ?>">
                         </td>
                     </tr>
 
                     <tr>
                         <td class="gst-summary-label">Round Off:</td>
                         <td class="text-end">
-                            <input type="number" step="0.01" name="roundoff_amount" id="roundoffInput" class="form-control form-control-sm text-end float-end" style="max-width: 110px;" value="<?= $bill['roundoff_amount'] ?? 0 ?>">
+                            <input type="number" step="any" name="roundoff_amount" id="roundoffInput" class="form-control form-control-sm text-end float-end" style="max-width: 110px;" value="<?= $bill['roundoff_amount'] ?? 0 ?>">
                         </td>
                     </tr>
 
@@ -518,10 +518,10 @@
             <input type="text" class="form-control form-control-sm item-hsn text-center">
         </td>
         <td>
-            <input type="number" step="0.01" class="form-control form-control-sm item-qty text-center fw-bold" value="1" min="0.01" required>
+            <input type="number" step="any" class="form-control form-control-sm item-qty text-center fw-bold" value="1" min="0.01" required>
         </td>
         <td>
-            <input type="number" step="0.01" class="form-control form-control-sm item-rate text-end fw-bold" value="0.00" min="0" required>
+            <input type="number" step="any" class="form-control form-control-sm item-rate text-end fw-bold" value="0.00" min="0" required>
         </td>
         <td>
             <select class="form-select form-select-sm item-tax">

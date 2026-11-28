@@ -65,7 +65,7 @@
 
                 <div class="col-md-6 mb-3">
                     <label for="current_balance" class="form-label">Current/Opening Balance</label>
-                    <input type="number" step="0.01" class="form-control" name="current_balance" id="current_balance" value="<?= old('current_balance', $account['current_balance'] ?? '0.00') ?>">
+                    <input type="number" step="any" class="form-control" name="current_balance" id="current_balance" value="<?= old('current_balance', $account['current_balance'] ?? '0.00') ?>">
                 </div>
 
                 <div class="col-md-6 mb-3">

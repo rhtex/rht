@@ -64,25 +64,25 @@
 
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Transport Charges (₹)</label>
-                    <input type="number" step="0.01" name="transport_charges" id="transport_charges"
+                    <input type="number" step="any" name="transport_charges" id="transport_charges"
                         class="form-control expense-input"
                         value="<?= old('transport_charges', isset($isEdit) ? number_format($receipt['transport_charges'], 2, '.', '') : '0.00') ?>">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Loading / Unloading (₹)</label>
-                    <input type="number" step="0.01" name="loading_charges" id="loading_charges"
+                    <input type="number" step="any" name="loading_charges" id="loading_charges"
                         class="form-control expense-input"
                         value="<?= old('loading_charges', isset($isEdit) ? number_format($receipt['loading_charges'], 2, '.', '') : '0.00') ?>">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Packing Charges (₹)</label>
-                    <input type="number" step="0.01" name="packing_charges" id="packing_charges"
+                    <input type="number" step="any" name="packing_charges" id="packing_charges"
                         class="form-control expense-input"
                         value="<?= old('packing_charges', isset($isEdit) ? number_format($receipt['packing_charges'], 2, '.', '') : '0.00') ?>">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Other Expenses (₹)</label>
-                    <input type="number" step="0.01" name="other_expenses" id="other_expenses"
+                    <input type="number" step="any" name="other_expenses" id="other_expenses"
                         class="form-control expense-input"
                         value="<?= old('other_expenses', isset($isEdit) ? number_format($receipt['other_expenses'], 2, '.', '') : '0.00') ?>">
                 </div>
@@ -95,7 +95,7 @@
                         $defaultJobCharges = number_format($receiptItems[0]['job_work_charges'], 2, '.', '');
                     }
                     ?>
-                    <input type="number" step="0.01" name="job_work_charges" id="job_work_charges"
+                    <input type="number" step="any" name="job_work_charges" id="job_work_charges"
                         class="form-control expense-input fw-bold border-primary"
                         value="<?= old('job_work_charges', $defaultJobCharges) ?>" required>
                 </div>
@@ -185,7 +185,7 @@
                                             </div>
                                             <div class="mb-2">
                                                 <label class="small fw-bold">Meters <span class="text-danger">*</span></label>
-                                                <input type="number" step="0.01"
+                                                <input type="number" step="any"
                                                     name="beams_return[<?= esc($beam['beam_number']) ?>][meters]"
                                                     class="form-control form-control-sm input-beam-meters"
                                                     value="<?= esc($beam['meters'] ?? '') ?>" placeholder="Length in meters">
@@ -325,7 +325,7 @@
                                         <td class="text-center fw-semibold"><?= number_format($issued, 2) ?> Kg</td>
                                         <td class="text-center fw-semibold"><?= $conesIssued ?></td>
                                         <td>
-                                            <input type="number" step="0.01" name="items[<?= $item['id'] ?>][quantity_received_kg]"
+                                            <input type="number" step="any" name="items[<?= $item['id'] ?>][quantity_received_kg]"
                                                 class="form-control form-control-sm input-recd text-center"
                                                 value="<?= number_format($qtyReceivedVal, 2, '.', '') ?>" min="0" required>
                                             <small class="text-danger qty-error-msg" style="display:none; font-weight:bold;"></small>

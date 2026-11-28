@@ -184,7 +184,7 @@
                     </div>
                     <div class="col-md-2">
                         <label for="transport_amount" class="form-label fw-semibold">Transport Amount (₹)</label>
-                        <input type="number" step="0.01" min="0" name="transport_amount" id="transport_amount" class="form-control text-end" value="0.00" placeholder="0.00">
+                        <input type="number" step="any" min="0" name="transport_amount" id="transport_amount" class="form-control text-end" value="0.00" placeholder="0.00">
                     </div>
                     <div class="col-md-2">
                         <label for="transport_paid_by" class="form-label fw-semibold">Transport Paid By <span class="text-danger">*</span></label>
@@ -253,8 +253,8 @@
                                 <input type="text" name="items[0][description]" class="form-control form-control-sm mt-1 product-description" placeholder="Item description...">
                                 <small class="text-muted inv-qty-hint d-none"></small>
                             </td>
-                            <td><input type="number" name="items[0][quantity]" class="form-control qty text-end" step="0.01" min="0.01" value="1" required></td>
-                            <td><input type="number" name="items[0][rate]" class="form-control rate text-end" step="0.01" min="0" value="0" required></td>
+                            <td><input type="number" name="items[0][quantity]" class="form-control qty text-end" step="any" min="0.01" value="1" required></td>
+                            <td><input type="number" name="items[0][rate]" class="form-control rate text-end" step="any" min="0" value="0" required></td>
                             <td>
                                 <select name="items[0][tax_percentage]" class="form-select text-end tax no-select2">
                                     <option value="0">0%</option>
@@ -289,7 +289,7 @@
                                         <label class="form-check-label fw-semibold" for="includeDiscountChk">Include Discount</label>
                                     </div>
                                     <div class="input-group input-group-sm" style="width: 210px;" id="discountInputGroup">
-                                        <input type="number" step="0.01" min="0" name="discount_amount" id="discountAmountInput" class="form-control text-end" value="0">
+                                        <input type="number" step="any" min="0" name="discount_amount" id="discountAmountInput" class="form-control text-end" value="0">
                                         <select name="discount_type" id="discountTypeSelect" class="form-select no-select2" style="max-width: 72px;">
                                             <option value="Fixed">₹</option>
                                             <option value="Percentage">%</option>
@@ -312,7 +312,7 @@
                                     <button type="button" class="btn btn-outline-secondary btn-xs py-0 px-2 small" id="btnAutoRound" title="Auto round Grand Total to nearest rupee">Round</button>
                                 </div>
                             </td>
-                            <td><input type="number" step="0.01" name="adjustment" id="adjustmentInput" class="form-control text-end" value="0.00"></td>
+                            <td><input type="number" step="any" name="adjustment" id="adjustmentInput" class="form-control text-end" value="0.00"></td>
                             <td></td>
                         </tr>
                         <tr class="table-primary">

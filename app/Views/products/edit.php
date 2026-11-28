@@ -55,7 +55,7 @@
                 <div class="col-md-3">
                     <div class="mb-3">
                         <label class="form-label">Selling Price (₹)</label>
-                        <input type="number" name="selling_price" class="form-control" step="0.01" value="<?= $product['selling_price'] ?>">
+                        <input type="number" name="selling_price" class="form-control" step="any" value="<?= $product['selling_price'] ?>">
                     </div>
                 </div>
                 <div class="col-md-3">

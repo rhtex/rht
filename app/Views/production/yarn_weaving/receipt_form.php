@@ -30,19 +30,19 @@
             <div class="row mt-2">
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Transport Charges (₹)</label>
-                    <input type="number" step="0.01" name="transport_charges" id="transport_charges" class="form-control expense-input" value="0.00">
+                    <input type="number" step="any" name="transport_charges" id="transport_charges" class="form-control expense-input" value="0.00">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Loading Charges (₹)</label>
-                    <input type="number" step="0.01" name="loading_charges" id="loading_charges" class="form-control expense-input" value="0.00">
+                    <input type="number" step="any" name="loading_charges" id="loading_charges" class="form-control expense-input" value="0.00">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Packing Charges (₹)</label>
-                    <input type="number" step="0.01" name="packing_charges" id="packing_charges" class="form-control expense-input" value="0.00">
+                    <input type="number" step="any" name="packing_charges" id="packing_charges" class="form-control expense-input" value="0.00">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Other Expenses (₹)</label>
-                    <input type="number" step="0.01" name="other_expenses" id="other_expenses" class="form-control expense-input" value="0.00">
+                    <input type="number" step="any" name="other_expenses" id="other_expenses" class="form-control expense-input" value="0.00">
                 </div>
             </div>
 
@@ -91,16 +91,16 @@
                             <td><?= number_format($issued, 2) ?> Kg</td>
                             <td><?= number_format($received, 2) ?> Kg</td>
                             <td>
-                                <input type="number" step="0.01" name="items[<?= $item['id'] ?>][quantity_received_kg]" class="form-control form-control-sm input-recd" value="0.00" required>
+                                <input type="number" step="any" name="items[<?= $item['id'] ?>][quantity_received_kg]" class="form-control form-control-sm input-recd" value="0.00" required>
                             </td>
                             <td>
-                                <input type="number" step="0.01" name="items[<?= $item['id'] ?>][quantity_wastage_kg]" class="form-control form-control-sm input-wastage" value="0.00" required>
+                                <input type="number" step="any" name="items[<?= $item['id'] ?>][quantity_wastage_kg]" class="form-control form-control-sm input-wastage" value="0.00" required>
                             </td>
                             <td>
                                 <strong class="text-primary"><span class="lbl-pending-kgs"><?= number_format($pending, 2) ?></span> Kg</strong>
                             </td>
                             <td>
-                                <input type="number" step="0.01" name="items[<?= $item['id'] ?>][job_work_charges]" class="form-control form-control-sm input-job-charges" value="0.00" required>
+                                <input type="number" step="any" name="items[<?= $item['id'] ?>][job_work_charges]" class="form-control form-control-sm input-job-charges" value="0.00" required>
                             </td>
                             <td>
                                 <span class="lbl-landed-cost text-success fw-bold">₹0.00</span>

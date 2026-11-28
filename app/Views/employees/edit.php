@@ -69,11 +69,11 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Basic Salary <span class="text-danger">*</span></label>
-                    <input type="number" step="0.01" class="form-control" name="basic_salary" value="<?= old('basic_salary', $employee['basic_salary'] ?? '') ?>" required>
+                    <input type="number" step="any" class="form-control" name="basic_salary" value="<?= old('basic_salary', $employee['basic_salary'] ?? '') ?>" required>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Daily Working Hours <span class="text-danger">*</span></label>
-                    <input type="number" step="0.01" class="form-control" name="daily_working_hours" value="<?= old('daily_working_hours', $employee['daily_working_hours'] ?? '8.00') ?>" required>
+                    <input type="number" step="any" class="form-control" name="daily_working_hours" value="<?= old('daily_working_hours', $employee['daily_working_hours'] ?? '8.00') ?>" required>
                 </div>
             </div>
 

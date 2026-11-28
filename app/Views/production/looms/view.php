@@ -66,7 +66,7 @@
                         </div>
                         <div class="col-md-6 mb-3" id="loom_cost_div" style="display: <?= $loom['loom_owner'] == 'Company' ? 'block' : 'none' ?>;">
                             <label class="form-label text-muted small fw-bold">Loom Cost</label>
-                            <input type="number" step="0.01" name="loom_cost" class="form-control form-control-sm" value="<?= esc($loom['loom_cost']) ?>">
+                            <input type="number" step="any" name="loom_cost" class="form-control form-control-sm" value="<?= esc($loom['loom_cost']) ?>">
                         </div>
                     </div>
                     <div class="row">
@@ -79,7 +79,7 @@
                         </div>
                         <div class="col-md-6 mb-3" id="jacquard_cost_div" style="display: <?= $loom['jacquard_owner'] == 'Company' ? 'block' : 'none' ?>;">
                             <label class="form-label text-muted small fw-bold">Jacquard Cost</label>
-                            <input type="number" step="0.01" name="jacquard_cost" class="form-control form-control-sm" value="<?= esc($loom['jacquard_cost']) ?>">
+                            <input type="number" step="any" name="jacquard_cost" class="form-control form-control-sm" value="<?= esc($loom['jacquard_cost']) ?>">
                         </div>
                     </div>
                     <div class="row">
@@ -92,7 +92,7 @@
                         </div>
                         <div class="col-md-6 mb-3" id="fitting_cost_div" style="display: <?= $loom['fitted_by'] == 'Company' ? 'block' : 'none' ?>;">
                             <label class="form-label text-muted small fw-bold">Fitting Cost</label>
-                            <input type="number" step="0.01" name="fitting_cost" class="form-control form-control-sm" value="<?= esc($loom['fitting_cost']) ?>">
+                            <input type="number" step="any" name="fitting_cost" class="form-control form-control-sm" value="<?= esc($loom['fitting_cost']) ?>">
                         </div>
                     </div>
 
@@ -304,11 +304,11 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Principal Amount (₹)</label>
-                        <input type="number" step="0.01" name="principal_amount" class="form-control" required>
+                        <input type="number" step="any" name="principal_amount" class="form-control" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Interest Rate (%)</label>
-                        <input type="number" step="0.01" name="interest_rate" class="form-control" value="0.00" required>
+                        <input type="number" step="any" name="interest_rate" class="form-control" value="0.00" required>
                         <small class="text-muted">Enter 0 if interest-free.</small>
                     </div>
                 </div>
@@ -342,7 +342,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Amount (₹)</label>
-                        <input type="number" step="0.01" name="amount" id="txnAmount" class="form-control" required>
+                        <input type="number" step="any" name="amount" id="txnAmount" class="form-control" required>
                         <small class="text-muted" id="txnBalanceInfo"></small>
                     </div>
                     <div class="mb-3">
@@ -396,12 +396,12 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Principal Amount (₹)</label>
-                        <input type="number" step="0.01" name="principal_amount" id="editLedgerPrincipal" class="form-control" required>
+                        <input type="number" step="any" name="principal_amount" id="editLedgerPrincipal" class="form-control" required>
                         <small class="text-muted">Warning: Changing this will adjust the balance automatically.</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Interest Rate (%)</label>
-                        <input type="number" step="0.01" name="interest_rate" id="editLedgerInterest" class="form-control" required>
+                        <input type="number" step="any" name="interest_rate" id="editLedgerInterest" class="form-control" required>
                     </div>
                 </div>
                 <div class="modal-footer">

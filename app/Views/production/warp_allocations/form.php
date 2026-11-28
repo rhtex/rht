@@ -88,10 +88,10 @@
                                     <input type="text" name="wefts[0][batch_number]" class="form-control">
                                 </td>
                                 <td>
-                                    <input type="number" step="0.001" name="wefts[0][issued_weight]" class="form-control weight-input">
+                                    <input type="number" step="any" name="wefts[0][issued_weight]" class="form-control weight-input">
                                 </td>
                                 <td>
-                                    <input type="number" step="0.01" name="wefts[0][rate]" class="form-control">
+                                    <input type="number" step="any" name="wefts[0][rate]" class="form-control">
                                 </td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-danger remove-btn"><i class="fas fa-times"></i></button>
@@ -189,10 +189,10 @@
                         <input type="text" name="wefts[${rowIdx}][batch_number]" class="form-control">
                     </td>
                     <td>
-                        <input type="number" step="0.001" name="wefts[${rowIdx}][issued_weight]" class="form-control weight-input">
+                        <input type="number" step="any" name="wefts[${rowIdx}][issued_weight]" class="form-control weight-input">
                     </td>
                     <td>
-                        <input type="number" step="0.01" name="wefts[${rowIdx}][rate]" class="form-control">
+                        <input type="number" step="any" name="wefts[${rowIdx}][rate]" class="form-control">
                     </td>
                     <td>
                         <button type="button" class="btn btn-sm btn-danger remove-btn"><i class="fas fa-times"></i></button>

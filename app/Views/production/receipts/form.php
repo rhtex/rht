@@ -67,13 +67,13 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="number" step="0.01" name="items[0][quantity]" class="form-control qty-input" required>
+                                        <input type="number" step="any" name="items[0][quantity]" class="form-control qty-input" required>
                                     </td>
                                     <td>
-                                        <input type="number" step="0.01" name="items[0][rate]" class="form-control rate-input" required>
+                                        <input type="number" step="any" name="items[0][rate]" class="form-control rate-input" required>
                                     </td>
                                     <td>
-                                        <input type="number" step="0.01" class="form-control amount-input" readonly>
+                                        <input type="number" step="any" class="form-control amount-input" readonly>
                                     </td>
                                     <td></td>
                                 </tr>
@@ -123,13 +123,13 @@
                         </select>
                     </td>
                     <td>
-                        <input type="number" step="0.01" name="items[${rowIdx}][quantity]" class="form-control qty-input" required>
+                        <input type="number" step="any" name="items[${rowIdx}][quantity]" class="form-control qty-input" required>
                     </td>
                     <td>
-                        <input type="number" step="0.01" name="items[${rowIdx}][rate]" class="form-control rate-input" required>
+                        <input type="number" step="any" name="items[${rowIdx}][rate]" class="form-control rate-input" required>
                     </td>
                     <td>
-                        <input type="number" step="0.01" class="form-control amount-input" readonly>
+                        <input type="number" step="any" class="form-control amount-input" readonly>
                     </td>
                     <td>
                         <button type="button" class="btn btn-sm btn-danger remove-btn"><i class="fas fa-times"></i></button>

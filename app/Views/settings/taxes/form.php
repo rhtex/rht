@@ -31,7 +31,7 @@
                 
                 <div class="form-group mb-3">
                     <label for="percentage">Percentage (%) <span class="text-danger">*</span></label>
-                    <input type="number" step="0.01" class="form-control" id="percentage" name="percentage" placeholder="Enter percentage (e.g. 18.00)" value="<?= old('percentage', $tax['percentage'] ?? '') ?>" required>
+                    <input type="number" step="any" class="form-control" id="percentage" name="percentage" placeholder="Enter percentage (e.g. 18.00)" value="<?= old('percentage', $tax['percentage'] ?? '') ?>" required>
                 </div>
 
                 <div class="form-group mb-3">

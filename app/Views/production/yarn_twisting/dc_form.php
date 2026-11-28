@@ -56,7 +56,7 @@
                         </div>
                         <div class="col-md-3 mb-2">
                             <label class="form-label">Quantity to Issue (Kg)</label>
-                            <input type="number" step="0.01" id="input-issue-qty" class="form-control" min="0.01" placeholder="0.00">
+                            <input type="number" step="any" id="input-issue-qty" class="form-control" min="0.01" placeholder="0.00">
                         </div>
                         <div class="col-md-3 mb-2">
                             <button type="button" id="btn-add-item" class="btn btn-dark w-100"><i class="fas fa-plus"></i> Add Item</button>

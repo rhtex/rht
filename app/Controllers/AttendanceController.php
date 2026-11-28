@@ -38,10 +38,25 @@ class AttendanceController extends BaseController
             $attendanceMap[$record['employee_id']] = $record;
         }
 
+        // Previous day's attendance for 1-click "Copy Yesterday"
+        $prevDate = date('Y-m-d', strtotime($date . ' -1 day'));
+        $yesterdayMap = [];
+        foreach ($this->attendanceModel->where('attendance_date', $prevDate)->findAll() as $rec) {
+            $yesterdayMap[$rec['employee_id']] = [
+                'status'     => $rec['status'],
+                'check_in'   => $rec['check_in_time'] ? substr((string) $rec['check_in_time'], 0, 5) : '',
+                'check_out'  => $rec['check_out_time'] ? substr((string) $rec['check_out_time'], 0, 5) : '',
+                'double_pay' => ((float) ($rec['multiplier'] ?? 1)) > 1.0,
+            ];
+        }
+
         $data = [
-            'date' => $date,
-            'employees' => $employees,
-            'attendanceMap' => $attendanceMap
+            'date'          => $date,
+            'prevDate'      => $prevDate,
+            'nextDate'      => date('Y-m-d', strtotime($date . ' +1 day')),
+            'employees'     => $employees,
+            'attendanceMap' => $attendanceMap,
+            'yesterdayMap'  => $yesterdayMap,
         ];
 
         return view('attendance/index', $data);

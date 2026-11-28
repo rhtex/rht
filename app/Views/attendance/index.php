@@ -8,10 +8,13 @@
         <h1 class="m-0"><i class="fas fa-user-clock text-primary me-2"></i>Daily Employee Attendance</h1>
     </div>
     <div class="col-sm-6 text-end">
-        <form action="<?= site_url('attendance') ?>" method="get" class="d-inline-flex gap-2 align-items-center float-sm-end">
-            <span class="small fw-bold text-muted">Attendance Date:</span>
+        <form action="<?= site_url('attendance') ?>" method="get" class="d-inline-flex gap-1 align-items-center float-sm-end">
+            <a href="<?= site_url('attendance?date=' . esc($prevDate)) ?>" class="btn btn-sm btn-outline-secondary" title="Previous Day"><i class="fas fa-chevron-left"></i></a>
             <input type="date" name="date" class="form-control form-control-sm" style="width: auto;" value="<?= esc($date) ?>" onchange="this.form.submit()">
-            <button class="btn btn-sm btn-primary" type="submit"><i class="fas fa-calendar-check me-1"></i> Go</button>
+            <a href="<?= site_url('attendance?date=' . esc($nextDate)) ?>" class="btn btn-sm btn-outline-secondary" title="Next Day"><i class="fas fa-chevron-right"></i></a>
+            <?php if ($date !== date('Y-m-d')): ?>
+                <a href="<?= site_url('attendance?date=' . date('Y-m-d')) ?>" class="btn btn-sm btn-outline-primary">Today</a>
+            <?php endif; ?>
         </form>
     </div>
 </div>
@@ -50,44 +53,59 @@ if (!empty($employees)) {
     <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-green" style="cursor:default;">
             <i class="fas fa-user-check bt-stat-icon"></i>
-            <div class="bt-stat-num"><?= number_format($presentCount) ?></div>
+            <div class="bt-stat-num" id="kpiPresent"><?= number_format($presentCount) ?></div>
             <div class="bt-stat-label">Present Today</div>
-            <div class="progress"><div class="progress-bar" style="width:<?= ($totalStaff > 0) ? min(100, round(($presentCount / $totalStaff) * 100)) : 0 ?>%"></div></div>
+            <div class="progress"><div class="progress-bar" id="kpiPresentBar" style="width:<?= ($totalStaff > 0) ? min(100, round(($presentCount / $totalStaff) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
     <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-teal" style="cursor:default;">
             <i class="fas fa-adjust bt-stat-icon"></i>
-            <div class="bt-stat-num"><?= number_format($halfDayCount) ?></div>
+            <div class="bt-stat-num" id="kpiHalf"><?= number_format($halfDayCount) ?></div>
             <div class="bt-stat-label">Half Day</div>
-            <div class="progress"><div class="progress-bar" style="width:<?= ($totalStaff > 0) ? min(100, round(($halfDayCount / $totalStaff) * 100)) : 0 ?>%"></div></div>
+            <div class="progress"><div class="progress-bar" id="kpiHalfBar" style="width:<?= ($totalStaff > 0) ? min(100, round(($halfDayCount / $totalStaff) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
     <div class="col-6 col-xl-3">
         <div class="bt-stat bt-g-red" style="cursor:default;">
             <i class="fas fa-user-times bt-stat-icon"></i>
-            <div class="bt-stat-num"><?= number_format($absentCount) ?></div>
+            <div class="bt-stat-num" id="kpiAbsent"><?= number_format($absentCount) ?></div>
             <div class="bt-stat-label">Absent / Off</div>
-            <div class="progress"><div class="progress-bar" style="width:<?= ($totalStaff > 0) ? min(100, round(($absentCount / $totalStaff) * 100)) : 0 ?>%"></div></div>
+            <div class="progress"><div class="progress-bar" id="kpiAbsentBar" style="width:<?= ($totalStaff > 0) ? min(100, round(($absentCount / $totalStaff) * 100)) : 0 ?>%"></div></div>
         </div>
     </div>
 </div>
 
 <div class="card card-outline card-primary shadow-sm mb-4">
     <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 py-2 bg-white">
-        <h3 class="card-title fw-bold mb-0">Roster for <?= date('l, d F Y', strtotime($date)) ?></h3>
-        
+        <div class="d-flex align-items-center gap-2">
+            <h3 class="card-title fw-bold mb-0">Roster for <?= date('l, d F Y', strtotime($date)) ?></h3>
+            <span id="unsavedBadge" class="badge text-bg-warning d-none">Unsaved changes</span>
+        </div>
+
         <div class="d-flex flex-wrap align-items-center gap-2">
-            <div class="input-group input-group-sm" style="width: 155px;">
+            <input type="search" id="empSearch" class="form-control form-control-sm" style="width: 170px;" placeholder="Search employee...">
+            <div class="input-group input-group-sm" style="width: 145px;">
                 <span class="input-group-text bg-light text-muted small">In</span>
                 <input type="time" id="defaultCheckIn" class="form-control" value="09:00">
             </div>
-            <div class="input-group input-group-sm" style="width: 155px;">
+            <div class="input-group input-group-sm" style="width: 145px;">
                 <span class="input-group-text bg-light text-muted small">Out</span>
                 <input type="time" id="defaultCheckOut" class="form-control" value="18:00">
             </div>
-            <button type="button" class="btn btn-success btn-sm text-nowrap rounded-pill px-3 shadow-sm" onclick="markAllPresent()">
-                <i class="fas fa-check-double me-1"></i> Mark All Present
+            <button type="button" class="btn btn-success btn-sm text-nowrap" onclick="markAllStatus('Present')" title="Mark all visible employees Present with shift times">
+                <i class="fas fa-check-double me-1"></i> All Present
+            </button>
+            <button type="button" class="btn btn-outline-warning text-dark btn-sm text-nowrap" onclick="markAllStatus('Holiday')" title="Mark all visible employees Holiday">
+                <i class="fas fa-umbrella-beach me-1"></i> All Holiday
+            </button>
+            <?php if (!empty($yesterdayMap)): ?>
+            <button type="button" class="btn btn-outline-info btn-sm text-nowrap" onclick="copyYesterday()" title="Copy attendance from <?= esc($prevDate) ?>">
+                <i class="fas fa-copy me-1"></i> Copy Yesterday
+            </button>
+            <?php endif; ?>
+            <button type="submit" form="attendanceForm" class="btn btn-primary btn-sm text-nowrap shadow-sm">
+                <i class="fas fa-save me-1"></i> Save
             </button>
         </div>
     </div>
@@ -168,10 +186,16 @@ if (!empty($employees)) {
                                         </div>
                                     </td>
                                     <td>
-                                        <input type="time" class="form-control form-control-sm time-input" id="check_in_<?= $emp['id'] ?>" name="attendance[<?= $emp['id'] ?>][check_in_time]" value="<?= esc($checkIn) ?>" data-emp="<?= $emp['id'] ?>">
+                                        <div class="input-group input-group-sm">
+                                            <input type="time" class="form-control time-input" id="check_in_<?= $emp['id'] ?>" name="attendance[<?= $emp['id'] ?>][check_in_time]" value="<?= esc($checkIn) ?>" data-emp="<?= $emp['id'] ?>">
+                                            <button type="button" class="btn btn-outline-secondary px-1" onclick="setNowTime('check_in_<?= $emp['id'] ?>', <?= $emp['id'] ?>)" title="Set Check-In to Now"><i class="fas fa-clock"></i></button>
+                                        </div>
                                     </td>
                                     <td>
-                                        <input type="time" class="form-control form-control-sm time-input" id="check_out_<?= $emp['id'] ?>" name="attendance[<?= $emp['id'] ?>][check_out_time]" value="<?= esc($checkOut) ?>" data-emp="<?= $emp['id'] ?>">
+                                        <div class="input-group input-group-sm">
+                                            <input type="time" class="form-control time-input" id="check_out_<?= $emp['id'] ?>" name="attendance[<?= $emp['id'] ?>][check_out_time]" value="<?= esc($checkOut) ?>" data-emp="<?= $emp['id'] ?>">
+                                            <button type="button" class="btn btn-outline-secondary px-1" onclick="setNowTime('check_out_<?= $emp['id'] ?>', <?= $emp['id'] ?>)" title="Set Check-Out to Now"><i class="fas fa-clock"></i></button>
+                                        </div>
                                     </td>
                                     <td class="text-center">
                                         <span class="badge text-bg-secondary" id="target_<?= $emp['id'] ?>" data-hours="<?= $emp['daily_working_hours'] ?>"><?= format_hours($emp['daily_working_hours']) ?></span>
@@ -220,6 +244,37 @@ if (!empty($employees)) {
 
 <?= $this->section('scripts') ?>
 <script>
+    const totalStaff = <?= (int) $totalStaff ?>;
+    const yesterdayMap = <?= json_encode($yesterdayMap ?? []) ?>;
+
+    function markUnsaved() {
+        $('#unsavedBadge').removeClass('d-none');
+    }
+
+    function refreshLiveKpis() {
+        let p = 0, h = 0, a = 0;
+        $('.status-radio:checked').each(function() {
+            const v = $(this).val();
+            if (v === 'Present') p++;
+            else if (v === 'Half Day') h++;
+            else if (v === 'Absent') a++;
+        });
+        $('#kpiPresent').text(p);
+        $('#kpiHalf').text(h);
+        $('#kpiAbsent').text(a);
+        if (totalStaff > 0) {
+            $('#kpiPresentBar').css('width', Math.min(100, Math.round((p / totalStaff) * 100)) + '%');
+            $('#kpiHalfBar').css('width', Math.min(100, Math.round((h / totalStaff) * 100)) + '%');
+            $('#kpiAbsentBar').css('width', Math.min(100, Math.round((a / totalStaff) * 100)) + '%');
+        }
+    }
+
+    function addHoursToTime(hhmm, hrs) {
+        const parts = (hhmm || '09:00').split(':');
+        const totalMin = Math.min(23 * 60 + 59, (parseInt(parts[0], 10) || 9) * 60 + (parseInt(parts[1], 10) || 0) + Math.round(hrs * 60));
+        return String(Math.floor(totalMin / 60)).padStart(2, '0') + ':' + String(totalMin % 60).padStart(2, '0');
+    }
+
     $('.status-radio').on('change', function() {
         const empId = $(this).data('emp');
         const status = $(this).val();
@@ -237,28 +292,39 @@ if (!empty($employees)) {
             checkIn.val('');
             checkOut.val('');
             updateWorkedHours(empId);
-        } else {
-            if (status === 'Present' && !checkIn.val()) {
-                const defIn = $('#defaultCheckIn').val();
-                const defOut = $('#defaultCheckOut').val();
-                checkIn.val(defIn);
-                checkOut.val(defOut);
-                updateWorkedHours(empId);
-            }
+        } else if (status === 'Half Day' && !checkIn.val()) {
+            const defIn = $('#defaultCheckIn').val() || '09:00';
+            const targetHrs = parseFloat($('#target_' + empId).data('hours')) || 8;
+            checkIn.val(defIn);
+            checkOut.val(addHoursToTime(defIn, targetHrs / 2));
+            updateWorkedHours(empId);
+        } else if (status === 'Present' && !checkIn.val()) {
+            checkIn.val($('#defaultCheckIn').val());
+            checkOut.val($('#defaultCheckOut').val());
+            updateWorkedHours(empId);
         }
+
+        refreshLiveKpis();
+        markUnsaved();
     });
 
-    $('.time-input').on('focus change input', function() {
+    $('.time-input').on('change input', function() {
         const empId = $(this).data('emp');
-        const statusRadio = $('input[name="attendance[' + empId + '][status]"]:checked');
-        
-        const currentStatus = statusRadio.val();
+        const currentStatus = $('input[name="attendance[' + empId + '][status]"]:checked').val();
         if (currentStatus === 'Absent' || currentStatus === 'Holiday') {
             $('#status_p_' + empId).prop('checked', true).trigger('change');
         }
-        
         updateWorkedHours(empId);
+        markUnsaved();
     });
+
+    $('input[name$="[double_pay]"]').on('change', markUnsaved);
+
+    function setNowTime(inputId, empId) {
+        const now = new Date();
+        const hhmm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        $('#' + inputId).val(hhmm).trigger('change');
+    }
 
     function updateWorkedHours(empId) {
         const checkInVal = $('#check_in_' + empId).val();
@@ -266,8 +332,7 @@ if (!empty($employees)) {
         const workedSpan = $('#worked_' + empId);
 
         if (!checkInVal || !checkOutVal) {
-            workedSpan.text('-');
-            workedSpan.removeClass('text-success text-danger');
+            workedSpan.text('-').removeClass('text-success text-danger');
             return;
         }
 
@@ -275,50 +340,58 @@ if (!empty($employees)) {
         const end = new Date("2000-01-01 " + checkOutVal);
 
         if (end < start) {
-            workedSpan.text('Invalid');
+            workedSpan.text('Invalid').addClass('text-danger').removeClass('text-success');
             return;
         }
 
-        const diffMs = end - start;
-        const diffHrs = diffMs / (1000 * 60 * 60);
-
+        const diffHrs = (end - start) / (1000 * 60 * 60);
         const hours = Math.floor(diffHrs);
         const minutes = Math.round((diffHrs - hours) * 60);
-        const formatted = hours + "h " + minutes + "m";
-
-        workedSpan.text(formatted);
+        workedSpan.text(hours + "h " + minutes + "m");
 
         const targetHours = parseFloat($('#target_' + empId).data('hours')) || 0;
-        if (diffHrs >= targetHours) {
-            workedSpan.addClass('text-success').removeClass('text-danger');
-        } else {
-            workedSpan.addClass('text-danger').removeClass('text-success');
-        }
+        workedSpan.toggleClass('text-success', diffHrs >= targetHours).toggleClass('text-danger', diffHrs < targetHours);
     }
 
-    function markAllPresent() {
-        if (!$('#defaultCheckIn').val() || !$('#defaultCheckOut').val()) {
-            alert('Please check Shift Start and Shift End times first.');
+    function markAllStatus(status) {
+        if (status === 'Present' && (!$('#defaultCheckIn').val() || !$('#defaultCheckOut').val())) {
+            alert('Please set Shift In and Out times first.');
             return;
         }
-
-        $('.status-radio[value="Present"]').each(function() {
-            if (!$(this).prop('checked')) {
-                $(this).prop('checked', true).trigger('change');
+        $('tbody tr[id^="row_"]:visible').each(function() {
+            const empId = this.id.replace('row_', '');
+            const radio = $(`.status-radio[data-emp="${empId}"][value="${status}"]`);
+            if (radio.length && !radio.prop('checked')) {
+                radio.prop('checked', true).trigger('change');
+            } else if (status === 'Present' && !$('#check_in_' + empId).val()) {
+                $('#check_in_' + empId).val($('#defaultCheckIn').val());
+                $('#check_out_' + empId).val($('#defaultCheckOut').val());
+                updateWorkedHours(empId);
+                markUnsaved();
             }
         });
-        
-        $('.status-radio[value="Present"]:checked').each(function() {
-             const empId = $(this).data('emp');
-             const checkIn = $('#check_in_' + empId);
-             if(!checkIn.val()) {
-                   const defIn = $('#defaultCheckIn').val();
-                   const defOut = $('#defaultCheckOut').val();
-                   checkIn.val(defIn);
-                   $('#check_out_' + empId).val(defOut);
-                   updateWorkedHours(empId);
-             }
-        });
     }
+
+    function copyYesterday() {
+        Object.keys(yesterdayMap).forEach(function(empId) {
+            const rec = yesterdayMap[empId];
+            const radio = $(`.status-radio[data-emp="${empId}"][value="${rec.status}"]`);
+            if (!radio.length) return;
+            radio.prop('checked', true).trigger('change');
+            $('#check_in_' + empId).val(rec.check_in || '');
+            $('#check_out_' + empId).val(rec.check_out || '');
+            $(`input[name="attendance[${empId}][double_pay]"]`).prop('checked', !!rec.double_pay);
+            updateWorkedHours(empId);
+        });
+        refreshLiveKpis();
+        markUnsaved();
+    }
+
+    $('#empSearch').on('input', function() {
+        const q = $(this).val().trim().toLowerCase();
+        $('tbody tr[id^="row_"]').each(function() {
+            $(this).toggle(!q || $(this).text().toLowerCase().indexOf(q) !== -1);
+        });
+    });
 </script>
 <?= $this->endSection() ?>

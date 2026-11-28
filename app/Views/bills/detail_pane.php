@@ -48,6 +48,7 @@
         </div>
     </div>
 
+
     <!-- Overview Cards -->
     <div class="row g-3 mb-3">
         <div class="col-md-6">
@@ -96,6 +97,8 @@
             </div>
         </div>
     </div>
+
+    <?= view('bills/_bill_copy_card', ['bill' => $bill]) ?>
 
     <!-- Line Items Table -->
     <div class="card card-outline card-secondary mb-3 shadow-none border">
@@ -233,6 +236,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Payments Made -->
     <?php if (!empty($bill['payments'])): ?>

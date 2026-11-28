@@ -678,6 +678,90 @@ class BillController extends BaseController
     /**
      * Print bill
      */
+    /**
+     * Ensure `bills.bill_copy` exists even if migration has not run yet.
+     */
+    private function ensureBillCopyColumn(): void
+    {
+        $db = \Config\Database::connect();
+        if (!$db->fieldExists('bill_copy', 'bills')) {
+            $db->query("ALTER TABLE `bills` ADD COLUMN `bill_copy` VARCHAR(255) NULL AFTER `reference_number`");
+        }
+    }
+
+    /**
+     * Upload or replace a scanned bill copy (PDF / image) for an existing bill.
+     */
+    public function uploadCopy($id)
+    {
+        $this->ensureBillCopyColumn();
+        $bill = $this->billModel->find($id);
+        if (!$bill) {
+            return redirect()->to('bills')->with('error', 'Bill not found.');
+        }
+
+        $file = $this->request->getFile('bill_copy');
+        if (!$file || !$file->isValid() || $file->hasMoved()) {
+            return redirect()->back()->with('error', 'Please select a valid bill copy file.');
+        }
+
+        $ext = strtolower($file->getExtension());
+        if (!in_array($ext, ['pdf', 'jpg', 'jpeg', 'png', 'webp'], true)) {
+            return redirect()->back()->with('error', 'Only PDF, JPG, PNG, or WEBP files are allowed.');
+        }
+        if ($file->getSizeByUnit('mb') > 10) {
+            return redirect()->back()->with('error', 'File size must be 10 MB or less.');
+        }
+
+        $uploadDir = FCPATH . 'uploads/bills';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0775, true);
+        }
+
+        $newName = $file->getRandomName();
+        $file->move($uploadDir, $newName);
+
+        // Remove previous file if replacing
+        if (!empty($bill['bill_copy'])) {
+            $oldPath = FCPATH . ltrim((string) $bill['bill_copy'], '/');
+            if (is_file($oldPath)) {
+                @unlink($oldPath);
+            }
+        }
+
+        $this->billModel->update($id, [
+            'bill_copy'  => 'uploads/bills/' . $newName,
+            'updated_by' => session('user_id'),
+        ]);
+
+        return redirect()->back()->with('success', 'Bill copy uploaded successfully.');
+    }
+
+    /**
+     * Remove the uploaded bill copy from an existing bill.
+     */
+    public function deleteCopy($id)
+    {
+        $this->ensureBillCopyColumn();
+        $bill = $this->billModel->find($id);
+        if (!$bill) {
+            return redirect()->to('bills')->with('error', 'Bill not found.');
+        }
+
+        if (!empty($bill['bill_copy'])) {
+            $oldPath = FCPATH . ltrim((string) $bill['bill_copy'], '/');
+            if (is_file($oldPath)) {
+                @unlink($oldPath);
+            }
+            $this->billModel->update($id, [
+                'bill_copy'  => null,
+                'updated_by' => session('user_id'),
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Bill copy removed.');
+    }
+
     public function print($id)
     {
         $bill = $this->billModel->getBillById($id);

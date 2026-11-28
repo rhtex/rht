@@ -15,6 +15,7 @@
         </div>
     </div>
 
+
     <!-- Bill Header Card -->
     <div class="card card-outline card-primary shadow-sm mb-3">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -112,6 +113,8 @@
             </div>
         </div>
     </div>
+
+    <?= view('bills/_bill_copy_card', ['bill' => $bill]) ?>
 
     <!-- Line Items Table -->
     <div class="card card-outline card-secondary shadow-sm mb-3">
@@ -247,6 +250,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Payment History -->
     <?php if (!empty($bill['payments'])): ?>

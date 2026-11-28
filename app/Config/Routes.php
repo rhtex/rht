@@ -296,6 +296,8 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->get('bills/payment/(:num)', 'BillController::recordPayment/$1', ['filter' => 'permission:bill.edit']);
     $routes->post('bills/payment/(:num)', 'BillController::storePayment/$1', ['filter' => 'permission:bill.edit']);
     $routes->get('bills/print/(:num)', 'BillController::print/$1', ['filter' => 'permission:bill.view']);
+    $routes->post('bills/upload-copy/(:num)', 'BillController::uploadCopy/$1', ['filter' => 'permission:bill.edit']);
+    $routes->post('bills/delete-copy/(:num)', 'BillController::deleteCopy/$1', ['filter' => 'permission:bill.edit']);
 
     // Vendor Credits
     $routes->get('vendor_credits', 'VendorCreditController::index', ['filter' => 'permission:vendor_credit.view']);
@@ -645,6 +647,8 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->get('bills/payment/(:num)', 'BillController::recordPayment/$1', ['filter' => 'permission:bill.edit']);
     $routes->post('bills/payment/(:num)', 'BillController::storePayment/$1', ['filter' => 'permission:bill.edit']);
     $routes->get('bills/print/(:num)', 'BillController::print/$1', ['filter' => 'permission:bill.view']);
+    $routes->post('bills/upload-copy/(:num)', 'BillController::uploadCopy/$1', ['filter' => 'permission:bill.edit']);
+    $routes->post('bills/delete-copy/(:num)', 'BillController::deleteCopy/$1', ['filter' => 'permission:bill.edit']);
 
     // Quotations
     $routes->get('quotations', 'QuotationController::index', ['filter' => 'permission:quotation.view']);

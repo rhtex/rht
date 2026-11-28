@@ -18,6 +18,7 @@ class BillModel extends Model
         'bill_date',
         'due_date',
         'reference_number',
+        'bill_copy',
         'status',
         'is_inter_state',
         'subtotal',

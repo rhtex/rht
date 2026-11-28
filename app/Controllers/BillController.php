@@ -154,6 +154,38 @@ class BillController extends BaseController
         return view('bills/index', $data);
     }
 
+    /**
+     * Fetch Purchase Orders for a given vendor (used by bill form dropdown & prefill).
+     */
+    private function vendorPurchaseOrdersList(int $vendorId): array
+    {
+        if ($vendorId <= 0) {
+            return [];
+        }
+        $db = \Config\Database::connect();
+        if (!$db->tableExists('purchase_orders')) {
+            return [];
+        }
+        return $db->table('purchase_orders')
+            ->select('id, purchase_order_number, order_date, total_amount, status, converted_to_bill_id')
+            ->where('vendor_id', $vendorId)
+            ->whereNotIn('status', ['Void', 'Cancelled'])
+            ->orderBy('order_date', 'DESC')
+            ->orderBy('id', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * AJAX endpoint: return Purchase Orders for a vendor as JSON.
+     */
+    public function getVendorPurchaseOrders($vendorId)
+    {
+        return $this->response->setJSON([
+            'purchase_orders' => $this->vendorPurchaseOrdersList((int) $vendorId),
+        ]);
+    }
+
     public function create()
     {
         $data['vendors'] = $this->vendorModel->findAll();
@@ -162,6 +194,33 @@ class BillController extends BaseController
         $data['title'] = 'Create Purchase Bill';
         $data['bill'] = null;
         $data['is_clone'] = false;
+
+        $poId = (int) ($this->request->getGet('po_id') ?? 0);
+        if ($poId > 0) {
+            $poModel = new \App\Models\PurchaseOrderModel();
+            $po = $poModel->getOrderById($poId);
+            if ($po) {
+                $data['title'] = 'Convert PO #' . $po['purchase_order_number'] . ' to Bill';
+                $data['bill'] = [
+                    'vendor_id'        => $po['vendor_id'],
+                    'bill_number'      => '',
+                    'bill_date'        => date('Y-m-d'),
+                    'due_date'         => date('Y-m-d', strtotime('+30 days')),
+                    'reference_number' => $po['purchase_order_number'],
+                    'is_inter_state'   => $po['is_inter_state'] ?? 0,
+                    'discount_amount'  => $po['discount_amount'] ?? 0,
+                    'discount_type'    => $po['discount_type'] ?? 'Amount',
+                    'shipping_charge'  => $po['shipping_charge'] ?? 0,
+                    'roundoff_amount'  => $po['roundoff_amount'] ?? 0,
+                    'notes'            => $po['notes'] ?? '',
+                    'terms'            => $po['terms'] ?? '',
+                    'items'            => $po['items'] ?? [],
+                ];
+            }
+        }
+
+        $vendorId = (int) ($data['bill']['vendor_id'] ?? old('vendor_id') ?? 0);
+        $data['vendor_pos'] = $this->vendorPurchaseOrdersList($vendorId);
 
         return view('bills/form', $data);
     }
@@ -179,12 +238,13 @@ class BillController extends BaseController
         $src['due_date']         = date('Y-m-d', strtotime('+30 days'));
 
         return view('bills/form', [
-            'vendors'  => $this->vendorModel->findAll(),
-            'products' => $this->productModel->getProductsWithCategory(),
-            'taxes'    => $this->taxModel->where('status', 'Active')->findAll(),
-            'title'    => 'Clone Purchase Bill',
-            'bill'     => $src,
-            'is_clone' => true,
+            'vendors'    => $this->vendorModel->findAll(),
+            'products'   => $this->productModel->getProductsWithCategory(),
+            'taxes'      => $this->taxModel->where('status', 'Active')->findAll(),
+            'title'      => 'Clone Purchase Bill',
+            'bill'       => $src,
+            'is_clone'   => true,
+            'vendor_pos' => $this->vendorPurchaseOrdersList((int) ($src['vendor_id'] ?? 0)),
         ]);
     }
 
@@ -281,6 +341,15 @@ class BillController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Failed to create bill.');
         }
 
+        // Link matching Purchase Order as Billed when reference_number matches a vendor PO
+        $refPoNumber = trim((string) ($billData['reference_number'] ?? ''));
+        if ($refPoNumber !== '' && $db->tableExists('purchase_orders')) {
+            $db->table('purchase_orders')
+                ->where('vendor_id', (int) $billData['vendor_id'])
+                ->where('purchase_order_number', $refPoNumber)
+                ->update(['status' => 'Billed', 'converted_to_bill_id' => $billId]);
+        }
+
         // --- ACCOUNTING LEDGER ---
         $finalBill = $this->billModel->find($billId);
         $billDate = $finalBill['bill_date'];
@@ -358,6 +427,7 @@ class BillController extends BaseController
         $data['products'] = $this->productModel->getProductsWithCategory();
         $data['taxes'] = $this->taxModel->where('status', 'Active')->findAll();
         $data['title'] = 'Edit Bill #' . $data['bill']['bill_number'];
+        $data['vendor_pos'] = $this->vendorPurchaseOrdersList((int) ($data['bill']['vendor_id'] ?? 0));
 
         return view('bills/form', $data);
     }

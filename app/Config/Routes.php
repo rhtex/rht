@@ -284,6 +284,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     // Bills
     $routes->get('bills', 'BillController::index', ['filter' => 'permission:bill.view']);
     $routes->get('bills/check-duplicate', 'BillController::checkDuplicate', ['filter' => 'permission:bill.view']);
+    $routes->get('bills/vendor-pos/(:num)', 'BillController::getVendorPurchaseOrders/$1', ['filter' => 'permission:bill.view']);
     $routes->get('bills/create', 'BillController::create', ['filter' => 'permission:bill.create']);
     $routes->get('bills/clone/(:num)', 'BillController::clone/$1', ['filter' => 'permission:bill.create']);
     $routes->post('bills/store', 'BillController::store', ['filter' => 'permission:bill.create']);
@@ -632,6 +633,7 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     // Bills
     $routes->get('bills', 'BillController::index', ['filter' => 'permission:bill.view']);
     $routes->get('bills/check-duplicate', 'BillController::checkDuplicate', ['filter' => 'permission:bill.view']);
+    $routes->get('bills/vendor-pos/(:num)', 'BillController::getVendorPurchaseOrders/$1', ['filter' => 'permission:bill.view']);
     $routes->get('bills/create', 'BillController::create', ['filter' => 'permission:bill.create']);
     $routes->get('bills/clone/(:num)', 'BillController::clone/$1', ['filter' => 'permission:bill.create']);
     $routes->post('bills/store', 'BillController::store', ['filter' => 'permission:bill.create']);

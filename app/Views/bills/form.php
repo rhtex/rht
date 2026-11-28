@@ -201,8 +201,23 @@
                     </div>
                     <div class="col-sm-6">
                         <label class="form-label">Reference # / PO #</label>
-                        <input type="text" name="reference_number" id="referenceNumberInput" class="form-control"
-                            value="<?= esc($bill['reference_number'] ?? '') ?>" placeholder="Optional PO or reference number">
+                        <?php
+                        $currentRef = trim((string) old('reference_number', $bill['reference_number'] ?? ''));
+                        $vendorPos  = $vendor_pos ?? [];
+                        $poNums     = array_column($vendorPos, 'purchase_order_number');
+                        ?>
+                        <select name="reference_number" id="referenceNumberInput" class="form-select">
+                            <option value="">-- Select PO / Reference # --</option>
+                            <?php foreach ($vendorPos as $po): ?>
+                                <?php $poNum = (string) $po['purchase_order_number']; ?>
+                                <option value="<?= esc($poNum) ?>" <?= $currentRef === $poNum ? 'selected' : '' ?>>
+                                    <?= esc($poNum) ?> (<?= date('d M Y', strtotime($po['order_date'])) ?> - ₹<?= number_format((float) $po['total_amount'], 2) ?>)
+                                </option>
+                            <?php endforeach; ?>
+                            <?php if ($currentRef !== '' && !in_array($currentRef, $poNums, true)): ?>
+                                <option value="<?= esc($currentRef) ?>" selected><?= esc($currentRef) ?></option>
+                            <?php endif; ?>
+                        </select>
                         <div id="refNumberDuplicateAlert" class="mt-1 d-none">
                             <span class="text-danger small fw-semibold">
                                 <i class="fas fa-exclamation-triangle me-1"></i>This Reference # already exists for this vendor!
@@ -929,22 +944,52 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Debounced listeners for bill_number and reference_number input
+    function loadVendorPurchaseOrders(vendorId, preserveRef) {
+        const sel = $('#referenceNumberInput');
+        const currentVal = preserveRef !== undefined ? preserveRef : (sel.val() || '');
+        sel.empty().append('<option value="">-- Select PO / Reference # --</option>');
+        if (!vendorId) {
+            if (currentVal) sel.append(new Option(currentVal, currentVal, true, true));
+            return;
+        }
+        fetch(`<?= site_url('bills/vendor-pos/') ?>${encodeURIComponent(vendorId)}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(res => {
+            const list = (res && res.purchase_orders) ? res.purchase_orders : [];
+            let matched = false;
+            list.forEach(po => {
+                const num = po.purchase_order_number || '';
+                const amt = parseFloat(po.total_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const label = `${num} (${po.order_date || ''} - ₹${amt})`;
+                const isSel = currentVal !== '' && currentVal === num;
+                if (isSel) matched = true;
+                sel.append(new Option(label, num, isSel, isSel));
+            });
+            if (currentVal && !matched) {
+                sel.append(new Option(currentVal, currentVal, true, true));
+            }
+            checkBillDuplicate('ref');
+        })
+        .catch(err => console.error('Vendor PO fetch error:', err));
+    }
+
+    // Debounced listeners for bill_number and reference_number
     let dupTimer = null;
     $('#billNumberInput').on('input blur', function() {
         clearTimeout(dupTimer);
         dupTimer = setTimeout(() => checkBillDuplicate('bill'), 350);
     });
 
-    $('#referenceNumberInput').on('input blur', function() {
-        clearTimeout(dupTimer);
-        dupTimer = setTimeout(() => checkBillDuplicate('ref'), 350);
+    $('#referenceNumberInput').on('change', function() {
+        checkBillDuplicate('ref');
     });
 
     $('#vendorSelect').on('change', function() {
+        loadVendorPurchaseOrders($(this).val(), '');
         setTimeout(() => {
             checkBillDuplicate('bill');
-            checkBillDuplicate('ref');
         }, 200);
     });
 

@@ -352,12 +352,17 @@ class BillSyncService extends AbstractModuleSyncService
             ];
             $localStatus = $statusMap[$zohoStatus] ?? 'Open';
 
+            $refNumber = trim((string) ($zohoBill['reference_number'] ?? ''));
+            if ($refNumber === '' && !empty($zohoBill['purchaseorders'][0]['purchaseorder_number'])) {
+                $refNumber = trim((string) $zohoBill['purchaseorders'][0]['purchaseorder_number']);
+            }
+
             $billData = [
                 'vendor_id'        => $localVendorId,
                 'bill_number'      => trim((string) ($zohoBill['bill_number'] ?? ($localBill['bill_number'] ?? $this->billModel->generateBillNumber()))),
                 'bill_date'        => $zohoBill['date'] ?? date('Y-m-d'),
                 'due_date'         => $zohoBill['due_date'] ?? ($zohoBill['date'] ?? date('Y-m-d')),
-                'reference_number' => $zohoBill['reference_number'] ?? null,
+                'reference_number' => $refNumber !== '' ? $refNumber : null,
                 'status'           => $localStatus,
                 'is_inter_state'   => $isInterState,
                 'subtotal'         => (float) ($zohoBill['sub_total'] ?? 0),

@@ -114,7 +114,6 @@ $qs = http_build_query(array_filter([
                         <th><?= $isDebit ? 'Reference #' : 'Number' ?></th>
                         <th><?= esc($def['party_label']) ?></th>
                         <?php if ($isCredit || $isDebit): ?><th><?= $isCredit ? 'Invoice #' : 'Bill #' ?></th><?php endif; ?>
-                        <th>Status</th>
                         <?php if (!$isDebit): ?>
                             <th class="text-end">Taxable</th>
                             <th class="text-end">Tax</th>
@@ -129,7 +128,7 @@ $qs = http_build_query(array_filter([
                 </thead>
                 <tbody>
                     <?php if (empty($items)): ?>
-                        <tr><td colspan="11" class="text-center text-muted py-4">No records found for the selected filters.</td></tr>
+                        <tr><td colspan="10" class="text-center text-muted py-4">No records found for the selected filters.</td></tr>
                     <?php endif; ?>
                     <?php foreach ($items as $it): ?>
                         <tr class="<?= $it['is_void'] ? 'text-muted text-decoration-line-through' : '' ?>">
@@ -137,7 +136,6 @@ $qs = http_build_query(array_filter([
                             <td><a href="<?= site_url($def['view_url'] . $it['id']) ?>" class="fw-semibold"><?= esc($it['number'] ?: ('#' . $it['id'])) ?></a></td>
                             <td><?= esc($it['party_name']) ?></td>
                             <?php if ($isCredit || $isDebit): ?><td><?= esc($it['ref_doc'] ?: '-') ?></td><?php endif; ?>
-                            <td><span class="badge bg-secondary-subtle text-secondary-emphasis"><?= esc($it['status']) ?></span></td>
                             <?php if (!$isDebit): ?>
                                 <td class="text-end"><?= number_format($it['subtotal'], 2) ?></td>
                                 <td class="text-end"><?= number_format($it['tax'], 2) ?></td>
@@ -157,7 +155,7 @@ $qs = http_build_query(array_filter([
                 <?php if (!empty($items)): ?>
                 <tfoot class="table-light fw-bold">
                     <tr>
-                        <td colspan="<?= ($isCredit || $isDebit) ? 5 : 4 ?>" class="text-end">Total (excl. Void)</td>
+                        <td colspan="<?= ($isCredit || $isDebit) ? 4 : 3 ?>" class="text-end">Total (excl. Void)</td>
                         <?php if (!$isDebit): ?>
                             <td class="text-end"><?= number_format($totals['subtotal'], 2) ?></td>
                             <td class="text-end"><?= number_format($totals['tax'], 2) ?></td>

@@ -33,15 +33,6 @@ $isCustom = ($filters['period'] ?? '') === 'custom';
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-lg-1 col-md-4">
-                <label class="form-label small fw-semibold mb-1">Status</label>
-                <select name="status" class="form-select form-select-sm">
-                    <option value="">All</option>
-                    <?php foreach ($statuses as $s): ?>
-                        <option value="<?= esc($s) ?>" <?= ($filters['status'] ?? '') === $s ? 'selected' : '' ?>><?= esc($s) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
             <?= $extra ?? '' ?>
             <div class="col-lg-auto col-md-4 d-flex gap-2">
                 <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter me-1"></i> Apply</button>

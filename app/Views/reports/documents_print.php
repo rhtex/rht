@@ -56,7 +56,6 @@ $n = static fn($v) => number_format((float) $v, 2);
         <div class="meta">
             <div><strong>Period:</strong> <?= esc($periodLabel) ?></div>
             <?php if ($partyName): ?><div><strong><?= esc($def['party_label']) ?>:</strong> <?= esc($partyName) ?></div><?php endif; ?>
-            <?php if (!empty($filters['status'])): ?><div><strong>Status:</strong> <?= esc($filters['status']) ?></div><?php endif; ?>
             <div><strong>Generated:</strong> <?= date('d M Y h:i A') ?></div>
         </div>
     </div>
@@ -82,7 +81,6 @@ $n = static fn($v) => number_format((float) $v, 2);
                 <th><?= $isDebit ? 'Reference #' : 'Number' ?></th>
                 <th><?= esc($def['party_label']) ?></th>
                 <?php if ($isCredit || $isDebit): ?><th><?= $isCredit ? 'Invoice #' : 'Bill #' ?></th><?php endif; ?>
-                <th>Status</th>
                 <?php if (!$isDebit): ?>
                     <th class="r">Subtotal</th>
                     <th class="r">Tax</th>
@@ -96,7 +94,7 @@ $n = static fn($v) => number_format((float) $v, 2);
         </thead>
         <tbody>
             <?php if (empty($items)): ?>
-                <tr><td colspan="11" style="text-align:center;padding:12px;">No records found for the selected filters.</td></tr>
+                <tr><td colspan="10" style="text-align:center;padding:12px;">No records found for the selected filters.</td></tr>
             <?php endif; ?>
             <?php foreach ($items as $i => $it): ?>
                 <tr class="<?= $it['is_void'] ? 'void' : '' ?>">
@@ -105,7 +103,6 @@ $n = static fn($v) => number_format((float) $v, 2);
                     <td><?= esc($it['number'] ?: ('#' . $it['id'])) ?></td>
                     <td><?= esc($it['party_name']) ?></td>
                     <?php if ($isCredit || $isDebit): ?><td><?= esc($it['ref_doc'] ?: '-') ?></td><?php endif; ?>
-                    <td><?= esc($it['status']) ?></td>
                     <?php if (!$isDebit): ?>
                         <td class="r"><?= $n($it['subtotal']) ?></td>
                         <td class="r"><?= $n($it['tax']) ?></td>
@@ -121,7 +118,7 @@ $n = static fn($v) => number_format((float) $v, 2);
         <?php if (!empty($items)): ?>
         <tfoot>
             <tr>
-                <td colspan="<?= ($isCredit || $isDebit) ? 6 : 5 ?>" class="r">Total (excl. Void)</td>
+                <td colspan="<?= ($isCredit || $isDebit) ? 5 : 4 ?>" class="r">Total (excl. Void)</td>
                 <?php if (!$isDebit): ?>
                     <td class="r"><?= $n($totals['subtotal']) ?></td>
                     <td class="r"><?= $n($totals['tax']) ?></td>

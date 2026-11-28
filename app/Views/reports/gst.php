@@ -28,14 +28,6 @@ $netGst = ($totals['tax'] - $salesReturnTotals['tax']) - $billTotals['tax'];
 $secPrintUrl = static fn(string $sec) => site_url('reports/gst') . '?' . http_build_query(array_merge($_GET, ['print' => '1', 'section' => $sec]));
 
 ob_start(); ?>
-<div class="col-lg-1 col-md-4">
-    <label class="form-label small fw-semibold mb-1">Type</label>
-    <select name="gst_type" class="form-select form-select-sm">
-        <option value="">All</option>
-        <option value="b2b" <?= $gstType === 'b2b' ? 'selected' : '' ?>>B2B</option>
-        <option value="b2c" <?= $gstType === 'b2c' ? 'selected' : '' ?>>B2C</option>
-    </select>
-</div>
 <div class="col-lg-auto col-md-4">
     <div class="form-check mb-1">
         <input class="form-check-input" type="checkbox" name="include_void" value="1" id="incVoid" <?= $includeVoid ? 'checked' : '' ?>>
@@ -161,14 +153,14 @@ ob_start(); ?>
                     <thead class="table-light" style="position:sticky;top:0;z-index:1;">
                         <tr>
                             <th style="width:32px"><input type="checkbox" class="form-check-input" id="chkAll"></th>
-                            <th>Date</th><th>Invoice #</th><th>Customer</th><th>GSTIN</th><th>Type</th><th>Status</th>
+                            <th>Date</th><th>Invoice #</th><th>Customer</th><th>GSTIN</th>
                             <th class="text-end">Qty Sold</th><th class="text-end">Subtotal</th><th class="text-end">CGST</th><th class="text-end">SGST</th><th class="text-end">IGST</th><th class="text-end">Total</th>
                             <th class="text-center">PDF</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($rows)): ?>
-                            <tr><td colspan="14" class="text-center text-muted py-3">No invoices found.</td></tr>
+                            <tr><td colspan="12" class="text-center text-muted py-3">No invoices found.</td></tr>
                         <?php endif; ?>
                         <?php foreach ($rows as $r): ?>
                         <tr class="<?= $r['is_void'] ? 'text-muted text-decoration-line-through' : '' ?>">
@@ -177,8 +169,6 @@ ob_start(); ?>
                             <td><a href="<?= site_url('invoices/view/' . $r['id']) ?>" class="fw-semibold"><?= esc($r['invoice_number']) ?></a></td>
                             <td><?= esc($r['customer_name'] ?? '-') ?></td>
                             <td class="small"><?= esc($r['customer_gstin'] ?: '-') ?></td>
-                            <td><span class="badge <?= $r['is_b2b'] ? 'bg-primary' : 'bg-secondary' ?>"><?= $r['is_b2b'] ? 'B2B' : 'B2C' ?></span></td>
-                            <td><?= esc($r['status']) ?></td>
                             <td class="text-end"><?= number_format($r['qty'], 2) ?></td>
                             <td class="text-end"><?= number_format($r['taxable'], 2) ?></td>
                             <td class="text-end"><?= number_format($r['cgst'], 2) ?></td>
@@ -192,7 +182,7 @@ ob_start(); ?>
                     <?php if (!empty($rows)): ?>
                     <tfoot class="table-light fw-bold">
                         <tr>
-                            <td colspan="7" class="text-end">Total (excl. Void)</td>
+                            <td colspan="4" class="text-end">Total (excl. Void)</td>
                             <td class="text-end"><?= number_format($totals['qty'], 2) ?></td>
                             <td class="text-end"><?= number_format($totals['taxable'], 2) ?></td>
                             <td class="text-end"><?= number_format($totals['cgst'], 2) ?></td>
@@ -224,14 +214,14 @@ ob_start(); ?>
             <table class="table table-hover table-sm align-middle mb-0" id="billsTable">
                 <thead class="table-light" style="position:sticky;top:0;z-index:1;">
                     <tr>
-                        <th>Date</th><th>Bill #</th><th>Vendor</th><th>GSTIN</th><th>Status</th>
+                        <th>Date</th><th>Bill #</th><th>Vendor</th><th>GSTIN</th>
                         <th class="text-end">Qty</th><th class="text-end">Subtotal</th><th class="text-end">CGST</th><th class="text-end">SGST</th><th class="text-end">IGST</th><th class="text-end">Total</th>
                         <th class="text-center">PDF</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($billRows)): ?>
-                        <tr><td colspan="12" class="text-center text-muted py-3">No bills found.</td></tr>
+                        <tr><td colspan="11" class="text-center text-muted py-3">No bills found.</td></tr>
                     <?php endif; ?>
                     <?php foreach ($billRows as $r): ?>
                     <tr class="<?= $r['is_void'] ? 'text-muted text-decoration-line-through' : '' ?>">
@@ -239,7 +229,6 @@ ob_start(); ?>
                         <td><a href="<?= site_url('bills/view/' . $r['id']) ?>" class="fw-semibold"><?= esc($r['bill_number']) ?></a></td>
                         <td><?= esc($r['vendor_name'] ?? '-') ?></td>
                         <td class="small"><?= esc($r['party_gstin'] ?: '-') ?></td>
-                        <td><?= esc($r['status']) ?></td>
                         <td class="text-end"><?= number_format($r['qty'], 2) ?></td>
                         <td class="text-end"><?= number_format($r['taxable'], 2) ?></td>
                         <td class="text-end"><?= number_format($r['cgst'], 2) ?></td>
@@ -253,7 +242,7 @@ ob_start(); ?>
                 <?php if (!empty($billRows)): ?>
                 <tfoot class="table-light fw-bold">
                     <tr>
-                        <td colspan="5" class="text-end">Total (excl. Void)</td>
+                        <td colspan="4" class="text-end">Total (excl. Void)</td>
                         <td class="text-end"><?= number_format($billTotals['qty'], 2) ?></td>
                         <td class="text-end"><?= number_format($billTotals['taxable'], 2) ?></td>
                         <td class="text-end"><?= number_format($billTotals['cgst'], 2) ?></td>
@@ -284,14 +273,14 @@ ob_start(); ?>
             <table class="table table-hover table-sm align-middle mb-0" id="srTable">
                 <thead class="table-light" style="position:sticky;top:0;z-index:1;">
                     <tr>
-                        <th>Date</th><th>Return #</th><th>Customer</th><th>GSTIN</th><th>Invoice #</th><th>Status</th>
+                        <th>Date</th><th>Return #</th><th>Customer</th><th>GSTIN</th><th>Invoice #</th>
                         <th class="text-end">Qty</th><th class="text-end">Subtotal</th><th class="text-end">Tax</th><th class="text-end">Total</th>
                         <th class="text-center">PDF</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($salesReturnRows)): ?>
-                        <tr><td colspan="11" class="text-center text-muted py-3">No sales returns found.</td></tr>
+                        <tr><td colspan="10" class="text-center text-muted py-3">No sales returns found.</td></tr>
                     <?php endif; ?>
                     <?php foreach ($salesReturnRows as $r): ?>
                     <tr class="<?= $r['is_void'] ? 'text-muted text-decoration-line-through' : '' ?>">
@@ -300,7 +289,6 @@ ob_start(); ?>
                         <td><?= esc($r['customer_name'] ?? '-') ?></td>
                         <td class="small"><?= esc($r['party_gstin'] ?: '-') ?></td>
                         <td><?= esc($r['invoice_number'] ?: '-') ?></td>
-                        <td><?= esc($r['status']) ?></td>
                         <td class="text-end"><?= number_format($r['qty'], 2) ?></td>
                         <td class="text-end"><?= number_format($r['taxable'], 2) ?></td>
                         <td class="text-end"><?= number_format($r['tax'], 2) ?></td>
@@ -312,7 +300,7 @@ ob_start(); ?>
                 <?php if (!empty($salesReturnRows)): ?>
                 <tfoot class="table-light fw-bold">
                     <tr>
-                        <td colspan="6" class="text-end">Total (excl. Void)</td>
+                        <td colspan="5" class="text-end">Total (excl. Void)</td>
                         <td class="text-end"><?= number_format($salesReturnTotals['qty'], 2) ?></td>
                         <td class="text-end"><?= number_format($salesReturnTotals['taxable'], 2) ?></td>
                         <td class="text-end"><?= number_format($salesReturnTotals['tax'], 2) ?></td>
@@ -341,14 +329,14 @@ ob_start(); ?>
             <table class="table table-hover table-sm align-middle mb-0" id="prTable">
                 <thead class="table-light" style="position:sticky;top:0;z-index:1;">
                     <tr>
-                        <th>Date</th><th>Reference #</th><th>Vendor</th><th>GSTIN</th><th>Bill #</th><th>Status</th>
+                        <th>Date</th><th>Reference #</th><th>Vendor</th><th>GSTIN</th><th>Bill #</th>
                         <th class="text-end">Amount</th><th class="text-end">Used</th><th class="text-end">Balance</th>
                         <th class="text-center">PDF</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($purchaseReturnRows)): ?>
-                        <tr><td colspan="10" class="text-center text-muted py-3">No purchase returns found.</td></tr>
+                        <tr><td colspan="9" class="text-center text-muted py-3">No purchase returns found.</td></tr>
                     <?php endif; ?>
                     <?php foreach ($purchaseReturnRows as $r): ?>
                     <tr class="<?= $r['is_void'] ? 'text-muted text-decoration-line-through' : '' ?>">
@@ -357,7 +345,6 @@ ob_start(); ?>
                         <td><?= esc($r['vendor_name'] ?? '-') ?></td>
                         <td class="small"><?= esc($r['party_gstin'] ?: '-') ?></td>
                         <td><?= esc($r['bill_number'] ?: '-') ?></td>
-                        <td><?= esc($r['status']) ?></td>
                         <td class="text-end fw-semibold"><?= number_format((float) $r['amount'], 2) ?></td>
                         <td class="text-end text-success"><?= number_format((float) $r['used_amount'], 2) ?></td>
                         <td class="text-end"><?= number_format((float) $r['balance'], 2) ?></td>
@@ -368,7 +355,7 @@ ob_start(); ?>
                 <?php if (!empty($purchaseReturnRows)): ?>
                 <tfoot class="table-light fw-bold">
                     <tr>
-                        <td colspan="6" class="text-end">Total (excl. Void)</td>
+                        <td colspan="5" class="text-end">Total (excl. Void)</td>
                         <td class="text-end"><?= number_format($purchaseReturnTotals['amount'], 2) ?></td>
                         <td class="text-end"><?= number_format($purchaseReturnTotals['used'], 2) ?></td>
                         <td class="text-end"><?= number_format($purchaseReturnTotals['balance'], 2) ?></td>

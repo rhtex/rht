@@ -175,8 +175,8 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label for="bales_count" class="form-label fw-semibold">No. of Bales</label>
-                        <input type="number" name="bales_count" id="bales_count" class="form-control" min="0" step="1" placeholder="0">
+                        <label for="bales_count" class="form-label fw-semibold">No. of Bales <span class="text-danger">*</span></label>
+                        <input type="number" name="bales_count" id="bales_count" class="form-control" min="1" step="1" placeholder="e.g. 1" required>
                     </div>
                     <div class="col-md-2">
                         <label for="lr_number" class="form-label fw-semibold">LR No.</label>
@@ -187,8 +187,8 @@
                         <input type="number" step="0.01" min="0" name="transport_amount" id="transport_amount" class="form-control text-end" value="0.00" placeholder="0.00">
                     </div>
                     <div class="col-md-2">
-                        <label for="transport_paid_by" class="form-label fw-semibold">Transport Paid By</label>
-                        <select name="transport_paid_by" id="transport_paid_by" class="form-select no-select2">
+                        <label for="transport_paid_by" class="form-label fw-semibold">Transport Paid By <span class="text-danger">*</span></label>
+                        <select name="transport_paid_by" id="transport_paid_by" class="form-select no-select2" required>
                             <option value="">-- Select --</option>
                             <option value="Customer">Customer</option>
                             <option value="Company">Company</option>

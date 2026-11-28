@@ -256,6 +256,13 @@ class SalesReturnController extends BaseController
         $balesPost = trim((string) $this->request->getPost('bales_count'));
         $paidByPost = trim((string) $this->request->getPost('transport_paid_by'));
 
+        if ($balesPost === '' || (int) $balesPost < 1) {
+            return redirect()->back()->withInput()->with('error', 'No. of Bales is required and must be at least 1.');
+        }
+        if (!in_array($paidByPost, ['Customer', 'Company'], true)) {
+            return redirect()->back()->withInput()->with('error', 'Transport Paid By (Customer or Company) is required.');
+        }
+
         // Auto-resolve Agent & Commission % from linked invoice or customer (no manual entry required)
         $linkedInvoice = $invoiceId ? $this->invoiceModel->find($invoiceId) : null;
         $agentId = !empty($linkedInvoice['agent_id']) ? (int) $linkedInvoice['agent_id'] : null;

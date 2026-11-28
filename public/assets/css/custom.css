@@ -82,12 +82,38 @@ h4,
     color: #475569 !important;
 }
 
+.form-select {
+    padding-top: 0.42rem !important;
+    padding-bottom: 0.42rem !important;
+    line-height: 1.4 !important;
+}
+
 .form-control-sm,
 .form-select-sm,
 .select2-container--bootstrap-5 .select2-selection.select2--small {
     font-size: 0.75rem !important;
     min-height: 31px !important;
     border-radius: 7px !important;
+}
+
+.form-select-sm {
+    padding-top: 0.28rem !important;
+    padding-bottom: 0.28rem !important;
+    line-height: 1.4 !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single {
+    display: flex !important;
+    align-items: center !important;
+    min-height: 35px;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    line-height: 1.4 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
 }
 
 .input-group-text {

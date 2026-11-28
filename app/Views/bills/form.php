@@ -389,7 +389,7 @@
                         <td class="gst-summary-label">
                             <div class="d-flex align-items-center gap-1">
                                 <span>Discount:</span>
-                                <select name="discount_type" id="discountType" class="form-select form-select-sm p-0 px-1" style="width: auto; height: 24px; font-size: 0.75rem;">
+                                <select name="discount_type" id="discountType" class="form-select form-select-sm" style="width: auto; min-width: 92px;">
                                     <option value="Amount" <?= (($bill['discount_type'] ?? '') == 'Amount') ? 'selected' : '' ?>>₹ Fixed</option>
                                     <option value="Percentage" <?= (($bill['discount_type'] ?? '') == 'Percentage') ? 'selected' : '' ?>>% Pct</option>
                                 </select>

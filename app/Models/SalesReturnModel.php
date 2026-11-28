@@ -33,6 +33,7 @@ class SalesReturnModel extends Model
         'adjustment',
         'total_amount',
         'reason',
+        'return_copy',
         'status',
         'is_inter_state',
         'created_by',

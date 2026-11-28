@@ -470,4 +470,87 @@ class SalesReturnController extends BaseController
 
         return view('sales_returns/print', $data);
     }
+
+    /**
+     * Ensure `sales_returns.return_copy` exists even if migration has not run yet.
+     */
+    private function ensureReturnCopyColumn(): void
+    {
+        $db = \Config\Database::connect();
+        if (!$db->fieldExists('return_copy', 'sales_returns')) {
+            $db->query("ALTER TABLE `sales_returns` ADD COLUMN `return_copy` VARCHAR(255) NULL AFTER `reason`");
+        }
+    }
+
+    /**
+     * Upload or replace a scanned return/debit note copy (PDF / image) for a sales return.
+     */
+    public function uploadCopy($id)
+    {
+        $this->ensureReturnCopyColumn();
+        $ret = $this->returnModel->find($id);
+        if (!$ret) {
+            return redirect()->to('sales_returns')->with('error', 'Credit note not found.');
+        }
+
+        $file = $this->request->getFile('return_copy');
+        if (!$file || !$file->isValid() || $file->hasMoved()) {
+            return redirect()->back()->with('error', 'Please select a valid sales return copy file.');
+        }
+
+        $ext = strtolower($file->getExtension());
+        if (!in_array($ext, ['pdf', 'jpg', 'jpeg', 'png', 'webp'], true)) {
+            return redirect()->back()->with('error', 'Only PDF, JPG, PNG, or WEBP files are allowed.');
+        }
+        if ($file->getSizeByUnit('mb') > 10) {
+            return redirect()->back()->with('error', 'File size must be 10 MB or less.');
+        }
+
+        $uploadDir = FCPATH . 'uploads/sales_returns';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0775, true);
+        }
+
+        $newName = $file->getRandomName();
+        $file->move($uploadDir, $newName);
+
+        if (!empty($ret['return_copy'])) {
+            $oldPath = FCPATH . ltrim((string) $ret['return_copy'], '/');
+            if (is_file($oldPath)) {
+                @unlink($oldPath);
+            }
+        }
+
+        $this->returnModel->update($id, [
+            'return_copy' => 'uploads/sales_returns/' . $newName,
+            'updated_by'  => session('user_id'),
+        ]);
+
+        return redirect()->back()->with('success', 'Sales return copy uploaded successfully.');
+    }
+
+    /**
+     * Remove the uploaded sales return copy.
+     */
+    public function deleteCopy($id)
+    {
+        $this->ensureReturnCopyColumn();
+        $ret = $this->returnModel->find($id);
+        if (!$ret) {
+            return redirect()->to('sales_returns')->with('error', 'Credit note not found.');
+        }
+
+        if (!empty($ret['return_copy'])) {
+            $oldPath = FCPATH . ltrim((string) $ret['return_copy'], '/');
+            if (is_file($oldPath)) {
+                @unlink($oldPath);
+            }
+            $this->returnModel->update($id, [
+                'return_copy' => null,
+                'updated_by'  => session('user_id'),
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Sales return copy removed.');
+    }
 }

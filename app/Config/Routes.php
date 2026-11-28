@@ -218,6 +218,8 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
     $routes->get('sales_returns/view/(:num)', 'SalesReturnController::view/$1', ['filter' => 'permission:invoice.view']);
     $routes->get('sales_returns/print/(:num)', 'SalesReturnController::print/$1', ['filter' => 'permission:invoice.view']);
+    $routes->post('sales_returns/upload-copy/(:num)', 'SalesReturnController::uploadCopy/$1', ['filter' => 'permission:invoice.edit']);
+    $routes->post('sales_returns/delete-copy/(:num)', 'SalesReturnController::deleteCopy/$1', ['filter' => 'permission:invoice.edit']);
 
     // e-Way Bills (Zoho Books API Integration)
     $routes->get('eway_bills', 'EwayBillController::index', ['filter' => 'permission:eway_bill.view']);
@@ -443,6 +445,8 @@ $routes->get('lang/(:segment)', 'Home::lang/$1');
     $routes->post('sales_returns/store', 'SalesReturnController::store', ['filter' => 'permission:invoice.edit']);
     $routes->get('sales_returns/view/(:num)', 'SalesReturnController::view/$1', ['filter' => 'permission:invoice.view']);
     $routes->get('sales_returns/print/(:num)', 'SalesReturnController::print/$1', ['filter' => 'permission:invoice.view']);
+    $routes->post('sales_returns/upload-copy/(:num)', 'SalesReturnController::uploadCopy/$1', ['filter' => 'permission:invoice.edit']);
+    $routes->post('sales_returns/delete-copy/(:num)', 'SalesReturnController::deleteCopy/$1', ['filter' => 'permission:invoice.edit']);
 
     // e-Way Bills (Zoho Books API Integration)
     $routes->get('eway_bills', 'EwayBillController::index', ['filter' => 'permission:eway_bill.view']);

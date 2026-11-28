@@ -117,6 +117,8 @@
         </div>
     </div>
 
+    <?= view('sales_returns/_return_copy_card', ['return' => $return]) ?>
+
     <!-- Line Items Table -->
     <div class="card card-outline card-secondary mb-3 shadow-none border">
         <div class="card-header py-2 bg-light">

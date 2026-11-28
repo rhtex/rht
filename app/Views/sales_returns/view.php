@@ -206,6 +206,8 @@
             </div>
         </div>
 
+        <?= view('sales_returns/_return_copy_card', ['return' => $return]) ?>
+
         <!-- Line Items Table -->
         <div class="card card-outline card-secondary shadow-sm mb-3">
             <div class="card-header">

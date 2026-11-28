@@ -284,7 +284,7 @@
                                         <input type="text" name="items[<?= $index ?>][description]" class="form-control form-control-sm item-desc" placeholder="Item description" value="<?= esc($item['description']) ?>" required>
                                     </td>
                                     <td>
-                                        <input type="text" name="items[<?= $index ?>][hsn_code]" class="form-control form-control-sm item-hsn text-center" value="<?= esc($item['hsn_code']) ?>">
+                                        <input type="text" name="items[<?= $index ?>][hsn_code]" class="form-control form-control-sm item-hsn text-center" value="<?= esc($item['hsn_code'] ?: '5208') ?>">
                                     </td>
                                     <td>
                                         <input type="number" step="any" name="items[<?= $index ?>][quantity]" class="form-control form-control-sm item-qty text-center fw-bold" value="<?= $item['quantity'] + 0 ?>" min="0.01" required>
@@ -331,7 +331,7 @@
                                     <input type="text" name="items[0][description]" class="form-control form-control-sm item-desc" placeholder="Item description" required>
                                 </td>
                                 <td>
-                                    <input type="text" name="items[0][hsn_code]" class="form-control form-control-sm item-hsn text-center">
+                                    <input type="text" name="items[0][hsn_code]" class="form-control form-control-sm item-hsn text-center" value="5208">
                                 </td>
                                 <td>
                                     <input type="number" step="any" name="items[0][quantity]" class="form-control form-control-sm item-qty text-center fw-bold" value="1" min="0.01" required>
@@ -517,7 +517,7 @@
             <input type="text" class="form-control form-control-sm item-desc" placeholder="Item description" required>
         </td>
         <td>
-            <input type="text" class="form-control form-control-sm item-hsn text-center">
+            <input type="text" class="form-control form-control-sm item-hsn text-center" value="5208">
         </td>
         <td>
             <input type="number" step="any" class="form-control form-control-sm item-qty text-center fw-bold" value="1" min="0.01" required>
@@ -674,7 +674,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (productData) {
             newSelect.val(productData.id).trigger('change');
             $(tr).find('.item-desc').val(productData.product_name || productData.name);
-            $(tr).find('.item-hsn').val(productData.hsn_code || '');
+            $(tr).find('.item-hsn').val(productData.hsn_code || '5208');
             $(tr).find('.item-rate').val(parseFloat(productData.cost_price || productData.purchase_price || productData.rate || 0).toFixed(2));
             if (productData.tax_percentage !== undefined) {
                 $(tr).find('.item-tax').val(productData.tax_percentage);
@@ -705,7 +705,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (firstRow.length && !firstRow.find('.product-select').val() && !firstRow.find('.item-desc').val()) {
                 firstRow.find('.product-select').val(product.id).trigger('change');
                 firstRow.find('.item-desc').val(product.product_name || product.name);
-                firstRow.find('.item-hsn').val(product.hsn_code || '');
+                firstRow.find('.item-hsn').val(product.hsn_code || '5208');
                 firstRow.find('.item-rate').val(parseFloat(product.cost_price || product.purchase_price || product.rate || 0).toFixed(2));
                 if (product.tax_percentage !== undefined) {
                     firstRow.find('.item-tax').val(product.tax_percentage);
@@ -739,7 +739,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (pid) {
             const rate = selected.data('rate') || 0;
-            const hsn = selected.data('hsn') || '';
+            const hsn = selected.data('hsn') || '5208';
             const tax = selected.data('tax') || 0;
             const text = selected.text().trim();
 
@@ -763,7 +763,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const tr = $(this).closest('tr');
             tr.find('.product-select').val('').trigger('change');
             tr.find('.item-desc').val('');
-            tr.find('.item-hsn').val('');
+            tr.find('.item-hsn').val('5208');
             tr.find('.item-qty').val('1');
             tr.find('.item-rate').val('0.00');
             tr.find('.item-tax').val('0');

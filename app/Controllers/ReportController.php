@@ -340,29 +340,27 @@ class ReportController extends BaseController
     }
 
     /**
-     * GST report: invoice-wise GST summary with bulk PDF printing.
+     * Summarize a list of GST tax-bearing rows (invoices, bills, sales returns) using stored columns only.
      */
-    public function gst()
+    private static function summarizeGstRows(array &$rows, bool $splitInterStateTax = false): array
     {
-        $db       = \Config\Database::connect();
-        $filters  = $this->readFilters('last_month');
-        $gstType  = (string) ($this->request->getGet('gst_type') ?? '');
-        $includeVoid = $this->request->getGet('include_void') === '1';
-
-        $rows = $this->gstInvoiceQuery($filters, $gstType, $includeVoid)->get()->getResultArray();
-
         $totals = ['count' => 0, 'b2b' => 0, 'b2c' => 0, 'qty' => 0, 'taxable' => 0, 'cgst' => 0, 'sgst' => 0, 'igst' => 0, 'tax' => 0, 'total' => 0];
-        $rateSummary = [];
         foreach ($rows as &$r) {
             $r['qty']     = (float) ($r['qty_sold'] ?? 0);
             $r['taxable'] = (float) ($r['subtotal'] ?? 0);
-            $r['cgst']    = (float) ($r['cgst_amount'] ?? 0);
-            $r['sgst']    = (float) ($r['sgst_amount'] ?? 0);
-            $r['igst']    = (float) ($r['igst_amount'] ?? 0);
             $r['tax']     = (float) ($r['tax_amount'] ?? 0);
-            $r['is_b2b']  = !empty($r['customer_gstin']);
-            $r['is_void'] = strcasecmp((string) $r['status'], 'Void') === 0;
-
+            if ($splitInterStateTax) {
+                $inter = !empty($r['is_inter_state']);
+                $r['cgst'] = $inter ? 0.0 : round($r['tax'] / 2, 2);
+                $r['sgst'] = $inter ? 0.0 : round($r['tax'] - $r['cgst'], 2);
+                $r['igst'] = $inter ? $r['tax'] : 0.0;
+            } else {
+                $r['cgst'] = (float) ($r['cgst_amount'] ?? 0);
+                $r['sgst'] = (float) ($r['sgst_amount'] ?? 0);
+                $r['igst'] = (float) ($r['igst_amount'] ?? 0);
+            }
+            $r['is_b2b']  = !empty($r['party_gstin']);
+            $r['is_void'] = strcasecmp((string) ($r['status'] ?? ''), 'Void') === 0;
             if ($r['is_void']) {
                 continue;
             }
@@ -374,9 +372,64 @@ class ReportController extends BaseController
             $totals['sgst']    += $r['sgst'];
             $totals['igst']    += $r['igst'];
             $totals['tax']     += $r['tax'];
-            $totals['total']   += (float) $r['total_amount'];
+            $totals['total']   += (float) ($r['total_amount'] ?? 0);
+        }
+        unset($r);
+        return $totals;
+    }
 
-            // GST rate bucket from stored line-item tax rate
+    /**
+     * Build common date/status/gstType filters on a query builder.
+     */
+    private static function applyGstFilters($builder, string $table, string $alias, string $dateCol, string $partyAlias, array $filters, string $gstType, bool $includeVoid): void
+    {
+        $db = \Config\Database::connect();
+        if ($db->fieldExists('deleted_at', $table)) {
+            $builder->where($alias . '.deleted_at', null);
+        }
+        if (!$includeVoid) {
+            $builder->whereNotIn($alias . '.status', ['Void', 'Draft']);
+        }
+        if ($filters['date_from']) {
+            $builder->where($alias . '.' . $dateCol . ' >=', $filters['date_from']);
+        }
+        if ($filters['date_to']) {
+            $builder->where($alias . '.' . $dateCol . ' <=', $filters['date_to']);
+        }
+        if ($filters['status'] !== '') {
+            $builder->where($alias . '.status', $filters['status']);
+        }
+        if ($gstType === 'b2b') {
+            $builder->where($partyAlias . '.gstin IS NOT NULL')->where($partyAlias . ".gstin <> ''");
+        } elseif ($gstType === 'b2c') {
+            $builder->groupStart()->where($partyAlias . '.gstin IS NULL')->orWhere($partyAlias . '.gstin', '')->groupEnd();
+        }
+    }
+
+    /**
+     * GST report: Invoices, Bills, Sales Returns, and Purchase Returns on one page,
+     * with bulk invoice PDF printing.
+     */
+    public function gst()
+    {
+        $db          = \Config\Database::connect();
+        $filters     = $this->readFilters('last_month');
+        $gstType     = (string) ($this->request->getGet('gst_type') ?? '');
+        $includeVoid = $this->request->getGet('include_void') === '1';
+
+        // 1. Invoices (Sales)
+        $rows = $this->gstInvoiceQuery($filters, $gstType, $includeVoid)->get()->getResultArray();
+        foreach ($rows as &$r) {
+            $r['party_gstin'] = $r['customer_gstin'] ?? '';
+        }
+        unset($r);
+        $totals = self::summarizeGstRows($rows, false);
+
+        $rateSummary = [];
+        foreach ($rows as $r) {
+            if ($r['is_void']) {
+                continue;
+            }
             $key = (int) round((float) ($r['item_tax_rate'] ?? 0));
             if (!isset($rateSummary[$key])) {
                 $rateSummary[$key] = ['count' => 0, 'qty' => 0, 'taxable' => 0, 'cgst' => 0, 'sgst' => 0, 'igst' => 0, 'total' => 0];
@@ -389,8 +442,60 @@ class ReportController extends BaseController
             $rateSummary[$key]['igst']    += $r['igst'];
             $rateSummary[$key]['total']   += (float) $r['total_amount'];
         }
-        unset($r);
         ksort($rateSummary);
+
+        // 2. Bills (Purchases)
+        $billRows = [];
+        if (can('bill.view')) {
+            $bb = $db->table('bills b')
+                ->select('b.id, b.bill_number, b.bill_date, b.status, b.subtotal, b.tax_amount,
+                          b.cgst_amount, b.sgst_amount, b.igst_amount, b.total_amount,
+                          v.name AS vendor_name, v.gstin AS party_gstin,
+                          (SELECT COALESCE(SUM(bi.quantity), 0) FROM bill_items bi WHERE bi.bill_id = b.id) AS qty_sold')
+                ->join('vendors v', 'v.id = b.vendor_id', 'left');
+            self::applyGstFilters($bb, 'bills', 'b', 'bill_date', 'v', $filters, $gstType, $includeVoid);
+            $billRows = $bb->orderBy('b.bill_date', 'ASC')->orderBy('b.bill_number', 'ASC')->get()->getResultArray();
+        }
+        $billTotals = self::summarizeGstRows($billRows, false);
+
+        // 3. Sales Returns (Credit Notes)
+        $srBuilder = $db->table('sales_returns sr')
+            ->select('sr.id, sr.return_number, sr.return_date, sr.status, sr.subtotal, sr.tax_amount, sr.total_amount, sr.is_inter_state,
+                      inv.invoice_number, c.name AS customer_name, c.gstin AS party_gstin,
+                      (SELECT COALESCE(SUM(sri.quantity), 0) FROM sales_return_items sri WHERE sri.sales_return_id = sr.id) AS qty_sold')
+            ->join('customers c', 'c.id = sr.customer_id', 'left')
+            ->join('invoices inv', 'inv.id = sr.invoice_id', 'left');
+        if ($filters['party_id'] > 0) {
+            $srBuilder->where('sr.customer_id', $filters['party_id']);
+        }
+        self::applyGstFilters($srBuilder, 'sales_returns', 'sr', 'return_date', 'c', $filters, $gstType, $includeVoid);
+        $salesReturnRows   = $srBuilder->orderBy('sr.return_date', 'ASC')->orderBy('sr.return_number', 'ASC')->get()->getResultArray();
+        $salesReturnTotals = self::summarizeGstRows($salesReturnRows, true);
+
+        // 4. Purchase Returns (Debit Notes / Vendor Credits)
+        $purchaseReturnRows = [];
+        $purchaseReturnTotals = ['count' => 0, 'amount' => 0, 'used' => 0, 'balance' => 0];
+        if (can('vendor_credit.view')) {
+            $prb = $db->table('vendor_credits vc')
+                ->select('vc.id, vc.credit_note_date, vc.reference_no, vc.status, vc.amount, vc.used_amount, vc.balance,
+                          b.bill_number, v.name AS vendor_name, v.gstin AS party_gstin')
+                ->join('vendors v', 'v.id = vc.vendor_id', 'left')
+                ->join('bills b', 'b.id = vc.bill_id', 'left');
+            self::applyGstFilters($prb, 'vendor_credits', 'vc', 'credit_note_date', 'v', $filters, $gstType, $includeVoid);
+            $purchaseReturnRows = $prb->orderBy('vc.credit_note_date', 'ASC')->orderBy('vc.id', 'ASC')->get()->getResultArray();
+            foreach ($purchaseReturnRows as &$pr) {
+                $pr['is_void'] = strcasecmp((string) ($pr['status'] ?? ''), 'Void') === 0;
+                $pr['is_b2b']  = !empty($pr['party_gstin']);
+                if ($pr['is_void']) {
+                    continue;
+                }
+                $purchaseReturnTotals['count']++;
+                $purchaseReturnTotals['amount']  += (float) ($pr['amount'] ?? 0);
+                $purchaseReturnTotals['used']    += (float) ($pr['used_amount'] ?? 0);
+                $purchaseReturnTotals['balance'] += (float) ($pr['balance'] ?? 0);
+            }
+            unset($pr);
+        }
 
         $statuses = array_column(
             $db->table('invoices')->select('status')->distinct()->where('status IS NOT NULL')->orderBy('status')->get()->getResultArray(),
@@ -402,17 +507,23 @@ class ReportController extends BaseController
         $viewName = $this->request->getGet('print') === '1' ? 'reports/gst_print' : 'reports/gst';
 
         return view($viewName, [
-            'title'         => 'GST Report',
-            'rows'          => $rows,
-            'totals'        => $totals,
-            'rateSummary'   => $rateSummary,
-            'filters'       => $filters,
-            'gstType'       => $gstType,
-            'includeVoid'   => $includeVoid,
-            'statuses'      => $statuses,
-            'customers'     => $customers,
-            'periodOptions' => self::periodOptions(),
-            'maxPdf'        => self::MAX_PDF_INVOICES,
+            'title'                => 'GST Report',
+            'rows'                 => $rows,
+            'totals'               => $totals,
+            'billRows'             => $billRows,
+            'billTotals'           => $billTotals,
+            'salesReturnRows'      => $salesReturnRows,
+            'salesReturnTotals'    => $salesReturnTotals,
+            'purchaseReturnRows'   => $purchaseReturnRows,
+            'purchaseReturnTotals' => $purchaseReturnTotals,
+            'rateSummary'          => $rateSummary,
+            'filters'              => $filters,
+            'gstType'              => $gstType,
+            'includeVoid'          => $includeVoid,
+            'statuses'             => $statuses,
+            'customers'            => $customers,
+            'periodOptions'        => self::periodOptions(),
+            'maxPdf'               => self::MAX_PDF_INVOICES,
         ]);
     }
 
